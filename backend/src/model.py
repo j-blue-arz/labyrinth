@@ -293,7 +293,10 @@ class Game:
         """
         self.find_player(player_id)
         self._leftover_card.rotation = leftover_rotation
+        pushed_card = self._leftover_card
         self._leftover_card = self._board.shift(new_leftover_location, self._leftover_card)
+        for player in self._find_players_by_maze_card(self._leftover_card):
+            player.maze_card = pushed_card
 
     def move(self, player_id, target_location):
         """ Performs a move action
@@ -314,3 +317,11 @@ class Game:
         elif not match:
             raise ValueError("No matching player in this game")
         return match[0]
+
+    def _find_players_by_maze_card(self, maze_card):
+        """ Finds player whose maze_card field matches the given maze card
+        
+        :param maze_card: an instance of MazeCard
+        """
+        return [player for player in self._players if player.maze_card is maze_card]
+
