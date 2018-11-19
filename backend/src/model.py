@@ -68,6 +68,7 @@ class MazeCard:
     STRAIGHT = "NS"
     CORNER = "NE"
     T_JUNCT = "NES"
+    next_id = 0
     def __init__(self, identifier=0, doors=STRAIGHT, rotation=0):
         self._doors = doors
         self._rotation = rotation
@@ -90,7 +91,10 @@ class MazeCard:
             raise ValueError("rotation must be divisible by 90")
         self._rotation = value % 360
 
-    next_id = 0
+    @property
+    def doors(self):
+        """ Getter of read-only doors """
+        return self._doors
 
     @classmethod
     def reset_ids(cls):
@@ -161,7 +165,7 @@ class Board:
         :return: the pushed out maze card
         """
         if insert_location not in self._insert_locations:
-            raise ValueError("Invalid insert location") 
+            raise ValueError("Invalid insert location")
         direction = self._determine_shift_direction(insert_location)
         shift_line_locations = []
         current_location = insert_location
@@ -171,7 +175,7 @@ class Board:
         pushed_out = self[shift_line_locations[-1]]
         self._shift_all(shift_line_locations)
         self[shift_line_locations[0]] = inserted_maze_card
-        return pushed_out     
+        return pushed_out
 
     def _shift_all(self, shift_locations):
         """ Shifts the maze cards along the given locations """
@@ -234,6 +238,11 @@ class Game:
         """ Getter for leftover card """
         return self._leftover_card
 
+    @leftover_card.setter
+    def leftover_card(self, value):
+        """ Setter for leftover card """
+        self._leftover_card = value
+
     @property
     def board(self):
         """ Getter for board """
@@ -243,6 +252,11 @@ class Game:
     def players(self):
         """ Getter for players """
         return self._players
+
+    @players.setter
+    def players(self, players):
+        """ Setter for players """
+        self._players = players
 
     def accepts_players(self):
         """ Determines if there are empty seats for players to join """
