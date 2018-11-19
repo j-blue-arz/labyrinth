@@ -44,6 +44,17 @@ def test_shift_updates_new_leftover():
     game.shift(player_id, BoardLocation(0, 1), 270)
     assert pushed_out == game.leftover_card
 
+def test_shift_updates_players_on_pushed_out_card():
+    """ Tests shift """
+    game = Game()
+    player_id = game.add_player()
+    player = game.find_player(player_id)
+    game.init_game()
+    pushed_card = game.leftover_card
+    player.maze_card = game.board[BoardLocation(0, 3)]
+    game.shift(player_id, BoardLocation(game.board.BOARD_SIZE-1, 3), 90)
+    assert player.maze_card == pushed_card
+
 def test_add_player_validation():
     """ Tests that adding more players than MAX_PLAYERS results in ValueError """
     game = Game()
