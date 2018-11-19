@@ -1,0 +1,20 @@
+English manual to the game: https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf
+German manual to the game: https://www.ravensburger.de/spielanleitungen/ecm/Spielanleitungen/26446%20anl%201637944.pdf?ossl=pds_text_Spielanleitung
+
+The follow format is used:
+term: term in manuel: explanation
+
+object: magical object and character: the objectives the player has to move to to win the game 
+maze card: maze card: the cards the game board consists of
+subpath:: the connections between a single maze card and its neighbors
+pathways: open pathways: the graph consisting of all subpaths
+game board
+objective: object card: the player's next magical object or character to reach, or his starting maze card
+leftover maze card: leftover maze card: remains on the edge of the board.
+shifting action: moving/shifting the maze/pathways/maze pathways: insert a maze card, push out a maze card opposite end
+piece: playing piece
+objects (on the board):: pieces and objectives
+pile/stack of object cards
+turn: shifting pathways and moving piece
+no-pushback rule:: game rule which prohibits players make a shifting action which reverses the shifting action of the previous turn.
+door:: a maze card's openings to its surrounding cards. If and only if two neighboring maze cards have a door facing the respective other, there is a path between them.
