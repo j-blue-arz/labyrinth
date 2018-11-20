@@ -28,15 +28,14 @@ class BoardLocation:
 
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
-                self.column == other.column and \
-                self.row == other.row
+            self.column == other.column and \
+            self.row == other.row
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
         return hash((self.row, self.column))
-
 
 
 class Player:
@@ -69,6 +68,7 @@ class MazeCard:
     CORNER = "NE"
     T_JUNCT = "NES"
     next_id = 0
+
     def __init__(self, identifier=0, doors=STRAIGHT, rotation=0):
         self._doors = doors
         self._rotation = rotation
@@ -117,6 +117,7 @@ class Board:
     """
 
     BOARD_SIZE = 7
+
     def __init__(self):
         self._maze_cards = [[None for _ in range(self.BOARD_SIZE)] for _ in range(self.BOARD_SIZE)]
         self._insert_locations = set()
@@ -143,7 +144,7 @@ class Board:
         :raises ValueError: if location is outside of the board
         :return: the MazeCard instance
         """
-        if not self.is_inside(location):
+        if not self._is_inside(location):
             raise ValueError("Location is outside of the board")
         return self._maze_cards[location.row][location.column]
 
@@ -171,7 +172,7 @@ class Board:
         current_location = insert_location
         while current_location is not None:
             shift_line_locations.append(current_location)
-            current_location = Board.neighbor(current_location, direction)
+            current_location = Board._neighbor(current_location, direction)
         pushed_out = self[shift_line_locations[-1]]
         self._shift_all(shift_line_locations)
         self[shift_line_locations[0]] = inserted_maze_card
@@ -200,7 +201,7 @@ class Board:
         raise ValueError("Invalid insert location")
 
     @classmethod
-    def neighbor(cls, location, direction):
+    def _neighbor(cls, location, direction):
         """ Determines the neighbor of a location, if possible.
 
         :param location: the location the neighbor is requested for
@@ -210,17 +211,25 @@ class Board:
         or None, if the location is outside of the board's extent
         """
         new_location = location.add(*direction)
-        if not cls.is_inside(new_location):
+        if not cls._is_inside(new_location):
             new_location = None
         return new_location
 
     @classmethod
-    def is_inside(cls, location):
+    def _is_inside(cls, location):
         """ Determines if the given location is inside the board """
         return location.row >= 0 and \
             location.column >= 0 and \
             location.row < cls.BOARD_SIZE and \
             location.column < cls.BOARD_SIZE
+
+    @classmethod
+    def board_locations(cls):
+        """ Returns a list of all BoardLocations, convenient for iterating over the board """
+        return [BoardLocation(row, column)
+                for row in range(cls.BOARD_SIZE)
+                for column in range(cls.BOARD_SIZE)]
+
 
 
 class Game:
@@ -228,6 +237,7 @@ class Game:
     The state of a game of labyrinth.
     """
     MAX_PLAYERS = 4
+
     def __init__(self):
         self._players = []
         self._board = Board()
@@ -320,8 +330,7 @@ class Game:
 
     def _find_players_by_maze_card(self, maze_card):
         """ Finds player whose maze_card field matches the given maze card
-        
+
         :param maze_card: an instance of MazeCard
         """
         return [player for player in self._players if player.maze_card is maze_card]
-

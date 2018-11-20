@@ -25,9 +25,7 @@ def game_to_dto(game: Game):
     game_dto = {_PLAYERS: [_player_to_dto(player) for player in game.players],
                 _MAZE_CARDS: []}
     game_dto[_MAZE_CARDS].append(_maze_card_to_dto(game.leftover_card, None))
-    for row in range(game.board.BOARD_SIZE):
-        for column in range(game.board.BOARD_SIZE):
-            location = BoardLocation(row, column)
+    for location in Board.board_locations():
             maze_card = game.board[location]
             game_dto[_MAZE_CARDS].append(_maze_card_to_dto(maze_card, location))
 

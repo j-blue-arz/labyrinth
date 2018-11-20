@@ -87,3 +87,27 @@ def test_shift_does_not_alter_rest_of_board():
     assert len(differences) == Board.BOARD_SIZE
     for difference in differences:
         assert difference[0] == 5
+
+def test_board_locations_returns_list_of_correct_size():
+    """ Test board_locations """
+    board_locations = Board.board_locations()
+    assert len(board_locations) == Board.BOARD_SIZE * Board.BOARD_SIZE
+
+def test_board_locations_returns_list_of_all_board_locations():
+    """ Test board_locations """
+    board_locations = Board.board_locations()
+    for row in range(Board.BOARD_SIZE):
+        for column in range(Board.BOARD_SIZE):
+            assert BoardLocation(row, column) in board_locations
+
+def test_board_locations_returns_list_in_ascending_order():
+    """ Test board_locations """
+    board_locations = Board.board_locations()
+    length = len(board_locations)
+    assert board_locations[0] == BoardLocation(0, 0)
+    for first, second in zip(range(length), range(1, length)):
+        first_location = board_locations[first]
+        second_location = board_locations[second]
+        assert (first_location.row < second_location.row) or \
+                ((first_location.row == second_location.row) and \
+                (first_location.column < second_location.column))
