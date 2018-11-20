@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from model import Game, Player, MazeCard, BoardLocation
+from model import Game, Player, MazeCard, BoardLocation, Board
 
 _PLAYERS = "players"
 _MAZE_CARDS = "mazeCards"
@@ -26,8 +26,9 @@ def game_to_dto(game: Game):
                 _MAZE_CARDS: []}
     game_dto[_MAZE_CARDS].append(_maze_card_to_dto(game.leftover_card, None))
     for location in Board.board_locations():
-            maze_card = game.board[location]
-            game_dto[_MAZE_CARDS].append(_maze_card_to_dto(maze_card, location))
+        maze_card = game.board[location]
+        game_dto[_MAZE_CARDS].append(_maze_card_to_dto(maze_card, location))
+    return game_dto
 
 def _player_to_dto(player: Player):
     """Maps a player to a DTO
@@ -79,6 +80,7 @@ def dto_to_game(game_dto):
         maze_card_by_id[maze_card.identifier] = maze_card
     game.players = [_dto_to_player(player_dto, maze_card_by_id)
                     for player_dto in game_dto[_PLAYERS]]
+    return game
 
 def _dto_to_player(player_dto, maze_card_dict):
     """ maps a DTO to a player
