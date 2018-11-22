@@ -23,13 +23,16 @@ Document databases usually do not provide ACID compliance. Isolation does not ma
 when processing a state altering request of a player, the game fetches the current state and checks if it is valid, i.e. it is the player's turn. 
 This can only be true for one player at a time. 
 On the other hand, when adding players to the game, the absence of isolation could result in more players than allowed.
+It is also possible to store the JSON string as a single column in a relational table. While this is considered an anti-pattern, it is also an easy setup.
+sqlite3 does not require a database server, only a library has to be included.
 
 
 These are two very different approaches. Each has an influence on its surrounding architecture. Hence, it might be difficult to change the approach once I run into problems. 
 ## Decision
 Easy solution first, more advanced, scalable and secure later!
 I will use the database approach. I will reuse the DTO-Mapper to map the entire game state to a dictionary.
-This dictionary is then stored in a MongoDB database. Each game will be stored as one document.
+A first implementation will use sqlite3 to store this dictionary. The database will have one table with two columns: one for the game id and one for the entire game. Each game will be stored as one document in this column.
+Later, I might add support for MongoDB. But right now, I strive for an easy solution, as the database persistence is not the main focus of this project. 
 
 ## Status
 Accepted

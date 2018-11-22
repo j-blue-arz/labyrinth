@@ -2,7 +2,7 @@ English manual to the game: https://www.ravensburger.com/spielanleitungen/ecm/Sp
 German manual to the game: https://www.ravensburger.de/spielanleitungen/ecm/Spielanleitungen/26446%20anl%201637944.pdf?ossl=pds_text_Spielanleitung
 
 The follow format is used:
-term: term in manuel: explanation
+term: term in manual: explanation
 
 object: magical object and character: the objectives the player has to move to to win the game 
 maze card: maze card: the cards the game board consists of
