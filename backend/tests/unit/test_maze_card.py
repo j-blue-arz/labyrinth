@@ -1,6 +1,6 @@
 """ Tests for MazeCard of model.py """
 import pytest
-from model import MazeCard
+from labyrinth.model import MazeCard
 
 def test_generate_assigns_unique_ids():
     """ Tests generate_random """

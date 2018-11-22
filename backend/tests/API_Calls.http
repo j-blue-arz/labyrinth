@@ -1,0 +1,30 @@
+POST http://localhost:5000/api/games/0/players
+
+###
+
+GET http://localhost:5000/api/games/0/state?p_id=0
+
+###
+
+POST http://localhost:5000/api/games/0/shift?p_id=0
+content-type: application/json
+
+{
+    "location": {
+        "row": 0,
+        "column": 1
+    },
+    "leftoverRotation": 90
+}
+
+###
+
+POST http://localhost:5000/api/games/0/move?p_id=0
+content-type: application/json
+
+{
+    "location": {
+        "row": 3,
+        "column": 3
+    }
+}

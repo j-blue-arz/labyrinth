@@ -1,5 +1,5 @@
 """ Tests for Board of model.py """
-from model import Board, MazeCard, BoardLocation
+from labyrinth.model import Board, MazeCard, BoardLocation
 
 
 def _get_id_matrix(board):

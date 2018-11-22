@@ -129,6 +129,7 @@ class Board:
 
     def generate_random(self):
         """ Generates a random board state """
+        MazeCard.reset_ids()
         self._maze_cards = [
             [MazeCard.generate_random() for _ in range(self.BOARD_SIZE)]
             for _ in range(self.BOARD_SIZE)]
@@ -229,7 +230,6 @@ class Board:
         return [BoardLocation(row, column)
                 for row in range(cls.BOARD_SIZE)
                 for column in range(cls.BOARD_SIZE)]
-
 
 
 class Game:

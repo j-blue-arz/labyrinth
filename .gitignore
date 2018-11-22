@@ -1,6 +1,7 @@
 .DS_Store
 **/node_modules
 /dist
+run.bat
 
 # local env files
 .env.local
@@ -25,3 +26,8 @@ yarn-error.log*
 **/.cache
 **/.pytest_cache
 **/env/
+*.pyc
+instance/
+.coverage
+htmlcov/
+*.egg-info/
