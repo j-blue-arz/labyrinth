@@ -12,6 +12,10 @@ and a reference to a maze card the piece is currently positioned on.
 BoardLocation is a wrapper for a row and a column.
 """
 from random import choice, randint
+from .exceptions import InvalidStateException, PlayerNotFoundException, \
+    InvalidLocationException, InvalidShiftLocationException, \
+    InvalidRotationException \
+
 
 
 class BoardLocation:
@@ -36,6 +40,9 @@ class BoardLocation:
 
     def __hash__(self):
         return hash((self.row, self.column))
+
+    def __str__(self):
+        return "({}, {})".format(self.row, self.column)
 
 
 class Player:
@@ -88,7 +95,7 @@ class MazeCard:
     def rotation(self, value):
         """ Setter of rotation, validates new value """
         if value % 90 != 0:
-            raise ValueError("rotation must be divisible by 90")
+            raise InvalidRotationException("Rotation {} is not divisible by 90".format(value))
         self._rotation = value % 360
 
     @property
@@ -142,20 +149,20 @@ class Board:
         """ Retrieves the maze card at a given location
 
         :param location: a BoardLocation instance
-        :raises ValueError: if location is outside of the board
+        :raises InvalidLocationException: if location is outside of the board
         :return: the MazeCard instance
         """
-        if not self._is_inside(location):
-            raise ValueError("location is outside of the board")
+        self._validate_location(location)
         return self._maze_cards[location.row][location.column]
 
     def __setitem__(self, location, maze_card):
         """ sets the maze card at a given location
 
         :param location: a BoardLocation instance
-        :raises ValueError: if location is outside of the board
+        :raises InvalidLocationException: if location is outside of the board
         :param maze_card: the maze card to set
         """
+        self._validate_location(location)
         self._maze_cards[location.row][location.column] = maze_card
 
     def shift(self, insert_location, inserted_maze_card):
@@ -163,11 +170,13 @@ class Board:
 
         :param insert_location: the location of the inserted maze card
         :param inserted_maze_card: the maze card to insert
-        :raises ValueError: for invalid insert location
+        :raises InvalidShiftLocationException: for invalid insert location
         :return: the pushed out maze card
         """
+        self._validate_location(insert_location)
         if insert_location not in self._insert_locations:
-            raise ValueError("Invalid insert location")
+            raise InvalidShiftLocationException(
+                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
         direction = self._determine_shift_direction(insert_location)
         shift_line_locations = []
         current_location = insert_location
@@ -189,6 +198,7 @@ class Board:
         """ Returns the direction to shift to for a given location
 
         :param shift_location: the location of the pushed in maze card
+        :raises InvalidShiftLocationException: if the location is not on the border
         :return: the direction as a tuple
         """
         if shift_location.row == cls.BOARD_SIZE - 1:
@@ -199,7 +209,8 @@ class Board:
             return (0, -1)
         if shift_location.column == 0:
             return (0, 1)
-        raise ValueError("Invalid insert location")
+        raise InvalidShiftLocationException(
+            "Location {} is not shiftable (not on border)".format(str(shift_location)))
 
     @classmethod
     def _neighbor(cls, location, direction):
@@ -230,6 +241,11 @@ class Board:
         return [BoardLocation(row, column)
                 for row in range(cls.BOARD_SIZE)
                 for column in range(cls.BOARD_SIZE)]
+
+    @classmethod
+    def _validate_location(cls, location):
+        if not cls._is_inside(location):
+            raise InvalidLocationException("Location {} is outside of the board.".format(str(location)))
 
 
 class Game:
@@ -275,7 +291,6 @@ class Game:
     def add_player(self):
         """ Adds a player and returns his id.
 
-        :raises ValueError: when game is full
         :return: id of the added player, None if the game is full
         """
         if self.accepts_players():
@@ -299,7 +314,9 @@ class Game:
         :param new_leftover_location: the new location of the leftover MazeCard
         :param leftover_rotation: the rotation of the leftover MazeCard, in degrees
         (one of 0, 90, 180, 270)
-        :raises ValueError: for invalid insert location, rotation value, or player id
+        :raises InvalidShiftLocationException: for invalid insert location
+        :raises InvalidRotationException: for invalid rotation value
+        :raises PlayerNotFoundException: for invalid player id
         """
         self.find_player(player_id)
         self._leftover_card.rotation = leftover_rotation
@@ -313,19 +330,28 @@ class Game:
 
         :param player_id: the moving player's id
         :param target_location: the board location to move to
-        :raises ValueError: for invalid target location or player id
+        :raises PlayerNotFoundException: for invalid player id
+        :raises InvalidLocationException: for invalid target location
+        :raises InvalidStateException: for invalid state
         """
         player = self.find_player(player_id)
         target = self._board[target_location]
         player.maze_card = target
 
     def find_player(self, player_id):
-        """ Finds player by id """
+        """ Finds player by id.
+
+        :param player_id: the id of the player to find
+        :raises InvalidStateException: if more than two players with given id
+        :raises PlayerNotFoundException: if no player with given id
+        :return: an instance of Player
+        """
+
         match = [player for player in self._players if player.identifier is player_id]
         if len(match) > 1:
-            raise ValueError("Invalid state")
+            raise InvalidStateException("More than one player with id {}".format(player_id))
         elif not match:
-            raise ValueError("No matching player in this game")
+            raise PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
         return match[0]
 
     def _find_players_by_maze_card(self, maze_card):
