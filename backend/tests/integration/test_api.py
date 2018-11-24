@@ -78,7 +78,7 @@ def test_get_state_for_nonexisting_game(client):
     """
     player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
     response = client.get("/api/games/1/state?p_id={}".format(player_id))
-    _assert_error_response(response, user_message="Game does not exist.",
+    _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
 
 
@@ -90,7 +90,7 @@ def test_get_state_for_nonexisting_player(client):
     """
     player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
     response = client.get("/api/games/0/state?p_id={}".format(player_id + 1))
-    _assert_error_response(response, user_message="Player does not take part in this game.",
+    _assert_error_response(response, user_message="The player does not take part in this game.",
                            key="PLAYER_NOT_IN_GAME", status=400)
 
 
@@ -113,8 +113,6 @@ def test_get_state_valid_after_error(client):
     state = response.get_json()
     assert "mazeCards" in state
     assert len(state["mazeCards"]) == 50
-    assert "players" in state
-    assert len(state["players"]) == 4
 
 
 def test_post_move(client):
@@ -177,7 +175,7 @@ def test_post_move_nonexisting_game(client):
         }
     })
     response = client.post("/api/games/8/move?p_id={}".format(player_id), data=data)
-    _assert_error_response(response, user_message="Game does not exist.",
+    _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
 
 
@@ -254,6 +252,7 @@ def _assert_invalid_action_and_unchanged_state(client, action_resource, data):
     asserts error response and checks that state has not changed """
     response = client.post("/api/games/0/players")
     player_id = _assert_ok_single_int(response)
+    response = client.get("/api/games/0/state?p_id={}".format(player_id))
     old_data = response.get_data()
     response = client.post("/api/games/0/{}?p_id={}".format(action_resource, player_id),
                            data=json.dumps(data))
@@ -276,13 +275,13 @@ def _assert_ok_single_int(response):
         assert False
 
 
-def _assert_error_response(response, user_message, key, status=400):
+def _assert_error_response(response, user_message, key, status):
     """ Asserts a certain error response
 
     :param response: the HTTP response object
     :param user_message: a human readable explanation for the error
     :param key: an error key, to be used for i18n
-    :param status: the expected status code, defaults to 400
+    :param status: the expected status code
     """
     assert response.status_code == status
     assert response.content_type == "application/json"
