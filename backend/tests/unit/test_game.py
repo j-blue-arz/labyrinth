@@ -1,6 +1,6 @@
 """ Tests for Game of model.py """
 import pytest
-from labyrinth.model import Game, BoardLocation
+from domain.model import Game, BoardLocation
 
 def test_add_find_player():
     """ Tests add_player and find_player """

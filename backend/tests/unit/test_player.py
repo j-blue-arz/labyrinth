@@ -1,5 +1,5 @@
 """ Tests Player of model.py """
-from labyrinth.model import Player
+from domain.model import Player
 
 def test_identifier():
     """ Tests identifier """

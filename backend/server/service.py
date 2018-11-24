@@ -1,8 +1,8 @@
 """ Service Layer """
 import json
-from labyrinth.db import get_database
-from labyrinth.mapper import dto_to_game, game_to_dto, dto_to_shift_action, dto_to_move_action, exception_to_dto
-from labyrinth.model import Game
+from . import db
+from .mapper import dto_to_game, game_to_dto, dto_to_shift_action, dto_to_move_action, exception_to_dto
+from .domain.model import Game
 
 
 class ApiException(Exception):
@@ -48,7 +48,7 @@ def add_player(game_id):
 
 
 def load_game(game_id):
-    game_row = get_database().execute(
+    game_row = db.get_database().execute(
         "SELECT game_state FROM games WHERE id=?", (game_id,)
     ).fetchone()
     if game_row is None:
@@ -60,19 +60,19 @@ def create_game(game_id):
     game = Game()
     game.init_game()
     game_json = json.dumps(game_to_dto(game))
-    get_database().execute(
-        "INSERT INTO games(id, game_state) VALUES (0, 'asdf')"  # , (game_id, game_json)
+    db.get_database().execute(
+        "INSERT INTO games(id, game_state) VALUES (?, ?)", (game_id, game_json)
     )
-    get_database().commit()
+    db.get_database().commit()
     return game
 
 
 def update_game(game_id, game):
     game_json = json.dumps(game_to_dto(game))
-    get_database().execute(
+    db.get_database().execute(
         "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
     )
-    get_database().commit()
+    db.get_database().commit()
 
 
 def get_game_state(game_id, player_id):

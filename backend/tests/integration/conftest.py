@@ -2,7 +2,7 @@
 import os
 import tempfile
 import pytest
-from labyrinth import create_app
+from server import create_app
 
 
 @pytest.fixture

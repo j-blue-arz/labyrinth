@@ -3,7 +3,7 @@ The module is responsible for request deserialization and result serialization, 
 leaves DTO mapping, database manipulation and and domain logic access to the Service Layer """
 
 from flask import Blueprint, request, json
-import labyrinth.service as service
+from . import service
 
 API = Blueprint('api', __name__, url_prefix='/api')
 

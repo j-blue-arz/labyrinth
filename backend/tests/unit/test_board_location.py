@@ -1,5 +1,5 @@
 """ Tests for BoardLocation of model.py """
-from labyrinth.model import BoardLocation
+from domain.model import BoardLocation
 
 def test_add_should_not_alter_current():
     """ Tests add method of BoardLocation """
