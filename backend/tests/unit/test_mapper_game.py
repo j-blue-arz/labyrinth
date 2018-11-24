@@ -2,8 +2,8 @@
 tests the mapping from a Game instance to the DTO by
 creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
-import labyrinth.mapper as mapper
-from labyrinth.model import Game, MazeCard, BoardLocation
+import server.mapper as mapper
+from domain.model import Game, MazeCard, BoardLocation
 
 
 def _create_test_game():

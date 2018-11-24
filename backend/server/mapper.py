@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from labyrinth.model import Game, Player, MazeCard, BoardLocation, Board
+from .domain.model import Game, Player, MazeCard, BoardLocation, Board
 #from labyrinth.service import ApiException
 
 _PLAYERS = "players"
