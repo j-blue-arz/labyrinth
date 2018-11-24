@@ -31,9 +31,9 @@ def create_app(test_config=None):
     from . import api
     app.register_blueprint(api.API)
 
-    from . import db
-    app.before_first_request(db.init_database)
-    app.teardown_request(db.close_database)
+    from . import database
+    app.before_first_request(database.init_database)
+    app.teardown_request(database.close_database)
 
     @app.route('/')
     def index():

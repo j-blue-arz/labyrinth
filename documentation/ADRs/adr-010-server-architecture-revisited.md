@@ -43,7 +43,7 @@ Right now, it stores Json strings in a single column of a relational database (S
 
 The Domain Model will not know anything about its persistence in the database, nor about its results, states or exceptions beeing transmitted by the API.
 ## Status
-Open
+Implemented
 
 ## Consequences
- Refactor according to the made decisions. Amend this document if the decisions change during the refactoring.
+Refactor according to the made decisions. Amend this document if the decisions change during the refactoring.
