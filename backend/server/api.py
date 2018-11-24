@@ -4,11 +4,12 @@ leaves DTO mapping, database manipulation and and domain logic access to the Ser
 
 from flask import Blueprint, request, json
 from . import service
+from .exceptions import ApiException
 
 API = Blueprint('api', __name__, url_prefix='/api')
 
 
-@API.errorhandler(service.ApiException)
+@API.errorhandler(ApiException)
 def handle_api_exception(api_exception):
     """ maps the ApiException to an error response """
     return json.jsonify(api_exception.to_dto()), api_exception.status_code

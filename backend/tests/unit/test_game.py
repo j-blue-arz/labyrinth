@@ -1,6 +1,7 @@
 """ Tests for Game of model.py """
 import pytest
 from domain.model import Game, BoardLocation
+from domain.exceptions import *
 
 def test_add_find_player():
     """ Tests add_player and find_player """
@@ -67,7 +68,7 @@ def test_shift_raises_error_on_invalid_location():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidShiftLocationException):
         game.shift(player_id, BoardLocation(0, 0), 90)
 
 def test_shift_raises_error_on_invalid_rotation():
@@ -75,7 +76,7 @@ def test_shift_raises_error_on_invalid_rotation():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidRotationException):
         game.shift(player_id, BoardLocation(0, 1), 70)
 
 def test_shift_raises_error_on_invalid_player_id():
@@ -83,7 +84,7 @@ def test_shift_raises_error_on_invalid_player_id():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    with pytest.raises(ValueError):
+    with pytest.raises(PlayerNotFoundException):
         game.shift(player_id + 1, BoardLocation(0, 1), 90)
 
 def test_move_raises_error_on_invalid_location():
@@ -91,7 +92,7 @@ def test_move_raises_error_on_invalid_location():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidLocationException):
         game.move(player_id, BoardLocation(-1, -1))
 
 
@@ -100,5 +101,5 @@ def test_move_raises_error_on_invalid_player_id():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    with pytest.raises(ValueError):
+    with pytest.raises(PlayerNotFoundException):
         game.move(player_id - 1, BoardLocation(5, 5))
