@@ -8,6 +8,12 @@ import labyrinth.service as service
 API = Blueprint('api', __name__, url_prefix='/api')
 
 
+@API.errorhandler(service.ApiException)
+def handle_api_exception(api_exception):
+    """ maps the ApiException to an error response """
+    return json.jsonify(api_exception.to_dto()), api_exception.status_code
+
+
 @API.route('/games/<int:game_id>/players', methods=["POST"])
 def post_player(game_id):
     """ Adds a player to an existing game. Creates the game if it does not exist """

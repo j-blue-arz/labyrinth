@@ -146,7 +146,7 @@ class Board:
         :return: the MazeCard instance
         """
         if not self._is_inside(location):
-            raise ValueError("Location is outside of the board")
+            raise ValueError("location is outside of the board")
         return self._maze_cards[location.row][location.column]
 
     def __setitem__(self, location, maze_card):
@@ -273,17 +273,17 @@ class Game:
         return len(self._players) < Game.MAX_PLAYERS
 
     def add_player(self):
-        """ Adds a player and returns his id. Throws if game is full
+        """ Adds a player and returns his id.
 
         :raises ValueError: when game is full
-        :return: id of the added player
+        :return: id of the added player, None if the game is full
         """
         if self.accepts_players():
             player_id = len(self._players)
             player = Player(player_id)
             self._players.append(player)
             return player_id
-        raise ValueError("Game is full")
+        return None
 
     def init_game(self):
         """ Randomly initializes the game state, with the currently connected players """

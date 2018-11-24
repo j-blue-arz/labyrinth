@@ -56,12 +56,11 @@ def test_shift_updates_players_on_pushed_out_card():
     assert player.maze_card == pushed_card
 
 def test_add_player_validation():
-    """ Tests that adding more players than MAX_PLAYERS results in ValueError """
+    """ Tests that adding more players than MAX_PLAYERS does not add another one """
     game = Game()
     while game.accepts_players():
         game.add_player()
-    with pytest.raises(ValueError):
-        game.add_player()
+    assert game.add_player() is None
 
 def test_shift_raises_error_on_invalid_location():
     """ Tests shift validation """
