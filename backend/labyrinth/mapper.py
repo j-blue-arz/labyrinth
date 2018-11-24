@@ -5,6 +5,7 @@ instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
 from labyrinth.model import Game, Player, MazeCard, BoardLocation, Board
+#from labyrinth.service import ApiException
 
 _PLAYERS = "players"
 _MAZE_CARDS = "mazeCards"
@@ -16,6 +17,8 @@ _ROTATION = "rotation"
 _ROW = "row"
 _COLUMN = "column"
 _LEFTOVER_ROTATION = "leftoverRotation"
+_KEY = "key"
+_MESSAGE = "userMessage"
 
 
 def game_to_dto(game: Game, player_id=None):
@@ -89,6 +92,14 @@ def dto_to_move_action(move_dto):
     :return: a BoardLocation instance
     """
     return _dto_to_board_location(move_dto[_LOCATION])
+
+
+def exception_to_dto(api_exception):
+    """ Maps an ApiException instance to a DTO to be transferred by the API """
+    return {
+        _KEY: api_exception.key,
+        _MESSAGE: api_exception.message,
+    }
 
 
 def _player_to_dto(player: Player):
