@@ -54,20 +54,18 @@ def test_get_state(client):
     for existing game. Expects 50 mazeCards and one player
     with correct id
     """
-    client.post("/api/games/0/players")
-    player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
-    print(player_id)
-    print("/api/games/0/state?p_id={}".format(player_id))
-    print("asdf")
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    player_id1 = _assert_ok_single_int(client.post("/api/games/0/players"))
+    player_id2 = _assert_ok_single_int(client.post("/api/games/0/players"))
+    response = client.get("/api/games/0/state?p_id={}".format(player_id2))
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
     assert "mazeCards" in state
     assert len(state["mazeCards"]) == 50
     assert "players" in state
-    assert len(state["players"]) == 1
-    assert state["players"][0]["id"] == player_id
+    assert len(state["players"]) == 2
+    player_ids = {state["players"][0]["id"], state["players"][1]["id"]}
+    assert player_ids == {player_id1, player_id2}
 
 
 def test_get_state_for_nonexisting_game(client):

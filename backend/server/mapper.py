@@ -30,11 +30,7 @@ def game_to_dto(game: Game, player_id=None):
     :return: a structure whose JSON representation is valid for the API
     """
     game_dto = dict()
-    if player_id is None:
-        game_dto[_PLAYERS] = [_player_to_dto(player) for player in game.players]
-    else:
-        game_dto[_PLAYERS] = [_player_to_dto(player) for player in game.players
-                              if player.identifier is player_id]
+    game_dto[_PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[_MAZE_CARDS] = []
     game_dto[_MAZE_CARDS].append(_maze_card_to_dto(game.leftover_card, None))
     for location in Board.board_locations():
