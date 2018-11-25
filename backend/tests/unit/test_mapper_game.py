@@ -40,12 +40,14 @@ def test_mapping_for_player():
     assert _compare_games_using_function(created_game, game,
                                          lambda g: g.find_player(player_ids[1]).maze_card.identifier)
 
+
 def test_mapping_for_leftover():
     """ Tests correct mapping of leftover maze card """
     created_game, _ = _create_test_game()
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert _compare_maze_cards(*map(lambda g: g.leftover_card, [created_game, game]))
+
 
 def test_mapping_for_board():
     """ Tests correct mapping of current board state """
@@ -56,22 +58,13 @@ def test_mapping_for_board():
         assert _compare_maze_cards(*map(lambda g: g.board[location], [created_game, game]))
     assert _compare_maze_cards(*map(lambda g: g.leftover_card, [created_game, game]))
 
-def test_mapping_for_single_player():
-    """ Tests correct mapping of player if player_id is given """
-    created_game, player_ids = _create_test_game()
-    player_id = player_ids[1]
-    game_dto = mapper.game_to_dto(created_game, player_id)
-    game = mapper.dto_to_game(game_dto)
-    assert len(game.players) == 1
-    assert game.find_player(player_id)
-    assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.find_player(player_id).maze_card.identifier)
 
 def _compare_maze_cards(maze_card1, maze_card2):
     """ Compares identifier, doors and rotation of MazeCard instances """
     return maze_card1.identifier == maze_card2.identifier and \
-           maze_card1.doors == maze_card2.doors and \
-           maze_card1.rotation == maze_card2.rotation
+        maze_card1.doors == maze_card2.doors and \
+        maze_card1.rotation == maze_card2.rotation
+
 
 def _compare_games_using_function(game1, game2, func):
     """ compares two instances of Game using a function, i.e.
