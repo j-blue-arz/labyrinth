@@ -48,8 +48,14 @@ def _get_database():
 def init_database():
     """ Executes the schema definition """
     database = _get_database()
-    with current_app.open_resource('schema.sql') as file:
-        database.executescript(file.read().decode('utf8'))
+    database.executescript("""
+        DROP TABLE IF EXISTS games;
+
+        CREATE TABLE games (
+            id INTEGER PRIMARY KEY,
+            game_state TEXT NOT NULL
+        );
+    """)
 
 
 def close_database(exception=None):
