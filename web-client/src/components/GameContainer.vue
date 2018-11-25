@@ -6,22 +6,26 @@
             :n="n"
             :maze-cards="mazeCardsList"
             :card-size="cardSize"
-            ref="interactive-board" />
+            ref="interactive-board"
+        />
         <v-maze-card
             @click.native="onLeftoverClick"
             :maze-card="leftoverMazeCard"
             :card-size="cardSize"
             class="game-container__leftover"
-            ref="leftover" />
+            ref="leftover"
+        />
     </div>
 </template>
 
 
 <script>
+import axios from "axios";
+import Vue from "vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
-import Vue from "vue";
 import MazeCard from "@/model/mazecard.js";
+// import { setInterval } from "timers";
 
 export default {
     name: "game-container",
@@ -34,11 +38,6 @@ export default {
             type: Array,
             required: false,
             default: () => []
-        },
-        playerId: {
-            type: Number,
-            required: false,
-            default: 0
         }
     },
     data() {
@@ -47,7 +46,10 @@ export default {
             cardSize: 100,
             mazeCards: [],
             leftoverMazeCard: {},
-            playerPieces: []
+            playerId: 0,
+            playerPieces: new Map(),
+            timer: "",
+            api: ""
         };
     },
     computed: {
@@ -57,78 +59,85 @@ export default {
     },
     methods: {
         onInsertCard: function(location) {
+            var shiftLocations = [];
             if (location.row === -1) {
-                this.shiftSouth(location.column);
+                shiftLocations = this.columnLocations(location.column);
             } else if (location.row === this.n) {
-                this.shiftNorth(location.column);
+                shiftLocations = this.columnLocations(location.column);
+                shiftLocations.reverse();
             } else if (location.column === this.n) {
-                this.shiftWest(location.row);
+                shiftLocations = this.rowLocations(location.row);
+                shiftLocations.reverse();
             } else if (location.column === -1) {
-                this.shiftEast(location.row);
+                shiftLocations = this.rowLocations(location.row);
             }
+            this.shiftAlongLocations(shiftLocations);
+        },
+        columnLocations: function(column) {
+            var locations = [];
+            for (let row = 0; row < this.n; row++) {
+                locations.push({ row: row, column: column });
+            }
+            return locations;
+        },
+        rowLocations: function(row) {
+            var locations = [];
+            for (let column = 0; column < this.n; column++) {
+                locations.push({ row: row, column: column });
+            }
+            return locations;
         },
         onLeftoverClick: function() {
             this.leftoverMazeCard.rotateClockwise();
         },
         onMovePlayerPiece: function(targetLocation) {
-            var playerPiece = this.playerPieces[this.playerId];
+            var targetMazeCard = this.getMazeCard(targetLocation);
+            var postMovePath = this.api + "/games/0/move?p_id=" + this.playerId;
+            axios
+                .post(postMovePath, {
+                    location: targetMazeCard.location
+                })
+                .catch(error => {
+                    console.error(error.response.data.userMessage);
+                });
+
+            var playerPiece = this.playerPieces.get(this.playerId);
             var index = playerPiece.mazeCard.playerPieces.indexOf(playerPiece);
             playerPiece.mazeCard.playerPieces.splice(index, 1);
 
-            var targetMazeCard = this.mazeCardAtLocation(targetLocation);
             targetMazeCard.playerPieces.push(playerPiece);
             playerPiece.mazeCard = targetMazeCard;
         },
-        mazeCardAtLocation(location) {
+        getMazeCard: function(location) {
             return this.mazeCards[location.row][location.column];
         },
-        shiftSouth: function(column) {
-            var tmp = this.leftoverMazeCard;
-            this.leftoverMazeCard = this.mazeCards[this.n - 1][column];
-            this.leftoverMazeCard.setLeftoverLocation();
-            for (var row = this.n - 1; row > 0; row--) {
-                this.mazeCards[row][column] = this.mazeCards[row - 1][column];
-                this.mazeCards[row][column].location.row = row;
-            }
-            this.transferPlayerPieces(this.leftoverMazeCard, tmp);
-            tmp.setLocation(0, column);
-            Vue.set(this.mazeCards[0], column, tmp);
+        setMazeCard: function(location, mazeCard) {
+            this.mazeCards[location.row][location.column] = mazeCard;
         },
-        shiftNorth: function(column) {
-            var tmp = this.leftoverMazeCard;
-            this.leftoverMazeCard = this.mazeCards[0][column];
-            this.leftoverMazeCard.setLeftoverLocation();
-            for (var row = 0; row < this.n - 1; row++) {
-                this.mazeCards[row][column] = this.mazeCards[row + 1][column];
-                this.mazeCards[row][column].location.row = row;
+        mazeCardById: function(id) {
+            for (var row = 0; row < this.n; row++) {
+                for (var col = 0; col < this.n; col++) {
+                    if (this.mazeCards[row][col].id == id) {
+                        return this.mazeCards[row][col];
+                    }
+                }
             }
-            this.transferPlayerPieces(this.leftoverMazeCard, tmp);
-            tmp.setLocation(this.n - 1, column);
-            Vue.set(this.mazeCards[this.n - 1], column, tmp);
         },
-        shiftWest: function(row) {
-            var tmp = this.leftoverMazeCard;
-            this.leftoverMazeCard = this.mazeCards[row][0];
+        shiftAlongLocations: function(locations) {
+            var pushedCard = this.leftoverMazeCard;
+            this.leftoverMazeCard = this.getMazeCard(locations[this.n - 1]);
             this.leftoverMazeCard.setLeftoverLocation();
-            for (var column = 0; column < this.n - 1; column++) {
-                this.mazeCards[row][column] = this.mazeCards[row][column + 1];
-                this.mazeCards[row][column].location.column = column;
+            for (let i = this.n - 1; i > 0; i--) {
+                this.setMazeCard(
+                    locations[i],
+                    this.getMazeCard(locations[i - 1])
+                );
+                this.getMazeCard(locations[i]).setLocation(locations[i]);
             }
-            this.transferPlayerPieces(this.leftoverMazeCard, tmp);
-            tmp.setLocation(row, this.n - 1);
-            Vue.set(this.mazeCards[row], this.n - 1, tmp);
-        },
-        shiftEast: function(row) {
-            var tmp = this.leftoverMazeCard;
-            this.leftoverMazeCard = this.mazeCards[row][this.n - 1];
-            this.leftoverMazeCard.setLeftoverLocation();
-            for (var column = this.n - 1; column > 0; column--) {
-                this.mazeCards[row][column] = this.mazeCards[row][column - 1];
-                this.mazeCards[row][column].location.column = column;
-            }
-            this.transferPlayerPieces(this.leftoverMazeCard, tmp);
-            tmp.setLocation(row, 0);
-            Vue.set(this.mazeCards[row], 0, tmp);
+            this.transferPlayerPieces(this.leftoverMazeCard, pushedCard);
+            var first = locations[0];
+            pushedCard.setLocation(first);
+            Vue.set(this.mazeCards[first.row], first.column, pushedCard);
         },
         transferPlayerPieces: function(sourceMazeCard, targetMazeCard) {
             while (sourceMazeCard.playerPieces.length) {
@@ -136,9 +145,74 @@ export default {
                 piece.mazeCard = targetMazeCard;
                 targetMazeCard.playerPieces.push(piece);
             }
+        },
+        compareApiLocations: function(a, b) {
+            if (a.row == b.row) {
+                return a.column - b.column;
+            }
+            return a.row - b.row;
+        },
+        getApiState: function() {
+            var getStatePath =
+                this.api + "/games/0/state?p_id=" + this.playerId;
+            axios
+                .get(getStatePath)
+                .then(response => this.createFromApiState(response.data))
+                .catch(error => {
+                    console.error(error.response.data.userMessage);
+                });
+        },
+        createFromApiState: function(apiState) {
+            console.log(apiState.mazeCards);
+            apiState.mazeCards.forEach(card => {
+                if (card.location === null) {
+                    card.location = {
+                        row: -1,
+                        column: -1
+                    };
+                }
+            });
+            apiState.mazeCards.sort((card1, card2) =>
+                this.compareApiLocations(card1.location, card2.location)
+            );
+            console.log(apiState.mazeCards);
+            this.leftoverMazeCard = MazeCard.createFromApi(
+                apiState.mazeCards[0]
+            );
+            this.mazeCards.splice(0, this.n);
+            var index = 1;
+            for (var row = 0; row < this.n; row++) {
+                this.mazeCards.push([]);
+                for (var col = 0; col < this.n; col++) {
+                    this.mazeCards[row].push(
+                        MazeCard.createFromApi(apiState.mazeCards[index])
+                    );
+                    index++;
+                }
+            }
+            this.playerPieces.clear();
+            apiState.players.forEach(player => {
+                var playerMazeCard = this.mazeCardById(player.mazeCardId);
+                var playerPiece = {
+                    id: player.id,
+                    mazeCard: playerMazeCard
+                };
+                playerMazeCard.playerPieces.push(playerPiece);
+                this.playerPieces.set(player.id, playerPiece);
+            });
         }
     },
     created: function() {
+        /* this.api = location.protocol + "//" + location.host + "/api";
+        var addPlayerPath = this.api + "/games/0/players";
+        axios
+            .post(addPlayerPath)
+            .then(response => (this.playerId = parseInt(response.data)))
+            .catch(error => {
+                console.error(error.response.data.userMessage);
+            });
+
+        this.timer = setInterval(this.getApiState, 800); */
         var id = 0;
         for (var row = 0; row < this.n; row++) {
             this.mazeCards.push([]);
@@ -162,13 +236,16 @@ export default {
             var location = this.initialPlayerLocations[i];
             var playerPiece = {
                 id: i,
-                mazeCard: this.mazeCardAtLocation(location)
+                mazeCard: this.getMazeCard(location)
             };
-            this.mazeCardAtLocation(location).playerPieces.push(playerPiece);
-            this.playerPieces.push(playerPiece);
+            this.getMazeCard(location).playerPieces.push(playerPiece);
+            this.playerPieces.set(i, playerPiece);
         }
 
         this.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
+    },
+    beforeDestroy() {
+        clearInterval(this.timer);
     }
 };
 </script>
