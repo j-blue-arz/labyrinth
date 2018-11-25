@@ -1,12 +1,18 @@
 import MazeCard from "@/model/mazecard.js";
 
 var hasValidState = function(mazeCard) {
-    return ((Number(mazeCard.hasNorthDoor()) + Number(mazeCard.hasEastDoor()) + Number(mazeCard.hasWestDoor()) + Number(mazeCard.hasSouthDoor())) >= 2)
-    && (mazeCard.rotation % 90 === 0)
-    && Number.isInteger(mazeCard.location.row)
-    && Number.isInteger(mazeCard.location.column)
-    && Number.isInteger(mazeCard.id);
-}
+    return (
+        Number(mazeCard.hasNorthDoor()) +
+            Number(mazeCard.hasEastDoor()) +
+            Number(mazeCard.hasWestDoor()) +
+            Number(mazeCard.hasSouthDoor()) >=
+            2 &&
+        mazeCard.rotation % 90 === 0 &&
+        Number.isInteger(mazeCard.location.row) &&
+        Number.isInteger(mazeCard.location.column) &&
+        Number.isInteger(mazeCard.id)
+    );
+};
 
 describe("MazeCard", () => {
     describe("constructor", () => {
@@ -23,7 +29,9 @@ describe("MazeCard", () => {
         });
 
         it("throws exception when doors is not string", () => {
-            expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(Error);
+            expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(
+                Error
+            );
         });
 
         it("throws exception when doors has same door twice", () => {
@@ -49,39 +57,39 @@ describe("MazeCard", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 180);
             expect(mazeCard.rotation).toBe(180);
             expect(hasValidState(mazeCard)).toBe(true);
-        })
+        });
 
         it("is increased by 90 when rotated clockwise", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 90);
             mazeCard.rotateClockwise();
             expect(mazeCard.rotation).toBe(180);
             expect(hasValidState(mazeCard)).toBe(true);
-        })
+        });
 
         it("is set to 0 when rotated clockwise, starting from 270", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 270);
             mazeCard.rotateClockwise();
             expect(mazeCard.rotation).toBe(0);
             expect(hasValidState(mazeCard)).toBe(true);
-        })
-    })
+        });
+    });
 
     describe("doors", () => {
-        it("are set from constructor", ()=> {
+        it("are set from constructor", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
             expect(mazeCard.hasNorthDoor()).toBe(true);
             expect(mazeCard.hasEastDoor()).toBe(true);
             expect(mazeCard.hasSouthDoor()).toBe(false);
             expect(mazeCard.hasWestDoor()).toBe(false);
-        })
+        });
 
-        it("respect rotation", ()=> {
+        it("respect rotation", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NS", 270);
             expect(mazeCard.hasNorthDoor()).toBe(false);
             expect(mazeCard.hasEastDoor()).toBe(true);
             expect(mazeCard.hasSouthDoor()).toBe(false);
             expect(mazeCard.hasWestDoor()).toBe(true);
-        })
+        });
 
         it("are rotated when rotateClockwise() is called", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
@@ -90,6 +98,6 @@ describe("MazeCard", () => {
             expect(mazeCard.hasEastDoor()).toBe(true);
             expect(mazeCard.hasSouthDoor()).toBe(true);
             expect(mazeCard.hasWestDoor()).toBe(false);
-        })
-    })
+        });
+    });
 });
