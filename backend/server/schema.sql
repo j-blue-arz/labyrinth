@@ -1,6 +1,0 @@
-DROP TABLE IF EXISTS games;
-
-CREATE TABLE games (
-    id INTEGER PRIMARY KEY,
-    game_state TEXT NOT NULL
-);
