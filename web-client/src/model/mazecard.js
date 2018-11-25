@@ -42,6 +42,16 @@ export default class MazeCard {
             );
     }
 
+    static createFromApi(apiMazeCard) {
+        return new this(
+            apiMazeCard.id,
+            apiMazeCard.location.row,
+            apiMazeCard.location.column,
+            apiMazeCard.doors,
+            apiMazeCard.rotation
+        );
+    }
+
     static createNewRandom(id, row, column) {
         return new this(id, row, column, this.generateRandomDoors(), 0);
     }
@@ -91,13 +101,14 @@ export default class MazeCard {
         this._rotation = (this._rotation + 90) % 360;
     }
 
-    setLocation(row, column) {
-        this.location.row = row;
-        this.location.column = column;
+    setLocation(location) {
+        this.location.row = location.row;
+        this.location.column = location.column;
     }
 
     setLeftoverLocation() {
-        this.setLocation(-1, -1);
+        this.location.row = -1;
+        this.location.column = -1;
     }
 }
 

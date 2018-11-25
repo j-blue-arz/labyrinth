@@ -8,7 +8,7 @@ const extractIdMatrix = function(gameContainer) {
         .find({ ref: "interactive-board" })
         .findAll(VMazeCard);
     var htmlCards = [];
-    for (var i = 0; i < vMazeCards.length; i++) {
+    for (let i = 0; i < vMazeCards.length; i++) {
         var card = vMazeCards.at(i);
         var x = Number.parseInt(card.element.getAttribute("x"));
         var y = Number.parseInt(card.element.getAttribute("y"));
@@ -53,14 +53,11 @@ const determineLeftOverId = function(gameContainer) {
 
 const determineMazeCardIdsWithPlayers = function(gameContainer) {
     var mazeCardIds = [];
-    var vMazeCards = gameContainer
-        .find({ ref: "interactive-board" })
-        .findAll(VMazeCard);
     var vPlayerPieces = gameContainer.findAll(VPlayerPiece);
     for (var i = 0; i < vPlayerPieces.length; i++) {
         mazeCardIds.push(
             Number.parseInt(
-                vPlayerPieces.at(0).element.parentElement.getAttribute("id")
+                vPlayerPieces.at(i).element.parentElement.getAttribute("id")
             )
         );
     }
@@ -120,13 +117,29 @@ describe("GameContainer", () => {
     it("displays a player piece on the correct maze card", () => {
         var gameContainer = mount(GameContainer, {
             propsData: {
-                initialPlayerLocations: [{ row: 6, column: 1 }]
+                initialPlayerLocations: [{ row: 5, column: 1 }]
             }
         });
-        var mazeCardIds = determineMazeCardIdsWithPlayers(gameContainer);
-        expect(mazeCardIds.length).toBe(1);
+        var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
+        expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
-        expect(mazeCardIds[0]).toBe(idMatrix[6][1]);
+        expect(playerCardIds[0]).toBe(idMatrix[5][1]);
+    });
+
+    it("moves players with maze cards when shifted", () => {
+        var gameContainer = mount(GameContainer, {
+            propsData: {
+                initialPlayerLocations: [{ row: 4, column: 3 }]
+            }
+        });
+
+        var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
+        interactiveBoard.vm.$emit("insert-card", { row: -1, column: 3 });
+
+        var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
+        expect(playerCardIds.length).toBe(1);
+        var idMatrix = extractIdMatrix(gameContainer);
+        expect(playerCardIds[0]).toBe(idMatrix[5][3]);
     });
 
     it("moves players to opposing side of the board when shifted out", () => {
@@ -136,16 +149,15 @@ describe("GameContainer", () => {
             }
         });
 
-        var leftoverCardId = determineLeftOverId(gameContainer);
+        var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
         interactiveBoard.vm.$emit("insert-card", { row: -1, column: 1 });
 
-        var mazeCardIds = determineMazeCardIdsWithPlayers(gameContainer);
-        expect(mazeCardIds.length).toBe(1);
-        expect(mazeCardIds[0]).toBe(leftoverCardId);
+        var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
+        expect(playerCardIds.length).toBe(1);
+        expect(playerCardIds[0]).toBe(pushedInCardId);
     });
-
 
     it("moves players when maze card is clicked", () => {
         var gameContainer = mount(GameContainer, {
@@ -155,11 +167,11 @@ describe("GameContainer", () => {
         });
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("move-piece", { row: 4, column: 4 })
+        interactiveBoard.vm.$emit("move-piece", { row: 4, column: 4 });
 
-        var mazeCardIds = determineMazeCardIdsWithPlayers(gameContainer);
-        expect(mazeCardIds.length).toBe(1);
+        var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
+        expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
-        expect(mazeCardIds[0]).toBe(idMatrix[4][4]);
+        expect(playerCardIds[0]).toBe(idMatrix[4][4]);
     });
 });
