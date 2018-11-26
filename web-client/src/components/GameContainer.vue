@@ -174,7 +174,6 @@ export default {
                 });
         },
         createFromApiState: function(apiState) {
-            console.log(apiState.mazeCards);
             apiState.mazeCards.forEach(card => {
                 if (card.location === null) {
                     card.location = {
@@ -186,7 +185,6 @@ export default {
             apiState.mazeCards.sort((card1, card2) =>
                 this.compareApiLocations(card1.location, card2.location)
             );
-            console.log(apiState.mazeCards);
             this.leftoverMazeCard = MazeCard.createFromApi(
                 apiState.mazeCards[0]
             );
