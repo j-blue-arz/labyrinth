@@ -1,21 +1,21 @@
 <template>
-    <div class="game-container">
-        <interactive-board
-            @move-piece="onMovePlayerPiece"
-            @insert-card="onInsertCard"
-            :n="n"
-            :maze-cards="mazeCardsList"
-            :card-size="cardSize"
-            ref="interactive-board"
-        />
-        <v-maze-card
-            @click.native="onLeftoverClick"
-            :maze-card="leftoverMazeCard"
-            :card-size="cardSize"
-            class="game-container__leftover"
-            ref="leftover"
-        />
-    </div>
+  <div class="game-container">
+    <interactive-board
+      @move-piece="onMovePlayerPiece"
+      @insert-card="onInsertCard"
+      :n="n"
+      :maze-cards="mazeCardsList"
+      :card-size="cardSize"
+      ref="interactive-board"
+    />
+    <v-maze-card
+      @click.native="onLeftoverClick"
+      :maze-card="leftoverMazeCard"
+      :card-size="cardSize"
+      class="game-container__leftover"
+      ref="leftover"
+    />
+  </div>
 </template>
 
 
@@ -125,6 +125,17 @@ export default {
         },
         shiftAlongLocations: function(locations) {
             var pushedCard = this.leftoverMazeCard;
+            var postShiftPath =
+                this.api + "/games/0/shift?p_id=" + this.playerId;
+            axios
+                .post(postShiftPath, {
+                    location: locations[0],
+                    leftoverRotation: pushedCard.rotation
+                })
+                .catch(error => {
+                    console.error(error.response.data.userMessage);
+                });
+
             this.leftoverMazeCard = this.getMazeCard(locations[this.n - 1]);
             this.leftoverMazeCard.setLeftoverLocation();
             for (let i = this.n - 1; i > 0; i--) {
@@ -203,7 +214,7 @@ export default {
         }
     },
     created: function() {
-        /* this.api = location.protocol + "//" + location.host + "/api";
+        this.api = location.protocol + "//" + location.host + "/api";
         var addPlayerPath = this.api + "/games/0/players";
         axios
             .post(addPlayerPath)
@@ -212,8 +223,8 @@ export default {
                 console.error(error.response.data.userMessage);
             });
 
-        this.timer = setInterval(this.getApiState, 800); */
-        var id = 0;
+        this.timer = setInterval(this.getApiState, 800);
+        /* var id = 0;
         for (var row = 0; row < this.n; row++) {
             this.mazeCards.push([]);
             for (var col = 0; col < this.n; col++) {
@@ -242,7 +253,7 @@ export default {
             this.playerPieces.set(i, playerPiece);
         }
 
-        this.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
+        this.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1); */
     },
     beforeDestroy() {
         clearInterval(this.timer);
