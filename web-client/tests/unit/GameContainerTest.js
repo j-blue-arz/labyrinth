@@ -2,6 +2,7 @@ import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import GameFactory from "../../src/model/gameFactory";
 
 const extractIdMatrix = function(gameContainer) {
     var vMazeCards = gameContainer
@@ -64,24 +65,39 @@ const determineMazeCardIdsWithPlayers = function(gameContainer) {
     return mazeCardIds;
 };
 
+const factory = function(location) {
+    var locations = [];
+    if (location !== undefined) {
+        locations = [location];
+    }
+    return mount(GameContainer, {
+        propsData: {
+            gameFactory: new GameFactory(locations)
+        }
+    });
+};
+
 describe("GameContainer", () => {
     it("rotates leftover maze card when clicked", () => {
-        var gameContainer = mount(GameContainer);
+        var gameContainer = factory();
         const rotateOperation = jest.spyOn(
-            gameContainer.vm.$data.leftoverMazeCard,
+            gameContainer.vm.$data.game.leftoverMazeCard,
             "rotateClockwise"
         );
         var leftOverVMazeCard = gameContainer.find({ ref: "leftover" });
+        var oldRotation = leftOverVMazeCard.props().mazeCard.rotation;
         leftOverVMazeCard.trigger("click");
+        var newRotation = leftOverVMazeCard.props().mazeCard.rotation;
+        expect(newRotation).toBe((oldRotation + 90) % 360);
         expect(rotateOperation).toHaveBeenCalledTimes(1);
     });
 
     it("shifts leftmost row correctly to the south", () => {
-        var gameContainer = mount(GameContainer);
+        var gameContainer = factory();
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: -1, column: 1 });
+        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 1 });
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[1][1]).toBe(idMatrixOld[0][1]);
@@ -93,33 +109,29 @@ describe("GameContainer", () => {
     });
 
     it("inserts leftover card when shifting", () => {
-        var gameContainer = mount(GameContainer);
+        var gameContainer = factory();
         var oldLeftOverId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: -1, column: 3 });
+        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 3 });
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[0][3]).toBe(oldLeftOverId);
     });
 
     it("updates leftover correctly card when shifting", () => {
-        var gameContainer = mount(GameContainer);
+        var gameContainer = factory();
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: 5, column: -1 });
+        interactiveBoard.vm.$emit("insert-card", { row: 5, column: 0 });
         var newLeftOverId = determineLeftOverId(gameContainer);
 
         expect(newLeftOverId).toBe(idMatrixOld[5][6]);
     });
 
     it("displays a player piece on the correct maze card", () => {
-        var gameContainer = mount(GameContainer, {
-            propsData: {
-                initialPlayerLocations: [{ row: 5, column: 1 }]
-            }
-        });
+        var gameContainer = factory({ row: 5, column: 1 });
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
@@ -127,14 +139,10 @@ describe("GameContainer", () => {
     });
 
     it("moves players with maze cards when shifted", () => {
-        var gameContainer = mount(GameContainer, {
-            propsData: {
-                initialPlayerLocations: [{ row: 4, column: 3 }]
-            }
-        });
+        var gameContainer = factory({ row: 4, column: 3 });
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("insert-card", { row: -1, column: 3 });
+        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 3 });
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
@@ -143,16 +151,12 @@ describe("GameContainer", () => {
     });
 
     it("moves players to opposing side of the board when shifted out", () => {
-        var gameContainer = mount(GameContainer, {
-            propsData: {
-                initialPlayerLocations: [{ row: 6, column: 1 }]
-            }
-        });
+        var gameContainer = factory({ row: 6, column: 1 });
 
         var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: -1, column: 1 });
+        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 1 });
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
@@ -160,11 +164,7 @@ describe("GameContainer", () => {
     });
 
     it("moves players when maze card is clicked", () => {
-        var gameContainer = mount(GameContainer, {
-            propsData: {
-                initialPlayerLocations: [{ row: 6, column: 1 }]
-            }
-        });
+        var gameContainer = factory({ row: 0, column: 1 });
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
         interactiveBoard.vm.$emit("move-piece", { row: 4, column: 4 });

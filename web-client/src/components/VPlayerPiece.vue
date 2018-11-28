@@ -8,20 +8,14 @@
 </template>
 
 <script>
-import { hasPropertyWithType } from "@/util/validation.js";
+import Player from "@/model/player.js";
 
 export default {
     name: "v-player-piece",
     props: {
         playerPiece: {
-            type: Object,
-            required: true,
-            validator: function(obj) {
-                return (
-                    hasPropertyWithType(obj, "id", "number") &&
-                    Number.isInteger(obj.id)
-                );
-            }
+            type: Player,
+            required: true
         },
         xCenterPos: {
             type: Number,
