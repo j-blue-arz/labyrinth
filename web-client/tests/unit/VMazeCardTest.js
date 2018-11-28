@@ -1,6 +1,7 @@
 import { mount } from "@vue/test-utils";
 import VMazeCard from "@/components/VMazeCard.vue";
 import MazeCard from "@/model/mazecard.js";
+import Player from "@/model/player.js";
 
 const wrapperFactory = (
     props = {
@@ -58,9 +59,7 @@ describe("VMazeCard", () => {
 
     it("renders a single player", () => {
         var mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.playerPieces.push({
-            id: 0
-        });
+        mazeCard.addPlayer(Player.withId(0));
         const wrapper = wrapperFactory({
             mazeCard: mazeCard,
             cardSize: 100
@@ -70,12 +69,8 @@ describe("VMazeCard", () => {
 
     it("renders two players without overlap", () => {
         var mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.playerPieces.push({
-            id: 0
-        });
-        mazeCard.playerPieces.push({
-            id: 1
-        });
+        mazeCard.addPlayer(Player.withId(0));
+        mazeCard.addPlayer(Player.withId(1));
         const wrapper = wrapperFactory({
             mazeCard: mazeCard,
             cardSize: 50

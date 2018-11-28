@@ -9,11 +9,11 @@
             :maze-cards="mazeCards"
             :card-size="cardSize" />
         <rect
-            v-for="(insertLocation, itemIndex) in insertLocations"
-            @click="onInsertLocationClick($event, itemIndex)"
-            :key="insertLocation.id"
-            :x="xPos(insertLocation) + boardOffset"
-            :y="yPos(insertLocation) + boardOffset"
+            v-for="(insertPanel, itemIndex) in insertPanels"
+            @click="onInsertPanelClick($event, itemIndex)"
+            :key="insertPanel.id"
+            :x="xPos(insertPanel) + boardOffset"
+            :y="yPos(insertPanel) + boardOffset"
             :height="cardSize"
             :width="cardSize"
             class="interactive-board__insert-location" />
@@ -48,7 +48,7 @@ export default {
     },
     data() {
         return {
-            insertLocations: [
+            insertPanels: [
                 { id: 0, row: -1, column: 1 },
                 { id: 1, row: -1, column: 3 },
                 { id: 2, row: -1, column: 5 },
@@ -79,8 +79,21 @@ export default {
         yPos(location) {
             return this.cardSize * location.row;
         },
-        onInsertLocationClick: function(event, itemIndex) {
-            var insertLocation = this.insertLocations[itemIndex];
+        toInsidePosition(maybeOutside) {
+            if (maybeOutside === -1) {
+                return 0;
+            }
+            if (maybeOutside === this.n) {
+                return this.n - 1;
+            }
+            return maybeOutside;
+        },
+        onInsertPanelClick: function(event, itemIndex) {
+            var insertPanel = this.insertPanels[itemIndex];
+            var insertLocation = {
+                row: this.toInsidePosition(insertPanel.row),
+                column: this.toInsidePosition(insertPanel.column)
+            };
             this.$emit("insert-card", insertLocation);
         },
         onMazeCardClick: function(mazeCard) {

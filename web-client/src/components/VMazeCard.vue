@@ -11,12 +11,12 @@
         <rect ref="westDoor" v-if="hasWest"
             x="1" :y="remainingSpace" :height="pathWidth" :width="remainingSpace" class="maze-card__pathway" />
         <v-player-piece
-            v-for="(playerPiece, index) in playerPieces"
+            v-for="(player, index) in players"
             :xCenterPos="pieceCenters[index].x"
             :yCenterPos="pieceCenters[index].y"
             :maxSize="pieceSize"
-            :key="playerPiece.id"
-            :playerPiece="playerPiece"
+            :key="player.id"
+            :playerPiece="player"
             />
     </svg>
 </template>
@@ -51,18 +51,18 @@ export default {
         return {};
     },
     computed: {
-        playerPieces: function() {
-            return this.mazeCard.playerPieces;
+        players: function() {
+            return this.mazeCard.players;
         },
         pieceSize: function() {
-            if (this.playerPieces.length === 1) {
+            if (this.players.length === 1) {
                 return Math.floor(this.cardSize / sizeToPieceSizeRatio);
             } else {
                 return Math.floor(this.cardSize / sizeToSmallPieceSizeRatio);
             }
         },
         pieceCenters: function() {
-            var numPieces = this.mazeCard.playerPieces.length;
+            var numPieces = this.mazeCard.players.length;
             if (numPieces <= 1) {
                 return [
                     {

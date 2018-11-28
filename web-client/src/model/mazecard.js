@@ -1,10 +1,12 @@
+import Player from "@/model/player.js";
+
 export default class MazeCard {
     constructor(id, row, column, doors, rotation) {
         this.id = id;
         this.location = { row: row, column: column };
         this.doors = doors;
         this._rotation = rotation;
-        this.playerPieces = [];
+        this._players = [];
 
         if (!Number.isInteger(id))
             throw new Error(
@@ -95,6 +97,22 @@ export default class MazeCard {
 
     get rotation() {
         return this._rotation;
+    }
+
+    get players() {
+        return this._players;
+    }
+
+    addPlayer(player) {
+        this._players.push(player);
+        this._players.sort(Player.compareById);
+    }
+
+    removePlayer(player) {
+        var index = this._players.indexOf(player);
+        if (index >= 0) {
+            this._players.splice(index, 1);
+        }
     }
 
     rotateClockwise() {
