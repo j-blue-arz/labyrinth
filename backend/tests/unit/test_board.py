@@ -47,6 +47,20 @@ def test_generate_random_generates_unique_ids_for_each_maze_card():
             assert current_id not in ids
             ids.add(current_id)
 
+def test_generate_random_fixes_corner_of_board():
+    """ Tests generate_random """
+    board = Board()
+    board.generate_random()
+    extent = Board.BOARD_SIZE - 1
+    assert board[BoardLocation(0, 0)].doors == MazeCard.CORNER
+    assert board[BoardLocation(0, 0)].rotation == 90
+    assert board[BoardLocation(0, extent)].doors == MazeCard.CORNER
+    assert board[BoardLocation(0, extent)].rotation == 180
+    assert board[BoardLocation(extent, extent)].doors == MazeCard.CORNER
+    assert board[BoardLocation(extent, extent)].rotation == 270
+    assert board[BoardLocation(extent, 0)].doors == MazeCard.CORNER
+    assert board[BoardLocation(extent, 0)].rotation == 0
+
 def test_shift_inserts_leftover():
     """ Tests shift """
     board = Board()
