@@ -10,6 +10,7 @@
         />
         <v-maze-card
             @click.native="onLeftoverClick"
+            v-if="hasStarted"
             :maze-card="leftoverMazeCard"
             :card-size="cardSize"
             class="game-container__leftover"
@@ -25,6 +26,7 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import Game from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
+import MazeCard from "@/model/mazecard.js";
 import { setInterval, clearInterval } from "timers";
 
 export default {
@@ -56,6 +58,9 @@ export default {
     computed: {
         mazeCardsList: function() {
             return this.game.mazeCardsAsList();
+        },
+        hasStarted: function() {
+            return this.game.leftoverMazeCard instanceof MazeCard;
         },
         leftoverMazeCard: function() {
             return this.game.leftoverMazeCard;

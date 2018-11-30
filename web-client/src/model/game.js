@@ -1,6 +1,7 @@
 import Vue from "vue";
 import MazeCard from "@/model/mazecard.js";
 import Player from "@/model/player.js";
+import ValueError from "@/util/exceptions";
 
 export default class Game {
     constructor() {
@@ -15,24 +16,36 @@ export default class Game {
     }
 
     mazeCardById(id) {
-        for (var row = 0; row < this.n; row++) {
-            for (var col = 0; col < this.n; col++) {
+        for (var row = 0; row < this.mazeCards.length; row++) {
+            for (var col = 0; col < this.mazeCards[row].length; col++) {
                 if (this.mazeCards[row][col].id == id) {
                     return this.mazeCards[row][col];
                 }
             }
         }
+        return null;
     }
 
     getMazeCard(location) {
-        return this.mazeCards[location.row][location.column];
+        if (this._isInside(location)) {
+            return this.mazeCards[location.row][location.column];
+        } else {
+            throw new RangeError();
+        }
     }
 
     setMazeCard(location, mazeCard) {
-        this.mazeCards[location.row][location.column] = mazeCard;
+        if (this._isInside(location)) {
+            this.mazeCards[location.row][location.column] = mazeCard;
+        } else {
+            throw new RangeError();
+        }
     }
 
     shift(location) {
+        if (!this._isInside(location)) {
+            throw new RangeError();
+        }
         var shiftLocations = [];
         if (location.row === 0) {
             shiftLocations = this._columnLocations(location.column);
@@ -45,11 +58,19 @@ export default class Game {
         } else if (location.column === 0) {
             shiftLocations = this._rowLocations(location.row);
         }
-        this._shiftAlongLocations(shiftLocations);
+        if (shiftLocations.length === this.n) {
+            this._shiftAlongLocations(shiftLocations);
+        } else {
+            throw new ValueError();
+        }
     }
 
     getPlayer(playerId) {
-        return this._players.get(playerId);
+        let player = this._players.get(playerId);
+        if (!player) {
+            throw new ValueError();
+        }
+        return player;
     }
 
     addPlayer(player) {
@@ -106,11 +127,9 @@ export default class Game {
     createFromApi(apiState) {
         var apiMazeCards = apiState.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
-
         this.leftoverMazeCard = MazeCard.createFromApi(apiMazeCards[0]);
 
         this._mazeCardsFromSortedApi(apiMazeCards);
-
         apiState.players.forEach(apiPlayer => {
             var playerCard = this.mazeCardById(apiPlayer.mazeCardId);
             var player = new Player(apiPlayer.id, playerCard);
@@ -152,5 +171,14 @@ export default class Game {
                 index++;
             }
         }
+    }
+
+    _isInside(location) {
+        return (
+            location.row >= 0 &&
+            location.row < this.n &&
+            location.column >= 0 &&
+            location.column < this.n
+        );
     }
 }
