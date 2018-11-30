@@ -99,7 +99,7 @@ export default class Game {
         while (sourceMazeCard.players.length) {
             var player = sourceMazeCard.players.pop();
             player.mazeCard = targetMazeCard;
-            targetMazeCard.players.push(player);
+            targetMazeCard.addPlayer(player);
         }
     }
 
