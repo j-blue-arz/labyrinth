@@ -1,10 +1,12 @@
-""" This package     is the backend of the labyrinth game.
+""" This package is the backend of the labyrinth game.
 It serves the Vue application
 and defines a set of API methods to play the game """
 import os
 
 from flask import Flask, render_template
 
+version_info = (0, 0, 3)
+__version__ = '.'.join(map(str, version_info))
 
 def create_app(test_config=None):
     """ basic Flask app setup. Creates the instance folder if not existing """
