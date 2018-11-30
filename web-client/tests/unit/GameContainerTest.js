@@ -2,7 +2,8 @@ import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
-import GameFactory from "../../src/model/gameFactory";
+import GameFactory from "@/model/gameFactory";
+import { loc } from "./testutils.js";
 
 const extractIdMatrix = function(gameContainer) {
     var vMazeCards = gameContainer
@@ -97,7 +98,7 @@ describe("GameContainer", () => {
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 1 });
+        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[1][1]).toBe(idMatrixOld[0][1]);
@@ -113,7 +114,7 @@ describe("GameContainer", () => {
         var oldLeftOverId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 3 });
+        interactiveBoard.vm.$emit("insert-card", loc(0, 3));
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[0][3]).toBe(oldLeftOverId);
@@ -124,14 +125,14 @@ describe("GameContainer", () => {
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: 5, column: 0 });
+        interactiveBoard.vm.$emit("insert-card", loc(5, 0));
         var newLeftOverId = determineLeftOverId(gameContainer);
 
         expect(newLeftOverId).toBe(idMatrixOld[5][6]);
     });
 
     it("displays a player piece on the correct maze card", () => {
-        var gameContainer = factory({ row: 5, column: 1 });
+        var gameContainer = factory(loc(5, 1));
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
@@ -139,10 +140,10 @@ describe("GameContainer", () => {
     });
 
     it("moves players with maze cards when shifted", () => {
-        var gameContainer = factory({ row: 4, column: 3 });
+        var gameContainer = factory(loc(4, 3));
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 3 });
+        interactiveBoard.vm.$emit("insert-card", loc(0, 3));
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
@@ -151,12 +152,12 @@ describe("GameContainer", () => {
     });
 
     it("moves players to opposing side of the board when shifted out", () => {
-        var gameContainer = factory({ row: 6, column: 1 });
+        var gameContainer = factory(loc(6, 1));
 
         var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", { row: 0, column: 1 });
+        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
@@ -164,10 +165,10 @@ describe("GameContainer", () => {
     });
 
     it("moves players when maze card is clicked", () => {
-        var gameContainer = factory({ row: 0, column: 1 });
+        var gameContainer = factory(loc(0, 1));
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("move-piece", { row: 4, column: 4 });
+        interactiveBoard.vm.$emit("move-piece", loc(4, 4));
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
