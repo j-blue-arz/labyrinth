@@ -4,42 +4,40 @@ export default class GameApi {
     constructor(serverUrl) {
         this.apiPath = serverUrl + "/api";
         this.playerId = "";
+        this.fetchSource = axios.CancelToken.source();
     }
 
-    doMove(toLocation, errorCallback) {
+    doMove(toLocation) {
         var postMovePath = this.apiPath + "/games/0/move?p_id=" + this.playerId;
-        axios
-            .post(postMovePath, {
-                location: toLocation
-            })
-            .catch(error => errorCallback(error));
+        return axios.post(postMovePath, {
+            location: toLocation
+        });
     }
 
-    doShift(shiftLocation, leftoverRotation, errorCallback) {
+    doShift(shiftLocation, leftoverRotation) {
         var postShiftPath =
             this.apiPath + "/games/0/shift?p_id=" + this.playerId;
-        axios
-            .post(postShiftPath, {
-                location: shiftLocation,
-                leftoverRotation: leftoverRotation
-            })
-            .catch(error => errorCallback(error));
+        return axios.post(postShiftPath, {
+            location: shiftLocation,
+            leftoverRotation: leftoverRotation
+        });
     }
 
-    doAddPlayer(callback, errorCallback) {
+    doAddPlayer() {
         var addPlayerPath = this.apiPath + "/games/0/players";
-        axios
-            .post(addPlayerPath)
-            .then(response => callback(response.data))
-            .catch(error => errorCallback(error));
+        return axios.post(addPlayerPath);
     }
 
-    fetchState(callback, errorCallback) {
+    fetchState() {
         var getStatePath =
             this.apiPath + "/games/0/state?p_id=" + this.playerId;
-        axios
-            .get(getStatePath)
-            .then(response => callback(response.data))
-            .catch(error => errorCallback(error));
+        return axios.get(getStatePath, {
+            cancelToken: this.fetchSource.token
+        });
+    }
+
+    cancelAllFetches() {
+        this.fetchSource.cancel();
+        this.fetchSource = axios.CancelToken.source();
     }
 }

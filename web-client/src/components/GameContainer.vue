@@ -25,7 +25,7 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import Game from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
-import { setInterval } from "timers";
+import { setInterval, clearInterval } from "timers";
 
 export default {
     name: "game-container",
@@ -50,7 +50,7 @@ export default {
             game: new Game(),
             cardSize: 100,
             playerId: 0,
-            timer: ""
+            timer: 0
         };
     },
     computed: {
@@ -66,41 +66,81 @@ export default {
     },
     methods: {
         onInsertCard: function(location) {
-            this.api.doShift(
-                location,
-                this.game.leftoverMazeCard.rotation,
-                this.logError
-            );
+            this.stopPolling();
+            var rotation = this.game.leftoverMazeCard.rotation;
+            this.api
+                .doShift(location, rotation)
+                .catch(this.logError)
+                .then(this.startPolling);
             this.game.shift(location);
         },
         onLeftoverClick: function() {
             this.game.leftoverMazeCard.rotateClockwise();
         },
         onMovePlayerPiece: function(targetLocation) {
-            this.api.doMove(targetLocation, this.logError);
+            this.stopPolling();
+            this.api
+                .doMove(targetLocation)
+                .catch(this.logError)
+                .then(this.startPolling);
             this.game.move(this.playerId, targetLocation);
         },
         logError: function(errorResponseData) {
             console.error(errorResponseData);
         },
+        stopPolling() {
+            if (this.timer !== 0) {
+                clearInterval(this.timer);
+                this.timer = 0;
+                this.api.cancelAllFetches();
+            }
+        },
+        startPolling() {
+            if (this.timer === 0) {
+                this.fetchApiState();
+                this.timer = setInterval(this.fetchApiState, 800);
+            }
+        },
         fetchApiState: function() {
-            this.api.fetchState(this.createGameFromApi, this.logError);
+            this.api
+                .fetchState()
+                .then(this.createGameFromApi)
+                .catch(this.logError);
         },
-        createGameFromApi: function(apiState) {
-            this.game.createFromApi(apiState);
+        createGameFromApi: function(apiResponse) {
+            this.game.createFromApi(apiResponse.data);
         },
-        addPlayer: function(responseData) {
-            console.log(responseData);
-            this.playerId = parseInt(responseData);
+        addPlayer: function(apiResponse) {
+            this.playerId = parseInt(apiResponse.data);
             this.api.playerId = this.playerId;
+            sessionStorage.playerId = this.playerId;
         }
     },
     created: function() {
         if (this.gameFactory !== null) {
             this.game = this.gameFactory.createGame();
         } else {
-            this.api.doAddPlayer(this.addPlayer, this.logError);
-            this.timer = setInterval(this.fetchApiState, 800);
+            if (sessionStorage.playerId) {
+                this.playerId = parseInt(sessionStorage.playerId);
+                this.api.playerId = this.playerId;
+                this.api
+                    .fetchState()
+                    .catch(error => {
+                        if (error.response.data.key === "PLAYER_NOT_IN_GAME") {
+                            this.api
+                                .doAddPlayer()
+                                .then(this.addPlayer)
+                                .catch(this.logError);
+                        }
+                    })
+                    .then(this.startPolling);
+            } else {
+                this.api
+                    .doAddPlayer()
+                    .then(this.addPlayer)
+                    .catch(this.logError)
+                    .then(this.startPolling);
+            }
         }
     },
     beforeDestroy() {

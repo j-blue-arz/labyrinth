@@ -104,7 +104,6 @@ export default class Game {
     }
 
     createFromApi(apiState) {
-        console.log(apiState);
         var apiMazeCards = apiState.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
 
