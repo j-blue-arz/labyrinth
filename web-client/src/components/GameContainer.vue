@@ -75,7 +75,7 @@ export default {
             var rotation = this.game.leftoverMazeCard.rotation;
             this.api
                 .doShift(location, rotation)
-                .catch(this.logError)
+                .catch(this.handleError)
                 .then(this.startPolling);
             this.game.shift(location);
         },
@@ -86,12 +86,14 @@ export default {
             this.stopPolling();
             this.api
                 .doMove(targetLocation)
-                .catch(this.logError)
+                .catch(this.handleError)
                 .then(this.startPolling);
             this.game.move(this.playerId, targetLocation);
         },
-        logError: function(errorResponseData) {
-            console.error(errorResponseData);
+        handleError: function(error) {
+            if (!this.api.errorWasThrownByCancel(error)) {
+                console.error(error);
+            }
         },
         stopPolling() {
             if (this.timer !== 0) {
@@ -110,7 +112,7 @@ export default {
             this.api
                 .fetchState()
                 .then(this.createGameFromApi)
-                .catch(this.logError);
+                .catch(this.handleError);
         },
         createGameFromApi: function(apiResponse) {
             this.game.createFromApi(apiResponse.data);
@@ -135,7 +137,7 @@ export default {
                             this.api
                                 .doAddPlayer()
                                 .then(this.addPlayer)
-                                .catch(this.logError);
+                                .catch(this.handleError);
                         }
                     })
                     .then(this.startPolling);
@@ -143,7 +145,7 @@ export default {
                 this.api
                     .doAddPlayer()
                     .then(this.addPlayer)
-                    .catch(this.logError)
+                    .catch(this.handleError)
                     .then(this.startPolling);
             }
         }

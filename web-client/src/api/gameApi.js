@@ -36,8 +36,14 @@ export default class GameApi {
         });
     }
 
+    CANCEL_MESSAGE = "fetchState cancelled by user.";
+
     cancelAllFetches() {
-        this.fetchSource.cancel();
+        this.fetchSource.cancel(this.CANCEL_MESSAGE);
         this.fetchSource = axios.CancelToken.source();
+    }
+
+    errorWasThrownByCancel(error) {
+        return error.toString().includes(this.CANCEL_MESSAGE)
     }
 }
