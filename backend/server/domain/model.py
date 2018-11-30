@@ -109,10 +109,15 @@ class MazeCard:
         cls.next_id = 0
 
     @classmethod
-    def generate_random(cls):
-        """ Generates a new instance randomly, with autoincreaseing ID """
-        doors = choice([cls.STRAIGHT, cls.CORNER, cls.T_JUNCT])
-        rotation = choice([0, 90, 180, 270])
+    def generate_random(cls, doors=None, rotation=None):
+        """Generates a new instance, with autoincreasing ID.
+
+        If parameters are None, they are set randomly.
+        """
+        if doors is None:
+            doors = choice([cls.STRAIGHT, cls.CORNER, cls.T_JUNCT])
+        if rotation is None:
+            rotation = choice([0, 90, 180, 270])
         maze_card = MazeCard(cls.next_id, doors, rotation)
         cls.next_id = cls.next_id + 1
         return maze_card
@@ -135,11 +140,23 @@ class Board:
             self._insert_locations.add(BoardLocation(position, Board.BOARD_SIZE - 1))
 
     def generate_random(self):
-        """ Generates a random board state """
+        """ Generates a random board state.
+        Corners of the board are fixed as corners,
+        Other unshiftable border pieces are t-junctions.
+        """
         MazeCard.reset_ids()
+        fixed_cards = {BoardLocation(0, 0): (MazeCard.CORNER, 90),
+                       BoardLocation(0, self.BOARD_SIZE-1): (MazeCard.CORNER, 180),
+                       BoardLocation(self.BOARD_SIZE-1, self.BOARD_SIZE-1): (MazeCard.CORNER, 270),
+                       BoardLocation(self.BOARD_SIZE-1, 0): (MazeCard.CORNER, 0)}
+        def card_at(location):
+            if location in fixed_cards:
+                return MazeCard.generate_random(fixed_cards[location][0], fixed_cards[location][1])
+            return MazeCard.generate_random()
+
         self._maze_cards = [
-            [MazeCard.generate_random() for _ in range(self.BOARD_SIZE)]
-            for _ in range(self.BOARD_SIZE)]
+            [card_at(BoardLocation(row, column)) for column in range(self.BOARD_SIZE)]
+            for row in range(self.BOARD_SIZE)]
 
     def random_maze_card(self):
         """ Returns a random MazeCard of the current board """
