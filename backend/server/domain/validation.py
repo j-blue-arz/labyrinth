@@ -17,18 +17,17 @@ class MoveValidator():
     def __init__(self, board):
         self._board = board
 
-    def validate_move(self, player, target_location):
+    def validate_move(self, source_location, target_location):
         """ Validates if a move is valid.
 
         Performs a BFS in a graph represented by the current board to
-        verify if the player's current location and the target location
+        verify if the source location and the target location
         are connected.
 
-        :param player: the Player requesting the move
+        :param source_location: the current BoardLocation
         :param target_location: the requested BoardLocation
         :return: True, iff there is a path from the player to the location
         """
-        source_location = self._board.maze_card_location(player.maze_card)
         reachable_locations = self._bfs(source_location)
         return target_location in reachable_locations
 
@@ -38,14 +37,14 @@ class MoveValidator():
         :param source: the BoardLocation to start from
         :return: a set of reachable BoardLocations
         """
-        reached = set(source)
-        next_elements = deque(source)
+        reached = set([source])
+        next_elements = deque([source])
         while next_elements:
             current = next_elements.popleft()
-        for neighbor in self._neighbors(current):
-            if neighbor not in reached:
-                reached.add(neighbor)
-                next_elements.append(neighbor)
+            for neighbor in self._neighbors(current):
+                if neighbor not in reached:
+                    reached.add(neighbor)
+                    next_elements.append(neighbor)
         return reached
 
     def _neighbors(self, location):
