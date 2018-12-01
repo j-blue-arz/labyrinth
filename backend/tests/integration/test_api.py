@@ -51,7 +51,7 @@ def test_post_players_five_times(client):
 def test_get_state(client):
     """ Tests GET for /api/games/0/state
 
-    for existing game. Expects 50 mazeCards and one player
+    for existing game. Expects 50 mazeCards and two players
     with correct id
     """
     player_id1 = _assert_ok_single_int(client.post("/api/games/0/players"))
@@ -66,6 +66,33 @@ def test_get_state(client):
     assert len(state["players"]) == 2
     player_ids = {state["players"][0]["id"], state["players"][1]["id"]}
     assert player_ids == {player_id1, player_id2}
+
+
+def test_get_state_has_correct_initial_state(client):
+    """ Tests GET for /api/games/0/state
+
+    for existing game. Expects players locations set to top left corner for first player.
+    Expects top left corner to be a corner. Expects a single leftover card
+    """
+    player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
+    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    state = response.get_json()
+    player_card_id = state["players"][0]["mazeCardId"]
+    player_maze_card = None
+    for maze_card in state["mazeCards"]:
+        if maze_card["id"] == player_card_id:
+            player_maze_card = maze_card
+    assert player_maze_card
+    assert player_maze_card["location"]["row"] == 0
+    assert player_maze_card["location"]["column"] == 0
+    assert player_maze_card["doors"] == "NE"
+    assert player_maze_card["rotation"] == 90
+    leftover_cards = [maze_card for maze_card in state["mazeCards"] if maze_card["location"] is None]
+    assert len(leftover_cards) == 1
+    leftover_card = leftover_cards[0]
+    assert not "W" in leftover_card["doors"]
+    assert "N" in leftover_card["doors"]
+
 
 
 def test_get_state_for_nonexisting_game(client):
@@ -117,19 +144,16 @@ def test_post_move(client):
     """ Tests POST for /api/games/0/move
 
     with correct request body.
+    The single player is placed on the top left corner. After pushing the leftover
+    such that a move to the card to the right is possible, a move action is performed.
+    It is exploited that every card has a "N" door.
     Expects a 200 OK, with empty body.
     State respects new position of player.
     """
-    client.post("/api/games/0/players")
     response = client.post("/api/games/0/players")
     player_id = _assert_ok_single_int(response)
-    data = json.dumps({
-        "location": {
-            "row": 4,
-            "column": 3
-        }
-    })
-    response = client.post("/api/games/0/move?p_id={}".format(player_id), data=data)
+    _post_shift(client, player_id, 0, 1, 270)
+    response = _post_move(client, player_id, 0, 1)
     assert response.status_code == 200
     assert response.content_length == 0
     response = client.get("/api/games/0/state?p_id={}".format(player_id))
@@ -139,9 +163,26 @@ def test_post_move(client):
                         None)
     location = next((card["location"] for card in state["mazeCards"] if card["id"] == maze_card_id),
                     None)
-    assert location["row"] == 4
-    assert location["column"] == 3
+    assert location["row"] == 0
+    assert location["column"] == 1
 
+def test_post_move_unreachable_move(client):
+    """ Tests POST for /api/games/0/move
+
+    with an unreachable location. The state is constructed by
+    shifting the pieces next to the top left corner so that
+    all outgoing paths are blocked.
+    It is exploited that no card has a "W" door.
+    Expects a 400 Bad Request, with exception body.
+    State is unchanged.
+    """
+    response = client.post("/api/games/0/players")
+    player_id = _assert_ok_single_int(response)
+    _post_shift(client, player_id, 0, 1, 0)
+    _post_shift(client, player_id, 1, 0, 90)
+    response = _post_move(client, player_id, 0, 1)
+    _assert_error_response(response, user_message="The sent action is invalid.",
+                           key="INVALID_ACTION", status=400)
 
 def test_post_move_invalid_move(client):
     """ Tests POST for /api/games/0/move
@@ -191,14 +232,7 @@ def test_post_shift(client):
                              None)
     old_rotation = old_leftover_card["rotation"]
     new_rotation = (old_rotation + 180) % 360
-    data = json.dumps({
-        "location": {
-            "row": 0,
-            "column": 1
-        },
-        "leftoverRotation": new_rotation
-    })
-    response = client.post("/api/games/0/shift?p_id={}".format(player_id), data=data)
+    response = _post_shift(client, player_id, 0, 1, new_rotation)
     assert response.status_code == 200
     assert response.content_length == 0
     new_state = client.get("/api/games/0/state?p_id={}".format(player_id)).get_json()
@@ -286,3 +320,25 @@ def _assert_error_response(response, user_message, key, status):
     message = response.get_json()
     assert message["userMessage"] == user_message
     assert message["key"] == key
+
+
+def _post_shift(client, player_id, row, column, rotation):
+    """ performs a shift API operation with the given parameters """
+    data = json.dumps({
+        "location": {
+            "row": row,
+            "column": column
+        },
+        "leftoverRotation": rotation
+    })
+    return client.post("/api/games/0/shift?p_id={}".format(player_id), data=data)
+
+
+def _post_move(client, player_id, row, column):
+    data = json.dumps({
+        "location": {
+            "row": row,
+            "column": column
+        }
+    })
+    return client.post("/api/games/0/move?p_id={}".format(player_id), data=data)

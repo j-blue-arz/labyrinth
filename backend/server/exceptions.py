@@ -3,7 +3,7 @@ It defines a few exception factories.
 It also maps domain exceptions to these pre-defined factories. """
 
 from .domain.exceptions import InvalidStateException, PlayerNotFoundException, \
-    InvalidLocationException, InvalidShiftLocationException, \
+    InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
     InvalidRotationException
 from .mapper import exception_to_dto
 
@@ -37,6 +37,7 @@ def domain_to_api_exception(domain_exception):
         return PLAYER_NOT_IN_GAME()
     if isinstance(domain_exception, (InvalidLocationException,
                                      InvalidShiftLocationException,
-                                     InvalidRotationException)):
+                                     InvalidRotationException,
+                                     MoveUnreachableException)):
         return INVALID_ACTION()
     return UNKNOWN_ERROR()

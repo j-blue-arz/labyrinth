@@ -5,7 +5,8 @@ __all__ = ["InvalidStateException",
            "PlayerNotFoundException",
            "InvalidLocationException",
            "InvalidShiftLocationException",
-           "InvalidRotationException"]
+           "InvalidRotationException",
+           "MoveUnreachableException"]
 
 class LabyrinthDomainException(Exception):
     """ A base class for all domain exceptions of the labyrinth domain model """
