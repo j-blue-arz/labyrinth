@@ -22,8 +22,8 @@ def _create_test_game():
                 game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 270)
             else:
                 game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 0)
-    game.move(player_ids[0], BoardLocation(3, 3))
-    game.move(player_ids[1], BoardLocation(5, 5))
+    game.find_player(player_ids[0]).maze_card = game.board[BoardLocation(3, 3)]
+    game.find_player(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
     return game, player_ids
 
 

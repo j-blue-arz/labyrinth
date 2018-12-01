@@ -1,8 +1,9 @@
 """ Tests for MoveValidator. A Board instance is created from a string representation of a labyrinth.
 Several validation tests are performed on this instance """
 
-from domain.model import Board, MazeCard, BoardLocation
+from domain.model import BoardLocation
 from domain.validation import MoveValidator
+from board_factory import create_board
 
 
 def test_validate_move_for_same_location():
@@ -79,48 +80,6 @@ def test_validate_move_for_swapped_locations():
 
     assert validator.validate_move(BoardLocation(6, 3), BoardLocation(5, 0))
     assert validator.validate_move(BoardLocation(2, 6), BoardLocation(0, 6))
-
-
-def create_board(board_string):
-    """ Reads a multi-line string representing a labyrinth configuration.
-    Each maze card is a 3*3 substring of this multiline string. Walls are represented by '#',
-    paths with '.'. After each field, there is one delimiter symbol, both horizontally and vertically.
-    First line starts at index 1."""
-    lines = board_string.splitlines()[1:]
-
-    def field(row, col):
-        row_lines = lines[row*4:row*4 + 3]
-        field_lines = [row_line[col*4:col*4+3] for row_line in row_lines]
-        return field_lines
-
-    def create_maze_card(field):
-        line = "".join(field)
-        if line == "###...###":
-            return MazeCard.generate_random(doors=MazeCard.STRAIGHT, rotation=90)
-        if line == "#.##.##.#":
-            return MazeCard.generate_random(doors=MazeCard.STRAIGHT, rotation=180)
-        if line == "#.##..###":
-            return MazeCard.generate_random(doors=MazeCard.CORNER, rotation=0)
-        if line == "####..#.#":
-            return MazeCard.generate_random(doors=MazeCard.CORNER, rotation=90)
-        if line == "###..##.#":
-            return MazeCard.generate_random(doors=MazeCard.CORNER, rotation=180)
-        if line == "#.#..####":
-            return MazeCard.generate_random(doors=MazeCard.CORNER, rotation=270)
-        if line == "#.##..#.#":
-            return MazeCard.generate_random(doors=MazeCard.T_JUNCT, rotation=0)
-        if line == "###...#.#":
-            return MazeCard.generate_random(doors=MazeCard.T_JUNCT, rotation=90)
-        if line == "#.#..##.#":
-            return MazeCard.generate_random(doors=MazeCard.T_JUNCT, rotation=180)
-        if line == "#.#...###":
-            return MazeCard.generate_random(doors=MazeCard.T_JUNCT, rotation=270)
-        return None
-
-    board = Board()
-    for location in board.board_locations():
-        board[location] = create_maze_card(field(location.row, location.column))
-    return board
 
 
 BOARD_STRING = """

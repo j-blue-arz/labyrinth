@@ -11,11 +11,12 @@ A Player represents a player, with a unique ID
 and a reference to a maze card the piece is currently positioned on.
 BoardLocation is a wrapper for a row and a column.
 """
+from itertools import cycle, islice
 from random import choice, randint
 from .exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, \
-    InvalidRotationException \
-
+    MoveUnreachableException, InvalidRotationException
+from .validation import MoveValidator
 
 
 class BoardLocation:
@@ -350,11 +351,18 @@ class Game:
         return None
 
     def init_game(self):
-        """ Randomly initializes the game state, with the currently connected players """
+        """ Randomly initializes the game state, with the currently connected players.
+        Players starting locations are the corners of the board, clockwise starting from (0, 0) """
         self._board.generate_random()
         self._leftover_card = MazeCard.generate_random()
-        for player in self._players:
-            player.maze_card = self._board.random_maze_card()
+        start_locations = [
+            BoardLocation(0, 0),
+            BoardLocation(0, self._board.BOARD_SIZE - 1),
+            BoardLocation(self._board.BOARD_SIZE - 1, self._board.BOARD_SIZE - 1),
+            BoardLocation(self._board.BOARD_SIZE - 1, 0)]
+        circular_locations = list(islice(cycle(start_locations), self.MAX_PLAYERS))
+        for player, location in zip(self._players, circular_locations):
+            player.maze_card = self._board[location]
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
@@ -381,9 +389,14 @@ class Game:
         :param target_location: the board location to move to
         :raises PlayerNotFoundException: for invalid player id
         :raises InvalidLocationException: for invalid target location
+        :raises MoveUnreachableException: if there is no valid path to the target location
         :raises InvalidStateException: for invalid state
         """
         player = self.find_player(player_id)
+        player_location = self._board.maze_card_location(player.maze_card)
+        if not MoveValidator(self._board).validate_move(player_location, target_location):
+            raise MoveUnreachableException("Locations {} and {} are not connected".format(
+                player_location, target_location))
         target = self._board[target_location]
         player.maze_card = target
 
