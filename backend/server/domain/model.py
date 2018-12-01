@@ -75,6 +75,7 @@ class MazeCard:
     CORNER = "NE"
     T_JUNCT = "NES"
     next_id = 0
+    _DIRECTION_TO_DOOR = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
 
     def __init__(self, identifier=0, doors=STRAIGHT, rotation=0):
         self._doors = doors
@@ -102,6 +103,28 @@ class MazeCard:
     def doors(self):
         """ Getter of read-only doors """
         return self._doors
+
+    def has_out_path(self, direction):
+        """ Returns whether there is an outgoing path
+        in a given direction, taking the rotation into account.
+
+        :param direction: a tuple describing the direction of the path, e.g. (-1, 0) for north
+        :return: true iff there is a path in the given direction
+        """
+        door = self._DIRECTION_TO_DOOR[direction]
+        door_index = "NESW".find(door)
+        turns = (self._rotation // 90)
+        adapted_index = (door_index - turns + 4) % 4
+        adapted_door = "NESW"[adapted_index]
+        return adapted_door in self._doors
+
+    def out_paths(self):
+        """ Returns an iterator over all directions
+        with outgoing paths, taking rotation into account.
+        """
+        for direction in self._DIRECTION_TO_DOOR:
+            if self.has_out_path(direction):
+                yield direction
 
     @classmethod
     def reset_ids(cls):
@@ -149,6 +172,7 @@ class Board:
                        BoardLocation(0, self.BOARD_SIZE-1): (MazeCard.CORNER, 180),
                        BoardLocation(self.BOARD_SIZE-1, self.BOARD_SIZE-1): (MazeCard.CORNER, 270),
                        BoardLocation(self.BOARD_SIZE-1, 0): (MazeCard.CORNER, 0)}
+
         def card_at(location):
             if location in fixed_cards:
                 return MazeCard.generate_random(fixed_cards[location][0], fixed_cards[location][1])
@@ -173,7 +197,7 @@ class Board:
         return self._maze_cards[location.row][location.column]
 
     def __setitem__(self, location, maze_card):
-        """ sets the maze card at a given location
+        """ Sets the maze card at a given location
 
         :param location: a BoardLocation instance
         :raises InvalidLocationException: if location is outside of the board
@@ -181,6 +205,14 @@ class Board:
         """
         self._validate_location(location)
         self._maze_cards[location.row][location.column] = maze_card
+
+    def maze_card_location(self, maze_card):
+        """ Returns the BoardLocation of the given MazeCard,
+        or None if the card is not on the board """
+        for location in self.board_locations():
+            if self[location] == maze_card:
+                return location
+        return None
 
     def shift(self, insert_location, inserted_maze_card):
         """ Performs a shifting action on the board
@@ -240,12 +272,12 @@ class Board:
         or None, if the location is outside of the board's extent
         """
         new_location = location.add(*direction)
-        if not cls._is_inside(new_location):
+        if not cls.is_inside(new_location):
             new_location = None
         return new_location
 
     @classmethod
-    def _is_inside(cls, location):
+    def is_inside(cls, location):
         """ Determines if the given location is inside the board """
         return location.row >= 0 and \
             location.column >= 0 and \
@@ -254,14 +286,14 @@ class Board:
 
     @classmethod
     def board_locations(cls):
-        """ Returns a list of all BoardLocations, convenient for iterating over the board """
-        return [BoardLocation(row, column)
-                for row in range(cls.BOARD_SIZE)
-                for column in range(cls.BOARD_SIZE)]
+        """ Returns an iterator of all BoardLocations """
+        for row in range(cls.BOARD_SIZE):
+            for column in range(cls.BOARD_SIZE):
+                yield BoardLocation(row, column)
 
     @classmethod
     def _validate_location(cls, location):
-        if not cls._is_inside(location):
+        if not cls.is_inside(location):
             raise InvalidLocationException("Location {} is outside of the board.".format(str(location)))
 
 

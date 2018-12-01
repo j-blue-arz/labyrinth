@@ -104,19 +104,19 @@ def test_shift_does_not_alter_rest_of_board():
 
 def test_board_locations_returns_list_of_correct_size():
     """ Test board_locations """
-    board_locations = Board.board_locations()
+    board_locations = [location for location in Board.board_locations()]
     assert len(board_locations) == Board.BOARD_SIZE * Board.BOARD_SIZE
 
 def test_board_locations_returns_list_of_all_board_locations():
     """ Test board_locations """
-    board_locations = Board.board_locations()
+    board_locations = [location for location in Board.board_locations()]
     for row in range(Board.BOARD_SIZE):
         for column in range(Board.BOARD_SIZE):
             assert BoardLocation(row, column) in board_locations
 
 def test_board_locations_returns_list_in_ascending_order():
     """ Test board_locations """
-    board_locations = Board.board_locations()
+    board_locations = [location for location in Board.board_locations()]
     length = len(board_locations)
     assert board_locations[0] == BoardLocation(0, 0)
     for first, second in zip(range(length), range(1, length)):
@@ -125,3 +125,32 @@ def test_board_locations_returns_list_in_ascending_order():
         assert (first_location.row < second_location.row) or \
                 ((first_location.row == second_location.row) and \
                 (first_location.column < second_location.column))
+
+def test_maze_card_location_returns_correct_location_for_all_cards():
+    """ Test maze_card_location """
+    board = Board()
+    board.generate_random()
+    for location in Board.board_locations():
+        assert board.maze_card_location(board[location]) == location
+
+def test_is_inside_returns_true_for_inside_location():
+    """ Test is_inside """
+    assert Board.is_inside(BoardLocation(3, 3))
+    assert Board.is_inside(BoardLocation(1, 5))
+
+def test_is_inside_returns_true_for_border_locations():
+    """ Test is_inside """
+    assert Board.is_inside(BoardLocation(Board.BOARD_SIZE-1, 3))
+    assert Board.is_inside(BoardLocation(4, Board.BOARD_SIZE-1))
+
+def test_is_inside_returns_true_for_corner_location():
+    """ Test is_inside """
+    assert Board.is_inside(BoardLocation(Board.BOARD_SIZE-1, Board.BOARD_SIZE-1))
+    assert Board.is_inside(BoardLocation(0, Board.BOARD_SIZE-1))
+
+def test_is_inside_returns_false_for_outside_locations():
+    """ Test is_inside """
+    assert not Board.is_inside(BoardLocation(-1, 4))
+    assert not Board.is_inside(BoardLocation(Board.BOARD_SIZE, 2))
+    assert not Board.is_inside(BoardLocation(0, 14))
+    assert not Board.is_inside(BoardLocation(14, -14))
