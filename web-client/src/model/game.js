@@ -127,7 +127,9 @@ export default class Game {
     createFromApi(apiState) {
         var apiMazeCards = apiState.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
-        this.leftoverMazeCard = MazeCard.createFromApi(apiMazeCards[0]);
+        if (this.leftoverMazeCard.id != apiMazeCards[0].id) {
+            this.leftoverMazeCard = MazeCard.createFromApi(apiMazeCards[0]);
+        }
 
         this._mazeCardsFromSortedApi(apiMazeCards);
         apiState.players.forEach(apiPlayer => {
