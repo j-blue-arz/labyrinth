@@ -86,9 +86,9 @@ export default {
             this.stopPolling();
             this.api
                 .doMove(targetLocation)
+                .then(() => this.game.move(this.playerId, targetLocation))
                 .catch(this.handleError)
                 .then(this.startPolling);
-            this.game.move(this.playerId, targetLocation);
         },
         handleError: function(error) {
             if (!this.api.errorWasThrownByCancel(error)) {
