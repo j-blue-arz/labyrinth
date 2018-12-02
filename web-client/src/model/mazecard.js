@@ -7,6 +7,7 @@ export default class MazeCard {
         this.doors = doors;
         this._rotation = rotation;
         this._players = [];
+        this.hasObject = false;
 
         if (!Number.isInteger(id))
             throw new Error(
