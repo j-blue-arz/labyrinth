@@ -18,12 +18,16 @@
             :key="player.id"
             :playerPiece="player"
             />
+        <v-objective
+            v-if="mazeCard.hasObject"
+            />
     </svg>
 </template>
 
 <script>
 import MazeCard from "@/model/mazecard.js";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import VObjective from "@/components/VObjective.vue";
 
 const sizeToPathWidthRatio = 2.7;
 const sizeToEdgeRadiusRatio = 7;
@@ -35,7 +39,8 @@ export default {
     name: "v-maze-card",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VPlayerPiece
+        VPlayerPiece,
+        VObjective
     },
     props: {
         mazeCard: {
