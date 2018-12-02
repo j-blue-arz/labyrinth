@@ -138,10 +138,8 @@ export default class Game {
             playerCard.addPlayer(player);
             this.addPlayer(player);
         });
-        if (apiState.objective) {
-            var objectiveCard = this.mazeCardById(
-                apiState.objective.mazeCardId
-            );
+        if (apiState.objectiveMazeCardId) {
+            var objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
             objectiveCard.hasObject = true;
         }
     }

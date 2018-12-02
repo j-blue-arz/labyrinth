@@ -1,8 +1,7 @@
 """ Service Layer """
-import json
 from . import exceptions
 from . import database
-from .mapper import game_to_dto, dto_to_shift_action, dto_to_move_action
+from .mapper import player_state_to_dto, dto_to_shift_action, dto_to_move_action
 from .domain.model import Game
 from .domain.exceptions import LabyrinthDomainException
 
@@ -29,7 +28,7 @@ def get_game_state(game_id, player_id):
     """ Returns the game state, as seen for the querying player """
     game = _load_game_or_throw(game_id)
     _try(lambda: game.find_player(player_id))
-    return game_to_dto(game, player_id=player_id)
+    return player_state_to_dto(game, player_id)
 
 
 def perform_shift(game_id, player_id, shift_dto):
