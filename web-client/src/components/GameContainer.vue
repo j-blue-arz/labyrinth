@@ -73,10 +73,12 @@ export default {
         onInsertCard: function(location) {
             this.stopPolling();
             var rotation = this.game.leftoverMazeCard.rotation;
-            this.api
-                .doShift(location, rotation)
-                .catch(this.handleError)
-                .then(this.startPolling);
+            if (process.env.NODE_ENV !== "development") {
+                this.api
+                    .doShift(location, rotation)
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+            }
             this.game.shift(location);
         },
         onLeftoverClick: function() {
@@ -84,11 +86,15 @@ export default {
         },
         onMovePlayerPiece: function(targetLocation) {
             this.stopPolling();
-            this.api
-                .doMove(targetLocation)
-                .then(() => this.game.move(this.playerId, targetLocation))
-                .catch(this.handleError)
-                .then(this.startPolling);
+            if (process.env.NODE_ENV !== "development") {
+                this.api
+                    .doMove(targetLocation)
+                    .then(() => this.game.move(this.playerId, targetLocation))
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+            } else {
+                this.game.move(this.playerId, targetLocation);
+            }
         },
         handleError: function(error) {
             if (!this.api.errorWasThrownByCancel(error)) {
@@ -103,7 +109,7 @@ export default {
             }
         },
         startPolling() {
-            if (this.timer === 0) {
+            if (this.timer === 0 && process.env.NODE_ENV !== "development") {
                 this.fetchApiState();
                 this.timer = setInterval(this.fetchApiState, 800);
             }
@@ -124,8 +130,14 @@ export default {
         }
     },
     created: function() {
-        if (this.gameFactory !== null) {
-            this.game = this.gameFactory.createGame();
+        var gameFactory;
+        if (process.env.NODE_ENV === "development") {
+            gameFactory = new GameFactory();
+        } else {
+            gameFactory = this.gameFactory;
+        }
+        if (gameFactory !== null) {
+            this.game = gameFactory.createGame();
         } else {
             if (sessionStorage.playerId) {
                 this.playerId = parseInt(sessionStorage.playerId);

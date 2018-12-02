@@ -44,6 +44,6 @@ export default class GameApi {
     }
 
     errorWasThrownByCancel(error) {
-        return error.toString().includes(this.CANCEL_MESSAGE)
+        return error.toString().includes(this.CANCEL_MESSAGE);
     }
 }
