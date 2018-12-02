@@ -12,7 +12,7 @@ and a reference to a maze card the piece is currently positioned on.
 BoardLocation is a wrapper for a row and a column.
 """
 from itertools import cycle, islice
-from random import choice, randint
+from random import choice, randint, sample
 from .exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, \
     MoveUnreachableException, InvalidRotationException
@@ -55,6 +55,7 @@ class Player:
     def __init__(self, identifier=0, maze_card=None):
         self._id = identifier
         self.maze_card = maze_card
+        self.objective_maze_card = None
 
     @property
     def identifier(self):
@@ -169,23 +170,20 @@ class Board:
         Other unshiftable border pieces are t-junctions.
         """
         MazeCard.reset_ids()
-        fixed_cards = {BoardLocation(0, 0): (MazeCard.CORNER, 90),
-                       BoardLocation(0, self.BOARD_SIZE-1): (MazeCard.CORNER, 180),
-                       BoardLocation(self.BOARD_SIZE-1, self.BOARD_SIZE-1): (MazeCard.CORNER, 270),
-                       BoardLocation(self.BOARD_SIZE-1, 0): (MazeCard.CORNER, 0)}
+        fixed_cards = {
+            BoardLocation(0, 0): MazeCard(doors=MazeCard.CORNER, rotation=90),
+            BoardLocation(0, self.BOARD_SIZE - 1): MazeCard(doors=MazeCard.CORNER, rotation=180),
+            BoardLocation(self.BOARD_SIZE - 1, self.BOARD_SIZE - 1): MazeCard(doors=MazeCard.CORNER, rotation=270),
+            BoardLocation(self.BOARD_SIZE - 1, 0): MazeCard(doors=MazeCard.CORNER, rotation=0)}
 
         def card_at(location):
             if location in fixed_cards:
-                return MazeCard.generate_random(fixed_cards[location][0], fixed_cards[location][1])
+                return MazeCard.generate_random(fixed_cards[location].doors, fixed_cards[location].rotation)
             return MazeCard.generate_random()
 
         self._maze_cards = [
             [card_at(BoardLocation(row, column)) for column in range(self.BOARD_SIZE)]
             for row in range(self.BOARD_SIZE)]
-
-    def random_maze_card(self):
-        """ Returns a random MazeCard of the current board """
-        return self._maze_cards[randint(0, self.BOARD_SIZE-1)][randint(0, self.BOARD_SIZE-1)]
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -352,17 +350,24 @@ class Game:
 
     def init_game(self):
         """ Randomly initializes the game state, with the currently connected players.
-        Players starting locations are the corners of the board, clockwise starting from (0, 0) """
+        Randomly gives each player an objective.
+        Players starting locations are the corners of the board, clockwise starting from (0, 0). """
         self._board.generate_random()
         self._leftover_card = MazeCard.generate_random()
+        unoccupied_maze_cards = set([self._board[location]
+                                     for location in self._board.board_locations()] + [self._leftover_card])
         start_locations = [
             BoardLocation(0, 0),
             BoardLocation(0, self._board.BOARD_SIZE - 1),
             BoardLocation(self._board.BOARD_SIZE - 1, self._board.BOARD_SIZE - 1),
             BoardLocation(self._board.BOARD_SIZE - 1, 0)]
-        circular_locations = list(islice(cycle(start_locations), self.MAX_PLAYERS))
+        circular_locations = list(islice(cycle(start_locations), len(self._players)))
         for player, location in zip(self._players, circular_locations):
             player.maze_card = self._board[location]
+            unoccupied_maze_cards.remove(player.maze_card)
+        objectives = sample(unoccupied_maze_cards, len(self._players))
+        for player, objective in zip(self._players, objectives):
+            player.objective_maze_card = objective
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
