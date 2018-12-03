@@ -73,7 +73,7 @@ export default {
         onInsertCard: function(location) {
             this.stopPolling();
             var rotation = this.game.leftoverMazeCard.rotation;
-            if (process.env.NODE_ENV !== "development") {
+            if (process.env.NODE_ENV === "production") {
                 this.api
                     .doShift(location, rotation)
                     .catch(this.handleError)
@@ -86,7 +86,7 @@ export default {
         },
         onMovePlayerPiece: function(targetLocation) {
             this.stopPolling();
-            if (process.env.NODE_ENV !== "development") {
+            if (process.env.NODE_ENV === "production") {
                 this.api
                     .doMove(targetLocation)
                     .then(() => this.game.move(this.playerId, targetLocation))
@@ -109,7 +109,7 @@ export default {
             }
         },
         startPolling() {
-            if (this.timer === 0 && process.env.NODE_ENV !== "development") {
+            if (this.timer === 0 && process.env.NODE_ENV === "production") {
                 this.fetchApiState();
                 this.timer = setInterval(this.fetchApiState, 800);
             }
@@ -130,13 +130,11 @@ export default {
         }
     },
     created: function() {
-        var gameFactory;
-        if (process.env.NODE_ENV === "development") {
-            gameFactory = new GameFactory();
-        } else {
-            gameFactory = this.gameFactory;
-        }
-        if (gameFactory !== null) {
+        if (process.env.NODE_ENV !== "production") {
+            let gameFactory = this.gameFactory;
+            if (gameFactory === null) {
+                gameFactory = new GameFactory();
+            }
             this.game = gameFactory.createGame();
         } else {
             if (sessionStorage.playerId) {

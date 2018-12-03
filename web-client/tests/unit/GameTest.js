@@ -246,6 +246,31 @@ describe("Game", () => {
             expect(mazeCard.id).toBe(49);
             expect(mazeCard.rotation).toBe(0);
         });
+
+        it("maps player's objective to a flag on the correct maze card", () => {
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+
+            let objectiveMazeCard = game.mazeCardById(8);
+            expect(objectiveMazeCard.hasObject).toBeTruthy();
+        });
+
+        it("only sets one maze card's objective flag to true", () => {
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+
+            let count = 0;
+            for (let row = 0; row < game.n; row++) {
+                for (let col = 0; col < game.n; col++) {
+                    if (game.getMazeCard(loc(row, col)).hasObject) {
+                        count++;
+                    }
+                }
+            }
+            expect(count).toBe(1);
+        });
     });
 });
 
@@ -382,5 +407,6 @@ let GET_STATE_RESULT_FOR_N_3 = `{
   },{
     "id": 17,
     "mazeCardId": 15
-  }]
+  }],
+  "objectiveMazeCardId": 8
 }`;

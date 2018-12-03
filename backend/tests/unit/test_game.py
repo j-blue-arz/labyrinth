@@ -45,6 +45,26 @@ def test_init_game_sets_all_players_on_corners():
         assert is_corner(player_location)
 
 
+def test_init_game_gives_all_players_objectives():
+    """ Tests init_game """
+    game = Game()
+    player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
+    game.init_game()
+    for player_id in player_ids:
+        assert game.find_player(player_id).objective_maze_card
+
+def test_all_player_and_objective_locations_are_different():
+    """ Tests init_game. """
+    game = Game()
+    player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
+    game.init_game()
+    card_ids = set()
+    for player_id in player_ids:
+        card_ids.add(game.find_player(player_id).maze_card.identifier)
+        card_ids.add(game.find_player(player_id).objective_maze_card.identifier)
+    assert len(card_ids) == len(player_ids) * 2
+
+
 def test_shift_updates_old_leftover_rotation():
     """ Tests shift """
     game = Game()
