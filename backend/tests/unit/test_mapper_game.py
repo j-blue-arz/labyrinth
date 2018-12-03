@@ -1,6 +1,7 @@
-""" Tests mapper module:
-tests the mapping from a Game instance to the DTO by
-creating a Game instance by hand, mapping it to DTO,
+""" Tests mapper module.
+Tests the main methods dto_to_game() and game_to_dto(), i.e.
+the methods used to persist a Game instance.
+The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
 import server.mapper as mapper
 from domain.model import Game, MazeCard, BoardLocation
@@ -24,6 +25,8 @@ def _create_test_game():
                 game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 0)
     game.find_player(player_ids[0]).maze_card = game.board[BoardLocation(3, 3)]
     game.find_player(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
+    game.find_player(player_ids[0]).objective_maze_card = game.board[BoardLocation(1, 4)]
+    game.find_player(player_ids[1]).objective_maze_card = None
     return game, player_ids
 
 
@@ -57,6 +60,16 @@ def test_mapping_for_board():
     for location in game.board.board_locations():
         assert _compare_maze_cards(*map(lambda g: g.board[location], [created_game, game]))
     assert _compare_maze_cards(*map(lambda g: g.leftover_card, [created_game, game]))
+
+
+def test_mapping_for_objectives():
+    """ Tests correct mapping of players' objective """
+    created_game, player_ids = _create_test_game()
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    assert _compare_games_using_function(created_game, game,
+                                         lambda g: g.find_player(player_ids[0]).objective_maze_card.identifier)
+    assert game.find_player(player_ids[1]).objective_maze_card is None
 
 
 def _compare_maze_cards(maze_card1, maze_card2):

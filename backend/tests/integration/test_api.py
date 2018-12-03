@@ -72,26 +72,33 @@ def test_get_state_has_correct_initial_state(client):
     """ Tests GET for /api/games/0/state
 
     for existing game. Expects players locations set to top left corner for first player.
-    Expects top left corner to be a corner. Expects a single leftover card
+    Expects top left corner to be a corner. Expects a single leftover card.
+    Expects an objective to be set for the player
     """
     player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
     response = client.get("/api/games/0/state?p_id={}".format(player_id))
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
+    objective_card_id = state["players"][0]["objectiveMazeCardId"]
     player_maze_card = None
+    objective_maze_card = None
     for maze_card in state["mazeCards"]:
         if maze_card["id"] == player_card_id:
             player_maze_card = maze_card
+        if maze_card["id"] == objective_card_id:
+            objective_maze_card = maze_card
     assert player_maze_card
     assert player_maze_card["location"]["row"] == 0
     assert player_maze_card["location"]["column"] == 0
     assert player_maze_card["doors"] == "NE"
     assert player_maze_card["rotation"] == 90
+    assert objective_maze_card
     leftover_cards = [maze_card for maze_card in state["mazeCards"] if maze_card["location"] is None]
     assert len(leftover_cards) == 1
     leftover_card = leftover_cards[0]
     assert not "W" in leftover_card["doors"]
     assert "N" in leftover_card["doors"]
+
 
 
 

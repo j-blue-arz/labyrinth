@@ -20,12 +20,12 @@ describe("VMazeCard", () => {
         expect(wrapper.contains("svg")).toBe(true);
     });
 
-    it("has width of 100 when cardSize is 100", () => {
+    it("has width of 100 if cardSize is 100", () => {
         const wrapper = wrapperFactory();
         expect(wrapper.element.getAttribute("width")).toBe("100");
     });
 
-    it("has height of 200 when cardSize is 200", () => {
+    it("has height of 200 if cardSize is 200", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "NSEW", 0),
             cardSize: 200
@@ -33,7 +33,7 @@ describe("VMazeCard", () => {
         expect(wrapper.element.getAttribute("height")).toBe("200");
     });
 
-    it("includes north door when MazeCard has a north door", () => {
+    it("includes north door if MazeCard has a north door", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "NW", 0),
             cardSize: 100
@@ -41,7 +41,7 @@ describe("VMazeCard", () => {
         expect(wrapper.find({ ref: "northDoor" }).exists()).toBeTruthy();
     });
 
-    it("does not include north door when MazeCard object does not have a north door", () => {
+    it("does not include north door if MazeCard object does not have a north door", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "EW", 0),
             cardSize: 100
@@ -49,7 +49,7 @@ describe("VMazeCard", () => {
         expect(wrapper.find({ ref: "northDoor" }).exists()).toBeFalsy();
     });
 
-    it("does not render players when the MazeCard object does not contain pieces", () => {
+    it("does not render players if the MazeCard object does not contain pieces", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "EW", 0),
             cardSize: 100
@@ -100,5 +100,25 @@ describe("VMazeCard", () => {
         );
         var radiusSums = r0 + r1;
         expect(distance).toBeGreaterThan(radiusSums);
+    });
+
+    it("renders an objective if MazeCard has one.", () => {
+        let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
+        mazeCard.hasObject = true;
+        const wrapper = wrapperFactory({
+            mazeCard: mazeCard,
+            cardSize: 100
+        });
+        expect(wrapper.findAll(".objective").length).toBe(1);
+    });
+
+    it("does not render an objective if MazeCard has none.", () => {
+        let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
+        mazeCard.hasObject = false;
+        const wrapper = wrapperFactory({
+            mazeCard: mazeCard,
+            cardSize: 100
+        });
+        expect(wrapper.findAll(".objective").length).toBe(0);
     });
 });
