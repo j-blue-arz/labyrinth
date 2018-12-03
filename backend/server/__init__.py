@@ -5,7 +5,7 @@ import os
 
 from flask import Flask, render_template
 
-version_info = (0, 0, 4)
+version_info = (0, 0, 5)
 __version__ = '.'.join(map(str, version_info))
 
 def create_app(test_config=None):
