@@ -66,10 +66,9 @@ const determineMazeCardIdsWithPlayers = function(gameContainer) {
     return mazeCardIds;
 };
 
-const factory = function(location) {
-    var locations = [];
-    if (location !== undefined) {
-        locations = [location];
+const factory = function(locations) {
+    if (locations === undefined) {
+        locations = [];
     }
     return mount(GameContainer, {
         propsData: {
@@ -132,7 +131,7 @@ describe("GameContainer", () => {
     });
 
     it("displays a player piece on the correct maze card", () => {
-        var gameContainer = factory(loc(5, 1));
+        var gameContainer = factory([loc(5, 1)]);
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
@@ -140,7 +139,7 @@ describe("GameContainer", () => {
     });
 
     it("moves players with maze cards when shifted", () => {
-        var gameContainer = factory(loc(4, 3));
+        var gameContainer = factory([loc(4, 3)]);
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
         interactiveBoard.vm.$emit("insert-card", loc(0, 3));
@@ -152,7 +151,7 @@ describe("GameContainer", () => {
     });
 
     it("moves players to opposing side of the board when shifted out", () => {
-        var gameContainer = factory(loc(6, 1));
+        var gameContainer = factory([loc(6, 1)]);
 
         var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
@@ -165,7 +164,7 @@ describe("GameContainer", () => {
     });
 
     it("moves players when maze card is clicked", () => {
-        var gameContainer = factory(loc(0, 1));
+        var gameContainer = factory([loc(0, 1)]);
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
         interactiveBoard.vm.$emit("move-piece", loc(4, 4));
@@ -174,5 +173,19 @@ describe("GameContainer", () => {
         expect(playerCardIds.length).toBe(1);
         var idMatrix = extractIdMatrix(gameContainer);
         expect(playerCardIds[0]).toBe(idMatrix[4][4]);
+    });
+
+    it("assigns indicies to all VPlayerPiece components ascending from 0", () => {
+        let playerLocations = [loc(0, 0), loc(0, 1), loc(0, 2), loc(0, 3)];
+        let gameContainer = factory(playerLocations);
+        let vPlayerPieces = gameContainer.findAll(VPlayerPiece);
+        let playerIndices = new Set();
+        for (let i = 0; i < vPlayerPieces.length; i++) {
+            playerIndices.add(vPlayerPieces.at(i).props("playerIndex"));
+        }
+        expect(playerIndices.size).toBe(4);
+        for (let i = 0; i < vPlayerPieces.length; i++) {
+            expect(playerIndices).toContain(i);
+        }
     });
 });

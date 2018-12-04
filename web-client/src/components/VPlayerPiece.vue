@@ -1,21 +1,20 @@
 <template>
     <circle
+        ref="playerPiece"
         :cx="xCenterPos"
         :cy="yCenterPos"
         :r="maxSize/2"
         :fill="playerColor"
-        class="player-piece"/>
+        :class="`player-piece player-piece__player-${playerIndex}`"/>
 </template>
 
 <script>
-import Player from "@/model/player.js";
-
 export default {
     name: "v-player-piece",
     props: {
-        playerPiece: {
-            type: Player,
-            required: true
+        playerIndex: {
+            type: Number,
+            require: true
         },
         xCenterPos: {
             type: Number,
@@ -29,18 +28,6 @@ export default {
             type: Number,
             require: true
         }
-    },
-    data() {
-        return {
-            playerColors: ["yellow", "lightblue", "darkgreen", "black"]
-        };
-    },
-    computed: {
-        playerColor: function() {
-            return this.playerColors[
-                this.playerPiece.id % this.playerColors.length
-            ];
-        }
     }
 };
 </script>
@@ -49,5 +36,21 @@ export default {
 .player-piece {
     stroke: black;
     stroke-width: 3px;
+
+    &__player-0 {
+        fill: #274594;
+    }
+
+    &__player-1 {
+        fill: #931717;
+    }
+
+    &__player-2 {
+        fill: #efb520;
+    }
+
+    &__player-3 {
+        fill: #50a28c;
+    }
 }
 </style>

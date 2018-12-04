@@ -16,7 +16,7 @@
             :yCenterPos="pieceCenters[index].y"
             :maxSize="pieceSize"
             :key="player.id"
-            :playerPiece="player"
+            :playerIndex="player.playerIndex"
             />
         <v-objective
             v-if="mazeCard.hasObject"

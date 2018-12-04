@@ -1,7 +1,8 @@
 export default class Player {
-    constructor(id, mazeCard) {
+    constructor(id, mazeCard, playerIndex) {
         this.id = id;
         this.mazeCard = mazeCard;
+        this.playerIndex = playerIndex;
     }
 
     static withId(id) {

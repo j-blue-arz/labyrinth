@@ -132,12 +132,14 @@ export default class Game {
         }
 
         this._mazeCardsFromSortedApi(apiMazeCards);
-        apiState.players.forEach(apiPlayer => {
-            var playerCard = this.mazeCardById(apiPlayer.mazeCardId);
-            var player = new Player(apiPlayer.id, playerCard);
+        for (let index = 0; index < apiState.players.length; index++) {
+            let apiPlayer = apiState.players[index];
+            let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
+            let player = new Player(apiPlayer.id, playerCard, index);
             playerCard.addPlayer(player);
             this.addPlayer(player);
-        });
+        }
+
         if (apiState.objectiveMazeCardId) {
             var objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
             objectiveCard.hasObject = true;

@@ -271,6 +271,18 @@ describe("Game", () => {
             }
             expect(count).toBe(1);
         });
+
+        it("assigns each player an ascending index, starting from 0", () => {
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+            let playerIndexList = [
+                game.getPlayer(42).playerIndex,
+                game.getPlayer(17).playerIndex
+            ];
+            expect(playerIndexList).toContain(0);
+            expect(playerIndexList).toContain(1);
+        });
     });
 });
 
