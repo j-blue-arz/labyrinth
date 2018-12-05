@@ -57,6 +57,10 @@ class Player:
         self.maze_card = maze_card
         self.objective_maze_card = None
 
+    def has_reached_objective(self):
+        """ true iff player's current location and his objective are equal """
+        return self.maze_card == self.objective_maze_card
+
     @property
     def identifier(self):
         """ Getter for read-only identifier """
@@ -404,6 +408,8 @@ class Game:
                 player_location, target_location))
         target = self._board[target_location]
         player.maze_card = target
+        if player.has_reached_objective():
+            player.objective_maze_card = self._random_unoccupied_maze_card()
 
     def find_player(self, player_id):
         """ Finds player by id.
@@ -427,3 +433,15 @@ class Game:
         :param maze_card: an instance of MazeCard
         """
         return [player for player in self._players if player.maze_card is maze_card]
+
+    def _random_unoccupied_maze_card(self):
+        """ Finds a random unoccupied maze card,
+        where a maze card is either occupied by a player or by a
+        player's objective
+        """
+        maze_cards = set([self._board[location]
+                          for location in self._board.board_locations()] + [self._leftover_card])
+        for player in self._players:
+            maze_cards.discard(player.objective_maze_card)
+            maze_cards.discard(player.maze_card)
+        return choice(tuple(maze_cards))

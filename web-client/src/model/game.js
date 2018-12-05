@@ -23,6 +23,9 @@ export default class Game {
                 }
             }
         }
+        if (this.leftoverMazeCard.id == id) {
+            return this.leftoverMazeCard;
+        }
         return null;
     }
 

@@ -79,7 +79,7 @@ def test_get_state_has_correct_initial_state(client):
     response = client.get("/api/games/0/state?p_id={}".format(player_id))
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
-    objective_card_id = state["players"][0]["objectiveMazeCardId"]
+    objective_card_id = state["objectiveMazeCardId"]
     player_maze_card = None
     objective_maze_card = None
     for maze_card in state["mazeCards"]:

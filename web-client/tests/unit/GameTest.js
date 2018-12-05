@@ -39,6 +39,18 @@ describe("Game", () => {
             );
         });
 
+        it("returns leftover card if given ID matches", () => {
+            let game = new Game();
+            game.n = 3;
+            let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
+            game.leftoverMazeCard = MazeCard.createNewRandom(nextId, -1, -1);
+            let leftover_card_id = game.leftoverMazeCard.id;
+
+            expect(game.mazeCardById(leftover_card_id)).toBe(
+                game.leftoverMazeCard
+            );
+        });
+
         it("returns null for ID which is not in the game.", () => {
             let game = new Game();
             expect(game.mazeCardById(0)).toBeNull();

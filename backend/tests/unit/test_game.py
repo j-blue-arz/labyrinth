@@ -56,13 +56,31 @@ def test_init_game_gives_all_players_objectives():
 def test_all_player_and_objective_locations_are_different():
     """ Tests init_game. """
     game = Game()
-    player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
+    for _ in range(game.MAX_PLAYERS):
+        game.add_player()
     game.init_game()
+    _assert_all_player_and_objective_locations_different(game)
+
+def test_objective_locations_after_reaching_location():
+    """ Tests new objective generation after reaching one """
+    game = Game()
+    game._board = create_board(BOARD_STRING)
+    game._leftover_card = MazeCard.generate_random()
+    player_id = game.add_player()
+    game.find_player(player_id).maze_card = game.board[BoardLocation(0, 6)]
+    game.find_player(player_id).objective_maze_card = game.board[BoardLocation(1, 6)]
+    game.move(player_id, BoardLocation(1, 6))
+    _assert_all_player_and_objective_locations_different(game)
+    
+
+
+def _assert_all_player_and_objective_locations_different(game):
+    """ asserts for a given Game instance """
     card_ids = set()
-    for player_id in player_ids:
-        card_ids.add(game.find_player(player_id).maze_card.identifier)
-        card_ids.add(game.find_player(player_id).objective_maze_card.identifier)
-    assert len(card_ids) == len(player_ids) * 2
+    for player in game.players:
+        card_ids.add(player.maze_card.identifier)
+        card_ids.add(player.objective_maze_card.identifier)
+    assert len(card_ids) == len(game.players) * 2
 
 
 def test_shift_updates_old_leftover_rotation():
