@@ -2,6 +2,7 @@
 **/node_modules
 /dist
 run.bat
+*.txt
 
 # local env files
 .env.local
