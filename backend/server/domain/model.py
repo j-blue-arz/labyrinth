@@ -12,10 +12,10 @@ and a reference to a maze card the piece is currently positioned on.
 BoardLocation is a wrapper for a row and a column.
 """
 from itertools import cycle, islice
-from random import choice, randint, sample
+from random import choice, sample
 from .exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, \
-    MoveUnreachableException, InvalidRotationException
+    MoveUnreachableException, InvalidRotationException, TurnActionViolationException
 from .validation import MoveValidator
 
 
@@ -310,6 +310,7 @@ class Game:
         self._players = []
         self._board = Board()
         self._leftover_card = MazeCard()
+        self._turns = None
 
     @property
     def leftover_card(self):
@@ -335,6 +336,16 @@ class Game:
     def players(self, players):
         """ Setter for players """
         self._players = players
+
+    @property
+    def turns(self):
+        """ Getter for turns """
+        return self._turns
+
+    @turns.setter
+    def turns(self, turns):
+        """ Setter for turns """
+        self._turns = turns
 
     def accepts_players(self):
         """ Determines if there are empty seats for players to join """
@@ -372,6 +383,7 @@ class Game:
         objectives = sample(unoccupied_maze_cards, len(self._players))
         for player, objective in zip(self._players, objectives):
             player.objective_maze_card = objective
+        self._turns = Turns(self._players)
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
@@ -384,12 +396,15 @@ class Game:
         :raises InvalidRotationException: for invalid rotation value
         :raises PlayerNotFoundException: for invalid player id
         """
-        self.find_player(player_id)
-        self._leftover_card.rotation = leftover_rotation
-        pushed_card = self._leftover_card
-        self._leftover_card = self._board.shift(new_leftover_location, self._leftover_card)
-        for player in self._find_players_by_maze_card(self._leftover_card):
-            player.maze_card = pushed_card
+        player = self.find_player(player_id)
+        if self._turns.is_action_possible(player, Turns.SHIFT_ACTION):
+            self._leftover_card.rotation = leftover_rotation
+            pushed_card = self._leftover_card
+            self._leftover_card = self._board.shift(new_leftover_location, self._leftover_card)
+            for player in self._find_players_by_maze_card(self._leftover_card):
+                player.maze_card = pushed_card
+        self._turns.perform_action(player, Turns.SHIFT_ACTION)
+        
 
     def move(self, player_id, target_location):
         """ Performs a move action
@@ -402,14 +417,16 @@ class Game:
         :raises InvalidStateException: for invalid state
         """
         player = self.find_player(player_id)
-        player_location = self._board.maze_card_location(player.maze_card)
-        if not MoveValidator(self._board).validate_move(player_location, target_location):
-            raise MoveUnreachableException("Locations {} and {} are not connected".format(
-                player_location, target_location))
-        target = self._board[target_location]
-        player.maze_card = target
-        if player.has_reached_objective():
-            player.objective_maze_card = self._random_unoccupied_maze_card()
+        if self._turns.is_action_possible(player, Turns.MOVE_ACTION):
+            player_location = self._board.maze_card_location(player.maze_card)
+            if not MoveValidator(self._board).validate_move(player_location, target_location):
+                raise MoveUnreachableException("Locations {} and {} are not connected".format(
+                    player_location, target_location))
+            target = self._board[target_location]
+            player.maze_card = target
+            if player.has_reached_objective():
+                player.objective_maze_card = self._random_unoccupied_maze_card()
+        self._turns.perform_action(player, Turns.MOVE_ACTION)
 
     def find_player(self, player_id):
         """ Finds player by id.
@@ -445,3 +462,44 @@ class Game:
             maze_cards.discard(player.objective_maze_card)
             maze_cards.discard(player.maze_card)
         return choice(tuple(maze_cards))
+
+
+class Turns:
+    """ This class contains the turn progression.
+
+    It manages player's turns and the correct order of their actions.
+    The constructor is parameterized with a game's current players.
+    The methods expect two parameters: a player parameter, and an action parameter.
+    The former is an instance of Player, the latter is either Turns.MOVE_ACTION or Turns.SHIFT_ACTION
+    """
+    MOVE_ACTION = "MOVE"
+    SHIFT_ACTION = "SHIFT"
+
+    def __init__(self, players=None, next_action=None):
+        if not players:
+            players = []
+        actions = [self.SHIFT_ACTION, self.MOVE_ACTION]
+        self._player_actions = [(player, action) for player in players for action in actions]
+        self._next = 0
+        if next_action:
+            self._next = self._player_actions.index(next_action)
+
+    def is_action_possible(self, player, action):
+        """ Checks if the action can be performed by the player """
+        return self.next_player_action() == (player, action)
+
+    def perform_action(self, player, action):
+        """ Informs that a player performed the given action """
+        if not self.is_action_possible(player, action):
+            raise TurnActionViolationException("Player {} should not be able to make action {}.".format(
+                player.identifier, action))
+        self._next = (self._next + 1) % len(self._player_actions)
+
+    def next_player_action(self):
+        """ Returns a tuple (current_player, next_action),
+        where current_player is a Player instance, and next_action is one of
+        MOVE_ACTION and SHIFT_ACTION """
+        try:
+            return self._player_actions[self._next]
+        except IndexError:
+            return None

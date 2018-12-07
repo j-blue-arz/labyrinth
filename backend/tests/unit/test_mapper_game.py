@@ -4,7 +4,7 @@ the methods used to persist a Game instance.
 The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
 import server.mapper as mapper
-from domain.model import Game, MazeCard, BoardLocation
+from domain.model import Game, MazeCard, BoardLocation, Turns
 
 
 def _create_test_game():
@@ -27,6 +27,7 @@ def _create_test_game():
     game.find_player(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
     game.find_player(player_ids[0]).objective_maze_card = game.board[BoardLocation(1, 4)]
     game.find_player(player_ids[1]).objective_maze_card = None
+    game.turns = Turns(game.players, next_action=(game.find_player(player_ids[1]), Turns.MOVE_ACTION))
     return game, player_ids
 
 
@@ -70,6 +71,20 @@ def test_mapping_for_objectives():
     assert _compare_games_using_function(created_game, game,
                                          lambda g: g.find_player(player_ids[0]).objective_maze_card.identifier)
     assert game.find_player(player_ids[1]).objective_maze_card is None
+
+
+def test_mapping_turns():
+    """ Tests correct mapping of next actions """
+    created_game, player_ids = _create_test_game()
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    for _ in range(len(player_ids) * 2):
+        _compare_games_using_function(created_game, game,
+                                      lambda g: g.turns.next_player_action()[1])
+        _compare_games_using_function(created_game, game,
+                                      lambda g: g.turns.next_player_action()[0].identifier)
+        game.turns.perform_action(*game.turns.next_player_action())
+        created_game.turns.perform_action(*created_game.turns.next_player_action())
 
 
 def _compare_maze_cards(maze_card1, maze_card2):

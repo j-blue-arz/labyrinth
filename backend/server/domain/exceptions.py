@@ -6,7 +6,8 @@ __all__ = ["InvalidStateException",
            "InvalidLocationException",
            "InvalidShiftLocationException",
            "InvalidRotationException",
-           "MoveUnreachableException"]
+           "MoveUnreachableException",
+           "TurnActionViolationException"]
 
 class LabyrinthDomainException(Exception):
     """ A base class for all domain exceptions of the labyrinth domain model """
@@ -43,6 +44,11 @@ class InvalidShiftLocationException(InvalidLocationException, RuleViolationExcep
 
 class MoveUnreachableException(InvalidLocationException, RuleViolationException):
     """ If there is no path to the requested location """
+    pass
+
+class TurnActionViolationException(RuleViolationException):
+    """ If an action was requested for a player, but it is not his turn to player,
+    or he has to perform another action """
     pass
 
 

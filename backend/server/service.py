@@ -9,7 +9,7 @@ from .domain.exceptions import LabyrinthDomainException
 
 def add_player(game_id):
     """ Adds a player to a game.
-    Creates the game if it does not exist. 
+    Creates the game if it does not exist.
     After adding the player, the game state is randomly generated.
 
     :param game_id: specifies the game

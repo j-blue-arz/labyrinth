@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from .domain.model import Game, Player, MazeCard, BoardLocation, Board
+from .domain.model import Game, Player, MazeCard, BoardLocation, Turns
 #from labyrinth.service import ApiException
 
 PLAYERS = "players"
@@ -20,6 +20,9 @@ LEFTOVER_ROTATION = "leftoverRotation"
 KEY = "key"
 MESSAGE = "userMessage"
 OBJECTIVE = "objectiveMazeCardId"
+NEXT_ACTION = "nextAction"
+ACTION = "action"
+PLAYER_ID = "playerId"
 
 
 def player_state_to_dto(game: Game, player_id):
@@ -33,6 +36,7 @@ def player_state_to_dto(game: Game, player_id):
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game)
     game_dto[OBJECTIVE] = _objective_to_dto(game.find_player(player_id).objective_maze_card)
+    game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
     return game_dto
 
 
@@ -42,12 +46,14 @@ def game_to_dto(game: Game):
     :param game: an instance of model.Game
     :param player_id: an identifier of a player.
     If given, only returns the state from the view of the player.
-    :return: a structure which can be encoded into JSON. 
+    :return: a structure which can be encoded into JSON.
     """
     game_dto = dict()
     game_dto[PLAYERS] = [_player_to_dto(player, include_objective=True) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game)
+    game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
     return game_dto
+
 
 def dto_to_game(game_dto):
     """ maps a DTO to a game
@@ -68,6 +74,7 @@ def dto_to_game(game_dto):
         maze_card_by_id[maze_card.identifier] = maze_card
     game.players = [_dto_to_player(player_dto, maze_card_by_id)
                     for player_dto in game_dto[PLAYERS]]
+    game.turns = _dto_to_turns(game_dto[NEXT_ACTION], game.players)
     return game
 
 
@@ -148,6 +155,7 @@ def _maze_card_to_dto(maze_card: MazeCard, location: BoardLocation = None):
             ROTATION: maze_card.rotation,
             LOCATION: _board_location_to_dto(location)}
 
+
 def _maze_cards_to_dto(game):
     """ Maps all the given game's maze cards to one list of DTOs
     These include all cards on the board and the leftover card with position None
@@ -162,6 +170,7 @@ def _maze_cards_to_dto(game):
         dto.append(_maze_card_to_dto(maze_card, location))
     return dto
 
+
 def _board_location_to_dto(location: BoardLocation):
     """ Maps a board location to a DTO
 
@@ -172,6 +181,18 @@ def _board_location_to_dto(location: BoardLocation):
         return None
     return {ROW: location.row,
             COLUMN: location.column}
+
+
+def _turns_to_next_action_dto(turns: Turns):
+    """ Maps an instance of Turns to a DTO, representing
+    only the next action.
+    """
+    next_action = turns.next_player_action()
+    if not next_action:
+        return None
+    player = next_action[0]
+    return {PLAYER_ID: player.identifier,
+            ACTION: next_action[1]}
 
 
 def _dto_to_player(player_dto, maze_card_dict):
@@ -199,6 +220,23 @@ def _dto_to_maze_card(maze_card_dto):
     maze_card = MazeCard(maze_card_dto[ID], maze_card_dto[DOORS], maze_card_dto[ROTATION])
     location = _dto_to_board_location(maze_card_dto[LOCATION])
     return maze_card, location
+
+
+def _dto_to_turns(next_action_dto, players):
+    """ Maps a DTO to a Turns instance
+
+    :param next_action_dto: a dictionary representing the next player action,
+    as created by _turns_to_next_action_dto
+    :param players: a list of players. The value of the PLAYER_ID field in the dto
+    has to match one of the player's id
+    :return: an instance of Turns
+    """
+    if not players:
+        return Turns()
+    player_id = next_action_dto[PLAYER_ID]
+    next_player = next(player for player in players if player.identifier is player_id)
+    next_action = (next_player, next_action_dto[ACTION])
+    return Turns(players, next_action)
 
 
 def _dto_to_board_location(board_location_dto):

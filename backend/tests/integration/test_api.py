@@ -100,8 +100,6 @@ def test_get_state_has_correct_initial_state(client):
     assert "N" in leftover_card["doors"]
 
 
-
-
 def test_get_state_for_nonexisting_game(client):
     """ Tests GET for /api/games/1/state
 
@@ -173,6 +171,7 @@ def test_post_move(client):
     assert location["row"] == 0
     assert location["column"] == 1
 
+
 def test_post_move_unreachable_move(client):
     """ Tests POST for /api/games/0/move
 
@@ -190,6 +189,7 @@ def test_post_move_unreachable_move(client):
     response = _post_move(client, player_id, 0, 1)
     _assert_error_response(response, user_message="The sent action is invalid.",
                            key="INVALID_ACTION", status=400)
+
 
 def test_post_move_invalid_move(client):
     """ Tests POST for /api/games/0/move
@@ -284,6 +284,50 @@ def test_post_shift_with_invalid_location(client):
         },
         "leftoverRotation": 90
     })
+
+
+def test_post_move_with_invalid_turn_action(client):
+    """ Tests POST for /api/games/0/move
+
+    when a shift should be performed.
+    Expects a 400 Bad Request, with exception body.
+    State is unchanged.
+    """
+    _assert_invalid_action_and_unchanged_state(client, "move", data={
+        "location": {
+            "row": 0,
+            "column": 0
+        }
+    })
+
+
+def test_turn_action_progression(client):
+    """ Tests GET for /api/games/0/state
+
+    expects the nextAction to change as correct actions are performed.
+    """
+    player_id_0 = _assert_ok_single_int(client.post("/api/games/0/players"))
+    player_id_1 = _assert_ok_single_int(client.post("/api/games/0/players"))
+    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    assert state["nextAction"]["playerId"] == player_id_0
+    assert state["nextAction"]["action"] == "SHIFT"
+    _post_shift(client, player_id_0, 0, 1, 270)
+    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    assert state["nextAction"]["playerId"] == player_id_0
+    assert state["nextAction"]["action"] == "MOVE"
+    _post_move(client, player_id_0, 0, 0)
+    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    assert state["nextAction"]["playerId"] == player_id_1
+    assert state["nextAction"]["action"] == "SHIFT"
+    _post_shift(client, player_id_1, 0, 1, 270)
+    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    assert state["nextAction"]["playerId"] == player_id_1
+    assert state["nextAction"]["action"] == "MOVE"
+    _post_move(client, player_id_1, 0, 6)
+    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    assert state["nextAction"]["playerId"] == player_id_0
+    assert state["nextAction"]["action"] == "SHIFT"
+
 
 
 def _assert_invalid_action_and_unchanged_state(client, action_resource, data):
