@@ -3,10 +3,11 @@ It serves the Vue application
 and defines a set of API methods to play the game """
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 version_info = (0, 0, 6)
 __version__ = '.'.join(map(str, version_info))
+
 
 def create_app(test_config=None):
     """ basic Flask app setup. Creates the instance folder if not existing """
@@ -36,6 +37,11 @@ def create_app(test_config=None):
     from . import database
     app.before_first_request(database.init_database)
     app.teardown_request(database.close_database)
+
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(app.template_folder,
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
     @app.route('/')
     def index():

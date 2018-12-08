@@ -4,7 +4,6 @@
         :cx="xCenterPos"
         :cy="yCenterPos"
         :r="maxSize/2"
-        :fill="playerColor"
         :class="`player-piece player-piece__player-${playerIndex}`"/>
 </template>
 
