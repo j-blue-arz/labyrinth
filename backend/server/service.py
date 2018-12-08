@@ -2,8 +2,8 @@
 from . import exceptions
 from . import database
 from .mapper import player_state_to_dto, dto_to_shift_action, dto_to_move_action
-from .domain.model import Game
 from .domain.exceptions import LabyrinthDomainException
+import server.domain.factories as factory
 
 
 
@@ -53,7 +53,7 @@ def _get_or_create_game(game_id):
     return game
 
 def _create_game(game_id):
-    game = Game()
+    game = factory.create_game()
     game.init_game()
     database.create_game(game, game_id)
     return game

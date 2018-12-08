@@ -3,7 +3,7 @@ Several validation tests are performed on this instance """
 
 from domain.model import BoardLocation
 from domain.validation import MoveValidator
-from maze_factory import create_maze
+from domain.factories import create_maze
 
 
 def test_validate_move_for_same_location():

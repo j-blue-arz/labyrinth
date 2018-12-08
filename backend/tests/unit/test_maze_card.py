@@ -1,22 +1,23 @@
 """ Tests for MazeCard of model.py """
 import pytest
 from domain.model import MazeCard
+from domain.factories import create_random_maze_card
 
 
 def test_generate_assigns_unique_ids():
     """ Tests generate_random """
     MazeCard.reset_ids()
-    maze_card1 = MazeCard.generate_random()
-    maze_card2 = MazeCard.generate_random()
+    maze_card1 = MazeCard.create_instance(MazeCard.CORNER, 270)
+    maze_card2 = MazeCard.create_instance(MazeCard.CORNER, 270)
     assert maze_card1.identifier != maze_card2.identifier
 
 
 def test_generate_with_reset_ids_should_start_at_0():
     """ Tests generate_random with reset_ids """
     MazeCard.reset_ids()
-    maze_card = MazeCard.generate_random()
+    maze_card = MazeCard.create_instance(MazeCard.CORNER, 270)
     MazeCard.reset_ids()
-    maze_card2 = MazeCard.generate_random()
+    maze_card2 = MazeCard.create_instance(MazeCard.CORNER, 270)
     assert maze_card.identifier == maze_card2.identifier
 
 

@@ -1,15 +1,16 @@
 """ This module tests mapper module.
-More specifically, it tests the method player_state_to_dto(), 
+More specifically, it tests the method player_state_to_dto(),
 which maps a Game instance to an object used to transfer the state,
 as seen from one player. """
 import server.mapper as mapper
-from domain.model import Game, BoardLocation
+from domain.model import BoardLocation
+from domain.factories import create_game
 
 
 def _create_test_game():
     """ Creates a Game instance,
     returns this instance and one of the player's identifier """
-    game = Game()
+    game = create_game()
     player_ids = [game.add_player(), game.add_player(), game.add_player()]
     game.init_game()
     return game, player_ids[1]

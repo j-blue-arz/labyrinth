@@ -185,6 +185,7 @@ def test_post_move_unreachable_move(client):
     response = client.post("/api/games/0/players")
     player_id = _assert_ok_single_int(response)
     _post_shift(client, player_id, 0, 1, 0)
+    _post_move(client, player_id, 0, 0)
     _post_shift(client, player_id, 1, 0, 90)
     response = _post_move(client, player_id, 0, 1)
     _assert_error_response(response, user_message="The sent action is invalid.",

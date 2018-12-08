@@ -1,5 +1,6 @@
 """ Tests for Game of model.py """
 import pytest
+from unittest.mock import Mock
 from domain.model import Game, BoardLocation, Turns
 from domain.exceptions import PlayerNotFoundException, TurnActionViolationException
 
@@ -50,49 +51,20 @@ def test_move_raises_error_on_invalid_player_id():
 
 def test_move_raises_error_on_invalid_turn():
     """ Tests turn validation """
-    game = Game()
+    board = Mock()
+    game = Game(board)
     player_id = game.add_player()
     game.init_game()
     with pytest.raises(TurnActionViolationException):
         game.move(player_id, BoardLocation(0, 0))
+    board.move.assert_not_called()
 
 def test_move_does_not_raise_error_after_shift():
     """ Tests turn validation """
-    game = Game()
+    board = Mock()
+    game = Game(board)
     player_id = game.add_player()
     game.init_game()
     game.turns.perform_action(player_id, Turns.SHIFT_ACTION)
     game.move(player_id, BoardLocation(0, 0))
-
-
-MAZE_STRING = """
-###|#.#|#.#|###|#.#|#.#|###|
-#..|#..|...|...|#..|..#|..#|
-#.#|###|###|#.#|###|###|#.#|
----------------------------|
-###|###|#.#|#.#|#.#|#.#|#.#|
-...|...|#.#|#..|#.#|...|..#|
-#.#|#.#|#.#|###|#.#|###|#.#|
----------------------------|
-#.#|#.#|#.#|#.#|#.#|#.#|#.#|
-#..|#..|..#|#..|..#|#.#|..#|
-#.#|#.#|#.#|#.#|#.#|#.#|#.#|
----------------------------|
-#.#|#.#|#.#|###|#.#|###|###|
-..#|..#|#..|...|...|...|..#|
-###|#.#|###|#.#|###|#.#|#.#|
----------------------------|
-###|#.#|###|#.#|###|#.#|###|
-#..|..#|#..|#.#|...|#..|...|
-#.#|###|#.#|#.#|#.#|###|###|
----------------------------|
-###|#.#|###|#.#|#.#|#.#|#.#|
-..#|#..|...|...|#.#|#..|..#|
-#.#|#.#|###|###|#.#|#.#|#.#|
----------------------------|
-#.#|#.#|###|###|#.#|#.#|#.#|
-#..|...|...|...|#.#|...|..#|
-###|###|#.#|###|#.#|###|###|
----------------------------*
-
-"""
+    board.move.assert_called_once()
