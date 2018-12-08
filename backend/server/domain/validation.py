@@ -10,8 +10,7 @@ class MoveValidator():
     """ Validates if a move is valid.
 
     Performs a BFS in a graph represented by the current board to
-    verify if the player's current location and the target location
-    are connected.
+    verify if two locations are connected.
     """
 
     def __init__(self, board):
@@ -26,7 +25,7 @@ class MoveValidator():
 
         :param source_location: the current BoardLocation
         :param target_location: the requested BoardLocation
-        :return: True, iff there is a path from the player to the location
+        :return: True, iff there is a path between the two locations
         """
         reachable_locations = self._bfs(source_location)
         return target_location in reachable_locations

@@ -23,11 +23,11 @@ def _create_test_game():
                 game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 270)
             else:
                 game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 0)
-    game.find_player(player_ids[0]).maze_card = game.board[BoardLocation(3, 3)]
-    game.find_player(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
-    game.find_player(player_ids[0]).objective_maze_card = game.board[BoardLocation(1, 4)]
-    game.find_player(player_ids[1]).objective_maze_card = None
-    game.turns = Turns(game.players, next_action=(game.find_player(player_ids[1]), Turns.MOVE_ACTION))
+    game.find_piece(player_ids[0]).maze_card = game.board[BoardLocation(3, 3)]
+    game.find_piece(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
+    game.find_piece(player_ids[0]).objective_maze_card = game.board[BoardLocation(1, 4)]
+    game.find_piece(player_ids[1]).objective_maze_card = None
+    game.turns = Turns(player_ids, next_action=(player_ids[1], Turns.MOVE_ACTION))
     return game, player_ids
 
 
@@ -37,12 +37,12 @@ def test_mapping_for_player():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert len(game.players) == 2
-    assert game.find_player(player_ids[0])
-    assert game.find_player(player_ids[1])
+    assert game.find_piece(player_ids[0])
+    assert game.find_piece(player_ids[1])
     assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.find_player(player_ids[0]).maze_card.identifier)
+                                         lambda g: g.find_piece(player_ids[0]).maze_card.identifier)
     assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.find_player(player_ids[1]).maze_card.identifier)
+                                         lambda g: g.find_piece(player_ids[1]).maze_card.identifier)
 
 
 def test_mapping_for_leftover():
@@ -69,8 +69,8 @@ def test_mapping_for_objectives():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.find_player(player_ids[0]).objective_maze_card.identifier)
-    assert game.find_player(player_ids[1]).objective_maze_card is None
+                                         lambda g: g.find_piece(player_ids[0]).objective_maze_card.identifier)
+    assert game.find_piece(player_ids[1]).objective_maze_card is None
 
 
 def test_mapping_turns():
@@ -82,7 +82,7 @@ def test_mapping_turns():
         _compare_games_using_function(created_game, game,
                                       lambda g: g.turns.next_player_action()[1])
         _compare_games_using_function(created_game, game,
-                                      lambda g: g.turns.next_player_action()[0].identifier)
+                                      lambda g: g.turns.next_player_action()[0])
         game.turns.perform_action(*game.turns.next_player_action())
         created_game.turns.perform_action(*created_game.turns.next_player_action())
 

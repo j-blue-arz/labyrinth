@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from .domain.model import Game, Player, MazeCard, BoardLocation, Turns
+from .domain.model import Game, Piece, MazeCard, BoardLocation, Turns
 #from labyrinth.service import ApiException
 
 PLAYERS = "players"
@@ -33,9 +33,9 @@ def player_state_to_dto(game: Game, player_id):
     :return: a structure whose JSON representation is valid for the API
     """
     game_dto = dict()
+    game_dto[OBJECTIVE] = _objective_to_dto(game.find_piece(player_id).objective_maze_card)
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game)
-    game_dto[OBJECTIVE] = _objective_to_dto(game.find_player(player_id).objective_maze_card)
     game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
     return game_dto
 
@@ -74,7 +74,8 @@ def dto_to_game(game_dto):
         maze_card_by_id[maze_card.identifier] = maze_card
     game.players = [_dto_to_player(player_dto, maze_card_by_id)
                     for player_dto in game_dto[PLAYERS]]
-    game.turns = _dto_to_turns(game_dto[NEXT_ACTION], game.players)
+    player_ids = [player.identifier for player in game.players]
+    game.turns = _dto_to_turns(game_dto[NEXT_ACTION], player_ids)
     return game
 
 
@@ -117,10 +118,10 @@ def exception_to_dto(api_exception):
     }
 
 
-def _player_to_dto(player: Player, include_objective=False):
+def _player_to_dto(player: Piece, include_objective=False):
     """Maps a player to a DTO
 
-    :param player: an instance of model.Player
+    :param player: an instance of model.Piece
     :param include_objective: if True, includes the player's objective_maze_card in the DTO
     :return: a structure whose JSON representation is valid for the API
     """
@@ -190,8 +191,7 @@ def _turns_to_next_action_dto(turns: Turns):
     next_action = turns.next_player_action()
     if not next_action:
         return None
-    player = next_action[0]
-    return {PLAYER_ID: player.identifier,
+    return {PLAYER_ID: next_action[0],
             ACTION: next_action[1]}
 
 
@@ -202,9 +202,9 @@ def _dto_to_player(player_dto, maze_card_dict):
     as created by _player_to_dto
     :param maze_card_dict: a dictionary between maze card ids and MazeCard instances
     :raises KeyError: if maze_card_dict does not contain the maze card or objective id in player_dto
-    :return: a Player instance
+    :return: a Piece instance
     """
-    player = Player(player_dto[ID], maze_card_dict[player_dto[MAZE_CARD_ID]])
+    player = Piece(player_dto[ID], maze_card_dict[player_dto[MAZE_CARD_ID]])
     if player_dto[OBJECTIVE]:
         player.objective_maze_card = maze_card_dict[player_dto[OBJECTIVE]]
     return player
@@ -222,21 +222,19 @@ def _dto_to_maze_card(maze_card_dto):
     return maze_card, location
 
 
-def _dto_to_turns(next_action_dto, players):
+def _dto_to_turns(next_action_dto, player_ids):
     """ Maps a DTO to a Turns instance
 
     :param next_action_dto: a dictionary representing the next player action,
     as created by _turns_to_next_action_dto
-    :param players: a list of players. The value of the PLAYER_ID field in the dto
+    :param player_ids: a list of player IDs. The value of the PLAYER_ID field in the dto
     has to match one of the player's id
     :return: an instance of Turns
     """
-    if not players:
+    if not player_ids:
         return Turns()
-    player_id = next_action_dto[PLAYER_ID]
-    next_player = next(player for player in players if player.identifier is player_id)
-    next_action = (next_player, next_action_dto[ACTION])
-    return Turns(players, next_action)
+    next_action = (next_action_dto[PLAYER_ID], next_action_dto[ACTION])
+    return Turns(player_ids, next_action)
 
 
 def _dto_to_board_location(board_location_dto):

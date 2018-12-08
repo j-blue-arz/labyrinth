@@ -5,13 +5,13 @@ from domain.exceptions import *
 from board_factory import fill_board
 
 
-def test_add_find_player():
-    """ Tests add_player and find_player """
+def test_add_find_piece():
+    """ Tests add_player and find_piece """
     game = Game()
     player_id1 = game.add_player()
     player_id2 = game.add_player()
-    assert game.find_player(player_id1).identifier == player_id1
-    assert game.find_player(player_id2).identifier == player_id2
+    assert game.find_piece(player_id1).identifier == player_id1
+    assert game.find_piece(player_id2).identifier == player_id2
 
 
 def test_accepts_players():
@@ -28,7 +28,7 @@ def test_init_game_sets_first_player_on_top_left_corner():
     game = Game()
     player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
     game.init_game()
-    assert game.find_player(player_ids[0]).maze_card == game.board[BoardLocation(0, 0)]
+    assert game.find_piece(player_ids[0]).maze_card == game.board[BoardLocation(0, 0)]
 
 
 def test_init_game_sets_all_players_on_corners():
@@ -41,7 +41,7 @@ def test_init_game_sets_all_players_on_corners():
     player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
     game.init_game()
     for player_id in player_ids:
-        player_location = game.board.maze_card_location(game.find_player(player_id).maze_card)
+        player_location = game.board.maze_card_location(game.find_piece(player_id).maze_card)
         assert is_corner(player_location)
 
 
@@ -51,7 +51,7 @@ def test_init_game_gives_all_players_objectives():
     player_ids = [game.add_player() for _ in range(game.MAX_PLAYERS)]
     game.init_game()
     for player_id in player_ids:
-        assert game.find_player(player_id).objective_maze_card
+        assert game.find_piece(player_id).objective_maze_card
 
 
 def test_all_player_and_objective_locations_are_different():
@@ -69,10 +69,10 @@ def test_objective_locations_after_reaching_location():
     fill_board(BOARD_STRING, game.board)
     game.leftover_card = MazeCard.generate_random()
     player_id = game.add_player()
-    player = game.find_player(player_id)
+    player = game.find_piece(player_id)
     player.maze_card = game.board[BoardLocation(0, 6)]
     player.objective_maze_card = game.board[BoardLocation(1, 6)]
-    game.turns = Turns([player], next_action=(player, Turns.MOVE_ACTION))
+    game.turns = Turns([player_id], next_action=(player_id, Turns.MOVE_ACTION))
     game.move(player_id, BoardLocation(1, 6))
     _assert_all_player_and_objective_locations_different(game)
 
@@ -110,7 +110,7 @@ def test_shift_updates_players_on_pushed_out_card():
     """ Tests shift """
     game = Game()
     player_id = game.add_player()
-    player = game.find_player(player_id)
+    player = game.find_piece(player_id)
     game.init_game()
     pushed_card = game.leftover_card
     player.maze_card = game.board[BoardLocation(0, 3)]
@@ -162,11 +162,10 @@ def test_move_updates_players_maze_card_correctly():
     fill_board(BOARD_STRING, game.board)
     game.leftover_card = MazeCard.generate_random()
     player_id = game.add_player()
-    player = game.find_player(player_id)
-    player.maze_card = game.board[BoardLocation(0, 1)]
-    game.turns = Turns([player], next_action=(player, Turns.MOVE_ACTION))
+    game.find_piece(player_id).maze_card = game.board[BoardLocation(0, 1)]
+    game.turns = Turns([player_id], next_action=(player_id, Turns.MOVE_ACTION))
     game.move(player_id, BoardLocation(0, 2))
-    assert game.board[BoardLocation(0, 2)] == game.find_player(player_id).maze_card
+    assert game.board[BoardLocation(0, 2)] == game.find_piece(player_id).maze_card
 
 
 def test_move_raises_error_on_unreachable_location():
@@ -175,9 +174,8 @@ def test_move_raises_error_on_unreachable_location():
     fill_board(BOARD_STRING, game.board)
     game.leftover_card = MazeCard.generate_random()
     player_id = game.add_player()
-    player = game.find_player(player_id)
-    player.maze_card = game.board[BoardLocation(0, 1)]
-    game.turns = Turns([player], next_action=(player, Turns.MOVE_ACTION))
+    game.find_piece(player_id).maze_card = game.board[BoardLocation(0, 1)]
+    game.turns = Turns([player_id], next_action=(player_id, Turns.MOVE_ACTION))
     with pytest.raises(MoveUnreachableException):
         game.move(player_id, BoardLocation(0, 0))
 
@@ -187,7 +185,7 @@ def test_move_raises_error_on_invalid_location():
     game = Game()
     player_id = game.add_player()
     game.init_game()
-    game.turns.perform_action(game.find_player(player_id), Turns.SHIFT_ACTION)
+    game.turns.perform_action(player_id, Turns.SHIFT_ACTION)
     with pytest.raises(InvalidLocationException):
         game.move(player_id, BoardLocation(-1, -1))
 

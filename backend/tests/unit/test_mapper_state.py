@@ -23,7 +23,7 @@ def test_mapping_players():
     assert len(game_dto[mapper.PLAYERS]) == len(game.players)
     for player_dto in game_dto[mapper.PLAYERS]:
         assert mapper.ID in player_dto
-        player_game = game.find_player(player_dto[mapper.ID])
+        player_game = game.find_piece(player_dto[mapper.ID])
         assert player_game
         assert player_dto[mapper.MAZE_CARD_ID] == player_game.maze_card.identifier
         assert mapper.OBJECTIVE not in player_dto
@@ -66,7 +66,7 @@ def test_mapping_objectives():
     game, player_id = _create_test_game()
     game_dto = mapper.player_state_to_dto(game, player_id)
     assert mapper.OBJECTIVE in game_dto
-    assert game_dto[mapper.OBJECTIVE] == game.find_player(player_id).objective_maze_card.identifier
+    assert game_dto[mapper.OBJECTIVE] == game.find_piece(player_id).objective_maze_card.identifier
 
 
 def _assert_and_return_location_dto(location_dto):
