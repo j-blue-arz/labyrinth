@@ -1,6 +1,6 @@
 import Game from "@/model/game.js";
 import MazeCard from "@/model/mazecard.js";
-import Player from "@/model/player.js";
+import Player, { SHIFT_ACTION } from "@/model/player.js";
 
 export default class GameFactory {
     constructor(initialPlayerLocations) {
@@ -25,10 +25,7 @@ export default class GameFactory {
         }
 
         if (this._initialPlayerLocations.length === 0) {
-            this._initialPlayerLocations.push({
-                row: Math.floor(Math.random() * game.n),
-                column: Math.floor(Math.random() * game.n)
-            });
+            this._initialPlayerLocations.push(this._randomLocation(game.n));
         }
 
         for (var i = 0; i < this._initialPlayerLocations.length; i++) {
@@ -39,7 +36,18 @@ export default class GameFactory {
             game.addPlayer(player);
         }
 
+        game.getMazeCard(this._randomLocation(game.n)).hasObject = true;
+
+        game.getPlayer(0).nextAction = SHIFT_ACTION;
+
         game.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
         return game;
+    }
+
+    _randomLocation(n) {
+        return {
+            row: Math.floor(Math.random() * n),
+            column: Math.floor(Math.random() * n)
+        };
     }
 }

@@ -3,6 +3,7 @@ import GameContainer from "@/components/GameContainer.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import GameFactory from "@/model/gameFactory";
+import MOVE_ACTION from "@/model/player";
 import { loc } from "./testutils.js";
 
 const extractIdMatrix = function(gameContainer) {
@@ -90,6 +91,18 @@ describe("GameContainer", () => {
         var newRotation = leftOverVMazeCard.props().mazeCard.rotation;
         expect(newRotation).toBe((oldRotation + 90) % 360);
         expect(rotateOperation).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not rotate leftover maze card when next action is move", () => {
+        var gameContainer = factory();
+        const rotateOperation = jest.spyOn(
+            gameContainer.vm.$data.game.leftoverMazeCard,
+            "rotateClockwise"
+        );
+        gameContainer.vm.$data.game.getPlayer(0).nextAction = MOVE_ACTION;
+        var leftOverVMazeCard = gameContainer.find({ ref: "leftover" });
+        leftOverVMazeCard.trigger("click");
+        expect(rotateOperation).toHaveBeenCalledTimes(0);
     });
 
     it("shifts leftmost row correctly to the south", () => {

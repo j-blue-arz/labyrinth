@@ -144,8 +144,13 @@ export default class Game {
         }
 
         if (apiState.objectiveMazeCardId) {
-            var objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
+            let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
             objectiveCard.hasObject = true;
+        }
+
+        if (apiState.nextAction) {
+            let nextAction = apiState.nextAction;
+            this.getPlayer(nextAction.playerId).nextAction = nextAction.action;
         }
     }
 

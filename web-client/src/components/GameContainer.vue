@@ -27,6 +27,7 @@ import Game from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
 import MazeCard from "@/model/mazecard.js";
+import * as player from "@/model/player.js";
 import { setInterval, clearInterval } from "timers";
 
 export default {
@@ -76,13 +77,17 @@ export default {
             if (process.env.NODE_ENV === "production") {
                 this.api
                     .doShift(location, rotation)
+                    .then(() => this.game.shift(location))
                     .catch(this.handleError)
                     .then(this.startPolling);
+            } else {
+                this.game.shift(location);
             }
-            this.game.shift(location);
         },
         onLeftoverClick: function() {
-            this.game.leftoverMazeCard.rotateClockwise();
+            if (this.getSelfPlayer().nextAction === player.SHIFT_ACTION) {
+                this.game.leftoverMazeCard.rotateClockwise();
+            }
         },
         onMovePlayerPiece: function(targetLocation) {
             this.stopPolling();
@@ -127,6 +132,9 @@ export default {
             this.playerId = parseInt(apiResponse.data);
             this.api.playerId = this.playerId;
             sessionStorage.playerId = this.playerId;
+        },
+        getSelfPlayer: function() {
+            return this.game.getPlayer(this.playerId);
         }
     },
     created: function() {
