@@ -3,7 +3,7 @@ More specifically, it tests the method player_state_to_dto(),
 which maps a Game instance to an object used to transfer the state,
 as seen from one player. """
 import server.mapper as mapper
-from domain.model import Game, MazeCard, BoardLocation
+from domain.model import Game, BoardLocation
 
 
 def _create_test_game():
@@ -20,10 +20,11 @@ def test_mapping_players():
     game, player_id = _create_test_game()
     game_dto = mapper.player_state_to_dto(game, player_id)
     assert mapper.PLAYERS in game_dto
-    assert len(game_dto[mapper.PLAYERS]) == len(game.players)
+    assert len(game_dto[mapper.PLAYERS]) == len(game.board.pieces)
+    assert len(game_dto[mapper.PLAYERS]) == len(game._player_ids)
     for player_dto in game_dto[mapper.PLAYERS]:
         assert mapper.ID in player_dto
-        player_game = game.find_piece(player_dto[mapper.ID])
+        player_game = game.board.find_piece(player_dto[mapper.ID])
         assert player_game
         assert player_dto[mapper.MAZE_CARD_ID] == player_game.maze_card.identifier
         assert mapper.OBJECTIVE not in player_dto
@@ -38,8 +39,8 @@ def test_mapping_leftover():
                      if not maze_card_dto[mapper.LOCATION]]
     assert len(leftover_dtos) == 1
     leftover_dto = leftover_dtos[0]
-    assert leftover_dto[mapper.ID] == game.leftover_card.identifier
-    assert leftover_dto[mapper.DOORS] == game.leftover_card.doors
+    assert leftover_dto[mapper.ID] == game.board.leftover_card.identifier
+    assert leftover_dto[mapper.DOORS] == game.board.leftover_card.doors
 
 
 def test_mapping_board():
@@ -49,11 +50,11 @@ def test_mapping_board():
     assert mapper.MAZE_CARDS in game_dto
     maze_card_dtos = [maze_card_dto for maze_card_dto in game_dto[mapper.MAZE_CARDS]
                       if maze_card_dto[mapper.LOCATION]]
-    assert len(maze_card_dtos) == game.maze.MAZE_SIZE * game.maze.MAZE_SIZE
+    assert len(maze_card_dtos) == game.board.maze.MAZE_SIZE * game.board.maze.MAZE_SIZE
     ids = set()
     for maze_card_dto in maze_card_dtos:
         location = _assert_and_return_location_dto(maze_card_dto[mapper.LOCATION])
-        maze_card_game = game.maze[location]
+        maze_card_game = game.board.maze[location]
         assert maze_card_dto[mapper.ID] == maze_card_game.identifier
         assert maze_card_dto[mapper.DOORS] == maze_card_game.doors
         assert maze_card_dto[mapper.ROTATION] == maze_card_game.rotation
@@ -66,7 +67,7 @@ def test_mapping_objectives():
     game, player_id = _create_test_game()
     game_dto = mapper.player_state_to_dto(game, player_id)
     assert mapper.OBJECTIVE in game_dto
-    assert game_dto[mapper.OBJECTIVE] == game.find_piece(player_id).objective_maze_card.identifier
+    assert game_dto[mapper.OBJECTIVE] == game.board.find_piece(player_id).objective_maze_card.identifier
 
 
 def _assert_and_return_location_dto(location_dto):

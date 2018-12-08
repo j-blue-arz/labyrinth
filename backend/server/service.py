@@ -27,7 +27,7 @@ def add_player(game_id):
 def get_game_state(game_id, player_id):
     """ Returns the game state, as seen for the querying player """
     game = _load_game_or_throw(game_id)
-    _try(lambda: game.find_piece(player_id))
+    _try(lambda: game.check_player(player_id))
     return player_state_to_dto(game, player_id)
 
 

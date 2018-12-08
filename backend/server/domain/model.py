@@ -1,7 +1,7 @@
 """ The model of the game.
 
-Game is the container for the entire state.
-It consists of a Board, and the Turns.
+Game is the representation one played game.
+It consists of a Board and the Turns.
 
 Board manages the current state of the set of game components currently on the table, i.e.
 the Maze, a 2-d array of MazeCards, a leftover MazeCard, and a list of Pieces.
@@ -24,7 +24,7 @@ from .validation import MoveValidator
 
 class BoardLocation:
     """A board location, defined by the row and the column.
-    The location does now know the extent of the board.
+    The location does now know the extent of the maze.
     """
 
     def __init__(self, row, column):
@@ -161,7 +161,6 @@ class Maze:
     """ Represent the state of the maze.
     The state is maintained in a 2-d array of MazeCard instances.
     """
-
     MAZE_SIZE = 7
 
     def __init__(self):
@@ -305,27 +304,20 @@ class Maze:
             raise InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
 
-class Game:
+class Board:
     """
-    The state of a game of labyrinth.
+    The board state of a game of labyrinth.
     """
-    MAX_PLAYERS = 4
 
     def __init__(self):
-        self._players = []
+        self._pieces = []
         self._maze = Maze()
         self._leftover_card = MazeCard()
-        self._turns = None
 
     @property
     def leftover_card(self):
         """ Getter for leftover card """
         return self._leftover_card
-
-    @leftover_card.setter
-    def leftover_card(self, value):
-        """ Setter for leftover card """
-        self._leftover_card = value
 
     @property
     def maze(self):
@@ -333,43 +325,12 @@ class Game:
         return self._maze
 
     @property
-    def players(self):
-        """ Getter for players """
-        return self._players
+    def pieces(self):
+        """ Getter for pieces """
+        return self._pieces
 
-    @players.setter
-    def players(self, players):
-        """ Setter for players """
-        self._players = players
-
-    @property
-    def turns(self):
-        """ Getter for turns """
-        return self._turns
-
-    @turns.setter
-    def turns(self, turns):
-        """ Setter for turns """
-        self._turns = turns
-
-    def accepts_players(self):
-        """ Determines if there are empty seats for players to join """
-        return len(self._players) < Game.MAX_PLAYERS
-
-    def add_player(self):
-        """ Adds a player and returns his id.
-
-        :return: id of the added player, None if the game is full
-        """
-        if self.accepts_players():
-            player_id = len(self._players)
-            player = Piece(player_id)
-            self._players.append(player)
-            return player_id
-        return None
-
-    def init_game(self):
-        """ Randomly initializes the game state, with the currently connected players.
+    def init_board(self, player_ids):
+        """ Randomly initializes the board state, with the currently connected players.
         Randomly gives each player an objective.
         Players starting locations are the corners of the maze, clockwise starting from (0, 0). """
         self._maze.generate_random()
@@ -381,14 +342,107 @@ class Game:
             BoardLocation(0, self._maze.MAZE_SIZE - 1),
             BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
             BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
-        circular_locations = list(islice(cycle(start_locations), len(self._players)))
-        for player, location in zip(self._players, circular_locations):
-            player.maze_card = self._maze[location]
-            unoccupied_maze_cards.remove(player.maze_card)
-        objectives = sample(unoccupied_maze_cards, len(self._players))
-        for player, objective in zip(self._players, objectives):
-            player.objective_maze_card = objective
-        self._turns = Turns([player.identifier for player in self._players])
+        circular_locations = list(islice(cycle(start_locations), len(player_ids)))
+        self._pieces = []
+        for player_id, location in zip(player_ids, circular_locations):
+            self._pieces.append(Piece(player_id, self._maze[location]))
+            unoccupied_maze_cards.remove(self._maze[location])
+        objectives = sample(unoccupied_maze_cards, len(self._pieces))
+        for piece, objective in zip(self._pieces, objectives):
+            piece.objective_maze_card = objective
+
+    def shift(self, player_id, new_leftover_location, leftover_rotation):
+        """ Performs a shifting action """
+        piece = self.find_piece(player_id)
+        self._leftover_card.rotation = leftover_rotation
+        pushed_card = self._leftover_card
+        self._leftover_card = self._maze.shift(new_leftover_location, self._leftover_card)
+        for piece in self._find_pieces_by_maze_card(self._leftover_card):
+            piece.maze_card = pushed_card
+
+    def move(self, player_id, target_location):
+        """ Performs a move action """
+        piece = self.find_piece(player_id)
+        piece_location = self._maze.maze_card_location(piece.maze_card)
+        if not MoveValidator(self._maze).validate_move(piece_location, target_location):
+            raise MoveUnreachableException("Locations {} and {} are not connected".format(
+                piece_location, target_location))
+        target = self._maze[target_location]
+        piece.maze_card = target
+        if piece.has_reached_objective():
+            piece.objective_maze_card = self._random_unoccupied_maze_card()
+
+    def find_piece(self, player_id):
+        """ Finds player's piece by id.
+
+        :param player_id: the id of the player to find
+        :return: an instance of Piece
+        """
+        match = [piece for piece in self._pieces if piece.identifier is player_id]
+        if len(match) > 1:
+            raise InvalidStateException("More than one piece with id {}".format(player_id))
+        elif not match:
+            raise InvalidStateException("No matching piece for id {} in this game".format(player_id))
+        return match[0]
+
+    def _find_pieces_by_maze_card(self, maze_card):
+        """ Finds pieces whose maze_card field matches the given maze card
+
+        :param maze_card: an instance of MazeCard
+        """
+        return [piece for piece in self._pieces if piece.maze_card is maze_card]
+
+    def _random_unoccupied_maze_card(self):
+        """ Finds a random unoccupied maze card,
+        where a maze card is either occupied by a player's piece or by a
+        player's objective
+        """
+        maze_cards = set([self._maze[location]
+                          for location in self._maze.maze_locations()] + [self._leftover_card])
+        for piece in self._pieces:
+            maze_cards.discard(piece.objective_maze_card)
+            maze_cards.discard(piece.maze_card)
+        return choice(tuple(maze_cards))
+
+
+class Game:
+    """ This class represents one played game """
+    MAX_PLAYERS = 4
+
+    def __init__(self):
+        self._player_ids = []
+        self._board = Board()
+        self._turns = None
+
+    @property
+    def turns(self):
+        """ Getter for turns """
+        return self._turns
+
+    @property
+    def board(self):
+        """ Getter for board """
+        return self._board
+
+    def accepts_players(self):
+        """ Determines if there are empty seats for players to join """
+        return len(self._player_ids) < self.MAX_PLAYERS
+
+    def add_player(self):
+        """ Adds a player and returns his id.
+
+        :return: id of the added player, None if the game is full
+        """
+        if self.accepts_players():
+            player_id = len(self._player_ids)
+            self._player_ids.append(player_id)
+            return player_id
+        return None
+
+    def init_game(self):
+        """ initializes the board and the turns """
+        self._board.init_board(self._player_ids)
+        self._turns = Turns(self._player_ids)
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
@@ -397,75 +451,31 @@ class Game:
         :param new_leftover_location: the new location of the leftover MazeCard
         :param leftover_rotation: the rotation of the leftover MazeCard, in degrees
         (one of 0, 90, 180, 270)
-        :raises InvalidShiftLocationException: for invalid insert location
-        :raises InvalidRotationException: for invalid rotation value
-        :raises PlayerNotFoundException: for invalid player id
         """
-        player = self.find_piece(player_id)
+        self.check_player(player_id)
         if self._turns.is_action_possible(player_id, Turns.SHIFT_ACTION):
-            self._leftover_card.rotation = leftover_rotation
-            pushed_card = self._leftover_card
-            self._leftover_card = self._maze.shift(new_leftover_location, self._leftover_card)
-            for player in self._find_pieces_by_maze_card(self._leftover_card):
-                player.maze_card = pushed_card
+            self._board.shift(player_id, new_leftover_location, leftover_rotation)
         self._turns.perform_action(player_id, Turns.SHIFT_ACTION)
-        
 
     def move(self, player_id, target_location):
         """ Performs a move action
 
         :param player_id: the moving player's id
         :param target_location: the board location to move to
-        :raises PlayerNotFoundException: for invalid player id
-        :raises InvalidLocationException: for invalid target location
-        :raises MoveUnreachableException: if there is no valid path to the target location
-        :raises InvalidStateException: for invalid state
         """
-        player = self.find_piece(player_id)
+        self.check_player(player_id)
         if self._turns.is_action_possible(player_id, Turns.MOVE_ACTION):
-            player_location = self._maze.maze_card_location(player.maze_card)
-            if not MoveValidator(self._maze).validate_move(player_location, target_location):
-                raise MoveUnreachableException("Locations {} and {} are not connected".format(
-                    player_location, target_location))
-            target = self._maze[target_location]
-            player.maze_card = target
-            if player.has_reached_objective():
-                player.objective_maze_card = self._random_unoccupied_maze_card()
+            self._board.move(player_id, target_location)
         self._turns.perform_action(player_id, Turns.MOVE_ACTION)
 
-    def find_piece(self, player_id):
-        """ Finds player's piece by id.
+    def check_player(self, player_id):
+        """ Checks if a player takes part in the game.
 
-        :param player_id: the id of the player to find
-        :raises InvalidStateException: if more than two players with given id
-        :raises PlayerNotFoundException: if no player with given id
-        :return: an instance of Piece
+        :param player_id: an ID of a player
+        :raises PlayerNotFoundException: if no player was found
         """
-        match = [player for player in self._players if player.identifier is player_id]
-        if len(match) > 1:
-            raise InvalidStateException("More than one player with id {}".format(player_id))
-        elif not match:
+        if player_id not in self._player_ids:
             raise PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
-        return match[0]
-
-    def _find_pieces_by_maze_card(self, maze_card):
-        """ Finds player whose maze_card field matches the given maze card
-
-        :param maze_card: an instance of MazeCard
-        """
-        return [player for player in self._players if player.maze_card is maze_card]
-
-    def _random_unoccupied_maze_card(self):
-        """ Finds a random unoccupied maze card,
-        where a maze card is either occupied by a player or by a
-        player's objective
-        """
-        maze_cards = set([self._maze[location]
-                          for location in self._maze.maze_locations()] + [self._leftover_card])
-        for player in self._players:
-            maze_cards.discard(player.objective_maze_card)
-            maze_cards.discard(player.maze_card)
-        return choice(tuple(maze_cards))
 
 
 class Turns:
