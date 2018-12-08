@@ -21,6 +21,8 @@ Also rename Player into Piece, but do not separate Player into Player and Piece 
 The list of Pieces is located in the Board, not in the Game. Game only knows about IDs.
 So right now, these two words player and piece are used interchangeably in the code, with the general idea that in the domain of a match the wording should be 'player' and in the domain of the Board, 'piece' should be the preferrd word.
 
+Remove setters for private fields. Ignore warnings in mapper.
+
 
 ## Status
 Open

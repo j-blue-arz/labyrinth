@@ -9,17 +9,17 @@ from collections import deque
 class MoveValidator():
     """ Validates if a move is valid.
 
-    Performs a BFS in a graph represented by the current board to
+    Performs a BFS in a graph represented by the current maze to
     verify if two locations are connected.
     """
 
-    def __init__(self, board):
-        self._board = board
+    def __init__(self, maze):
+        self._maze = maze
 
     def validate_move(self, source_location, target_location):
         """ Validates if a move is valid.
 
-        Performs a BFS in a graph represented by the current board to
+        Performs a BFS in a graph represented by the current maze to
         verify if the source location and the target location
         are connected.
 
@@ -48,13 +48,13 @@ class MoveValidator():
 
     def _neighbors(self, location):
         """ Returns an iterator over valid neighbors
-        of the given BoardLocation, with the current state of the board """
+        of the given BoardLocation, with the current state of the maze """
         def _mirror(delta_tuple):
             return (-delta_tuple[0], -delta_tuple[1])
-        maze_card = self._board[location]
+        maze_card = self._maze[location]
         for delta in maze_card.out_paths():
             location_to_test = location.add(*delta)
-            if self._board.is_inside(location_to_test):
-                card_to_test = self._board[location_to_test]
+            if self._maze.is_inside(location_to_test):
+                card_to_test = self._maze[location_to_test]
                 if card_to_test.has_out_path(_mirror(delta)):
                     yield location_to_test

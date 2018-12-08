@@ -49,11 +49,11 @@ def test_mapping_board():
     assert mapper.MAZE_CARDS in game_dto
     maze_card_dtos = [maze_card_dto for maze_card_dto in game_dto[mapper.MAZE_CARDS]
                       if maze_card_dto[mapper.LOCATION]]
-    assert len(maze_card_dtos) == game.board.BOARD_SIZE * game.board.BOARD_SIZE
+    assert len(maze_card_dtos) == game.maze.MAZE_SIZE * game.maze.MAZE_SIZE
     ids = set()
     for maze_card_dto in maze_card_dtos:
         location = _assert_and_return_location_dto(maze_card_dto[mapper.LOCATION])
-        maze_card_game = game.board[location]
+        maze_card_game = game.maze[location]
         assert maze_card_dto[mapper.ID] == maze_card_game.identifier
         assert maze_card_dto[mapper.DOORS] == maze_card_game.doors
         assert maze_card_dto[mapper.ROTATION] == maze_card_game.rotation

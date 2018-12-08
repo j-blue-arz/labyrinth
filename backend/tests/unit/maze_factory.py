@@ -1,22 +1,22 @@
-""" This module defines a convenient way to create maze board layouts
-by calling the function create_board on a multiline string."""
+""" This module defines a convenient way to create maze layouts
+by calling the function create_maze on a multiline string."""
 
-from domain.model import Board, MazeCard
-
-
-def create_board(board_string):
-    """ Creates a board, fills it by a string and returns the Board """
-    board = Board()
-    fill_board(board_string, board)
-    return board
+from domain.model import Maze, MazeCard
 
 
-def fill_board(board_string, board):
+def create_maze(maze_string):
+    """ Creates a maze, fills it by a string and returns the Maze """
+    maze = Maze()
+    fill_maze(maze_string, maze)
+    return maze
+
+
+def fill_maze(maze_string, maze):
     """ Reads a multi-line string representing a labyrinth configuration.
     Each maze card is a 3*3 substring of this multiline string. Walls are represented by '#',
     paths with '.'. After each field, there is one delimiter symbol, both horizontally and vertically.
     First line starts at index 1. """
-    lines = board_string.splitlines()[1:]
+    lines = maze_string.splitlines()[1:]
 
     def field(row, col):
         row_lines = lines[row*4:row*4 + 3]
@@ -47,5 +47,5 @@ def fill_board(board_string, board):
             return MazeCard.generate_random(doors=MazeCard.T_JUNCT, rotation=270)
         return None
 
-    for location in board.board_locations():
-        board[location] = create_maze_card(field(location.row, location.column))
+    for location in maze.maze_locations():
+        maze[location] = create_maze_card(field(location.row, location.column))

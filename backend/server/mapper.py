@@ -70,7 +70,7 @@ def dto_to_game(game_dto):
         if board_location is None:
             game.leftover_card = maze_card
         else:
-            game.board[board_location] = maze_card
+            game.maze[board_location] = maze_card
         maze_card_by_id[maze_card.identifier] = maze_card
     game.players = [_dto_to_player(player_dto, maze_card_by_id)
                     for player_dto in game_dto[PLAYERS]]
@@ -147,8 +147,8 @@ def _maze_card_to_dto(maze_card: MazeCard, location: BoardLocation = None):
     """ Maps a maze card to a DTO
 
     :param maze_card: an instance of model.MazeCard
-    :param location: an instance of BoardLocation, i.e. the location of this card on the board.
-    if no location is given, the card is not on the board, i.e. it is the leftover card.
+    :param location: an instance of BoardLocation, i.e. the location of this card in the maze.
+    if no location is given, the card is not in the maze, i.e. it is the leftover card.
     :return: a structure whose JSON representation is valid for the API
     """
     return {ID: maze_card.identifier,
@@ -159,15 +159,15 @@ def _maze_card_to_dto(maze_card: MazeCard, location: BoardLocation = None):
 
 def _maze_cards_to_dto(game):
     """ Maps all the given game's maze cards to one list of DTOs
-    These include all cards on the board and the leftover card with position None
+    These include all cards in the maze and the leftover card with position None
 
     :param game: an instance of model.Game
     :return: a list of DTOs.
     """
     dto = []
     dto.append(_maze_card_to_dto(game.leftover_card, None))
-    for location in game.board.board_locations():
-        maze_card = game.board[location]
+    for location in game.maze.maze_locations():
+        maze_card = game.maze[location]
         dto.append(_maze_card_to_dto(maze_card, location))
     return dto
 

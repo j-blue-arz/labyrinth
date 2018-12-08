@@ -13,19 +13,19 @@ def _create_test_game():
     player_ids = [game.add_player(), game.add_player()]
     game.leftover_card = MazeCard(0, MazeCard.T_JUNCT, 0)
     card_id = 1
-    for row in range(game.board.BOARD_SIZE):
-        for column in range(game.board.BOARD_SIZE):
+    for row in range(game.maze.MAZE_SIZE):
+        for column in range(game.maze.MAZE_SIZE):
             if row == 0 and column == 0:
-                game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.STRAIGHT, 0)
+                game.maze[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.STRAIGHT, 0)
             elif row == 1 and column == 1:
-                game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.CORNER, 0)
+                game.maze[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.CORNER, 0)
             elif row == 2 and column == 2:
-                game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 270)
+                game.maze[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 270)
             else:
-                game.board[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 0)
-    game.find_piece(player_ids[0]).maze_card = game.board[BoardLocation(3, 3)]
-    game.find_piece(player_ids[1]).maze_card = game.board[BoardLocation(5, 5)]
-    game.find_piece(player_ids[0]).objective_maze_card = game.board[BoardLocation(1, 4)]
+                game.maze[BoardLocation(row, column)] = MazeCard(card_id, MazeCard.T_JUNCT, 0)
+    game.find_piece(player_ids[0]).maze_card = game.maze[BoardLocation(3, 3)]
+    game.find_piece(player_ids[1]).maze_card = game.maze[BoardLocation(5, 5)]
+    game.find_piece(player_ids[0]).objective_maze_card = game.maze[BoardLocation(1, 4)]
     game.find_piece(player_ids[1]).objective_maze_card = None
     game.turns = Turns(player_ids, next_action=(player_ids[1], Turns.MOVE_ACTION))
     return game, player_ids
@@ -53,13 +53,13 @@ def test_mapping_for_leftover():
     assert _compare_maze_cards(*map(lambda g: g.leftover_card, [created_game, game]))
 
 
-def test_mapping_for_board():
-    """ Tests correct mapping of current board state """
+def test_mapping_for_maze():
+    """ Tests correct mapping of current maze state """
     created_game, _ = _create_test_game()
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
-    for location in game.board.board_locations():
-        assert _compare_maze_cards(*map(lambda g: g.board[location], [created_game, game]))
+    for location in game.maze.maze_locations():
+        assert _compare_maze_cards(*map(lambda g: g.maze[location], [created_game, game]))
     assert _compare_maze_cards(*map(lambda g: g.leftover_card, [created_game, game]))
 
 
