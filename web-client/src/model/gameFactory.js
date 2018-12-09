@@ -3,11 +3,9 @@ import MazeCard from "@/model/mazecard.js";
 import Player from "@/model/player.js";
 
 export default class GameFactory {
-    constructor(initialPlayerLocations) {
-        if (initialPlayerLocations === undefined) {
-            initialPlayerLocations = [];
-        }
+    constructor(initialPlayerLocations = []) {
         this._initialPlayerLocations = initialPlayerLocations;
+        this.nextAction = SHIFT_ACTION;
     }
 
     createGame() {
@@ -38,7 +36,7 @@ export default class GameFactory {
 
         game.getMazeCard(this._randomLocation(game.n)).hasObject = true;
 
-        game.setNextAction(0, SHIFT_ACTION);
+        game.setNextAction(0, this.nextAction);
 
         game.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
         return game;

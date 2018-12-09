@@ -12,7 +12,7 @@ export default class Game {
         this.mazeCards = [];
         this.leftoverMazeCard = {};
         this._players = new Map();
-        this.nextAction = {};
+        this.nextAction = { playerId: 0, action: "NONE" };
     }
 
     mazeCardsAsList() {

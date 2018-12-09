@@ -6,6 +6,7 @@
             :n="mazeSize"
             :maze-cards="mazeCards"
             :card-size="cardSize"
+            :interaction="isMyTurnToMove"
         ></v-game-board>
         <rect
             v-for="(insertPanel, itemIndex) in insertPanels"
@@ -16,6 +17,7 @@
             :height="cardSize"
             :width="cardSize"
             class="interactive-board__insert-location"
+            :class="{interaction: isMyTurnToShift}"
         ></rect>
         <v-maze-card
             @click.native="onLeftoverClick"
@@ -24,6 +26,7 @@
             :card-size="cardSize"
             class="interactive-board__leftover"
             ref="leftover"
+            :class="{interaction: isMyTurnToShift}"
         ></v-maze-card>
     </svg>
 </template>
@@ -77,8 +80,17 @@ export default {
         mazeSize: function() {
             return this.game.n;
         },
-        playerToAct: function() {
-            return this.game.nextAction;
+        isMyTurnToMove: function() {
+            return (
+                this.game.nextAction.playerId === this.playerId &&
+                this.game.nextAction.action === action.MOVE_ACTION
+            );
+        },
+        isMyTurnToShift: function() {
+            return (
+                this.game.nextAction.playerId === this.playerId &&
+                this.game.nextAction.action === action.SHIFT_ACTION
+            );
         },
         interactionSize: function() {
             return this.cardSize * (this.mazeSize + 2);
@@ -113,10 +125,7 @@ export default {
             return maybeOutside;
         },
         onInsertPanelClick: function(event, itemIndex) {
-            if (
-                this.playerToAct.playerId === this.playerId &&
-                this.playerToAct.action === action.SHIFT_ACTION
-            ) {
+            if (this.isMyTurnToShift) {
                 let insertPanel = this.insertPanels[itemIndex];
                 let insertEvent = {
                     location: {
@@ -129,18 +138,12 @@ export default {
             }
         },
         onMazeCardClick: function(mazeCard) {
-            if (
-                this.playerToAct.playerId === this.playerId &&
-                this.playerToAct.action === action.MOVE_ACTION
-            ) {
+            if (this.isMyTurnToMove) {
                 this.$emit("move-piece", mazeCard.location);
             }
         },
         onLeftoverClick: function() {
-            if (
-                this.playerToAct.playerId === this.playerId &&
-                this.playerToAct.action === action.SHIFT_ACTION
-            ) {
+            if (this.isMyTurnToShift) {
                 this.game.leftoverMazeCard.rotateClockwise();
             }
         }
@@ -157,13 +160,19 @@ export default {
     width: 900px;
 
     &__insert-location {
-        opacity: 0.1;
-        cursor: pointer;
-    }
+        transition: all 0.2s;
+        &:not(.interaction) {
+            fill: black;
+            opacity: 0.2;
+        }
 
-    &__leftover {
-        top: 100px;
-        cursor: pointer;
+        &.interaction {
+            opacity: 0.3;
+            cursor: pointer;
+            &:hover {
+                fill: blue;
+            }
+        }
     }
 }
 </style>

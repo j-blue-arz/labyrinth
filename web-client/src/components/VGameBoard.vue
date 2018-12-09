@@ -16,7 +16,8 @@
             :card-size="cardSize"
             :x="xPos(mazeCard.location) + borderWidth"
             :y="yPos(mazeCard.location) + borderWidth"
-            class="game-board__maze-card"/>
+            class="game-board__maze-card"
+            :class="{interaction: interaction}"/>
     </svg>
 </template>
 
@@ -48,6 +49,11 @@ export default {
         boardOffset: {
             type: Number,
             default: 100
+        },
+        interaction: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     data() {

@@ -98,6 +98,7 @@ export default {
         },
         createGameFromApi: function(apiResponse) {
             this.game.createFromApi(apiResponse.data);
+            //this.$forceUpdate();
         },
         addPlayer: function(apiResponse) {
             this.playerId = parseInt(apiResponse.data);

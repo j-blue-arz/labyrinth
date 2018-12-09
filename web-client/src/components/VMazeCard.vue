@@ -1,15 +1,62 @@
 <template>
-    <svg :height="cardSize" :width="cardSize" :id="mazeCard.id" viewBox="0 0 100 100" class="maze-card">
-        <rect x="0" y="0" :ry="edgeRadius" :height="cardSize" :width="cardSize" class="maze-card__wall maze-card__outline" />
-        <rect :x="remainingSpace" :y="remainingSpace" :height="pathWidth" :width="pathWidth" class="maze-card__pathway" />
-        <rect ref="northDoor" v-if="hasNorth"
-            :x="remainingSpace" y="1" :height="remainingSpace" :width="pathWidth" class="maze-card__pathway" />
-        <rect ref="eastDoor" v-if="hasEast"
-            :x="(cardSize - 1) - (remainingSpace + 1)" :y="remainingSpace" :height="pathWidth" :width="remainingSpace + 1" class="maze-card__pathway" />
-        <rect ref="southDoor" v-if="hasSouth"
-            :x="remainingSpace" :y="(cardSize - 1) - (remainingSpace + 1)" :height="remainingSpace + 1" :width="pathWidth" class="maze-card__pathway" />
-        <rect ref="westDoor" v-if="hasWest"
-            x="1" :y="remainingSpace" :height="pathWidth" :width="remainingSpace" class="maze-card__pathway" />
+    <svg
+        :height="cardSize"
+        :width="cardSize"
+        :id="mazeCard.id"
+        viewBox="0 0 100 100"
+        class="maze-card"
+    >
+        <rect
+            x="0"
+            y="0"
+            :ry="edgeRadius"
+            :height="cardSize"
+            :width="cardSize"
+            class="maze-card__wall maze-card__outline"
+        ></rect>
+        <rect
+            :x="remainingSpace"
+            :y="remainingSpace"
+            :height="pathWidth"
+            :width="pathWidth"
+            class="maze-card__pathway"
+        ></rect>
+        <rect
+            ref="northDoor"
+            v-if="hasNorth"
+            :x="remainingSpace"
+            y="1"
+            :height="remainingSpace"
+            :width="pathWidth"
+            class="maze-card__pathway"
+        ></rect>
+        <rect
+            ref="eastDoor"
+            v-if="hasEast"
+            :x="(cardSize - 1) - (remainingSpace + 1)"
+            :y="remainingSpace"
+            :height="pathWidth"
+            :width="remainingSpace + 1"
+            class="maze-card__pathway"
+        ></rect>
+        <rect
+            ref="southDoor"
+            v-if="hasSouth"
+            :x="remainingSpace"
+            :y="(cardSize - 1) - (remainingSpace + 1)"
+            :height="remainingSpace + 1"
+            :width="pathWidth"
+            class="maze-card__pathway"
+        ></rect>
+        <rect
+            ref="westDoor"
+            v-if="hasWest"
+            x="1"
+            :y="remainingSpace"
+            :height="pathWidth"
+            :width="remainingSpace"
+            class="maze-card__pathway"
+        ></rect>
         <v-player-piece
             v-for="(player, index) in players"
             :xCenterPos="pieceCenters[index].x"
@@ -17,10 +64,8 @@
             :maxSize="pieceSize"
             :key="player.id"
             :playerIndex="player.playerIndex"
-            />
-        <v-objective
-            v-if="mazeCard.hasObject"
-            />
+        ></v-player-piece>
+        <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
 
@@ -124,8 +169,24 @@ export default {
 
 <style lang="scss">
 .maze-card {
+    transition: all 0.1s;
     &__outline {
         stroke: black;
+        stroke-width: 1px;
+        stroke-opacity: 0.8;
+    }
+
+    &.interaction {
+        .maze-card__outline {
+            stroke-width: 2px;
+            stroke-opacity: 1;
+        }
+
+        &:hover {
+            .maze-card__outline {
+                stroke: blue;
+            }
+        }
     }
 
     &__wall {
@@ -135,6 +196,10 @@ export default {
     &__pathway {
         fill: white;
         stroke: white;
+    }
+
+    &.interaction {
+        cursor: pointer;
     }
 }
 </style>
