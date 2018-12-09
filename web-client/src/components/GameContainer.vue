@@ -42,10 +42,10 @@ export default {
             required: false,
             default: null
         },
-        api: {
-            type: GameApi,
+        shouldUseApi: {
+            type: Boolean,
             required: false,
-            default: () => new GameApi(location.protocol + "//" + location.host)
+            default: true
         }
     },
     data() {
@@ -53,7 +53,8 @@ export default {
             game: new Game(),
             cardSize: 100,
             playerId: 0,
-            timer: 0
+            timer: 0,
+            api: new GameApi(location.protocol + "//" + location.host)
         };
     },
     computed: {
@@ -74,7 +75,7 @@ export default {
         onInsertCard: function(location) {
             this.stopPolling();
             var rotation = this.game.leftoverMazeCard.rotation;
-            if (process.env.NODE_ENV === "production") {
+            if (this.useApi()) {
                 this.api
                     .doShift(location, rotation)
                     .then(() => this.game.shift(location))
@@ -91,7 +92,7 @@ export default {
         },
         onMovePlayerPiece: function(targetLocation) {
             this.stopPolling();
-            if (process.env.NODE_ENV === "production") {
+            if (this.useApi()) {
                 this.api
                     .doMove(targetLocation)
                     .then(() => this.game.move(this.playerId, targetLocation))
@@ -114,7 +115,7 @@ export default {
             }
         },
         startPolling() {
-            if (this.timer === 0 && process.env.NODE_ENV === "production") {
+            if (this.timer === 0 && this.useApi()) {
                 this.fetchApiState();
                 this.timer = setInterval(this.fetchApiState, 800);
             }
@@ -131,21 +132,29 @@ export default {
         addPlayer: function(apiResponse) {
             this.playerId = parseInt(apiResponse.data);
             this.api.playerId = this.playerId;
-            sessionStorage.playerId = this.playerId;
+            if (this.useStorage()) {
+                sessionStorage.playerId = this.playerId;
+            }
         },
         getSelfPlayer: function() {
             return this.game.getPlayer(this.playerId);
+        },
+        useApi: function() {
+            return process.env.NODE_ENV !== "developmemt" && this.shouldUseApi;
+        },
+        useStorage: function() {
+            return process.env.NODE_ENV === "production";
         }
     },
     created: function() {
-        if (process.env.NODE_ENV !== "production") {
+        if (!this.useApi()) {
             let gameFactory = this.gameFactory;
             if (gameFactory === null) {
                 gameFactory = new GameFactory();
             }
             this.game = gameFactory.createGame();
         } else {
-            if (sessionStorage.playerId) {
+            if (this.useStorage() && sessionStorage.playerId) {
                 this.playerId = parseInt(sessionStorage.playerId);
                 this.api.playerId = this.playerId;
                 this.api

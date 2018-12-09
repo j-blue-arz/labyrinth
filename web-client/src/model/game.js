@@ -46,6 +46,7 @@ export default class Game {
     }
 
     shift(location) {
+        console.log("game.shift()");
         if (!this._isInside(location)) {
             throw new RangeError();
         }
@@ -106,6 +107,7 @@ export default class Game {
     }
 
     _shiftAlongLocations(locations) {
+        console.log("_shiftAlongLocations" + locations);
         var pushedCard = this.leftoverMazeCard;
         this.leftoverMazeCard = this.getMazeCard(locations[this.n - 1]);
         this.leftoverMazeCard.setLeftoverLocation();

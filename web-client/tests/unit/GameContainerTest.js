@@ -1,52 +1,9 @@
 import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
-import VMazeCard from "@/components/VMazeCard.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import GameFactory from "@/model/gameFactory";
 import MOVE_ACTION from "@/model/player";
-import { loc } from "./testutils.js";
-
-const extractIdMatrix = function(gameContainer) {
-    var vMazeCards = gameContainer
-        .find({ ref: "interactive-board" })
-        .findAll(VMazeCard);
-    var htmlCards = [];
-    for (let i = 0; i < vMazeCards.length; i++) {
-        var card = vMazeCards.at(i);
-        var x = Number.parseInt(card.element.getAttribute("x"));
-        var y = Number.parseInt(card.element.getAttribute("y"));
-        var id = Number.parseInt(card.element.getAttribute("id"));
-        htmlCards.push({
-            x: x,
-            y: y,
-            id: id
-        });
-    }
-    htmlCards.sort(function(a, b) {
-        if (a.y > b.y) {
-            return 1;
-        }
-        if (a.y < b.y) {
-            return -1;
-        }
-        if (a.x > b.x) {
-            return 1;
-        }
-        if (a.x < b.x) {
-            return -1;
-        }
-        return 0;
-    });
-    var ids = [];
-    var i = 0;
-    for (var row = 0; row < 7; row++) {
-        ids.push([]);
-        for (var col = 0; col < 7; col++) {
-            ids[row].push(htmlCards[i++].id);
-        }
-    }
-    return ids;
-};
+import { loc, extractIdMatrix } from "./testutils.js";
 
 const determineLeftOverId = function(gameContainer) {
     return Number.parseInt(
@@ -73,7 +30,8 @@ const factory = function(locations) {
     }
     return mount(GameContainer, {
         propsData: {
-            gameFactory: new GameFactory(locations)
+            gameFactory: new GameFactory(locations),
+            shouldUseApi: false
         }
     });
 };
