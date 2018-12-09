@@ -1,13 +1,14 @@
 import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameFactory from "@/model/gameFactory";
-import MOVE_ACTION from "@/model/player";
 import { loc, extractIdMatrix } from "./testutils.js";
 
 const determineLeftOverId = function(gameContainer) {
+    let board = gameContainer.find(InteractiveBoard);
     return Number.parseInt(
-        gameContainer.find({ ref: "leftover" }).element.getAttribute("id")
+        board.find({ ref: "leftover" }).element.getAttribute("id")
     );
 };
 
@@ -36,39 +37,17 @@ const factory = function(locations) {
     });
 };
 
+const shiftEvent = function(row, column, rotation) {
+    return { location: loc(row, column), leftoverRotation: rotation };
+};
+
 describe("GameContainer", () => {
-    it("rotates leftover maze card when clicked", () => {
-        var gameContainer = factory();
-        const rotateOperation = jest.spyOn(
-            gameContainer.vm.$data.game.leftoverMazeCard,
-            "rotateClockwise"
-        );
-        var leftOverVMazeCard = gameContainer.find({ ref: "leftover" });
-        var oldRotation = leftOverVMazeCard.props().mazeCard.rotation;
-        leftOverVMazeCard.trigger("click");
-        var newRotation = leftOverVMazeCard.props().mazeCard.rotation;
-        expect(newRotation).toBe((oldRotation + 90) % 360);
-        expect(rotateOperation).toHaveBeenCalledTimes(1);
-    });
-
-    it("does not rotate leftover maze card when next action is move", () => {
-        var gameContainer = factory();
-        const rotateOperation = jest.spyOn(
-            gameContainer.vm.$data.game.leftoverMazeCard,
-            "rotateClockwise"
-        );
-        gameContainer.vm.$data.game.getPlayer(0).nextAction = MOVE_ACTION;
-        var leftOverVMazeCard = gameContainer.find({ ref: "leftover" });
-        leftOverVMazeCard.trigger("click");
-        expect(rotateOperation).toHaveBeenCalledTimes(0);
-    });
-
     it("shifts leftmost row correctly to the south", () => {
         var gameContainer = factory();
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
+        interactiveBoard.vm.$emit("insert-card", shiftEvent(0, 1, 0));
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[1][1]).toBe(idMatrixOld[0][1]);
@@ -84,7 +63,7 @@ describe("GameContainer", () => {
         var oldLeftOverId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(0, 3));
+        interactiveBoard.vm.$emit("insert-card", shiftEvent(0, 3, 0));
         var idMatrixNew = extractIdMatrix(gameContainer);
 
         expect(idMatrixNew[0][3]).toBe(oldLeftOverId);
@@ -95,7 +74,7 @@ describe("GameContainer", () => {
         var idMatrixOld = extractIdMatrix(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(5, 0));
+        interactiveBoard.vm.$emit("insert-card", shiftEvent(5, 0, 0));
         var newLeftOverId = determineLeftOverId(gameContainer);
 
         expect(newLeftOverId).toBe(idMatrixOld[5][6]);
@@ -113,7 +92,7 @@ describe("GameContainer", () => {
         var gameContainer = factory([loc(4, 3)]);
 
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("insert-card", loc(0, 3));
+        interactiveBoard.vm.$emit("insert-card", shiftEvent(0, 3, 0));
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);
@@ -127,7 +106,7 @@ describe("GameContainer", () => {
         var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
+        interactiveBoard.vm.$emit("insert-card", shiftEvent(0, 1, 0));
 
         var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
         expect(playerCardIds.length).toBe(1);

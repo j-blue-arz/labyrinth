@@ -1,13 +1,12 @@
 <template>
-    <svg
-        :viewBox="`0 0 ${interactionSize} ${interactionSize}`"
-        class="interactive-board">
+    <svg :viewBox="`0 0 ${interactionSize} ${interactionSize}`" class="interactive-board">
         <v-game-board
             @maze-card-clicked="onMazeCardClick"
             :board-offset="boardOffset"
-            :n="n"
+            :n="mazeSize"
             :maze-cards="mazeCards"
-            :card-size="cardSize" />
+            :card-size="cardSize"
+        ></v-game-board>
         <rect
             v-for="(insertPanel, itemIndex) in insertPanels"
             @click="onInsertPanelClick($event, itemIndex)"
@@ -16,32 +15,42 @@
             :y="yPos(insertPanel) + boardOffset"
             :height="cardSize"
             :width="cardSize"
-            class="interactive-board__insert-location" />
+            class="interactive-board__insert-location"
+        ></rect>
+        <v-maze-card
+            @click.native="onLeftoverClick"
+            v-if="hasStarted"
+            :maze-card="leftoverMazeCard"
+            :card-size="cardSize"
+            class="interactive-board__leftover"
+            ref="leftover"
+        ></v-maze-card>
     </svg>
 </template>
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
+import VMazeCard from "@/components/VMazeCard.vue";
+import Game, * as action from "@/model/game.js";
+import MazeCard from "@/model/mazecard.js";
 
 export default {
     name: "interactive-board",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VGameBoard
+        VGameBoard,
+        VMazeCard
     },
     props: {
-        n: {
-            type: Number,
-            default: 7,
-            validator: function(num) {
-                return num % 2 == 1;
-            }
-        },
-        mazeCards: {
-            type: Array,
+        game: {
+            type: Game,
             required: true
         },
         cardSize: {
+            type: Number,
+            required: true
+        },
+        playerId: {
             type: Number,
             required: true
         }
@@ -52,24 +61,39 @@ export default {
                 { id: 0, row: -1, column: 1 },
                 { id: 1, row: -1, column: 3 },
                 { id: 2, row: -1, column: 5 },
-                { id: 3, row: this.n, column: 1 },
-                { id: 4, row: this.n, column: 3 },
-                { id: 5, row: this.n, column: 5 },
+                { id: 3, row: this.game.n, column: 1 },
+                { id: 4, row: this.game.n, column: 3 },
+                { id: 5, row: this.game.n, column: 5 },
                 { id: 6, row: 1, column: -1 },
                 { id: 7, row: 3, column: -1 },
                 { id: 8, row: 5, column: -1 },
-                { id: 9, row: 1, column: this.n },
-                { id: 10, row: 3, column: this.n },
-                { id: 11, row: 5, column: this.n }
+                { id: 9, row: 1, column: this.game.n },
+                { id: 10, row: 3, column: this.game.n },
+                { id: 11, row: 5, column: this.game.n }
             ]
         };
     },
     computed: {
+        mazeSize: function() {
+            return this.game.n;
+        },
+        playerToAct: function() {
+            return this.game.nextAction;
+        },
         interactionSize: function() {
-            return this.cardSize * (this.n + 2);
+            return this.cardSize * (this.mazeSize + 2);
         },
         boardOffset: function() {
             return this.cardSize;
+        },
+        mazeCards: function() {
+            return this.game.mazeCardsAsList();
+        },
+        hasStarted: function() {
+            return this.game.leftoverMazeCard instanceof MazeCard;
+        },
+        leftoverMazeCard: function() {
+            return this.game.leftoverMazeCard;
         }
     },
     methods: {
@@ -83,21 +107,42 @@ export default {
             if (maybeOutside === -1) {
                 return 0;
             }
-            if (maybeOutside === this.n) {
-                return this.n - 1;
+            if (maybeOutside === this.mazeSize) {
+                return this.mazeSize - 1;
             }
             return maybeOutside;
         },
         onInsertPanelClick: function(event, itemIndex) {
-            var insertPanel = this.insertPanels[itemIndex];
-            var insertLocation = {
-                row: this.toInsidePosition(insertPanel.row),
-                column: this.toInsidePosition(insertPanel.column)
-            };
-            this.$emit("insert-card", insertLocation);
+            if (
+                this.playerToAct.playerId === this.playerId &&
+                this.playerToAct.action === action.SHIFT_ACTION
+            ) {
+                let insertPanel = this.insertPanels[itemIndex];
+                let insertEvent = {
+                    location: {
+                        row: this.toInsidePosition(insertPanel.row),
+                        column: this.toInsidePosition(insertPanel.column)
+                    },
+                    leftoverRotation: this.leftoverMazeCard.rotation
+                };
+                this.$emit("insert-card", insertEvent);
+            }
         },
         onMazeCardClick: function(mazeCard) {
-            this.$emit("move-piece", mazeCard.location);
+            if (
+                this.playerToAct.playerId === this.playerId &&
+                this.playerToAct.action === action.MOVE_ACTION
+            ) {
+                this.$emit("move-piece", mazeCard.location);
+            }
+        },
+        onLeftoverClick: function() {
+            if (
+                this.playerToAct.playerId === this.playerId &&
+                this.playerToAct.action === action.SHIFT_ACTION
+            ) {
+                this.game.leftoverMazeCard.rotateClockwise();
+            }
         }
     }
 };
@@ -115,14 +160,10 @@ export default {
         opacity: 0.1;
         cursor: pointer;
     }
-}
 
-.game-board {
-    &__background {
-        fill: lightblue;
+    &__leftover {
+        top: 100px;
+        cursor: pointer;
     }
-}
-.game-board-move {
-    transition: transform 0.5s ease-in-out;
 }
 </style>

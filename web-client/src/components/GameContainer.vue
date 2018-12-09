@@ -3,18 +3,10 @@
         <interactive-board
             @move-piece="onMovePlayerPiece"
             @insert-card="onInsertCard"
-            :n="boardSize"
-            :maze-cards="mazeCardsList"
+            :game="game"
             :card-size="cardSize"
+            :player-id="playerId"
             ref="interactive-board"
-        />
-        <v-maze-card
-            @click.native="onLeftoverClick"
-            v-if="hasStarted"
-            :maze-card="leftoverMazeCard"
-            :card-size="cardSize"
-            class="game-container__leftover"
-            ref="leftover"
         />
     </div>
 </template>
@@ -22,19 +14,15 @@
 
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
-import VMazeCard from "@/components/VMazeCard.vue";
-import Game from "@/model/game.js";
+import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
-import MazeCard from "@/model/mazecard.js";
-import * as player from "@/model/player.js";
 import { setInterval, clearInterval } from "timers";
 
 export default {
     name: "game-container",
     components: {
-        InteractiveBoard,
-        VMazeCard
+        InteractiveBoard
     },
     props: {
         gameFactory: {
@@ -57,37 +45,18 @@ export default {
             api: new GameApi(location.protocol + "//" + location.host)
         };
     },
-    computed: {
-        mazeCardsList: function() {
-            return this.game.mazeCardsAsList();
-        },
-        hasStarted: function() {
-            return this.game.leftoverMazeCard instanceof MazeCard;
-        },
-        leftoverMazeCard: function() {
-            return this.game.leftoverMazeCard;
-        },
-        boardSize: function() {
-            return this.game.n;
-        }
-    },
     methods: {
-        onInsertCard: function(location) {
+        onInsertCard: function(event) {
             this.stopPolling();
-            var rotation = this.game.leftoverMazeCard.rotation;
             if (this.useApi()) {
                 this.api
-                    .doShift(location, rotation)
-                    .then(() => this.game.shift(location))
+                    .doShift(event.location, event.leftoverRotation)
+                    .then(() => this.game.shift(event.location))
                     .catch(this.handleError)
                     .then(this.startPolling);
             } else {
-                this.game.shift(location);
-            }
-        },
-        onLeftoverClick: function() {
-            if (this.getSelfPlayer().nextAction === player.SHIFT_ACTION) {
-                this.game.leftoverMazeCard.rotateClockwise();
+                this.game.shift(event.location);
+                this.game.nextAction.action = actions.MOVE_ACTION;
             }
         },
         onMovePlayerPiece: function(targetLocation) {
@@ -100,6 +69,7 @@ export default {
                     .then(this.startPolling);
             } else {
                 this.game.move(this.playerId, targetLocation);
+                this.game.nextAction.action = actions.SHIFT_ACTION;
             }
         },
         handleError: function(error) {
@@ -136,11 +106,8 @@ export default {
                 sessionStorage.playerId = this.playerId;
             }
         },
-        getSelfPlayer: function() {
-            return this.game.getPlayer(this.playerId);
-        },
         useApi: function() {
-            return process.env.NODE_ENV !== "developmemt" && this.shouldUseApi;
+            return process.env.NODE_ENV !== "development" && this.shouldUseApi;
         },
         useStorage: function() {
             return process.env.NODE_ENV === "production";
@@ -190,10 +157,5 @@ export default {
     position: relative;
     display: flex;
     flex-flow: row wrap;
-
-    &__leftover {
-        top: 100px;
-        cursor: pointer;
-    }
 }
 </style>

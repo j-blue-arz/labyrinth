@@ -3,12 +3,16 @@ import MazeCard from "@/model/mazecard.js";
 import Player from "@/model/player.js";
 import ValueError from "@/util/exceptions";
 
+export const MOVE_ACTION = "MOVE";
+export const SHIFT_ACTION = "SHIFT";
+
 export default class Game {
     constructor() {
         this.n = 7;
         this.mazeCards = [];
         this.leftoverMazeCard = {};
         this._players = new Map();
+        this.nextAction = {};
     }
 
     mazeCardsAsList() {
@@ -46,7 +50,6 @@ export default class Game {
     }
 
     shift(location) {
-        console.log("game.shift()");
         if (!this._isInside(location)) {
             throw new RangeError();
         }
@@ -107,7 +110,6 @@ export default class Game {
     }
 
     _shiftAlongLocations(locations) {
-        console.log("_shiftAlongLocations" + locations);
         var pushedCard = this.leftoverMazeCard;
         this.leftoverMazeCard = this.getMazeCard(locations[this.n - 1]);
         this.leftoverMazeCard.setLeftoverLocation();
@@ -151,9 +153,16 @@ export default class Game {
         }
 
         if (apiState.nextAction) {
-            let nextAction = apiState.nextAction;
-            this.getPlayer(nextAction.playerId).nextAction = nextAction.action;
+            this.setNextAction(
+                apiState.nextAction.playerId,
+                apiState.nextAction.action
+            );
         }
+    }
+
+    setNextAction(playerId, action) {
+        this.nextAction.playerId = playerId;
+        this.nextAction.action = action;
     }
 
     _sortApiMazeCards(apiMazeCards) {

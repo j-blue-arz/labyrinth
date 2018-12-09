@@ -15,14 +15,16 @@ export function extractIdMatrix(gameContainer) {
     var htmlCards = [];
     for (let i = 0; i < vMazeCards.length; i++) {
         var card = vMazeCards.at(i);
-        var x = Number.parseInt(card.element.getAttribute("x"));
-        var y = Number.parseInt(card.element.getAttribute("y"));
-        var id = Number.parseInt(card.element.getAttribute("id"));
-        htmlCards.push({
-            x: x,
-            y: y,
-            id: id
-        });
+        if (!card.classes("interactive-board__leftover")) {
+            var x = Number.parseInt(card.element.getAttribute("x"));
+            var y = Number.parseInt(card.element.getAttribute("y"));
+            var id = Number.parseInt(card.element.getAttribute("id"));
+            htmlCards.push({
+                x: x,
+                y: y,
+                id: id
+            });
+        }
     }
     htmlCards.sort(function(a, b) {
         if (a.y > b.y) {

@@ -1,5 +1,6 @@
 import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
+import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import flushPromises from "flush-promises";
 import { loc } from "./testutils.js";
 import GameApi from "@/api/gameApi.js";
@@ -10,13 +11,15 @@ var mockFetchState = jest.fn();
 var mockAddPlayer = jest.fn();
 var mockShift = jest.fn();
 var mockCancel = jest.fn();
+var mockErrorWasThrownByCancel = jest.fn();
 jest.mock("@/api/gameApi.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
             fetchState: mockFetchState,
             doAddPlayer: mockAddPlayer,
             doShift: mockShift,
-            cancelAllFetches: mockCancel
+            cancelAllFetches: mockCancel,
+            errorWasThrownByCancel: mockErrorWasThrownByCancel
         };
     });
 });
@@ -24,6 +27,7 @@ jest.mock("@/api/gameApi.js", () => {
 mockFetchState.mockImplementation(() => Promise.resolve({ data: state }));
 mockAddPlayer.mockImplementation(() => Promise.resolve({ data: 7 }));
 mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
+mockErrorWasThrownByCancel.mockReturnValue(true);
 
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
@@ -57,7 +61,7 @@ describe("GameContainerPublic", () => {
         let gameContainer = factory();
         await flushPromises();
         expect(mockFetchState).toHaveBeenCalledTimes(1);
-        var leftOverVMazeCard = gameContainer.find({
+        var leftOverVMazeCard = gameContainer.find(InteractiveBoard).find({
             ref: "leftover"
         });
         var rotation = leftOverVMazeCard.props().mazeCard.rotation;

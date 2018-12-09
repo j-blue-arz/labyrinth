@@ -1,6 +1,6 @@
-import Game from "@/model/game.js";
+import Game, { SHIFT_ACTION } from "@/model/game.js";
 import MazeCard from "@/model/mazecard.js";
-import Player, { SHIFT_ACTION } from "@/model/player.js";
+import Player from "@/model/player.js";
 
 export default class GameFactory {
     constructor(initialPlayerLocations) {
@@ -38,7 +38,7 @@ export default class GameFactory {
 
         game.getMazeCard(this._randomLocation(game.n)).hasObject = true;
 
-        game.getPlayer(0).nextAction = SHIFT_ACTION;
+        game.setNextAction(0, SHIFT_ACTION);
 
         game.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
         return game;
