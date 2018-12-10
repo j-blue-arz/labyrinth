@@ -27,10 +27,10 @@ class MoveValidator():
         :param target_location: the requested BoardLocation
         :return: True, iff there is a path between the two locations
         """
-        reachable_locations = self._bfs(source_location)
+        reachable_locations = self.bfs(source_location)
         return target_location in reachable_locations
 
-    def _bfs(self, source):
+    def bfs(self, source):
         """ Performs a BFS, returning all reachable BoardLocations
 
         :param source: the BoardLocation to start from

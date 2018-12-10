@@ -161,12 +161,12 @@ class Maze:
 
     def __init__(self):
         self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
-        self._insert_locations = set()
+        self.insert_locations = set()
         for position in range(1, Maze.MAZE_SIZE, 2):
-            self._insert_locations.add(BoardLocation(0, position))
-            self._insert_locations.add(BoardLocation(position, 0))
-            self._insert_locations.add(BoardLocation(Maze.MAZE_SIZE - 1, position))
-            self._insert_locations.add(BoardLocation(position, Maze.MAZE_SIZE - 1))
+            self.insert_locations.add(BoardLocation(0, position))
+            self.insert_locations.add(BoardLocation(position, 0))
+            self.insert_locations.add(BoardLocation(Maze.MAZE_SIZE - 1, position))
+            self.insert_locations.add(BoardLocation(position, Maze.MAZE_SIZE - 1))
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -205,7 +205,7 @@ class Maze:
         :return: the pushed out maze card
         """
         self._validate_location(insert_location)
-        if insert_location not in self._insert_locations:
+        if insert_location not in self.insert_locations:
             raise InvalidShiftLocationException(
                 "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
         direction = self._determine_shift_direction(insert_location)
@@ -462,6 +462,7 @@ class Turns:
     """
     MOVE_ACTION = "MOVE"
     SHIFT_ACTION = "SHIFT"
+    WAIT_ACTION = "WAIT"
 
     def __init__(self, players=None, next_action=None):
         if not players:
