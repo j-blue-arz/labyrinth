@@ -27,6 +27,7 @@
             class="interactive-board__leftover"
             ref="leftover"
             :class="{interaction: isMyTurnToShift}"
+            :rotation="leftoverRotation"
         ></v-maze-card>
     </svg>
 </template>
@@ -73,7 +74,8 @@ export default {
                 { id: 9, row: 1, column: this.game.n },
                 { id: 10, row: 3, column: this.game.n },
                 { id: 11, row: 5, column: this.game.n }
-            ]
+            ],
+            leftoverRotation: 0
         };
     },
     computed: {
@@ -132,9 +134,11 @@ export default {
                         row: this.toInsidePosition(insertPanel.row),
                         column: this.toInsidePosition(insertPanel.column)
                     },
-                    leftoverRotation: this.leftoverMazeCard.rotation
+                    leftoverRotation: this.leftoverRotation
                 };
                 this.$emit("insert-card", insertEvent);
+                this.leftoverRotation = this.leftoverMazeCard.rotation;
+                this.leftoverMazeCard.rotation = 0;
             }
         },
         onMazeCardClick: function(mazeCard) {
@@ -144,7 +148,7 @@ export default {
         },
         onLeftoverClick: function() {
             if (this.isMyTurnToShift) {
-                this.game.leftoverMazeCard.rotateClockwise();
+                this.leftoverRotation = (this.leftoverRotation + 90) % 360;
             }
         }
     }

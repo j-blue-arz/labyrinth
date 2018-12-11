@@ -91,13 +91,17 @@ export default class MazeCard {
     _hasDoor(door) {
         var rotationDoor = MazeCard.rotationEquivalentDoor(
             door,
-            -this._rotation
+            -(this._rotation % 360)
         );
         return this.doors.indexOf(rotationDoor) != -1;
     }
 
     get rotation() {
         return this._rotation;
+    }
+
+    set rotation(value) {
+        this._rotation = value;
     }
 
     get players() {

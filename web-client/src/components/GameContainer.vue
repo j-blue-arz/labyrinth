@@ -47,6 +47,7 @@ export default {
     },
     methods: {
         onInsertCard: function(event) {
+            this.game.leftoverMazeCard.rotation = event.leftoverRotation;
             this.stopPolling();
             if (this.useApi()) {
                 this.api
