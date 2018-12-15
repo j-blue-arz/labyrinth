@@ -51,7 +51,7 @@ I will keep track of the player ID with local storage (https://vuejs.org/v2/cook
 To handle the polling problem, all axios GET requests will be given a token (see https://github.com/axios/axios). On a POST request, the GET requests are cancelled. The polling timer is cancelled as well. On return a single GET is issued and the timer is started.
 
 ## Status
-To be implemented.
+Implemented.
 
 ## Consequence
 Refactor, revisit this ADR if needed.

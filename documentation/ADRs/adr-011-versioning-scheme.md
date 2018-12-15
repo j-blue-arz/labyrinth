@@ -25,7 +25,7 @@ Some of the epics defined on pivotaltracker, e.g. 'UX', are not epics but ticket
 I will tag all versions in Git. 
 
 ## Status
-Open
+Accepted
 
 ## Consequences
 Update version number after current ticket to 0.0.3. Tag this version.
