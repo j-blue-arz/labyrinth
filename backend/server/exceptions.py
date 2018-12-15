@@ -4,7 +4,7 @@ It also maps domain exceptions to these pre-defined factories. """
 
 from .domain.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
-    InvalidRotationException, TurnActionViolationException
+    InvalidRotationException, TurnActionViolationException, GameFullException
 from .mapper import exception_to_dto
 
 GAME_FULL = lambda: ApiException("GAME_FULL", "Number of players has reached game limit.", 400)
@@ -33,6 +33,8 @@ def domain_to_api_exception(domain_exception):
     """
     if isinstance(domain_exception, InvalidStateException):
         return UNKNOWN_ERROR()
+    if isinstance(domain_exception, GameFullException):
+        return GAME_FULL()
     if isinstance(domain_exception, PlayerNotFoundException):
         return PLAYER_NOT_IN_GAME()
     if isinstance(domain_exception, (InvalidLocationException,

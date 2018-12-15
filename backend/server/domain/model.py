@@ -16,9 +16,7 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 """
 from itertools import cycle, islice
 from random import choice
-from .exceptions import InvalidStateException, PlayerNotFoundException, \
-    InvalidLocationException, InvalidShiftLocationException, \
-    MoveUnreachableException, InvalidRotationException, TurnActionViolationException
+import exceptions
 from .validation import MoveValidator
 
 
@@ -107,7 +105,7 @@ class MazeCard:
     def rotation(self, value):
         """ Setter of rotation, validates new value """
         if value % 90 != 0:
-            raise InvalidRotationException("Rotation {} is not divisible by 90".format(value))
+            raise exceptions.InvalidRotationException("Rotation {} is not divisible by 90".format(value))
         self._rotation = value % 360
 
     @property
@@ -206,7 +204,7 @@ class Maze:
         """
         self._validate_location(insert_location)
         if insert_location not in self.insert_locations:
-            raise InvalidShiftLocationException(
+            raise exceptions.InvalidShiftLocationException(
                 "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
         direction = self._determine_shift_direction(insert_location)
         shift_line_locations = []
@@ -240,7 +238,7 @@ class Maze:
             return (0, -1)
         if shift_location.column == 0:
             return (0, 1)
-        raise InvalidShiftLocationException(
+        raise exceptions.InvalidShiftLocationException(
             "Location {} is not shiftable (not on border)".format(str(shift_location)))
 
     @classmethod
@@ -276,7 +274,7 @@ class Maze:
     @classmethod
     def _validate_location(cls, location):
         if not cls.is_inside(location):
-            raise InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
+            raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
 
 class Board:
@@ -337,7 +335,7 @@ class Board:
         piece_location = self._maze.maze_card_location(piece.maze_card)
         target = self._maze[target_location]
         if not MoveValidator(self._maze).validate_move(piece_location, target_location):
-            raise MoveUnreachableException("Locations {} and {} are not connected".format(
+            raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
                 piece_location, target_location))
         piece.maze_card = target
         if piece.has_reached_objective():
@@ -351,9 +349,9 @@ class Board:
         """
         match = [piece for piece in self._pieces if piece.identifier is player_id]
         if len(match) > 1:
-            raise InvalidStateException("More than one piece with id {}".format(player_id))
+            raise exceptions.InvalidStateException("More than one piece with id {}".format(player_id))
         elif not match:
-            raise InvalidStateException("No matching piece for id {} in this game".format(player_id))
+            raise exceptions.InvalidStateException("No matching piece for id {} in this game".format(player_id))
         return match[0]
 
     def _find_pieces_by_maze_card(self, maze_card):
@@ -376,12 +374,66 @@ class Board:
         return choice(tuple(maze_cards))
 
 
+class Turns:
+    """ This class contains the turn progression.
+
+    It manages player's turns and the correct order of their actions.
+    The constructor is parameterized with the game's current players.
+    The methods expect two parameters: a player parameter, and an action parameter.
+    The former is an instance of Player, the latter is either Turns.MOVE_ACTION or Turns.SHIFT_ACTION
+    """
+    MOVE_ACTION = "MOVE"
+    SHIFT_ACTION = "SHIFT"
+    WAIT_ACTION = "WAIT"
+
+    def __init__(self, players=None, next_action=None):
+        if not players:
+            players = []
+        actions = [self.SHIFT_ACTION, self.MOVE_ACTION]
+        self._player_actions = [(player, action) for player in players for action in actions]
+        self._next = 0
+        if next_action:
+            self._next = self._player_actions.index(next_action)
+
+    def is_action_possible(self, player, action):
+        """ Checks if the action can be performed by the player """
+        return self.next_player_action() == (player, action)
+
+    def perform_action(self, player, action):
+        """ Informs that a player performed the given action """
+        if not self.is_action_possible(player, action):
+            raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
+                player.identifier, action))
+        self._next = (self._next + 1) % len(self._player_actions)
+
+    def next_player_action(self):
+        """ Returns a tuple (current_player, next_action),
+        where current_player is a player ID, and next_action is one of
+        MOVE_ACTION and SHIFT_ACTION """
+        try:
+            return self._player_actions[self._next]
+        except IndexError:
+            return None
+
+
+class Player:
+    """ This class represents a player playing a game """
+    def __init__(self):
+        self.identifier = None
+        self.piece = None
+        self.board = None
+
+    
+
+
+
 class Game:
     """ This class represents one played game """
     MAX_PLAYERS = 4
 
-    def __init__(self, board=None):
-        self._player_ids = []
+    def __init__(self, identifier, board=None):
+        self.identifier = identifier
+        self._players = []
         if not board:
             self._board = Board()
         else:
@@ -398,38 +450,38 @@ class Game:
         """ Getter for board """
         return self._board
 
-    def accepts_players(self):
-        """ Determines if there are empty seats for players to join """
-        return len(self._player_ids) < self.MAX_PLAYERS
+    def add_player(self, player):
+        """ Adds a player, throws if the game is full
+        If not, it sets a player ID and provides the player with a 
+        reference to itself.
 
-    def add_player(self):
-        """ Adds a player and returns his id.
-
-        :return: id of the added player, None if the game is full
+        :param player: an instance of Player
+        :return: the ID of the player
         """
-        if self.accepts_players():
-            player_id = len(self._player_ids)
-            self._player_ids.append(player_id)
-            return player_id
-        return None
+        if len(self._players) < self.MAX_PLAYERS:
+            player.identifier = len(self._players)
+            player.board = self._board
+            self._players.append(player)
+            return player.identifier
+        raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
 
     def init_game(self):
         """ initializes the board and the turns """
-        self._board.init_board(self._player_ids)
-        self._turns = Turns(self._player_ids)
+        self._board.init_board([player.identifier for player in self._players])
+        self._turns = Turns(self._players)
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
 
-        :param player_id: the shifting player's id
+        :param player_id: the shifting player's ID
         :param new_leftover_location: the new location of the leftover MazeCard
         :param leftover_rotation: the rotation of the leftover MazeCard, in degrees
         (one of 0, 90, 180, 270)
         """
-        self.check_player(player_id)
-        if self._turns.is_action_possible(player_id, Turns.SHIFT_ACTION):
+        player = self.get_player(player_id)
+        if self._turns.is_action_possible(player, Turns.SHIFT_ACTION):
             self._board.shift(player_id, new_leftover_location, leftover_rotation)
-        self._turns.perform_action(player_id, Turns.SHIFT_ACTION)
+        self._turns.perform_action(player, Turns.SHIFT_ACTION)
 
     def move(self, player_id, target_location):
         """ Performs a move action
@@ -437,58 +489,20 @@ class Game:
         :param player_id: the moving player's id
         :param target_location: the board location to move to
         """
-        self.check_player(player_id)
-        if self._turns.is_action_possible(player_id, Turns.MOVE_ACTION):
+        player = self.get_player(player_id)
+        if self._turns.is_action_possible(player, Turns.MOVE_ACTION):
             self._board.move(player_id, target_location)
-        self._turns.perform_action(player_id, Turns.MOVE_ACTION)
+        self._turns.perform_action(player, Turns.MOVE_ACTION)
 
-    def check_player(self, player_id):
-        """ Checks if a player takes part in the game.
+    def get_player(self, player_id):
+        """ Finds a player by ID
 
         :param player_id: an ID of a player
+        :return: the Player with the given ID
         :raises PlayerNotFoundException: if no player was found
         """
-        if player_id not in self._player_ids:
-            raise PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
-
-
-class Turns:
-    """ This class contains the turn progression.
-
-    It manages player's turns and the correct order of their actions.
-    The constructor is parameterized with the IDs of a game's current players.
-    The methods expect two parameters: a player parameter, and an action parameter.
-    The former is an ID, the latter is either Turns.MOVE_ACTION or Turns.SHIFT_ACTION
-    """
-    MOVE_ACTION = "MOVE"
-    SHIFT_ACTION = "SHIFT"
+        player = next(player for player in self._players if player.identifier == player_id)
+        if not player:
+            raise exceptions.PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
+        return player
     WAIT_ACTION = "WAIT"
-
-    def __init__(self, players=None, next_action=None):
-        if not players:
-            players = []
-        actions = [self.SHIFT_ACTION, self.MOVE_ACTION]
-        self._player_actions = [(player, action) for player in players for action in actions]
-        self._next = 0
-        if next_action:
-            self._next = self._player_actions.index(next_action)
-
-    def is_action_possible(self, player_id, action):
-        """ Checks if the action can be performed by the player """
-        return self.next_player_action() == (player_id, action)
-
-    def perform_action(self, player_id, action):
-        """ Informs that a player performed the given action """
-        if not self.is_action_possible(player_id, action):
-            raise TurnActionViolationException("Player {} should not be able to make action {}.".format(
-                player_id, action))
-        self._next = (self._next + 1) % len(self._player_actions)
-
-    def next_player_action(self):
-        """ Returns a tuple (current_player, next_action),
-        where current_player is a player ID, and next_action is one of
-        MOVE_ACTION and SHIFT_ACTION """
-        try:
-            return self._player_actions[self._next]
-        except IndexError:
-            return None

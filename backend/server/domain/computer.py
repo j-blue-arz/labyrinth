@@ -1,20 +1,31 @@
 import time
-import json
 import requests
+from threading import Thread
 from flask import Flask, url_for
 from random import sample, choice
 from .validation import MoveValidator
-from .model import BoardLocation
+from .model import BoardLocation, Player
 
 
-class Computer:
+class ComputerPlayer(Player):
+    def __init__(self, algorithm):
+        super(ComputerPlayer, self).__init__()
+        self.algorithm = algorithm
+
+
+class Computer(Thread):
     def __init__(self, game_id, game, player_id):
+        super(Computer, self).__init__()
         self._game_id = game_id
         self._game = game
         maze = game.board.maze
         self._bfs = MoveValidator(maze)
         self._insert_locations = maze.insert_locations
         self._player_id = player_id
+        self._shift_url = url_for("api.post_shift", game_id=self._game_id,
+                                  p_id=self._player_id, _external=True)
+        self._move_url = url_for("api.post_move", game_id=self._game_id,
+                                 p_id=self._player_id, _external=True)
 
     def run(self):
         insert_location, insert_rotation, best_move = self._random_actions()
@@ -27,14 +38,12 @@ class Computer:
         dto = {}
         dto["location"] = _board_location_to_dto(insert_location)
         dto["leftoverRotation"] = insert_rotation
-        requests.post(url_for("api.post_shift", game_id=self._game_id,
-                              p_id=self._player_id, _external=True), json=dto)
+        requests.post(self._shift_url, json=dto)
 
     def _post_move(self, move_location):
         dto = {}
         dto["location"] = _board_location_to_dto(move_location)
-        requests.post(url_for("api.post_move", game_id=self._game_id,
-                              p_id=self._player_id, _external=True), json=dto)
+        requests.post(self._move_url, json=dto)
 
     def _random_actions(self):
         def evaluate(location):

@@ -14,19 +14,29 @@ def test_add_check_player():
     game.check_player(player_id2)
 
 
-def test_accepts_players():
-    """ Tests accepts_players """
+def test_next_player_id_truthy_falsy():
+    """ Tests next_player_id  """
     game = Game()
+
     for _ in range(game.MAX_PLAYERS):
-        assert game.accepts_players()
+        assert game.next_player_id()
         game.add_player()
-    assert not game.accepts_players()
+    assert not game.next_player_id()
+
+def test_next_player_id_unique():
+    """ Tests next_player_id """
+    game = Game()
+    ids = set()
+    for _ in range(game.MAX_PLAYERS):
+        ids = game.next_player_id()
+        game.add_player()
+    assert len(ids) == game.MAX_PLAYERS
 
 
 def test_add_player_validation():
     """ Tests that adding more players than MAX_PLAYERS does not add another one """
     game = Game()
-    while game.accepts_players():
+    for _ in range(game.MAX_PLAYERS):
         game.add_player()
     assert game.add_player() is None
 

@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from .domain.model import Game, Board, Piece, MazeCard, BoardLocation, Turns
+from .domain.model import Game, Board, Piece, MazeCard, BoardLocation, Turns, Maze
 #from labyrinth.service import ApiException
 
 PLAYERS = "players"
@@ -63,21 +63,22 @@ def dto_to_game(game_dto):
     created by game_to_dto
     :return: a Game instance whose state is equal to the DTO
     """
-    board = Board()
+    maze = Maze()
+    leftover_card = None
     maze_card_by_id = {}
     for maze_card_dto in game_dto[MAZE_CARDS]:
         maze_card, board_location = _dto_to_maze_card(maze_card_dto)
         if board_location is None:
-            board._leftover_card = maze_card
+            leftover_card = maze_card
         else:
-            board.maze[board_location] = maze_card
+            maze[board_location] = maze_card
         maze_card_by_id[maze_card.identifier] = maze_card
+    board = Board(maze, leftover_card)
     board._pieces = [_dto_to_piece(player_dto, maze_card_by_id)
                      for player_dto in game_dto[PLAYERS]]
-    game = Game()
-    game._player_ids = [piece.identifier for piece in board.pieces]
-    game._board = board
-    game._turns = _dto_to_turns(game_dto[NEXT_ACTION], game._player_ids)
+    game = Game(board)
+    game._players = [piece.identifier for piece in board.pieces]
+    game._turns = _dto_to_turns(game_dto[NEXT_ACTION], game._players)
     return game
 
 
@@ -128,7 +129,7 @@ def _piece_to_dto(piece: Piece, include_objective=False):
     :return: a structure whose JSON representation is valid for the API
     """
     piece_dto = {ID: piece.identifier,
-                  MAZE_CARD_ID: piece.maze_card.identifier}
+                 MAZE_CARD_ID: piece.maze_card.identifier}
     if include_objective:
         piece_dto[OBJECTIVE] = _objective_to_dto(piece.objective_maze_card)
     return piece_dto

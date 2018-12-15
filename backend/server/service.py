@@ -3,7 +3,6 @@ from . import exceptions
 from . import database
 from .mapper import player_state_to_dto, dto_to_shift_action, dto_to_move_action
 from .domain.exceptions import LabyrinthDomainException
-from .domain.computer import Computer
 import server.domain.factories as factory
 
 
@@ -19,7 +18,6 @@ def add_player(game_id):
     """
     game = _get_or_create_game(game_id)
     player_id = game.add_player()
-    game.add_player()
     if player_id is not None:
         game.init_game()
         database.update_game(game_id, game)
@@ -41,7 +39,6 @@ def perform_shift(game_id, player_id, shift_dto):
     database.update_game(game_id, game)
 
 
-
 def perform_move(game_id, player_id, move_dto):
     """Performs a move operation on the game."""
     location = dto_to_move_action(move_dto)
@@ -49,7 +46,7 @@ def perform_move(game_id, player_id, move_dto):
     _try(lambda: game.move(player_id, location))
     database.update_game(game_id, game)
     if game.turns.next_player_action()[0] == 1:
-        Computer(game_id, game, 1).run()
+        Computer(game_id, game, 1).start()
 
 def _get_or_create_game(game_id):
     game = database.load_game(game_id)
