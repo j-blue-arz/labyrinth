@@ -16,7 +16,8 @@ def player_state_to_dto(game: Game, player_id):
     :return: a structure whose JSON representation is valid for the API
     """
     game_dto = dict()
-    game_dto[OBJECTIVE] = _objective_to_dto(game.board.find_piece(player_id).objective_maze_card)
+    player = next(player for player in game.players if player.identifier == player_id)
+    game_dto[OBJECTIVE] = _objective_to_dto(player.piece.objective_maze_card)
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_player_action_dto(game.turns)
@@ -100,5 +101,5 @@ def _turns_to_next_player_action_dto(turns: Turns):
     next_player_action = turns.next_player_action()
     if not next_player_action:
         return None
-    return {PLAYER_ID: next_player_action.player,
+    return {PLAYER_ID: next_player_action.player.identifier,
             ACTION: next_player_action.action}

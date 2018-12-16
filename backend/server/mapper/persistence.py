@@ -3,12 +3,10 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from ..domain.model import Game, Board, Piece, MazeCard, Turns, Maze, Player
+from ..domain.model import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
 from ..domain.computer import ComputerPlayer
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location
 from .constants import *
-
-
 
 
 def game_to_dto(game: Game):
@@ -46,10 +44,9 @@ def dto_to_game(game_dto):
     players = [_dto_to_player(player_dto, 0, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
-    game = Game(0, board=board, players=players)
-    game._turns = _dto_to_turns(game_dto[NEXT_ACTION], players)
+    turns = _dto_to_turns(game_dto[NEXT_ACTION], players)
+    game = Game(0, board=board, players=players, turns=turns)
     return game
-
 
 
 def _player_to_dto(player: Player):
@@ -67,19 +64,15 @@ def _player_to_dto(player: Player):
     return player_dto
 
 
-
-
-
-
 def _turns_to_next_action_dto(turns: Turns):
     """ Maps an instance of Turns to a DTO, representing
     only the next action.
     """
-    next_action = turns.next_player_action()
-    if not next_action:
+    player_action = turns.next_player_action()
+    if not player_action:
         return None
-    return {PLAYER_ID: next_action[0],
-            ACTION: next_action[1]}
+    return {PLAYER_ID: player_action.player.identifier,
+            ACTION: player_action.action}
 
 
 def _dto_to_player(player_dto, game_id, board, maze_card_dict):
@@ -95,15 +88,15 @@ def _dto_to_player(player_dto, game_id, board, maze_card_dict):
     if player_dto[OBJECTIVE]:
         piece.objective_maze_card = maze_card_dict[player_dto[OBJECTIVE]]
     player = None
-    if player_dto[IS_COMPUTER]:
+    if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
         player = ComputerPlayer(
             algorithm_name=player_dto[ALGORITHM],
-            identifier=player_dto[PLAYER_ID],
+            identifier=player_dto[ID],
             game_identifier=game_id)
     else:
-        player = Player(identifier=player_dto[PLAYER_ID], game_identifier=game_id)
+        player = Player(identifier=player_dto[ID], game_identifier=game_id)
     player._piece = piece
-    player.board = board
+    player._board = board
     return player
 
 
@@ -130,7 +123,7 @@ def _dto_to_turns(next_action_dto, players):
     """
     if not players:
         return Turns()
-    next_action = (next_action_dto[PLAYER_ID], next_action_dto[ACTION])
-    return Turns(players, next_action)
-
-
+    player = next(player for player in players if player.identifier == next_action_dto[PLAYER_ID])
+    action = next_action_dto[ACTION]
+    next_player_action = PlayerAction(player, action)
+    return Turns(players, next_player_action)

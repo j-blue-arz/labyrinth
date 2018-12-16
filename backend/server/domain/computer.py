@@ -16,7 +16,7 @@ from threading import Thread
 from flask import url_for
 import requests
 from .maze_algorithm import Graph
-from .model import Player
+from .model import Player, Turns
 from ..mapper.api import shift_action_to_dto, move_action_to_dto
 
 
@@ -29,21 +29,22 @@ class ComputerPlayer(Player, Thread):
     _SECONDS_TO_ANSWER = 3
 
     def __init__(self, algorithm_name, **kwargs):
-        super().__init__(**kwargs)
+        Player.__init__(self, **kwargs)
+        Thread.__init__(self)
         algorithms = [RandomActionsAlgorithm]
         self.algorithm = RandomActionsAlgorithm
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
         self._shift_url = url_for("api.post_shift", game_id=self._game_id,
-                                  p_id=self._identifier, _external=True)
+                                  p_id=self._id, _external=True)
         self._move_url = url_for("api.post_move", game_id=self._game_id,
-                                 p_id=self._identifier, _external=True)
+                                 p_id=self._id, _external=True)
 
-    def register_in_turns(self, turns):
+    def register_in_turns(self, turns: Turns):
         """ Registers itself in a Turns manager.
         Overwrites superclass method. """
-        turns.add(self, turn_callback=self.start)
+        turns.add_player(self, turn_callback=self.start)
 
     def run(self):
         self._board = copy.deepcopy(self._board)
@@ -88,10 +89,10 @@ class RandomActionsAlgorithm(Thread):
         return self._move_action
 
     def run(self):
-        piece_location = self._maze.maze_card_location(self._piece.maze_card)
         insert_location = choice(tuple(self._maze.insert_locations))
         insert_rotation = choice([0, 90, 180, 270])
         self._shift_action = (insert_location, insert_rotation)
         self._board.shift(insert_location, insert_rotation)
+        piece_location = self._maze.maze_card_location(self._piece.maze_card)
         reachable_locations = Graph(self._maze).reachable_locations(piece_location)
         self._move_action = choice(tuple(reachable_locations))

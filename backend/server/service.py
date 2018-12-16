@@ -12,7 +12,7 @@ from .domain.computer import ComputerPlayer
 def add_player(game_id, add_player_dto):
     """ Adds a player to a game.
     Creates the game if it does not exist.
-    After adding the player, the game state is randomly generated.
+    After adding the player, the game is started.
 
     :param game_id: specifies the game
     :param add_player_dto: if this parameter is given, it contains information about the type of computer player to add
@@ -23,10 +23,10 @@ def add_player(game_id, add_player_dto):
     algorithm = dto_to_algorithm(add_player_dto)
     player_id = None
     if algorithm is None:
-        player_id = game.add_player(Player, {})
+        player_id = _try(lambda: game.add_player(Player, {}))
     else:
-        player_id = game.add_player(ComputerPlayer, {"algorithm": algorithm})
-    game.start_game()
+        player_id = _try(lambda: game.add_player(ComputerPlayer, {"algorithm_name": algorithm}))
+    _try(game.start_game)
     database.update_game(game_id, game)
     return player_id
 
@@ -82,6 +82,6 @@ def _try(model_operation):
     lambda: game.move(player_id, location)
     """
     try:
-        model_operation()
+        return model_operation()
     except LabyrinthDomainException as domain_exception:
         raise exceptions.domain_to_api_exception(domain_exception)

@@ -24,7 +24,7 @@ def post_player(game_id):
     }, where algorithm can currently only be
     'random'.
     If no body is given, a human player is added. """
-    request_body = request.get_json(force=True)
+    request_body = request.get_json(silent=True)
     player_id = service.add_player(game_id, request_body)
     return json.jsonify(player_id)
 

@@ -43,7 +43,7 @@ def create_board():
 def create_game():
     """ Creates a game instance with a random board. Player and piece initialization
     is not done here, but dynamically depending on the number of players """
-    return Game(create_board())
+    return Game(0, board=create_board())
 
 
 def create_maze(maze_string):
