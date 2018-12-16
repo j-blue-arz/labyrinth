@@ -1,73 +1,97 @@
+""" This module implements functionality for a computer to play the game.
+ComputerPlayer is a subclass of model.game.Player, which handles board state and time-keeping.
+It uses an algorithm to compute a shift and a move.
+
+These algorithms are implemented in a separate class, ending with 'Algorithm'.
+The Algorithm classes are expected to have a getter for shift_action and move_action, with which they provide their
+solutions for the respective moves.
+shift_action is expected to return a tuple of the form (<insert_location>, <insert_rotation>),
+where <insert_location> is a BoardLocation, <insert_rotation> is one of [0, 90, 270, 180]
+move_action should return a BoardLocation  """
+
+import copy
+from random import choice
 import time
-import requests
 from threading import Thread
-from flask import Flask, url_for
-from random import sample, choice
-from .validation import MoveValidator
-from .model import BoardLocation, Player
+from flask import url_for
+import requests
+from .maze_algorithm import Graph
+from .model import Player
+from ..mapper.api import shift_action_to_dto, move_action_to_dto
 
 
-class ComputerPlayer(Player):
-    def __init__(self, algorithm):
-        super(ComputerPlayer, self).__init__()
-        self.algorithm = algorithm
+class ComputerPlayer(Player, Thread):
+    """ This class represents a computer player. It is instantiated with
+    an algorithm parameter, currently only 'random' is implemented. Defaults to 'random'.
+    If the player is requested to make its action, it starts a thread for time keeping,
+    and a thread for letting the algorithm compute the next shift and move action """
 
+    _SECONDS_TO_ANSWER = 3
 
-class Computer(Thread):
-    def __init__(self, game_id, game, player_id):
-        super(Computer, self).__init__()
-        self._game_id = game_id
-        self._game = game
-        maze = game.board.maze
-        self._bfs = MoveValidator(maze)
-        self._insert_locations = maze.insert_locations
-        self._player_id = player_id
+    def __init__(self, algorithm_name, **kwargs):
+        super().__init__(**kwargs)
+        algorithms = [RandomActionsAlgorithm]
+        self.algorithm = RandomActionsAlgorithm
+        for algorithm in algorithms:
+            if algorithm.SHORT_NAME == algorithm_name:
+                self.algorithm = algorithm
         self._shift_url = url_for("api.post_shift", game_id=self._game_id,
-                                  p_id=self._player_id, _external=True)
+                                  p_id=self._identifier, _external=True)
         self._move_url = url_for("api.post_move", game_id=self._game_id,
-                                 p_id=self._player_id, _external=True)
+                                 p_id=self._identifier, _external=True)
+
+    def register_in_turns(self, turns):
+        """ Registers itself in a Turns manager.
+        Overwrites superclass method. """
+        turns.add(self, turn_callback=self.start)
 
     def run(self):
-        insert_location, insert_rotation, best_move = self._random_actions()
-        time.sleep(2)
-        self._post_shift(insert_location, insert_rotation)
-        time.sleep(2)
-        self._post_move(best_move)
+        self._board = copy.deepcopy(self._board)
+        algorithm = self.algorithm(self._board, self._piece)
+        algorithm.start()
+        time.sleep(self._SECONDS_TO_ANSWER)
+        self._post_shift(*(algorithm.shift_action))
+        time.sleep(self._SECONDS_TO_ANSWER)
+        self._post_move(algorithm.move_action)
 
     def _post_shift(self, insert_location, insert_rotation):
-        dto = {}
-        dto["location"] = _board_location_to_dto(insert_location)
-        dto["leftoverRotation"] = insert_rotation
+        dto = shift_action_to_dto(insert_location, insert_rotation)
         requests.post(self._shift_url, json=dto)
 
     def _post_move(self, move_location):
-        dto = {}
-        dto["location"] = _board_location_to_dto(move_location)
+        dto = move_action_to_dto(move_location)
         requests.post(self._move_url, json=dto)
 
-    def _random_actions(self):
-        def evaluate(location):
-            return location.row - location.column
 
-        piece = self._game.board.find_piece(self._player_id)
-        piece_location = self._game.board.maze.maze_card_location(piece.maze_card)
-        insert_location = sample(self._insert_locations, 1)[0]
+class RandomActionsAlgorithm(Thread):
+    """ Implements an algorithm which performs a random shift action followed by a random, but valid
+    move action """
+
+    SHORT_NAME = "random"
+
+    def __init__(self, board, piece):
+        super().__init__()
+        self._board = board
+        self._maze = board.maze
+        self._piece = piece
+        self._shift_action = None
+        self._move_action = None
+
+    @property
+    def shift_action(self):
+        """ Getter for shift_action """
+        return self._shift_action
+
+    @property
+    def move_action(self):
+        """ Getter for move_action """
+        return self._move_action
+
+    def run(self):
+        piece_location = self._maze.maze_card_location(self._piece.maze_card)
+        insert_location = choice(tuple(self._maze.insert_locations))
         insert_rotation = choice([0, 90, 180, 270])
-        reachable_locations = self._bfs.bfs(piece_location)
-        best_move = piece_location
-        for location in reachable_locations:
-            if evaluate(location) > evaluate(best_move):
-                best_move = location
-        return insert_location, insert_rotation, best_move
-
-
-def _board_location_to_dto(location: BoardLocation):
-    """ Maps a board location to a DTO
-
-    :param location: an instance of model.BoardLocation
-    :return: a structure whose JSON representation is valid for the API
-    """
-    if location is None:
-        return None
-    return {"row": location.row,
-            "column": location.column}
+        self._shift_action = (insert_location, insert_rotation)
+        self._board.shift(insert_location, insert_rotation)
+        reachable_locations = Graph(self._maze).reachable_locations(piece_location)
+        self._move_action = choice(tuple(reachable_locations))

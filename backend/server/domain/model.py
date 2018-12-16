@@ -16,8 +16,8 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 """
 from itertools import cycle, islice
 from random import choice
-import exceptions
-from .validation import MoveValidator
+from . import exceptions
+from .maze_algorithm import Graph
 
 
 class BoardLocation:
@@ -50,24 +50,17 @@ class BoardLocation:
 
 class Piece:
     """ Represents a player's piece
-    Each piece has a unique ID and,
-    if positioned in the maze, a reference to a MazeCard instance.
+    Each piece has a reference to a MazeCard instance as its position.
     The player's objective is another reference to a MazeCard instance.
     """
 
-    def __init__(self, identifier=0, maze_card=None):
-        self._id = identifier
+    def __init__(self, maze_card=None):
         self.maze_card = maze_card
         self.objective_maze_card = None
 
     def has_reached_objective(self):
         """ true iff player's current location and his objective are equal """
         return self.maze_card == self.objective_maze_card
-
-    @property
-    def identifier(self):
-        """ Getter for read-only identifier """
-        return self._id
 
 
 class MazeCard:
@@ -311,48 +304,37 @@ class Board:
         """ Getter for pieces """
         return self._pieces
 
-    def init_board(self, player_ids):
-        """ Sets pieces on the board, on corners of the maze, clockwise starting from (0, 0).
-        Randomly gives each player an objective."""
-        circular_locations = list(islice(cycle(self._start_locations), len(player_ids)))
-        self._pieces = [Piece(player_id, self._maze[location])
-                        for player_id, location in zip(player_ids, circular_locations)]
-        for piece in self._pieces:
-            piece.objective_maze_card = self.random_unoccupied_maze_card()
+    def clear_pieces(self):
+        """ Removes all pieces currently on the board """
+        self._pieces.clear()
 
-    def shift(self, player_id, new_leftover_location, leftover_rotation):
+    def create_piece(self):
+        """ Creates and places a piece on the board """
+        circular_locations = list(islice(cycle(self._start_locations), len(self._pieces + 1)))
+        next_location = circular_locations[-1]
+        piece = Piece(self._maze[next_location])
+        self._pieces.append(piece)
+        piece.objective_maze_card = self.random_unoccupied_maze_card
+        return piece
+
+    def shift(self, new_leftover_location, leftover_rotation):
         """ Performs a shifting action """
-        piece = self.find_piece(player_id)
         self._leftover_card.rotation = leftover_rotation
         pushed_card = self._leftover_card
         self._leftover_card = self._maze.shift(new_leftover_location, self._leftover_card)
-        for piece in self._find_pieces_by_maze_card(self._leftover_card):
-            piece.maze_card = pushed_card
+        for card_piece in self._find_pieces_by_maze_card(self._leftover_card):
+            card_piece.maze_card = pushed_card
 
-    def move(self, player_id, target_location):
+    def move(self, piece, target_location):
         """ Performs a move action """
-        piece = self.find_piece(player_id)
         piece_location = self._maze.maze_card_location(piece.maze_card)
         target = self._maze[target_location]
-        if not MoveValidator(self._maze).validate_move(piece_location, target_location):
+        if not Graph(self._maze).is_reachable(piece_location, target_location):
             raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
                 piece_location, target_location))
         piece.maze_card = target
         if piece.has_reached_objective():
             piece.objective_maze_card = self.random_unoccupied_maze_card()
-
-    def find_piece(self, player_id):
-        """ Finds player's piece by id.
-
-        :param player_id: the id of the player to find
-        :return: an instance of Piece
-        """
-        match = [piece for piece in self._pieces if piece.identifier is player_id]
-        if len(match) > 1:
-            raise exceptions.InvalidStateException("More than one piece with id {}".format(player_id))
-        elif not match:
-            raise exceptions.InvalidStateException("No matching piece for id {} in this game".format(player_id))
-        return match[0]
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
@@ -374,37 +356,122 @@ class Board:
         return choice(tuple(maze_cards))
 
 
+class PlayerAction:
+    """ This class represent the action of a specific player.
+    This class should only be used inside of Turns """
+
+    MOVE_ACTION = "MOVE"
+    SHIFT_ACTION = "SHIFT"
+
+    def __init__(self, player, action, turn_callback=None):
+        """
+        :param player: a Player instance
+        :param action: PlayerAction.MOVE_ACTION or PlayerAction.SHIFT_ACTION
+        :param turn_callback: a method which is called with no arguments, if it is the player's turn.
+        """
+        self._player = player
+        self._action = action
+        self._turn_callback = turn_callback
+
+    @property
+    def player(self):
+        """ Getter of player """
+        return self._player
+
+    @property
+    def action(self):
+        """ Getter of action """
+        return self._action
+
+    @property
+    def turn_callback(self):
+        """ Getter of turn_callback """
+        return self._turn_callback
+
+
+class Player:
+    """ This class represents a player playing a game """
+
+    def __init__(self, identifier, game_identifier):
+        self._identifier = identifier
+        self._board = None
+        self._piece = None
+        self._game_id = game_identifier
+
+    @property
+    def piece(self):
+        """ Getter for piece """
+        return self._piece
+
+    def set_board(self, board: Board):
+        """ Setter for board """
+        self._board = board
+        self._piece = board.create_piece(self._identifier)
+
+    def register_in_turns(self, turns):
+        """ registers itself in a Turns manager """
+        turns.add(self)
+
+
 class Turns:
     """ This class contains the turn progression.
 
     It manages player's turns and the correct order of their actions.
-    The constructor is parameterized with the game's current players.
     The methods expect two parameters: a player parameter, and an action parameter.
-    The former is an instance of Player, the latter is either Turns.MOVE_ACTION or Turns.SHIFT_ACTION
+    The former is an instance of Player, the latter is either PlayerAction.MOVE_ACTION or PlayerAction.SHIFT_ACTION
     """
-    MOVE_ACTION = "MOVE"
-    SHIFT_ACTION = "SHIFT"
-    WAIT_ACTION = "WAIT"
 
     def __init__(self, players=None, next_action=None):
-        if not players:
-            players = []
-        actions = [self.SHIFT_ACTION, self.MOVE_ACTION]
-        self._player_actions = [(player, action) for player in players for action in actions]
+        self._player_actions = []
+        if players:
+            for player in players:
+                self.add_player(player)
         self._next = 0
         if next_action:
             self._next = self._player_actions.index(next_action)
 
+    def add_player(self, player, turn_callback=None):
+        """ Adds a player to the turn progression, if he does not present already """
+        found = False
+        for player_action in self._player_actions:
+            if player_action.player is player:
+                found = True
+        if not found:
+            self._player_actions.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
+            self._player_actions.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
+
+    def start(self):
+        """ Starts the progression, informs player if necessary """
+        self._next = 0
+        next_player = self._player_actions[self._next].player
+        if next_player.turn_callback:
+            next_player.turn_callback()
+
     def is_action_possible(self, player, action):
-        """ Checks if the action can be performed by the player """
+        """ Checks if the action can be performed by the player
+
+        :param player: an instance of Player
+        :param action: one of Turn.MOVE_ACTION and Turn.SHIFT_ACTION
+        :return: true, iff the action is to be performed by the player
+        """
         return self.next_player_action() == (player, action)
 
     def perform_action(self, player, action):
-        """ Informs that a player performed the given action """
+        """Method to call when a player performed the given action.
+        Checks if it is another player's turn and informs him if that is the case.
+
+        :param player: an instance of Player
+        :param action: one of Turn.MOVE_ACTION and Turn.SHIFT_ACTION
+        :raises exceptions.TurnActionViolationException: if it is not the player's turn,
+        or the player has to perform a different action next.
+        """
         if not self.is_action_possible(player, action):
             raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
                 player.identifier, action))
         self._next = (self._next + 1) % len(self._player_actions)
+        next_player = self._player_actions[self._next].player
+        if next_player != player and next_player.turn_callback:
+            next_player.turn_callback()
 
     def next_player_action(self):
         """ Returns a tuple (current_player, next_action),
@@ -416,28 +483,20 @@ class Turns:
             return None
 
 
-class Player:
-    """ This class represents a player playing a game """
-    def __init__(self):
-        self.identifier = None
-        self.piece = None
-        self.board = None
-
-    
-
-
-
 class Game:
     """ This class represents one played game """
     MAX_PLAYERS = 4
 
-    def __init__(self, identifier, board=None):
-        self.identifier = identifier
-        self._players = []
-        if not board:
-            self._board = Board()
+    def __init__(self, identifier, board=None, players=None):
+        self._identifier = identifier
+        if players:
+            self._players = players
         else:
+            self._players = []
+        if board:
             self._board = board
+        else:
+            self._board = Board()
         self._turns = None
 
     @property
@@ -450,25 +509,33 @@ class Game:
         """ Getter for board """
         return self._board
 
-    def add_player(self, player):
-        """ Adds a player, throws if the game is full
-        If not, it sets a player ID and provides the player with a 
-        reference to itself.
+    @property
+    def players(self):
+        """ Getter for players """
+        return self._players
 
-        :param player: an instance of Player
+    def add_player(self, player_class, player_class_kwargs=None):
+        """Creates a player and adds it to the game. Throws if the game is full.
+
+        :param player: a class, descendant of Player
+        :player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
         :return: the ID of the player
         """
+
         if len(self._players) < self.MAX_PLAYERS:
-            player.identifier = len(self._players)
-            player.board = self._board
+            next_id = len(self._players)
+            player = player_class(identifier=next_id, game_id=self._identifier, **player_class_kwargs)
             self._players.append(player)
             return player.identifier
         raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
 
-    def init_game(self):
+    def start_game(self):
         """ initializes the board and the turns """
-        self._board.init_board([player.identifier for player in self._players])
-        self._turns = Turns(self._players)
+        self._board.clear_pieces()
+        for player in self._players:
+            player.set_board(self._board)
+            player.register_in_turns(self._turns)
+        self._turns.start()
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
@@ -479,9 +546,9 @@ class Game:
         (one of 0, 90, 180, 270)
         """
         player = self.get_player(player_id)
-        if self._turns.is_action_possible(player, Turns.SHIFT_ACTION):
-            self._board.shift(player_id, new_leftover_location, leftover_rotation)
-        self._turns.perform_action(player, Turns.SHIFT_ACTION)
+        if self._turns.is_action_possible(player, PlayerAction.SHIFT_ACTION):
+            self._board.shift(new_leftover_location, leftover_rotation)
+        self._turns.perform_action(player, PlayerAction.SHIFT_ACTION)
 
     def move(self, player_id, target_location):
         """ Performs a move action
@@ -490,9 +557,9 @@ class Game:
         :param target_location: the board location to move to
         """
         player = self.get_player(player_id)
-        if self._turns.is_action_possible(player, Turns.MOVE_ACTION):
-            self._board.move(player_id, target_location)
-        self._turns.perform_action(player, Turns.MOVE_ACTION)
+        if self._turns.is_action_possible(player, PlayerAction.MOVE_ACTION):
+            self._board.move(player.piece, target_location)
+        self._turns.perform_action(player, PlayerAction.MOVE_ACTION)
 
     def get_player(self, player_id):
         """ Finds a player by ID
@@ -505,4 +572,3 @@ class Game:
         if not player:
             raise exceptions.PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
         return player
-    WAIT_ACTION = "WAIT"
