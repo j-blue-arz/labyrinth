@@ -18,13 +18,18 @@ def handle_api_exception(api_exception):
 @API.route('/games/<int:game_id>/players', methods=["POST"])
 def post_player(game_id):
     """ Adds a player to an existing game. Creates the game if it does not exist.
-    The request body can contain a JSON of the form
+    The request can contain a body of the form
     {
-        'algorithm': <string>
-    }, where algorithm can currently only be
-    'random'.
-    If no body is given, a human player is added. """
-    request_body = request.get_json(silent=True)
+        'alone': <boolean>
+        'type': <string>,
+    },
+    where type can be 'human' or 'random'.
+    If 'alone' is true, only the requested player is added. If it is false,
+                            an additional computer player is added if the game ways empty before.
+    If 'type' is 'human', a human player is added, if it is 'random', a random computer player is added.
+    Default: alone: 'false' and type: 'human'
+    """
+    request_body = request.get_json(force=True)
     player_id = service.add_player(game_id, request_body)
     return json.jsonify(player_id)
 

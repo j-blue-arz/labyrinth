@@ -13,22 +13,26 @@ import copy
 from random import choice
 import time
 from threading import Thread
-from flask import url_for
 import requests
+from server.mapper.api import shift_action_to_dto, move_action_to_dto
 from .maze_algorithm import Graph
 from .model import Player, Turns
-from ..mapper.api import shift_action_to_dto, move_action_to_dto
+
 
 
 class ComputerPlayer(Player, Thread):
     """ This class represents a computer player. It is instantiated with
-    an algorithm parameter, currently only 'random' is implemented. Defaults to 'random'.
+    an algorithm_name parameter, currently only 'random' is implemented. Defaults to 'random'.
+    A second required parameter is a supplier for the shift and move API URLs.
+    This supplier is expected to have methods get_shift_url(game_id, player_id), and
+    get_move_url(game_id, player_id).
+
     If the player is requested to make its action, it starts a thread for time keeping,
-    and a thread for letting the algorithm compute the next shift and move action """
+    and a thread for letting the algorithm compute the next shift and move action. """
 
     _SECONDS_TO_ANSWER = 3
 
-    def __init__(self, algorithm_name, **kwargs):
+    def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
         algorithms = [RandomActionsAlgorithm]
@@ -36,10 +40,14 @@ class ComputerPlayer(Player, Thread):
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
-        self._shift_url = url_for("api.post_shift", game_id=self._game_id,
-                                  p_id=self._id, _external=True)
-        self._move_url = url_for("api.post_move", game_id=self._game_id,
-                                 p_id=self._id, _external=True)
+        if url_supplier:
+            self._shift_url = url_supplier.get_shift_url(self._game_id, self._id)
+            self._move_url = url_supplier.get_move_url(self._game_id, self._id)
+        elif move_url and shift_url:
+            self._shift_url = shift_url
+            self._move_url = move_url
+        else:
+            raise ValueError("Either url_supplier, or move_url and shift_url have to be given as parameters.")
 
     def register_in_turns(self, turns: Turns):
         """ Registers itself in a Turns manager.
@@ -47,21 +55,31 @@ class ComputerPlayer(Player, Thread):
         turns.add_player(self, turn_callback=self.start)
 
     def run(self):
-        self._board = copy.deepcopy(self._board)
-        algorithm = self.algorithm(self._board, self._piece)
+        board_copy = copy.deepcopy(self._board)
+        algorithm = self.algorithm(board_copy, self._piece)
         algorithm.start()
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_shift(*(algorithm.shift_action))
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_move(algorithm.move_action)
 
+    @property
+    def shift_url(self):
+        """ Getter for shift_url """
+        return self._shift_url
+
+    @property
+    def move_url(self):
+        """ Getter for move_url """
+        return self._move_url
+
     def _post_shift(self, insert_location, insert_rotation):
         dto = shift_action_to_dto(insert_location, insert_rotation)
-        requests.post(self._shift_url, json=dto)
+        requests.post(self.shift_url, json=dto)
 
     def _post_move(self, move_location):
         dto = move_action_to_dto(move_location)
-        requests.post(self._move_url, json=dto)
+        requests.post(self.move_url, json=dto)
 
 
 class RandomActionsAlgorithm(Thread):

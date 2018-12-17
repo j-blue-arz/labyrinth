@@ -4,9 +4,10 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from ..domain.model import Game, Turns, Player
+from server.domain.model import Game, Turns, Player
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
 from .constants import *
+
 
 def player_state_to_dto(game: Game, player_id):
     """Maps a game, as seen from one player, to a DTO.
@@ -55,10 +56,16 @@ def dto_to_move_action(move_dto):
     return _dto_to_board_location(move_dto[LOCATION])
 
 
-def dto_to_algorithm(add_player_dto):
-    """ Maps a DTO for the add player api method to an algorithm string, or None if it is an empty string """
+def dto_to_type_and_alone_flag(add_player_dto):
+    """ Maps a DTO for the add player api method to two values, the type and the flag 'alone' """
     if isinstance(add_player_dto, dict):
-        return add_player_dto[ALGORITHM]
+        return _value_or_none(add_player_dto, POST_PLAYER_TYPE), _value_or_none(add_player_dto, POST_PLAYER_ALONE)
+    return None, None
+
+
+def _value_or_none(dto, key):
+    if key in dto:
+        return dto[key]
     return None
 
 

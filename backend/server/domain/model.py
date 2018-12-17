@@ -47,6 +47,9 @@ class BoardLocation:
     def __str__(self):
         return "({}, {})".format(self.row, self.column)
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class MazeCard:
     """ Represents one maze card
@@ -551,7 +554,7 @@ class Game:
         """ Getter for identifier """
         return self._id
 
-    def add_player(self, player_class, player_class_kwargs=None):
+    def add_player(self, player_class, **player_class_kwargs):
         """Creates a player and adds it to the game. Throws if the game is full.
 
         :param player: a class, descendant of Player
@@ -560,8 +563,6 @@ class Game:
         """
         if len(self._players) < self.MAX_PLAYERS:
             next_id = len(self._players)
-            if not player_class_kwargs:
-                player_class_kwargs = {}
             player = player_class(identifier=next_id, game_identifier=self._id, **player_class_kwargs)
             self._players.append(player)
             return player.identifier

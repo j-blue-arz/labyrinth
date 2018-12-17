@@ -3,8 +3,8 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from ..domain.model import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
-from ..domain.computer import ComputerPlayer
+from server.domain.model import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
+from server.domain.computer import ComputerPlayer
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location
 from .constants import *
 
@@ -58,9 +58,11 @@ def _player_to_dto(player: Player):
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier}
     player_dto[OBJECTIVE] = _objective_to_dto(player.piece.objective_maze_card)
-    if isinstance(player, ComputerPlayer):
+    if type(player) is ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
+        player_dto[SHIFT_URL] = player.shift_url
+        player_dto[MOVE_URL] = player.move_url
     return player_dto
 
 
@@ -92,7 +94,9 @@ def _dto_to_player(player_dto, game_id, board, maze_card_dict):
         player = ComputerPlayer(
             algorithm_name=player_dto[ALGORITHM],
             identifier=player_dto[ID],
-            game_identifier=game_id)
+            game_identifier=game_id,
+            shift_url=player_dto[SHIFT_URL],
+            move_url=player_dto[MOVE_URL])
     else:
         player = Player(identifier=player_dto[ID], game_identifier=game_id)
     player._piece = piece
