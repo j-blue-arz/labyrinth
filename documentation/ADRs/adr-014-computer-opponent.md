@@ -45,7 +45,7 @@ There is an interesting question whether the graph of object dependencies should
 Is it possible to get rid of one of the references in the structure of Players, Games, Pieces and Boards? The list of Player in Game is required because the Game's interface uses player IDs. The Player needs a reference to the Board because the ComputerPlayer needs it to compute actions. The reference of a Player to a Piece could be eliminated by sharing an ID, but this introduces just another way of representing an existing dependency.
 
 ## Decision
-I will alter the service method with which to add players, and include a parameter to decide if the player is human or not. The web-client will have options to add computer players, or (at most once) add himself as a player. The latter is no longer an automatism.
+I will alter the service method with which to add players, and include a parameter to decide if the player is human or not. Another parameter defines if the added player should be alone. If not, a second player is automatically added if the game was empty before.
 
 The Game currently only has player IDs. I will encapsulate these in a Player class. Each player will have a reference to the Board he is currently playing, and to its Piece on the Board. The Turn logic uses the new Player objects instead of IDs. It informs a Player when it is his turn to play. The Game will create the Players, but the Service Layer passes the class to instantiate to the Game. The game calls the constructor with an ID. This is good enough as long as there is no need for a globally unique player ID.
 
@@ -54,8 +54,7 @@ The Player is subclassed for computer players (ComputerPlayer). The logic for ti
 Both the ComputerPlayer and the Algorithm have to run in a separate thread. The ComputerPlayer, because it must not block the flask thread handling the current user request. The Algorithm, to enable time-keeping in the ComputerPlayer. If the Algorithm does not answer in time, the ComputerPlayer asks the RandomActionsAlgorithm, the most basic Algorithm implementation, as a fallback. When notified to take action, the ComputerPlayer will first fetch all necessary information, like the return URLs and the game state, then start a new thread for itself. It will deep copy all state, so that the original state is not altered. 
 
 I will take no further measures to make sure that the ComputerPlayer does not send POSTs to the API before the previous thread has finished. I expect the locking mechanisms of the database on the one hand, and the minimum time restriction on the other hand, to take care that there is no lost update problem. Even if there was, the validation of user actions would make sure that the persisted game is not left in an in inconsistent state.
-I will further implement a method to start a database transaction as soon as the state is fetched for alteration, i.e. in a POST method call.
-If there ever is a problem with lost updates, I would have to pull the turn logic into the service layer.
+If there ever is a problem with lost updates, I could try to start a database transaction as soon as the state is fetched for alteration, i.e. in a POST method call. The last option is to pull the turn logic into the service layer.
 
 I will remove the ID in Piece. In the setter of Board in Player, the Player will ask the Board to create a Piece. This will be done at the start of the game.
 There will be an explicit model method to start a game. This prepares the possibility to separate adding players from starting a game.
