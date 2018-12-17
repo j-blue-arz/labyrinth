@@ -1,5 +1,6 @@
 """ Tests the api methods ( /api/ ) """
 import json
+import time
 
 
 def test_post_players(client):
@@ -7,7 +8,7 @@ def test_post_players(client):
 
     Expects an OK response with a single int in the body.
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     assert response.content_type == "application/json"
     _assert_ok_single_int(response)
 
@@ -18,13 +19,13 @@ def test_post_players_four_times(client):
     Expects four OKs with pair-wise different numbers
     """
     player_ids = set()
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_ids.add(_assert_ok_single_int(response))
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_ids.add(_assert_ok_single_int(response))
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_ids.add(_assert_ok_single_int(response))
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_ids.add(_assert_ok_single_int(response))
     assert len(player_ids) == 4
 
@@ -35,15 +36,15 @@ def test_post_players_five_times(client):
     Expects four OKs
     and a 400 Bad Request with a exception body
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     _assert_ok_single_int(response)
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     _assert_ok_single_int(response)
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     _assert_ok_single_int(response)
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     _assert_ok_single_int(response)
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     _assert_error_response(response, user_message="Number of players has reached game limit.",
                            key="GAME_FULL", status=400)
 
@@ -54,9 +55,9 @@ def test_get_state(client):
     for existing game. Expects 50 mazeCards and two players
     with correct id
     """
-    player_id1 = _assert_ok_single_int(client.post("/api/games/0/players"))
-    player_id2 = _assert_ok_single_int(client.post("/api/games/0/players"))
-    response = client.get("/api/games/0/state?p_id={}".format(player_id2))
+    player_id1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id2 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    response = _get_state(client, player_id2)
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
@@ -75,8 +76,8 @@ def test_get_state_has_correct_initial_state(client):
     Expects top left corner to be a corner. Expects a single leftover card.
     Expects an objective to be set for the player
     """
-    player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    response = _get_state(client, player_id)
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
     objective_card_id = state["objectiveMazeCardId"]
@@ -106,7 +107,7 @@ def test_get_state_for_nonexisting_game(client):
     for non-existing game. Expects 404 Not Found with
     exception body
     """
-    player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
+    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     response = client.get("/api/games/1/state?p_id={}".format(player_id))
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
@@ -118,8 +119,8 @@ def test_get_state_for_nonexisting_player(client):
     for non-existing player. Expects 400 Bad Request with
     exception body
     """
-    player_id = _assert_ok_single_int(client.post("/api/games/0/players"))
-    response = client.get("/api/games/0/state?p_id={}".format(player_id + 1))
+    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    response = _get_state(client, player_id + 1)
     _assert_error_response(response, user_message="The player does not take part in this game.",
                            key="PLAYER_NOT_IN_GAME", status=400)
 
@@ -130,14 +131,14 @@ def test_get_state_valid_after_error(client):
     after a previous request resulted in an error.
     Expects 200 OK
     """
-    client.post("/api/games/0/players")
-    client.post("/api/games/0/players")
-    client.post("/api/games/0/players")
-    response = client.post("/api/games/0/players")
+    _post_player(client, player_type="human", alone=True)
+    _post_player(client, player_type="human", alone=True)
+    _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     assert response.status_code == 400
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    response = _get_state(client, player_id)
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
@@ -155,13 +156,13 @@ def test_post_move(client):
     Expects a 200 OK, with empty body.
     State respects new position of player.
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
     _post_shift(client, player_id, 0, 1, 270)
     response = _post_move(client, player_id, 0, 1)
     assert response.status_code == 200
     assert response.content_length == 0
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    response = _get_state(client, player_id)
     state = response.get_json()
     maze_card_id = next((player["mazeCardId"]
                          for player in state["players"] if player["id"] == player_id),
@@ -182,7 +183,7 @@ def test_post_move_unreachable_move(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
     _post_shift(client, player_id, 0, 1, 0)
     _post_move(client, player_id, 0, 0)
@@ -213,7 +214,7 @@ def test_post_move_nonexisting_game(client):
     for non-existing game and with invalid location.
     Expects 404 Not Found with exception body about not found game
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
     data = json.dumps({
         "location": {
@@ -233,9 +234,9 @@ def test_post_shift(client):
     Expects a 200 OK, with empty body.
     State is correct about pushed in card with rotation.
     """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    old_state = client.get("/api/games/0/state?p_id={}".format(player_id)).get_json()
+    old_state = _get_state(client, player_id).get_json()
     old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
                              None)
     old_rotation = old_leftover_card["rotation"]
@@ -243,7 +244,7 @@ def test_post_shift(client):
     response = _post_shift(client, player_id, 0, 1, new_rotation)
     assert response.status_code == 200
     assert response.content_length == 0
-    new_state = client.get("/api/games/0/state?p_id={}".format(player_id)).get_json()
+    new_state = _get_state(client, player_id).get_json()
     old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
                              None)
     pushed_in_card = next((card for card in new_state["mazeCards"]
@@ -307,42 +308,41 @@ def test_turn_action_progression(client):
 
     expects the nextAction to change as correct actions are performed.
     """
-    player_id_0 = _assert_ok_single_int(client.post("/api/games/0/players"))
-    player_id_1 = _assert_ok_single_int(client.post("/api/games/0/players"))
-    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    state = _get_state(client, player_id_0).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
     _post_shift(client, player_id_0, 0, 1, 270)
-    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    state = _get_state(client, player_id_0).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "MOVE"
     _post_move(client, player_id_0, 0, 0)
-    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    state = _get_state(client, player_id_0).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
     assert state["nextAction"]["action"] == "SHIFT"
     _post_shift(client, player_id_1, 0, 1, 270)
-    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    state = _get_state(client, player_id_0).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
     assert state["nextAction"]["action"] == "MOVE"
     _post_move(client, player_id_1, 0, 6)
-    state = client.get("/api/games/0/state?p_id={}".format(player_id_0)).get_json()
+    state = _get_state(client, player_id_0).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
-
 
 
 def _assert_invalid_action_and_unchanged_state(client, action_resource, data):
     """ Sets a game up, performs invalid action on given resource with given data,
     asserts error response and checks that state has not changed """
-    response = client.post("/api/games/0/players")
+    response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    response = _get_state(client, player_id)
     old_data = response.get_data()
     response = client.post("/api/games/0/{}?p_id={}".format(action_resource, player_id),
                            data=json.dumps(data))
     _assert_error_response(response, user_message="The sent action is invalid.",
                            key="INVALID_ACTION", status=400)
-    response = client.get("/api/games/0/state?p_id={}".format(player_id))
+    response = _get_state(client, player_id)
     assert response.status_code == 200
     new_data = response.get_data()
     assert old_data == new_data
@@ -383,7 +383,7 @@ def _post_shift(client, player_id, row, column, rotation):
         },
         "leftoverRotation": rotation
     })
-    return client.post("/api/games/0/shift?p_id={}".format(player_id), data=data)
+    return client.post("/api/games/0/shift?p_id={}".format(player_id), data=data, mimetype="application/json")
 
 
 def _post_move(client, player_id, row, column):
@@ -393,4 +393,28 @@ def _post_move(client, player_id, row, column):
             "column": column
         }
     })
-    return client.post("/api/games/0/move?p_id={}".format(player_id), data=data)
+    return client.post("/api/games/0/move?p_id={}".format(player_id), data=data, mimetype="application/json")
+
+
+def _post_player(client, player_type=None, alone=None):
+    data = None
+    if alone is not None and player_type is not None:
+        data = {
+            "type": player_type,
+            "alone": alone
+        }
+    elif alone is not None:
+        data = {
+            "alone": alone
+        }
+    elif player_type is not None:
+        data = {
+            "type": player_type
+        }
+    if data:
+        data = json.dumps(data)
+    return client.post("/api/games/0/players", data=data, mimetype="application/json")
+
+
+def _get_state(client, player_id):
+    return client.get("/api/games/0/state?p_id={}".format(player_id))

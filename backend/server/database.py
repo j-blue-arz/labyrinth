@@ -2,7 +2,7 @@
 import json
 import sqlite3
 from flask import current_app, g
-from .mapper import dto_to_game, game_to_dto
+from .mapper.persistence import dto_to_game, game_to_dto
 
 
 def create_game(game, game_id=0):

@@ -10,7 +10,7 @@ def test_get_root(client):
     response = client.get('/')
     assert response.status_code == 200
     assert b'<!DOCTYPE html>' in response.get_data()
-    assert b'<title>Vue App</title>' in response.get_data()
+    assert b'<title>Labyrinth</title>' in response.get_data()
     assert b'<div id=app>' in response.get_data()
     assert b'href=/static/js/' in response.get_data()
     assert b'href=/static/css/' in response.get_data()

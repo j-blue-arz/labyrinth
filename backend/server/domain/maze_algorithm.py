@@ -1,25 +1,19 @@
-""" This module deals with input validation of players' actions,
-if these cannot be validated with the basic model methods.
+""" This module deals with graph algorithms performed on the maze,
 
-Currently it only has one class to validate a user's move in the labyrinth.
+Currently it only has one class to compute all reachable locations.
 """
 from collections import deque
 
-
-class MoveValidator():
-    """ Validates if a move is valid.
-
-    Performs a BFS in a graph represented by the current maze to
+class Graph():
+    """ Performs a BFS in a graph represented by the current maze to
     verify if two locations are connected.
     """
 
     def __init__(self, maze):
         self._maze = maze
 
-    def validate_move(self, source_location, target_location):
-        """ Validates if a move is valid.
-
-        Performs a BFS in a graph represented by the current maze to
+    def is_reachable(self, source_location, target_location):
+        """ Performs a BFS in a graph represented by the current maze to
         verify if the source location and the target location
         are connected.
 
@@ -27,10 +21,10 @@ class MoveValidator():
         :param target_location: the requested BoardLocation
         :return: True, iff there is a path between the two locations
         """
-        reachable_locations = self._bfs(source_location)
+        reachable_locations = self.reachable_locations(source_location)
         return target_location in reachable_locations
 
-    def _bfs(self, source):
+    def reachable_locations(self, source):
         """ Performs a BFS, returning all reachable BoardLocations
 
         :param source: the BoardLocation to start from

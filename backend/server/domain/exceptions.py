@@ -7,7 +7,8 @@ __all__ = ["InvalidStateException",
            "InvalidShiftLocationException",
            "InvalidRotationException",
            "MoveUnreachableException",
-           "TurnActionViolationException"]
+           "TurnActionViolationException",
+           "GameFullException"]
 
 class LabyrinthDomainException(Exception):
     """ A base class for all domain exceptions of the labyrinth domain model """
@@ -18,6 +19,10 @@ class InvalidStateException(LabyrinthDomainException):
     """ If the game realizes it is in an invalid state from which it cannot recover,
     and it is unable to determine how it got there
     """
+    pass
+
+class GameFullException(LabyrinthDomainException):
+    """ If a player is added to game without empty places """
     pass
 
 
