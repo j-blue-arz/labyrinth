@@ -29,7 +29,7 @@ def post_player(game_id):
     If 'type' is 'human', a human player is added, if it is 'random', a random computer player is added.
     Default: alone: 'false' and type: 'human'
     """
-    request_body = request.get_json(force=True)
+    request_body = request.get_json(silent=True)
     player_id = service.add_player(game_id, request_body)
     return json.jsonify(player_id)
 
