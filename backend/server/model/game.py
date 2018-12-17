@@ -124,8 +124,6 @@ class MazeCard:
     @classmethod
     def create_instance(cls, doors, rotation):
         """Generates a new instance, with autoincreasing ID.
-
-        If parameters are None, they are set randomly.
         """
         maze_card = MazeCard(cls.next_id, doors, rotation)
         cls.next_id = cls.next_id + 1

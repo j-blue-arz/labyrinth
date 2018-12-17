@@ -1,29 +1,30 @@
 """ This module contains methods to build and initialize model objects """
-from random import choice
+import random
 from .game import MazeCard, Maze, BoardLocation, Board, Game
 
 
-def create_random_maze_card():
+def create_random_maze_card(doors=None):
     """ Creates a new instance of MazeCard with
     random doors and rotation
     """
-    doors = choice([MazeCard.STRAIGHT, MazeCard.CORNER, MazeCard.T_JUNCT])
-    rotation = choice([0, 90, 180, 270])
+    if not doors:
+        doors = random.choice([MazeCard.STRAIGHT, MazeCard.CORNER, MazeCard.T_JUNCT])
+    rotation = random.choice([0, 90, 180, 270])
     return MazeCard.create_instance(doors, rotation)
 
 
 def create_random_maze():
     """ Generates a random maze state.
     Corners of the maze are fixed as corners,
-    Other unshiftable border pieces are t-junctions.
     """
-    MazeCard.reset_ids()
-    maze = Maze()
     fixed_cards = {
         BoardLocation(0, 0): MazeCard(doors=MazeCard.CORNER, rotation=90),
-        BoardLocation(0, Maze.MAZE_SIZE - 1): MazeCard(doors=MazeCard.CORNER, rotation=180),
-        BoardLocation(Maze.MAZE_SIZE - 1, Maze.MAZE_SIZE - 1): MazeCard(doors=MazeCard.CORNER, rotation=270),
-        BoardLocation(Maze.MAZE_SIZE - 1, 0): MazeCard(doors=MazeCard.CORNER, rotation=0)}
+        BoardLocation(0, 6): MazeCard(doors=MazeCard.CORNER, rotation=180),
+        BoardLocation(6, 6): MazeCard(doors=MazeCard.CORNER, rotation=270),
+        BoardLocation(6, 0): MazeCard(doors=MazeCard.CORNER, rotation=0)}
+
+    MazeCard.reset_ids()
+    maze = Maze()
 
     def card_at(location):
         if location in fixed_cards:
@@ -35,14 +36,63 @@ def create_random_maze():
     return maze
 
 
+def create_random_original_maze_and_leftover():
+    """ Generates a random maze state according to the rules of the original game.
+    Corners of the maze are fixed as corners,
+    All other fixed maze cards are t-junctions
+    15 corners, 6 t-junctions, and 13 straights are randomly placed on the board
+    """
+    fixed_cards = {
+        BoardLocation(0, 0): MazeCard(doors=MazeCard.CORNER, rotation=90),
+        BoardLocation(0, 6): MazeCard(doors=MazeCard.CORNER, rotation=180),
+        BoardLocation(6, 6): MazeCard(doors=MazeCard.CORNER, rotation=270),
+        BoardLocation(6, 0): MazeCard(doors=MazeCard.CORNER, rotation=0),
+        BoardLocation(0, 2): MazeCard(doors=MazeCard.T_JUNCT, rotation=90),
+        BoardLocation(0, 4): MazeCard(doors=MazeCard.T_JUNCT, rotation=90),
+        BoardLocation(2, 6): MazeCard(doors=MazeCard.T_JUNCT, rotation=180),
+        BoardLocation(4, 6): MazeCard(doors=MazeCard.T_JUNCT, rotation=180),
+        BoardLocation(6, 2): MazeCard(doors=MazeCard.T_JUNCT, rotation=270),
+        BoardLocation(6, 4): MazeCard(doors=MazeCard.T_JUNCT, rotation=270),
+        BoardLocation(2, 0): MazeCard(doors=MazeCard.T_JUNCT, rotation=0),
+        BoardLocation(4, 0): MazeCard(doors=MazeCard.T_JUNCT, rotation=0),
+        BoardLocation(2, 2): MazeCard(doors=MazeCard.T_JUNCT, rotation=0),
+        BoardLocation(2, 4): MazeCard(doors=MazeCard.T_JUNCT, rotation=90),
+        BoardLocation(4, 4): MazeCard(doors=MazeCard.T_JUNCT, rotation=180),
+        BoardLocation(4, 2): MazeCard(doors=MazeCard.T_JUNCT, rotation=270)}
+
+    MazeCard.reset_ids()
+    maze = Maze()
+    loose_cards_doors = [MazeCard.CORNER]*15 + [MazeCard.T_JUNCT]*6 + [MazeCard.STRAIGHT]*13
+    loose_cards = [create_random_maze_card(doors=doors) for doors in loose_cards_doors]
+    random.shuffle(loose_cards)
+    card_iter = iter(loose_cards)
+
+    for location in Maze.maze_locations():
+        if location in fixed_cards:
+            maze[location] = MazeCard.create_instance(fixed_cards[location].doors, fixed_cards[location].rotation)
+        else:
+            maze[location] = card_iter.__next__()
+
+    leftover = card_iter.__next__()
+    return maze, leftover
+
+
 def create_board():
-    """ Creates a Board instance. Random maze, random left over. """
+    """ Creates a Board instance. Random maze, random leftover. """
     return Board(maze=create_random_maze(), leftover_card=create_random_maze_card())
 
 
-def create_game():
+def create_original_board():
+    """ Creates a Board instance. Original maze, original random leftover """
+    maze, leftover = create_random_original_maze_and_leftover()
+    return Board(maze=maze, leftover_card=leftover)
+
+
+def create_game(original=False):
     """ Creates a game instance with a random board. Player and piece initialization
     is not done here, but dynamically depending on the number of players """
+    if original:
+        return Game(0, board=create_original_board())
     return Game(0, board=create_board())
 
 

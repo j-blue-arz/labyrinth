@@ -65,7 +65,7 @@ def _get_or_create_game(game_id):
 
 
 def _create_game(game_id):
-    game = factory.create_game()
+    game = factory.create_game(original=True)
     database.create_game(game, game_id)
     return game
 
