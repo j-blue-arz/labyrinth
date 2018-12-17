@@ -1,6 +1,6 @@
 """ All methods and constants which are shared in persistence and dto """
 
-from server.domain.model import MazeCard, BoardLocation
+from server.model.game import MazeCard, BoardLocation
 from .constants import ROW, COLUMN, ID, DOORS, ROTATION, LOCATION
 
 def _objective_to_dto(maze_card: MazeCard):

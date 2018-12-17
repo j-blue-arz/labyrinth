@@ -5,8 +5,8 @@ as seen from one player. """
 import json
 import mapper.api as mapper
 from mapper import constants
-from domain.model import BoardLocation, Player
-from domain.factories import create_game
+from model.game import BoardLocation, Player
+from model.factories import create_game
 
 
 def _create_test_game():

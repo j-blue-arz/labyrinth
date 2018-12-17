@@ -1,10 +1,10 @@
-""" Tests for module computer in domain. The classes contained in this are multithreaded.
+""" Tests for module computer in model. The classes contained in this are multithreaded.
 The tests only run these classes in a single thread, by calling run() directly. """
 import copy
 from unittest.mock import MagicMock
-from server.domain.computer import ComputerPlayer, RandomActionsAlgorithm
-from domain.factories import create_maze
-from domain.model import Board, MazeCard, BoardLocation
+from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
+from model.factories import create_maze
+from model.game import Board, MazeCard, BoardLocation
 
 
 def test_computer_player_fetches_urls_from_url_supplier():

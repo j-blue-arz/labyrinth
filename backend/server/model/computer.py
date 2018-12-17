@@ -16,7 +16,7 @@ from threading import Thread
 import requests
 from server.mapper.api import shift_action_to_dto, move_action_to_dto
 from .maze_algorithm import Graph
-from .model import Player, Turns
+from .game import Player, Turns
 
 
 

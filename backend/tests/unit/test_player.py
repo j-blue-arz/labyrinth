@@ -1,7 +1,7 @@
-""" Tests player of model.py """
+""" Tests player of game.py """
 from unittest.mock import MagicMock
-from server.domain.model import Player, Piece
-from server.domain.factories import create_random_maze_card
+from server.model.game import Player, Piece
+from server.model.factories import create_random_maze_card
 
 
 def test_set_board():

@@ -4,8 +4,8 @@ the methods used to persist a Game instance.
 The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
 import server.mapper.persistence as mapper
-from server.domain.model import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from server.domain.computer import ComputerPlayer, RandomActionsAlgorithm
+from server.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
+from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
 
 
 def _create_test_game(with_computer=False):
@@ -26,7 +26,7 @@ def _create_test_game(with_computer=False):
     if with_computer:
         player_ids.append(42)
         players.append(ComputerPlayer(identifier=42, game_identifier=7,
-                                    algorithm_name="random", shift_url="shift-url", move_url="move-url"))
+                                      algorithm_name="random", shift_url="shift-url", move_url="move-url"))
     for player in players:
         player.set_board(board)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]

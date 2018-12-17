@@ -2,7 +2,7 @@
 It defines a few exception factories.
 It also maps domain exceptions to these pre-defined factories. """
 
-from .domain.exceptions import InvalidStateException, PlayerNotFoundException, \
+from .model.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
     InvalidRotationException, TurnActionViolationException, GameFullException
 from .mapper.api import exception_to_dto
@@ -29,7 +29,7 @@ class ApiException(Exception):
 def domain_to_api_exception(domain_exception):
     """ Maps a domain exception instance to an ApiException.
 
-    :param domain_exception: an instance of a subclass of domain.exceptions.LabyrinthDomainException
+    :param domain_exception: an instance of a subclass of model.exceptions.LabyrinthDomainException
     """
     if isinstance(domain_exception, InvalidStateException):
         return UNKNOWN_ERROR()

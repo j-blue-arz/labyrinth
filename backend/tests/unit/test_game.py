@@ -1,8 +1,8 @@
-""" Tests for Game of model.py """
+""" Tests for Game of game.py """
 from unittest.mock import Mock, patch, call
 import pytest
-from domain.model import Game, BoardLocation, Player, PlayerAction
-from domain.exceptions import PlayerNotFoundException, GameFullException
+from model.game import Game, BoardLocation, Player, PlayerAction
+from model.exceptions import PlayerNotFoundException, GameFullException
 
 
 def test_add_get_player():
@@ -49,7 +49,7 @@ def test_start_game_with_four_players():
     assert turns.mock_calls == expected_turn_calls
 
 
-@patch("domain.model.Player")
+@patch("model.game.Player")
 def test_add_player_calls_constructor_with_correct_arguments(mock_player_class):
     """ Tests add_player """
     game = Game(identifier=7)

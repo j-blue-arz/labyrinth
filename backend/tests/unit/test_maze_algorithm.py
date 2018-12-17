@@ -1,9 +1,9 @@
 """ Tests for Graph. A Board instance is created from a string representation of a labyrinth.
 Several validation tests are performed on this instance """
 
-from domain.model import BoardLocation
-from domain.maze_algorithm import Graph
-from domain.factories import create_maze
+from model.game import BoardLocation
+from model.maze_algorithm import Graph
+from model.factories import create_maze
 
 def test_is_reachable_for_same_location():
     """ Tests is_reachable """

@@ -1,6 +1,6 @@
-""" Tests for module domain.factories """
-from domain.factories import create_random_maze
-from domain.model import BoardLocation, MazeCard
+""" Tests for module model.factories """
+from model.factories import create_random_maze
+from model.game import BoardLocation, MazeCard
 
 
 def test_create_random_maze_generates_unique_ids_for_each_maze_card():

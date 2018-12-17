@@ -4,7 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from server.domain.model import Game, Turns, Player
+from server.model.game import Game, Turns, Player
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
 from .constants import *
 

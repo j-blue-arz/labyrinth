@@ -3,8 +3,8 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from server.domain.model import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
-from server.domain.computer import ComputerPlayer
+from server.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
+from server.model.computer import ComputerPlayer
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location
 from .constants import *
 

@@ -1,6 +1,6 @@
-""" Tests Piece of model.py """
-from domain.model import Piece
-from domain.factories import create_random_maze_card
+""" Tests Piece of game.py """
+from model.game import Piece
+from model.factories import create_random_maze_card
 
 
 def test_has_reached_objective_is_true():

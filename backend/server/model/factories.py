@@ -1,6 +1,6 @@
 """ This module contains methods to build and initialize model objects """
 from random import choice
-from .model import MazeCard, Maze, BoardLocation, Board, Game
+from .game import MazeCard, Maze, BoardLocation, Board, Game
 
 
 def create_random_maze_card():

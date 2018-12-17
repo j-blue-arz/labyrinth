@@ -1,12 +1,12 @@
 """ Service Layer """
 from flask import url_for
-import server.domain.factories as factory
+import server.model.factories as factory
 import mapper.api as mapper
 from . import exceptions
 from . import database
-from .domain.exceptions import LabyrinthDomainException
-from .domain.model import Player
-from .domain.computer import ComputerPlayer
+from .model.exceptions import LabyrinthDomainException
+from .model.game import Player
+from .model.computer import ComputerPlayer
 
 
 def add_player(game_id, add_player_dto):
