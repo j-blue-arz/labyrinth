@@ -97,31 +97,32 @@ export default {
         cardSize: {
             type: Number,
             default: 100
-        },
-        rotation: {
-            type: Number,
-            default: 0
         }
     },
     data() {
         return {
-            rotationClass: "noRotation",
+            animatedRotationClass: "",
             timer: 0
         };
     },
     watch: {
         rotation: function(newValue) {
             clearTimeout(this.timer);
-            this.rotationClass = "rotateTo" + newValue;
+            this.animatedRotationClass = "rotateTo" + newValue;
             this.timer = setTimeout(() => {
-                this.rotationClass = "rotate" + newValue;
+                this.animatedRotationClass = "rotate" + newValue;
             }, 500);
         }
     },
     computed: {
-        rotationTransform: function() {
-            let rotation = "rotate(" + this.rotation + "deg)";
-            return { transform: rotation, "transform-origin": "50px 50px" };
+        rotation: function() {
+            return this.mazeCard.rotation;
+        },
+        rotationClass: function() {
+            if (this.animatedRotationClass === "") {
+                return "rotate" + this.mazeCard.rotation;
+            }
+            return this.animatedRotationClass;
         },
         players: function() {
             return this.mazeCard.players;
@@ -191,9 +192,10 @@ export default {
 
 <style lang="scss">
 .maze-card {
-    /* transition: all 0.1s; */
+    overflow: visible;
+
     &__outline {
-        stroke: black;
+        stroke: $color-outline;
         stroke-width: 1px;
         stroke-opacity: 0.8;
     }
@@ -206,18 +208,18 @@ export default {
 
         &:hover {
             .maze-card__outline {
-                stroke: blue;
+                stroke: $color-outline-active;
             }
         }
     }
 
     &__wall {
-        fill: grey;
+        fill: $color-walls;
     }
 
     &__pathway {
-        fill: white;
-        stroke: white;
+        fill: $color-pathways;
+        stroke: $color-pathways;
     }
 
     &.interaction {
@@ -225,84 +227,27 @@ export default {
     }
 
     &__group {
-        /* transition: all 1s; */
         transform-origin: 50px 50px;
     }
 }
 
-.rotateTo90 {
-    animation-duration: 0.5s;
-    animation-name: rotate90;
-}
+$degrees: 0 90 180 270;
+@each $rotation in $degrees {
+    $to: $rotation;
+    @if $rotation == 0 {
+        $to: 360;
+    }
+    $from: $to - 90;
+    $animationName: from#{$from}to#{$to};
 
-.rotate90 {
-    transform: rotate(90deg);
-}
-
-@keyframes rotate90 {
-    from {
-        transform: rotate(0deg);
+    .rotateTo#{$rotation} {
+        @include rotationAnimation($animationName);
     }
 
-    to {
-        transform: rotate(90deg);
-    }
-}
-
-.rotateTo180 {
-    animation-duration: 0.5s;
-    animation-name: rotate180;
-}
-
-.rotate180 {
-    transform: rotate(180deg);
-}
-
-@keyframes rotate180 {
-    from {
-        transform: rotate(90deg);
+    .rotate#{$rotation} {
+        transform: rotate($rotation + deg);
     }
 
-    to {
-        transform: rotate(180deg);
-    }
-}
-
-.rotateTo270 {
-    animation-duration: 0.5s;
-    animation-name: rotate270;
-}
-
-.rotate270 {
-    transform: rotate(270deg);
-}
-
-@keyframes rotate270 {
-    from {
-        transform: rotate(180deg);
-    }
-
-    to {
-        transform: rotate(270deg);
-    }
-}
-
-.rotateTo0 {
-    animation-duration: 0.5s;
-    animation-name: rotate0;
-}
-
-.rotate0 {
-    transform: rotate(0deg);
-}
-
-@keyframes rotate0 {
-    from {
-        transform: rotate(270deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+    @include rotateFromTo($animationName, $from + deg, $to + deg);
 }
 </style>

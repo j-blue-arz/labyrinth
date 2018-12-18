@@ -1,0 +1,16 @@
+@mixin rotationAnimation($name) {
+    animation-duration: $rotation-animation-duration;
+    animation-name: $name;
+}
+
+@mixin rotateFromTo($name, $from, $to) {
+    @keyframes #{$name} {
+        from {
+            transform: rotate($from);
+        }
+
+        to {
+            transform: rotate($to);
+        }
+    }
+}

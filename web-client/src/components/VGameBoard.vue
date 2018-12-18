@@ -84,7 +84,7 @@ export default {
 <style lang="scss">
 .game-board {
     &__background {
-        fill: lightblue;
+        fill: $color-game-board;
     }
 }
 </style>

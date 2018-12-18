@@ -65,13 +65,6 @@ export default class MazeCard {
         ];
     }
 
-    static rotationEquivalentDoor(originalDoor, rotation) {
-        return MazeCard.doorsRotation[
-            (MazeCard.doorsRotation.indexOf(originalDoor) + rotation / 90 + 4) %
-                4
-        ];
-    }
-
     hasNorthDoor() {
         return this._hasDoor("N");
     }
@@ -89,11 +82,7 @@ export default class MazeCard {
     }
 
     _hasDoor(door) {
-        var rotationDoor = MazeCard.rotationEquivalentDoor(
-            door,
-            -(this._rotation % 360)
-        );
-        return this.doors.indexOf(rotationDoor) != -1;
+        return this.doors.indexOf(door) != -1;
     }
 
     get rotation() {
@@ -148,5 +137,3 @@ MazeCard.validCombinations = [
     "EW",
     "SW"
 ];
-
-MazeCard.doorsRotation = ["N", "E", "S", "W"];
