@@ -1,5 +1,4 @@
-> 1%
+> 2%
 Chrome >= 69
 Firefox >= 62
-ie >= 11
-not ie <= 8
+not ie <= 11

@@ -20,7 +20,7 @@ The non-functional requirements have different priorities. They can be seperated
 * unit tests for the client
 
 #### Platforms
-* Client fully functional in IE 11, Firefox 62+, Chrome 69+ (browserslist: ie >= 11, Firefox >= 62, Chrome >= 69, not ie <= 8, > 1%)
+* Client fully functional in Firefox 62+, Chrome 69+, iOS Safari 11.3+ (browserslist: not ie <= 11, Firefox >= 62, Chrome >= 69, > 2%)
 * Client fully functional on my PC (i5-6500 @ 3.20GHz, 8.00 GB RAM, Windows 10 Pro 64 Bit)
 * Client fully functional on HDTV Beamer (1280x720)
 * Client fully functional on my Smartphone (Sony Xperia Z1 Compact, Android)
