@@ -144,7 +144,7 @@ export default {
         },
         onLeftoverClick: function() {
             if (this.isMyTurnToShift) {
-                this.game.leftoverMazeCard.rotateClockwise();
+                this.leftoverMazeCard.rotateClockwise();
             }
         }
     }

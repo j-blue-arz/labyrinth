@@ -83,20 +83,20 @@ describe("MazeCard", () => {
             expect(mazeCard.hasWestDoor()).toBe(false);
         });
 
-        it("respect rotation", () => {
+        it("do not respect rotation", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NS", 270);
-            expect(mazeCard.hasNorthDoor()).toBe(false);
-            expect(mazeCard.hasEastDoor()).toBe(true);
-            expect(mazeCard.hasSouthDoor()).toBe(false);
-            expect(mazeCard.hasWestDoor()).toBe(true);
+            expect(mazeCard.hasNorthDoor()).toBe(true);
+            expect(mazeCard.hasEastDoor()).toBe(false);
+            expect(mazeCard.hasSouthDoor()).toBe(true);
+            expect(mazeCard.hasWestDoor()).toBe(false);
         });
 
-        it("are rotated when rotateClockwise() is called", () => {
+        it("are not rotated when rotateClockwise() is called", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
             mazeCard.rotateClockwise();
-            expect(mazeCard.hasNorthDoor()).toBe(false);
+            expect(mazeCard.hasNorthDoor()).toBe(true);
             expect(mazeCard.hasEastDoor()).toBe(true);
-            expect(mazeCard.hasSouthDoor()).toBe(true);
+            expect(mazeCard.hasSouthDoor()).toBe(false);
             expect(mazeCard.hasWestDoor()).toBe(false);
         });
     });

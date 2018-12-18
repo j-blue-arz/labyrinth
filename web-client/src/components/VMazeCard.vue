@@ -6,57 +6,59 @@
         viewBox="0 0 100 100"
         class="maze-card"
     >
-        <rect
-            x="0"
-            y="0"
-            :ry="edgeRadius"
-            :height="cardSize"
-            :width="cardSize"
-            class="maze-card__wall maze-card__outline"
-        ></rect>
-        <rect
-            :x="remainingSpace"
-            :y="remainingSpace"
-            :height="pathWidth"
-            :width="pathWidth"
-            class="maze-card__pathway"
-        ></rect>
-        <rect
-            ref="northDoor"
-            v-if="hasNorth"
-            :x="remainingSpace"
-            y="1"
-            :height="remainingSpace"
-            :width="pathWidth"
-            class="maze-card__pathway"
-        ></rect>
-        <rect
-            ref="eastDoor"
-            v-if="hasEast"
-            :x="(cardSize - 1) - (remainingSpace + 1)"
-            :y="remainingSpace"
-            :height="pathWidth"
-            :width="remainingSpace + 1"
-            class="maze-card__pathway"
-        ></rect>
-        <rect
-            ref="southDoor"
-            v-if="hasSouth"
-            :x="remainingSpace"
-            :y="(cardSize - 1) - (remainingSpace + 1)"
-            :height="remainingSpace + 1"
-            :width="pathWidth"
-            class="maze-card__pathway"
-        ></rect>
-        <rect
-            ref="westDoor"
-            v-if="hasWest"
-            x="1"
-            :y="remainingSpace"
-            :height="pathWidth"
-            :width="remainingSpace"
-            class="maze-card__pathway"
-        ></rect>
+        <g class="maze-card__group" :class="rotationClass">
+            <rect
+                x="0"
+                y="0"
+                :ry="edgeRadius"
+                :height="cardSize"
+                :width="cardSize"
+                class="maze-card__wall maze-card__outline"
+            ></rect>
+            <rect
+                :x="remainingSpace"
+                :y="remainingSpace"
+                :height="pathWidth"
+                :width="pathWidth"
+                class="maze-card__pathway"
+            ></rect>
+            <rect
+                ref="northDoor"
+                v-if="hasNorth"
+                :x="remainingSpace"
+                y="1"
+                :height="remainingSpace"
+                :width="pathWidth"
+                class="maze-card__pathway"
+            ></rect>
+            <rect
+                ref="eastDoor"
+                v-if="hasEast"
+                :x="(cardSize - 1) - (remainingSpace + 1)"
+                :y="remainingSpace"
+                :height="pathWidth"
+                :width="remainingSpace + 1"
+                class="maze-card__pathway"
+            ></rect>
+            <rect
+                ref="southDoor"
+                v-if="hasSouth"
+                :x="remainingSpace"
+                :y="(cardSize - 1) - (remainingSpace + 1)"
+                :height="remainingSpace + 1"
+                :width="pathWidth"
+                class="maze-card__pathway"
+            ></rect>
+            <rect
+                ref="westDoor"
+                v-if="hasWest"
+                x="1"
+                :y="remainingSpace"
+                :height="pathWidth"
+                :width="remainingSpace"
+                class="maze-card__pathway"
+            ></rect>
+        </g>
         <v-player-piece
             v-for="(player, index) in players"
             :xCenterPos="pieceCenters[index].x"
@@ -98,9 +100,30 @@ export default {
         }
     },
     data() {
-        return {};
+        return {
+            animatedRotationClass: "",
+            timer: 0
+        };
+    },
+    watch: {
+        rotation: function(newValue) {
+            clearTimeout(this.timer);
+            this.animatedRotationClass = "rotateTo" + newValue;
+            this.timer = setTimeout(() => {
+                this.animatedRotationClass = "rotate" + newValue;
+            }, 500);
+        }
     },
     computed: {
+        rotation: function() {
+            return this.mazeCard.rotation;
+        },
+        rotationClass: function() {
+            if (this.animatedRotationClass === "") {
+                return "rotate" + this.mazeCard.rotation;
+            }
+            return this.animatedRotationClass;
+        },
         players: function() {
             return this.mazeCard.players;
         },
@@ -169,9 +192,10 @@ export default {
 
 <style lang="scss">
 .maze-card {
-    transition: all 0.1s;
+    overflow: visible;
+
     &__outline {
-        stroke: black;
+        stroke: $color-outline;
         stroke-width: 1px;
         stroke-opacity: 0.8;
     }
@@ -184,22 +208,46 @@ export default {
 
         &:hover {
             .maze-card__outline {
-                stroke: blue;
+                stroke: $color-outline-active;
             }
         }
     }
 
     &__wall {
-        fill: grey;
+        fill: $color-walls;
     }
 
     &__pathway {
-        fill: white;
-        stroke: white;
+        fill: $color-pathways;
+        stroke: $color-pathways;
     }
 
     &.interaction {
         cursor: pointer;
     }
+
+    &__group {
+        transform-origin: 50px 50px;
+    }
+}
+
+$degrees: 0 90 180 270;
+@each $rotation in $degrees {
+    $to: $rotation;
+    @if $rotation == 0 {
+        $to: 360;
+    }
+    $from: $to - 90;
+    $animationName: from#{$from}to#{$to};
+
+    .rotateTo#{$rotation} {
+        @include rotationAnimation($animationName);
+    }
+
+    .rotate#{$rotation} {
+        transform: rotate($rotation + deg);
+    }
+
+    @include rotateFromTo($animationName, $from + deg, $to + deg);
 }
 </style>
