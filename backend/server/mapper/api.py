@@ -18,7 +18,7 @@ def player_state_to_dto(game: Game, player_id):
     """
     game_dto = dict()
     player = next(player for player in game.players if player.identifier == player_id)
-    game_dto[OBJECTIVE] = _objective_to_dto(player.piece.objective_maze_card)
+    game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_player_action_dto(game.turns)
@@ -93,7 +93,6 @@ def _player_to_dto(player: Player):
     """Maps a player to a DTO
 
     :param piece: an instance of model.Piece
-    :param include_objective: if True, includes the player's objective_maze_card in the DTO
     :return: a structure whose JSON representation is valid for the API
     """
     player_dto = {ID: player.identifier,

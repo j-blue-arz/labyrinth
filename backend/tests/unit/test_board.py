@@ -18,13 +18,6 @@ def test_create_piece_sets_all_pieces_on_corners():
         assert is_corner(piece_location)
 
 
-def test_create_piece_sets_objective():
-    """ Tests create_piece """
-    board = Board(create_random_maze())
-    piece = board.create_piece()
-    assert piece.objective_maze_card
-
-
 def test_clear_pieces_after_creations_empties_pieces():
     """ Tests clear_pieces. """
     board = Board(create_random_maze())
@@ -37,21 +30,25 @@ def test_clear_pieces_after_creations_empties_pieces():
 
 def test_move_new_objective_locations_after_reaching_location():
     """ Tests new objective generation after reaching one """
-    board = Board(maze=create_maze(MAZE_STRING), leftover_card=create_random_maze_card())
+    maze = create_maze(MAZE_STRING)
+    objective_maze_card = maze[BoardLocation(1, 6)]
+    board = Board(
+        maze=create_maze(MAZE_STRING),
+        leftover_card=create_random_maze_card(),
+        objective_maze_card=objective_maze_card)
     piece = board.create_piece()
-    piece.maze_card = board.maze[BoardLocation(0, 6)]
-    piece.objective_maze_card = board.maze[BoardLocation(1, 6)]
+    piece.maze_card = maze[BoardLocation(0, 6)]
     board.move(piece, BoardLocation(1, 6))
-    _assert_all_piece_and_objective_locations_different(board)
+    _assert_all_piece_and_objective_location_different(board)
 
 
-def _assert_all_piece_and_objective_locations_different(board):
+def _assert_all_piece_and_objective_location_different(board):
     """ asserts for a given Board instance """
     card_ids = set()
     for piece in board.pieces:
         card_ids.add(piece.maze_card.identifier)
-        card_ids.add(piece.objective_maze_card.identifier)
-    assert len(card_ids) == len(board.pieces) * 2
+    card_ids.add(board.objective_maze_card.identifier)
+    assert len(card_ids) == len(board.pieces) + 1
 
 
 def test_shift_updates_old_leftover_rotation():

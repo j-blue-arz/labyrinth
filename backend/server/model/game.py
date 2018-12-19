@@ -146,17 +146,10 @@ class MazeCard:
 class Piece:
     """ Represents a player's piece
     Each piece has a reference to a MazeCard instance as its position.
-    The player's objective is another reference to a MazeCard instance.
     """
 
     def __init__(self, maze_card: MazeCard = None):
         self.maze_card = maze_card
-        self.objective_maze_card = None
-
-    def has_reached_objective(self):
-        """ true iff player's current location and his objective are equal """
-        return self.maze_card == self.objective_maze_card
-
 
 class Maze:
     """ Represent the state of the maze.
@@ -289,7 +282,7 @@ class Board:
     The board state of a game of labyrinth.
     """
 
-    def __init__(self, maze=None, leftover_card=None):
+    def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
         if not maze:
             maze = Maze()
@@ -297,6 +290,9 @@ class Board:
         if not leftover_card:
             leftover_card = MazeCard()
         self._leftover_card = leftover_card
+        if not objective_maze_card:
+            objective_maze_card = self._random_unoccupied_maze_card()
+        self._objective_maze_card = objective_maze_card
         self._start_locations = [
             BoardLocation(0, 0),
             BoardLocation(0, self._maze.MAZE_SIZE - 1),
@@ -307,6 +303,11 @@ class Board:
     def leftover_card(self):
         """ Getter for leftover card """
         return self._leftover_card
+
+    @property
+    def objective_maze_card(self):
+        """ Getter for objective maze card """
+        return self._objective_maze_card
 
     @property
     def maze(self):
@@ -323,12 +324,13 @@ class Board:
         self._pieces.clear()
 
     def create_piece(self):
-        """ Creates and places a piece on the board """
+        """ Creates and places a piece on the board.
+        Generates new objective, because the old one could be the same as the new piece's starting location """
         circular_locations = list(islice(cycle(self._start_locations), len(self._pieces) + 1))
         next_location = circular_locations[-1]
         piece = Piece(self._maze[next_location])
         self._pieces.append(piece)
-        piece.objective_maze_card = self._random_unoccupied_maze_card()
+        self._objective_maze_card = self._random_unoccupied_maze_card()
         return piece
 
     def shift(self, new_leftover_location, leftover_rotation):
@@ -347,8 +349,8 @@ class Board:
             raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
                 piece_location, target_location))
         piece.maze_card = target
-        if piece.has_reached_objective():
-            piece.objective_maze_card = self._random_unoccupied_maze_card()
+        if target == self.objective_maze_card:
+            self._objective_maze_card = self._random_unoccupied_maze_card()
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
@@ -365,7 +367,6 @@ class Board:
         maze_cards = set([self._maze[location]
                           for location in self._maze.maze_locations()] + [self._leftover_card])
         for piece in self._pieces:
-            maze_cards.discard(piece.objective_maze_card)
             maze_cards.discard(piece.maze_card)
         return choice(tuple(maze_cards))
 

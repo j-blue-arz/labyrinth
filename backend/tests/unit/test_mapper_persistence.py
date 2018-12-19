@@ -31,8 +31,7 @@ def _create_test_game(with_computer=False):
         player.set_board(board)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]
     players[1].piece.maze_card = board.maze[BoardLocation(5, 5)]
-    players[0].piece.objective_maze_card = board.maze[BoardLocation(1, 4)]
-    players[1].piece.objective_maze_card = None
+    board._objective_maze_card = board.maze[BoardLocation(1, 4)]
     turns = Turns(players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
     game = Game(identifier=7, turns=turns, board=board, players=players)
     return game, player_ids
@@ -87,8 +86,7 @@ def test_mapping_for_objectives():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.get_player(player_ids[0]).piece.objective_maze_card.identifier)
-    assert game.get_player(player_ids[1]).piece.objective_maze_card is None
+                                         lambda g: g.board.objective_maze_card.identifier)
 
 
 def test_mapping_turns():

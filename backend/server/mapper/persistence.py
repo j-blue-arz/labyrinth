@@ -19,6 +19,7 @@ def game_to_dto(game: Game):
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
+    game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
     return game_dto
 
 
@@ -40,7 +41,8 @@ def dto_to_game(game_dto):
         else:
             maze[board_location] = maze_card
         maze_card_by_id[maze_card.identifier] = maze_card
-    board = Board(maze, leftover_card)
+    objective_maze_card = maze_card_by_id[game_dto[OBJECTIVE]]
+    board = Board(maze, leftover_card, objective_maze_card=objective_maze_card)
     players = [_dto_to_player(player_dto, 0, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
@@ -57,7 +59,6 @@ def _player_to_dto(player: Player):
     """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier}
-    player_dto[OBJECTIVE] = _objective_to_dto(player.piece.objective_maze_card)
     if type(player) is ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
@@ -87,8 +88,6 @@ def _dto_to_player(player_dto, game_id, board, maze_card_dict):
     :return: a Player instance
     """
     piece = Piece(maze_card_dict[player_dto[MAZE_CARD_ID]])
-    if player_dto[OBJECTIVE]:
-        piece.objective_maze_card = maze_card_dict[player_dto[OBJECTIVE]]
     player = None
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
         player = ComputerPlayer(

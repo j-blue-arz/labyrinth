@@ -71,7 +71,7 @@ def test_mapping_objectives():
     game, player_id = _create_test_game()
     game_dto = mapper.player_state_to_dto(game, player_id)
     assert mapper.OBJECTIVE in game_dto
-    assert game_dto[mapper.OBJECTIVE] == game.get_player(player_id).piece.objective_maze_card.identifier
+    assert game_dto[mapper.OBJECTIVE] == game.board.objective_maze_card.identifier
 
 
 def test_dto_to_shift_action():
