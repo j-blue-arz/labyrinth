@@ -1,4 +1,4 @@
-# ADR 13: Architecture of computer players
+# ADR 14: Architecture of computer players
 
 ## Context
 One of the visions of the project is to investigate the complexity of the game and write artificial players who solve the problem of finding the best moves.
@@ -64,7 +64,7 @@ Both Player and ComputerPlayer will be stored in JSON as a single type. The Comp
 I will also rename package `domain` into `model`, and rename module `model` into `game`.
 
 ## Status
-Ready to be implemented.
+Implemented.
 
 ## Consequence
 Refactor, revisit this ADR if necessary.

@@ -95,10 +95,10 @@ def _dto_to_player(player_dto, game_id, board, maze_card_dict):
             identifier=player_dto[ID],
             game_identifier=game_id,
             shift_url=player_dto[SHIFT_URL],
-            move_url=player_dto[MOVE_URL])
+            move_url=player_dto[MOVE_URL],
+            piece=piece)
     else:
-        player = Player(identifier=player_dto[ID], game_identifier=game_id)
-    player._piece = piece
+        player = Player(identifier=player_dto[ID], game_identifier=game_id, piece=piece)
     player._board = board
     return player
 

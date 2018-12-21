@@ -29,10 +29,23 @@ def post_player(game_id):
     If 'type' is 'human', a human player is added, if it is 'random', a random computer player is added.
     Default: alone: 'false' and type: 'human'
     """
-    request_body = request.get_json(silent=True)
+    request_body = request.get_json(silent=True, force=True)
     player_id = service.add_player(game_id, request_body)
     return json.jsonify(player_id)
 
+
+@API.route('/games/<int:game_id>/players/<int:player_id>', methods=["DELETE"])
+def delete_player(game_id, player_id):
+    """ Removes a player from a game. Game has to exist, player has to exist in game. """
+    service.delete_player(game_id, player_id)
+    return ""
+
+@API.route('/games/<int:game_id>/players/<int:player_id>', methods=["PUT"])
+def replace_player(game_id, player_id):
+    """ Alters a player in a game. The body has the same form as the POST request, and the same rules apply. """
+    request_body = request.get_json(force=True)
+    service.replace_player(game_id, player_id, request_body)
+    return ""
 
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):

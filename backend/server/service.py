@@ -9,18 +9,17 @@ from .model.game import Player
 from .model.computer import ComputerPlayer
 
 
-def add_player(game_id, add_player_dto):
+def add_player(game_id, player_request_dto):
     """ Adds a player to a game.
     Creates the game if it does not exist.
     After adding the player, the game is started.
 
     :param game_id: specifies the game
-    :param add_player_dto: if this parameter is given, it contains information about the type of computer player to add
-    :raises exceptions.GAME_FULL: if the game is full
+    :param player_request_dto: if this parameter is given, it contains information about the type of player to add
     :return: the id of the added player
     """
     game = _get_or_create_game(game_id)
-    player_type, alone = mapper.dto_to_type_and_alone_flag(add_player_dto)
+    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     player_id = None
     if player_type is None or player_type == 'human':
         if not game.players and not alone:
@@ -34,11 +33,41 @@ def add_player(game_id, add_player_dto):
     return player_id
 
 
+def delete_player(game_id, player_id):
+    """ Removes a player from a game
+
+    :param game_id: specifies the game
+    :param player_id: specifies the player to remove
+    """
+    game = _load_game_or_throw(game_id)
+    _try(lambda: game.remove_player(player_id))
+    database.update_game(game_id, game)
+    return ""
+
+
+def replace_player(game_id, player_id, player_request_dto):
+    """ Changes a player in a game.
+
+    :param game_id: specifies the game. Has to exist.
+    :param player_id: specifies the player to remove
+    :param player_request_dto: contains information about the type of player to add.
+    Currently the only supported option is to replace a human player by a computer player.
+    """
+    player_type, _ = mapper.dto_to_type_and_alone_flag(player_request_dto)
+    if player_type == 'human':
+        raise exceptions.INVALID_ARGUMENTS()
+    else:
+        game = _load_game_or_throw(game_id)
+        game.change_player(player_id,
+                           ComputerPlayer, algorithm_name=player_type, url_supplier=URLSupplier())
+        database.update_game(game_id, game)
+
+
 def get_game_state(game_id, player_id):
-    """ Returns the game state, as seen for the querying player """
+    """ Returns the game state. The querying player has to take part in this game. """
     game = _load_game_or_throw(game_id)
     _try(lambda: game.get_player(player_id))
-    return mapper.player_state_to_dto(game, player_id)
+    return mapper.player_state_to_dto(game)
 
 
 def perform_shift(game_id, player_id, shift_dto):

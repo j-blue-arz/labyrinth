@@ -1,6 +1,5 @@
 """ Tests the api methods ( /api/ ) """
 import json
-import time
 
 
 def test_post_players(client):
@@ -331,6 +330,39 @@ def test_turn_action_progression(client):
     assert state["nextAction"]["action"] == "SHIFT"
 
 
+def test_delete_player(client):
+    """ Tests GET for /api/games/0/state and delete for /api/games/0/players/<player_id>
+
+    After a player was deleted, he should not be able to see the game state.
+    """
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _delete_player(client, player_id_1)
+    response = _get_state(client, player_id_1)
+    _assert_error_response(response, user_message="The player does not take part in this game.",
+                           key="PLAYER_NOT_IN_GAME", status=400)
+    state = _get_state(client, player_id_0).get_json()
+    assert len(state["players"]) == 1
+
+
+def test_put_player(client):
+    """ Tests PUT for /api/games/0/players/<player_id> and GET for /api/games/0/state
+
+    Changes human player to computer player, expects state to respect this change
+    """
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _put_player(client, player_id_1, player_type="random", alone=True)
+    state = _get_state(client, player_id_0).get_json()
+    assert len(state["players"]) == 2
+    player = state["players"][1]
+    assert "isComputerPlayer" in player
+    assert player["isComputerPlayer"] is True
+    assert player["algorithm"] == "random"
+    assert player["id"] == player_id_1
+
+
+
 def _assert_invalid_action_and_unchanged_state(client, action_resource, data):
     """ Sets a game up, performs invalid action on given resource with given data,
     asserts error response and checks that state has not changed """
@@ -397,6 +429,20 @@ def _post_move(client, player_id, row, column):
 
 
 def _post_player(client, player_type=None, alone=None):
+    player_data = _player_data(player_type, alone)
+    return client.post("/api/games/0/players", data=player_data, mimetype="application/json")
+
+def _delete_player(client, player_id):
+    return client.delete("/api/games/0/players/{}".format(player_id))
+
+def _put_player(client, player_id, player_type=None, alone=None):
+    player_data = _player_data(player_type, alone)
+    return client.put("/api/games/0/players/{}".format(player_id), data=player_data, mimetype="application/json")
+
+def _get_state(client, player_id):
+    return client.get("/api/games/0/state?p_id={}".format(player_id))
+
+def _player_data(player_type=None, alone=None):
     data = None
     if alone is not None and player_type is not None:
         data = {
@@ -413,8 +459,4 @@ def _post_player(client, player_type=None, alone=None):
         }
     if data:
         data = json.dumps(data)
-    return client.post("/api/games/0/players", data=data, mimetype="application/json")
-
-
-def _get_state(client, player_id):
-    return client.get("/api/games/0/state?p_id={}".format(player_id))
+    return data

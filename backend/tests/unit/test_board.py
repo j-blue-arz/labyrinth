@@ -12,10 +12,37 @@ def test_create_piece_sets_all_pieces_on_corners():
 
     def is_corner(location):
         return (location.row in [0, board.maze.MAZE_SIZE - 1]) and (location.column in [0, board.maze.MAZE_SIZE - 1])
+
     for _ in range(8):
         piece = board.create_piece()
         piece_location = board.maze.maze_card_location(piece.maze_card)
         assert is_corner(piece_location)
+
+
+def test_remove_piece_after_create_piece():
+    """ Tests remove_piece """
+    board = Board(create_random_maze())
+    piece = board.create_piece()
+    board.remove_piece(piece)
+    assert not board.pieces
+
+def test_after_series_of_creates_and_removes_no_corners_empty():
+    """ Tests create_piece. Adds three pieces, removes two, adds three,
+    and checks that all pieces are on a different corner """
+    board = Board(create_random_maze())
+    piece1 = board.create_piece()
+    piece2 = board.create_piece()
+    board.create_piece()
+    board.remove_piece(piece1)
+    board.remove_piece(piece2)
+    board.create_piece()
+    board.create_piece()
+    board.create_piece()
+    assert len(board.pieces) == 4
+    piece_cards = set()
+    for piece in board.pieces:
+        piece_cards.add(piece.maze_card) 
+    assert len(piece_cards) == 4
 
 
 def test_clear_pieces_after_creations_empties_pieces():
@@ -33,7 +60,7 @@ def test_move_new_objective_locations_after_reaching_location():
     maze = create_maze(MAZE_STRING)
     objective_maze_card = maze[BoardLocation(1, 6)]
     board = Board(
-        maze=create_maze(MAZE_STRING),
+        maze=maze,
         leftover_card=create_random_maze_card(),
         objective_maze_card=objective_maze_card)
     piece = board.create_piece()

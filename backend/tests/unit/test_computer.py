@@ -63,13 +63,13 @@ def test_random_actions_algorithm_computes_valid_actions():
         elif insert_location == BoardLocation(1, 0) and insert_rotation == 0:
             allowed_coordinates = allowed_coordinates + [(1, 0), (1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2)]
         elif insert_location == BoardLocation(6, 1):
-            allowed_coordinates = allowed_coordinates + [(0, 1), (0, 2), (1, 0), (1, 1), (2, 0), (2, 1), (3, 0)]
+            allowed_coordinates = allowed_coordinates + [(0, 1), (0, 2), (1, 1), (2, 1)]
         allowed_moves = set(BoardLocation(*coordinates) for coordinates in allowed_coordinates)
         assert move_location in allowed_moves
 
 def test_random_actions_algorithm_should_have_different_results():
     """ Runs algorithm 200 times and checks that a certain move is performed sooner or later.
-    This test has a probability of about 0.015 to fail. """
+    This test has a probability of about 0.008 to fail. """
     orig_board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
     move_locations = set()
     for _ in range(200):
@@ -80,8 +80,7 @@ def test_random_actions_algorithm_should_have_different_results():
         algorithm = RandomActionsAlgorithm(board, piece)
         algorithm.run()
         move_locations.add(algorithm.move_action)
-    assert BoardLocation(3, 0) in move_locations
-    assert BoardLocation(0, 1) in move_locations
+    assert BoardLocation(2, 1) in move_locations
 
 
 
@@ -96,7 +95,7 @@ MAZE_STRING = """
 #.#|#.#|#.#|###|#.#|###|#.#|
 ---------------------------|
 #.#|#.#|#.#|#.#|#.#|#.#|#.#|
-#..|#..|..#|#..|..#|#.#|..#|
+#.#|#..|..#|#..|..#|#.#|..#|
 #.#|#.#|#.#|#.#|#.#|#.#|#.#|
 ---------------------------|
 #.#|#.#|#.#|###|#.#|###|###|

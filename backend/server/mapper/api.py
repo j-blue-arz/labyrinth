@@ -5,19 +5,20 @@ instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Turns, Player
+import server.model.computer
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
 from .constants import *
 
 
-def player_state_to_dto(game: Game, player_id):
-    """Maps a game, as seen from one player, to a DTO.
+def player_state_to_dto(game: Game):
+    """Maps the game state, as served by the GET state request, to a DTO.
+    Player ID is no longer a parameter, because with the change that all players have the same objective,
+    every player has full information about the game.
 
     :param game: an instance of model.Game
-    :param player_id: the identifier of the player.
     :return: a structure whose JSON representation is valid for the API
     """
     game_dto = dict()
-    player = next(player for player in game.players if player.identifier == player_id)
     game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
@@ -56,10 +57,12 @@ def dto_to_move_action(move_dto):
     return _dto_to_board_location(move_dto[LOCATION])
 
 
-def dto_to_type_and_alone_flag(add_player_dto):
+def dto_to_type_and_alone_flag(player_request_dto):
     """ Maps a DTO for the add player api method to two values, the type and the flag 'alone' """
-    if isinstance(add_player_dto, dict):
-        return _value_or_none(add_player_dto, POST_PLAYER_TYPE), _value_or_none(add_player_dto, POST_PLAYER_ALONE)
+    if isinstance(player_request_dto, dict):
+        return _value_or_none(
+            player_request_dto, POST_PLAYER_TYPE), _value_or_none(
+                player_request_dto, POST_PLAYER_ALONE)
     return None, None
 
 
@@ -97,6 +100,11 @@ def _player_to_dto(player: Player):
     """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier}
+    if type(player) is server.model.computer.ComputerPlayer:
+        player_dto[IS_COMPUTER] = True
+        player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
+    else:
+        player_dto[IS_COMPUTER] = False
     return player_dto
 
 

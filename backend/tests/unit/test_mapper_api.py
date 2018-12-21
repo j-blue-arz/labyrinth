@@ -1,28 +1,29 @@
 """ This module tests mapper module.
 More specifically, it tests the method player_state_to_dto(),
-which maps a Game instance to an object used to transfer the state,
-as seen from one player. """
+which maps a Game instance to an object used to transfer the state """
 import json
 import mapper.api as mapper
-from mapper import constants
-from model.game import BoardLocation, Player
-from model.factories import create_game
+from server.model.game import BoardLocation, Player
+from server.model.factories import create_game
+from server.model.computer import ComputerPlayer
 
 
 def _create_test_game():
     """ Creates a Game instance,
     returns this instance and one of the player's identifier """
     game = create_game()
-    player_ids = [game.add_player(Player), game.add_player(Player),
-                  game.add_player(Player)]
+    game.add_player(Player)
+    game.add_player(Player)
+    game.add_player(ComputerPlayer, algorithm_name="random", shift_url="shift-url",
+                    move_url="move-url")
     game.start_game()
-    return game, player_ids[1]
+    return game
 
 
 def test_mapping_players():
     """ Tests correct mapping of players """
-    game, player_id = _create_test_game()
-    game_dto = mapper.player_state_to_dto(game, player_id)
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
     assert mapper.PLAYERS in game_dto
     assert len(game_dto[mapper.PLAYERS]) == len(game.board.pieces)
     assert len(game_dto[mapper.PLAYERS]) == len(game.players)
@@ -34,10 +35,22 @@ def test_mapping_players():
         assert mapper.OBJECTIVE not in player_dto
 
 
+def test_mapping_computer_player():
+    """ Tests correct mapping of information about computer player """
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
+    computer_player_dto = game_dto[mapper.PLAYERS][2]
+    assert computer_player_dto[mapper.IS_COMPUTER]
+    assert computer_player_dto[mapper.ALGORITHM] == "random"
+    player_dto = game_dto[mapper.PLAYERS][1]
+    assert not player_dto[mapper.IS_COMPUTER]
+    assert mapper.ALGORITHM not in player_dto
+
+
 def test_mapping_leftover():
     """ Tests correct mapping of leftover maze card """
-    game, player_id = _create_test_game()
-    game_dto = mapper.player_state_to_dto(game, player_id)
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
     assert mapper.MAZE_CARDS in game_dto
     leftover_dtos = [maze_card_dto for maze_card_dto in game_dto[mapper.MAZE_CARDS]
                      if not maze_card_dto[mapper.LOCATION]]
@@ -49,8 +62,8 @@ def test_mapping_leftover():
 
 def test_mapping_board():
     """ Tests correct mapping of current board state """
-    game, player_id = _create_test_game()
-    game_dto = mapper.player_state_to_dto(game, player_id)
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
     assert mapper.MAZE_CARDS in game_dto
     maze_card_dtos = [maze_card_dto for maze_card_dto in game_dto[mapper.MAZE_CARDS]
                       if maze_card_dto[mapper.LOCATION]]
@@ -68,8 +81,8 @@ def test_mapping_board():
 
 def test_mapping_objectives():
     """ Tests correct mapping of players' objective """
-    game, player_id = _create_test_game()
-    game_dto = mapper.player_state_to_dto(game, player_id)
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
     assert mapper.OBJECTIVE in game_dto
     assert game_dto[mapper.OBJECTIVE] == game.board.objective_maze_card.identifier
 
@@ -93,49 +106,52 @@ def test_dto_to_move_action():
 
 def test_dto_to_type():
     """ Tests dto_to_type_and_alone_flag """
-    add_player_dto = json.loads("""{"type": "normal"}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(add_player_dto)
+    player_request_dto = json.loads("""{"type": "normal"}""")
+    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     assert player_type == "normal"
     assert alone is None
 
 
 def test_dto_to_type_and_alone_with_none():
     """ Tests dto_to_type_and_alone_flag """
-    add_player_dto = None
-    player_type, alone = mapper.dto_to_type_and_alone_flag(add_player_dto)
+    player_request_dto = None
+    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     assert player_type is None
     assert alone is None
 
+
 def test_dto_to_alone_true():
     """ Tests dto_to_type_and_alone_flag """
-    add_player_dto = json.loads("""{"alone": true}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(add_player_dto)
+    player_request_dto = json.loads("""{"alone": true}""")
+    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     assert player_type is None
     assert alone is True
 
+
 def test_dto_to_alone_false():
     """ Tests dto_to_type_and_alone_flag """
-    add_player_dto = json.loads("""{"alone": false}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(add_player_dto)
+    player_request_dto = json.loads("""{"alone": false}""")
+    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     assert player_type is None
     assert alone is False
+
 
 def test_shift_action_to_dto():
     """ Tests shift_action_to_dto """
     shift_dto = mapper.shift_action_to_dto(BoardLocation(1, 2), 180)
-    assert constants.LOCATION in shift_dto
-    location = _assert_and_return_location_dto(shift_dto[constants.LOCATION])
+    assert mapper.LOCATION in shift_dto
+    location = _assert_and_return_location_dto(shift_dto[mapper.LOCATION])
     assert location.row == 1
     assert location.column == 2
-    assert constants.LEFTOVER_ROTATION in shift_dto
-    assert shift_dto[constants.LEFTOVER_ROTATION] == 180
+    assert mapper.LEFTOVER_ROTATION in shift_dto
+    assert shift_dto[mapper.LEFTOVER_ROTATION] == 180
 
 
 def test_move_action_to_dto():
     """ Tests move_action_to_dto """
     move_dto = mapper.move_action_to_dto(BoardLocation(3, 4))
-    assert constants.LOCATION in move_dto
-    location = _assert_and_return_location_dto(move_dto[constants.LOCATION])
+    assert mapper.LOCATION in move_dto
+    location = _assert_and_return_location_dto(move_dto[mapper.LOCATION])
     assert location.row == 3
     assert location.column == 4
 

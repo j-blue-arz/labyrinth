@@ -14,7 +14,7 @@ from random import choice
 import time
 from threading import Thread
 import requests
-from server.mapper.api import shift_action_to_dto, move_action_to_dto
+import server.mapper.api
 from .maze_algorithm import Graph
 from .game import Player, Turns
 
@@ -74,11 +74,11 @@ class ComputerPlayer(Player, Thread):
         return self._move_url
 
     def _post_shift(self, insert_location, insert_rotation):
-        dto = shift_action_to_dto(insert_location, insert_rotation)
+        dto = server.mapper.api.shift_action_to_dto(insert_location, insert_rotation)
         requests.post(self.shift_url, json=dto)
 
     def _post_move(self, move_location):
-        dto = move_action_to_dto(move_location)
+        dto = server.mapper.api.move_action_to_dto(move_location)
         requests.post(self.move_url, json=dto)
 
 

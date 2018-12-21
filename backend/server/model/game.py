@@ -148,8 +148,9 @@ class Piece:
     Each piece has a reference to a MazeCard instance as its position.
     """
 
-    def __init__(self, maze_card: MazeCard = None):
+    def __init__(self, maze_card: MazeCard):
         self.maze_card = maze_card
+
 
 class Maze:
     """ Represent the state of the maze.
@@ -325,13 +326,27 @@ class Board:
 
     def create_piece(self):
         """ Creates and places a piece on the board.
-        Generates new objective, because the old one could be the same as the new piece's starting location """
-        circular_locations = list(islice(cycle(self._start_locations), len(self._pieces) + 1))
-        next_location = circular_locations[-1]
+        Generates new objective, because the old one could be the same as the new piece's starting location. """
+
+        def next_least_pieces_start_location():
+            least_pieces = 1000
+            least_pieces_location = None
+            for location in self._start_locations:
+                num_pieces = len([piece for piece in self.pieces if piece.maze_card is self.maze[location]])
+                if num_pieces < least_pieces:
+                    least_pieces_location = location
+                    least_pieces = num_pieces
+            return least_pieces_location
+
+        next_location = next_least_pieces_start_location()
         piece = Piece(self._maze[next_location])
         self._pieces.append(piece)
         self._objective_maze_card = self._random_unoccupied_maze_card()
         return piece
+
+    def remove_piece(self, piece):
+        """ Removes a piece from the board """
+        self._pieces.remove(piece)
 
     def shift(self, new_leftover_location, leftover_rotation):
         """ Performs a shifting action """
@@ -374,10 +389,10 @@ class Board:
 class Player:
     """ This class represents a player playing a game """
 
-    def __init__(self, identifier, game_identifier):
+    def __init__(self, identifier=None, game_identifier=None, piece=None, board=None):
         self._id = identifier
-        self._board = None
-        self._piece = None
+        self._board = board
+        self._piece = piece
         self._game_id = game_identifier
 
     @property
@@ -390,10 +405,16 @@ class Player:
         """ Getter for identifier """
         return self._id
 
+    @property
+    def board(self):
+        """ Getter for board """
+        return self._board
+
     def set_board(self, board: Board):
         """ Setter for board """
         self._board = board
-        self._piece = board.create_piece()
+        if not self._piece or self._piece not in board.pieces:
+            self._piece = board.create_piece()
 
     def register_in_turns(self, turns):
         """ registers itself in a Turns manager """
@@ -454,15 +475,20 @@ class Turns:
 
     def __init__(self, players=None, next_action=None):
         self._player_actions = []
-        if players:
-            for player in players:
-                player.register_in_turns(self)
+        self.init(players)
         self._next = 0
         if next_action:
             self._next = self._player_actions.index(next_action)
 
+    def init(self, players=None):
+        """ clears turn progression, adds all players """
+        self._player_actions = []
+        if players:
+            for player in players:
+                player.register_in_turns(self)
+
     def add_player(self, player, turn_callback=None):
-        """ Adds a player to the turn progression, if he does not present already """
+        """ Adds a player to the turn progression, if he is not present already """
         found = False
         for player_action in self._player_actions:
             if player_action.player is player:
@@ -471,9 +497,27 @@ class Turns:
             self._player_actions.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
             self._player_actions.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
 
-    def start(self):
+    def remove_player(self, player):
+        """ Removes all PlayerActions with this player. If it was this player's turn to play, the next
+        Player has to play and is informed if available """
+        player_index = self._player_actions.index(PlayerAction(player, PlayerAction.MOVE_ACTION))
+        if player_index - 1 <= self._next <= player_index:
+            next_player_index = (self._next + 2) % len(self._player_actions)
+            next_player = self._player_actions[next_player_index].player
+            self._next = self._player_actions.index(PlayerAction(next_player, PlayerAction.SHIFT_ACTION))
+            if self.next_player_action().turn_callback:
+                self.next_player_action().turn_callback()
+        if self._next > player_index:
+            self._next -= 2
+        self._player_actions = [player_action for player_action in self._player_actions
+                                if player_action.player is not player]
+
+    def start(self, next_action=None):
         """ Starts the progression, informs player if necessary """
-        self._next = 0
+        if next_action:
+            self._next = self._player_actions.index(next_action)
+        else:
+            self._next = 0
         next_player = self._player_actions[self._next]
         if next_player.turn_callback:
             next_player.turn_callback()
@@ -501,13 +545,11 @@ class Turns:
                 player.identifier, action))
         self._next = (self._next + 1) % len(self._player_actions)
         player_action = self._player_actions[self._next]
-        if player_action.player != player and player_action.turn_callback:
+        if player_action.action is PlayerAction.SHIFT_ACTION and player_action.turn_callback:
             player_action.turn_callback()
 
     def next_player_action(self):
-        """ Returns a tuple (current_player, next_action),
-        where current_player is a player ID, and next_action is one of
-        MOVE_ACTION and SHIFT_ACTION """
+        """ Returns the next PlayerAction in the turn progression """
         try:
             return self._player_actions[self._next]
         except IndexError:
@@ -557,22 +599,60 @@ class Game:
         """Creates a player and adds it to the game. Throws if the game is full.
 
         :param player: a class, descendant of Player
-        :player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
+        :param player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
         :return: the ID of the player
         """
-        if len(self._players) < self.MAX_PLAYERS:
-            next_id = len(self._players)
-            player = player_class(identifier=next_id, game_identifier=self._id, **player_class_kwargs)
-            self._players.append(player)
-            return player.identifier
-        raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
+        if len(self._players) >= self.MAX_PLAYERS:
+            raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
+        next_id = max([player.identifier for player in self._players], default=0) + 1
+        player = player_class(identifier=next_id, game_identifier=self._id, **player_class_kwargs)
+        player.set_board(self._board)
+        player.register_in_turns(self._turns)
+        self._players.append(player)
+        return player.identifier
+        
+
+    def get_player(self, player_id):
+        """ Finds a player by ID
+
+        :param player_id: an ID of a player
+        :return: the Player with the given ID
+        :raises PlayerNotFoundException: if no player was found
+        """
+        try:
+            return next(player for player in self._players if player.identifier == player_id)
+        except StopIteration:
+            raise exceptions.PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
+
+    def remove_player(self, player_id):
+        """ Removes player by ID.
+        Removes piece from the board, and removes player from turns.
+
+        :param player_id: the ID of the player
+        :raises PlayerNotFoundException: if player does not exist
+        """
+        player = self.get_player(player_id)
+        self.board.remove_piece(player.piece)
+        self.turns.remove_player(player)
+        self.players.remove(player)
+
+    def change_player(self, player_id, player_class, **player_class_kwargs):
+        """ Changes the type of a player.
+
+        Replaces player with given ID by a newly created player.
+        :param player_id: the ID of the player to chane
+        :param player_class: a class, descendant of Player
+        :param player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
+        """
+        old_player = self.get_player(player_id)
+        new_player = player_class(identifier=player_id, game_identifier=self._id,
+                                  piece=old_player.piece, board=old_player.board, **player_class_kwargs)
+        self.players[self.players.index(old_player)] = new_player
+        self.start_game()
 
     def start_game(self):
-        """ initializes the board and the turns """
-        self._board.clear_pieces()
-        for player in self._players:
-            player.set_board(self._board)
-            player.register_in_turns(self._turns)
+        """ starts the turn progression """
+        self._turns.init(self.players)
         self._turns.start()
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):
@@ -598,15 +678,3 @@ class Game:
         if self._turns.is_action_possible(player, PlayerAction.MOVE_ACTION):
             self._board.move(player.piece, target_location)
         self._turns.perform_action(player, PlayerAction.MOVE_ACTION)
-
-    def get_player(self, player_id):
-        """ Finds a player by ID
-
-        :param player_id: an ID of a player
-        :return: the Player with the given ID
-        :raises PlayerNotFoundException: if no player was found
-        """
-        try:
-            return next(player for player in self._players if player.identifier == player_id)
-        except StopIteration:
-            raise exceptions.PlayerNotFoundException("No matching player for id {} in this game".format(player_id))
