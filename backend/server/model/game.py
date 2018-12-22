@@ -14,7 +14,6 @@ A Piece represents a player, with a unique ID,
 a reference to a maze card the piece is currently positioned on and an objective.
 BoardLocation is a wrapper for a row and a column. If both are positive, the position is in the maze.
 """
-from itertools import cycle, islice
 from random import choice
 from . import exceptions
 from .maze_algorithm import Graph
@@ -141,6 +140,9 @@ class MazeCard:
 
     def __str__(self):
         return "(MazeCard: identifer: {}, rotation: {}, doors: {})".format(self.identifier, self.rotation, self.doors)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Piece:
@@ -610,7 +612,6 @@ class Game:
         player.register_in_turns(self._turns)
         self._players.append(player)
         return player.identifier
-        
 
     def get_player(self, player_id):
         """ Finds a player by ID

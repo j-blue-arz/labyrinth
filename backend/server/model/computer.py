@@ -16,7 +16,7 @@ from threading import Thread
 import requests
 import server.mapper.api
 from .maze_algorithm import Graph
-from .game import Player, Turns
+from .game import Player, Turns, Piece
 
 
 
@@ -30,7 +30,7 @@ class ComputerPlayer(Player, Thread):
     If the player is requested to make its action, it starts a thread for time keeping,
     and a thread for letting the algorithm compute the next shift and move action. """
 
-    _SECONDS_TO_ANSWER = 3
+    _SECONDS_TO_ANSWER = 2
 
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
@@ -55,8 +55,9 @@ class ComputerPlayer(Player, Thread):
         turns.add_player(self, turn_callback=self.start)
 
     def run(self):
-        board_copy = copy.deepcopy(self._board)
-        algorithm = self.algorithm(board_copy, self._piece)
+        board = copy.deepcopy(self._board)
+        piece = next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
+        algorithm = self.algorithm(board, piece)
         algorithm.start()
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_shift(*(algorithm.shift_action))
