@@ -83,13 +83,15 @@ export default {
         isMyTurnToMove: function() {
             return (
                 this.game.nextAction.playerId === this.playerId &&
-                this.game.nextAction.action === action.MOVE_ACTION
+                this.game.nextAction.action === action.MOVE_ACTION &&
+                !this.game.getPlayer(this.playerId).isComputer
             );
         },
         isMyTurnToShift: function() {
             return (
                 this.game.nextAction.playerId === this.playerId &&
-                this.game.nextAction.action === action.SHIFT_ACTION
+                this.game.nextAction.action === action.SHIFT_ACTION &&
+                !this.game.getPlayer(this.playerId).isComputer
             );
         },
         interactionSize: function() {
@@ -157,7 +159,6 @@ export default {
     left: 0;
     max-height: 100%;
     max-width: 100%;
-    width: 900px;
 
     &__insert-location {
         transition: all 0.2s;

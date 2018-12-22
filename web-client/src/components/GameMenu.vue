@@ -73,6 +73,6 @@ export default {
     display: block;
     height: 100px;
     width: 100px;
-    position: absolute;
+    background-color: lightblue;
 }
 </style>
