@@ -4,7 +4,7 @@ import VPlayerPiece from "@/components/VPlayerPiece.vue";
 const wrapperFactory = function(index) {
     return shallowMount(VPlayerPiece, {
         propsData: {
-            playerIndex: index,
+            colorIndex: index,
             xCenterPos: 50,
             yCenterPos: 50,
             maxSize: 30
@@ -13,7 +13,7 @@ const wrapperFactory = function(index) {
 };
 
 describe("VPlayerPiece", () => {
-    it("renders different classes for different values of playerIndex", () => {
+    it("renders different classes for different values of colorIndex", () => {
         for (let index = 0; index < 4; index++) {
             let playerPiece = wrapperFactory(index);
             let svgElement = playerPiece.find({ ref: "playerPiece" });

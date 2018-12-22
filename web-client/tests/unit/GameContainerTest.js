@@ -125,17 +125,17 @@ describe("GameContainer", () => {
         expect(playerCardIds[0]).toBe(idMatrix[4][4]);
     });
 
-    it("assigns indicies to all VPlayerPiece components ascending from 0", () => {
+    it("assigns colors to all VPlayerPiece components ascending from 0", () => {
         let playerLocations = [loc(0, 0), loc(0, 1), loc(0, 2), loc(0, 3)];
         let gameContainer = factory(playerLocations);
         let vPlayerPieces = gameContainer.findAll(VPlayerPiece);
-        let playerIndices = new Set();
+        let playerColors = new Set();
         for (let i = 0; i < vPlayerPieces.length; i++) {
-            playerIndices.add(vPlayerPieces.at(i).props("playerIndex"));
+            playerColors.add(vPlayerPieces.at(i).props("colorIndex"));
         }
-        expect(playerIndices.size).toBe(4);
+        expect(playerColors.size).toBe(4);
         for (let i = 0; i < vPlayerPieces.length; i++) {
-            expect(playerIndices).toContain(i);
+            expect(playerColors).toContain(i);
         }
     });
 

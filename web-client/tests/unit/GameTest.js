@@ -306,12 +306,12 @@ describe("Game", () => {
             let game = new Game();
             game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
-            let playerIndexList = [
-                game.getPlayer(42).playerIndex,
-                game.getPlayer(17).playerIndex
+            let colorIndexList = [
+                game.getPlayer(42).colorIndex,
+                game.getPlayer(17).colorIndex
             ];
-            expect(playerIndexList).toContain(0);
-            expect(playerIndexList).toContain(1);
+            expect(colorIndexList).toContain(0);
+            expect(colorIndexList).toContain(1);
         });
 
         it("sets attributes for computer players", () => {

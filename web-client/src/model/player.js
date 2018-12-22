@@ -1,8 +1,8 @@
 export default class Player {
-    constructor(id, mazeCard, playerIndex) {
+    constructor(id, mazeCard, colorIndex) {
         this.id = id;
         this.mazeCard = mazeCard;
-        this.playerIndex = playerIndex;
+        this.colorIndex = colorIndex;
         this.isComputer = false;
         this.algorithm = "";
     }

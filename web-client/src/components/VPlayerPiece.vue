@@ -4,14 +4,14 @@
         :cx="xCenterPos"
         :cy="yCenterPos"
         :r="maxSize/2"
-        :class="`player-piece player-piece__player-${playerIndex}`"/>
+        :class="`player-piece player-piece__player-${colorIndex}`"/>
 </template>
 
 <script>
 export default {
     name: "v-player-piece",
     props: {
-        playerIndex: {
+        colorIndex: {
             type: Number,
             require: true
         },

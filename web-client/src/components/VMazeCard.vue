@@ -65,7 +65,7 @@
             :yCenterPos="pieceCenters[index].y"
             :maxSize="pieceSize"
             :key="player.id"
-            :playerIndex="player.playerIndex"
+            :colorIndex="player.colorIndex"
         ></v-player-piece>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
