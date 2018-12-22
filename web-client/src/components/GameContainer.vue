@@ -8,12 +8,20 @@
             :player-id="playerId"
             ref="interactive-board"
         />
+        <game-menu
+            v-if="isUsingApi"
+            :api="api"
+            :game="game"
+            :player-id="playerId"
+            @called-api-method="startPolling"
+        />
     </div>
 </template>
 
 
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
+import GameMenu from "@/components/GameMenu.vue";
 import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
@@ -22,7 +30,8 @@ import { setInterval, clearInterval } from "timers";
 export default {
     name: "game-container",
     components: {
-        InteractiveBoard
+        InteractiveBoard,
+        GameMenu
     },
     props: {
         gameFactory: {
@@ -44,6 +53,11 @@ export default {
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
         };
+    },
+    computed: {
+        isUsingApi: function() {
+            return this.useApi();
+        }
     },
     methods: {
         onInsertCard: function(event) {
@@ -86,6 +100,7 @@ export default {
             }
         },
         startPolling() {
+            this.stopPolling();
             if (this.timer === 0 && this.useApi()) {
                 this.fetchApiState();
                 this.timer = setInterval(this.fetchApiState, 800);
@@ -99,7 +114,6 @@ export default {
         },
         createGameFromApi: function(apiResponse) {
             this.game.createFromApi(apiResponse.data);
-            //this.$forceUpdate();
         },
         addPlayer: function(apiResponse) {
             this.playerId = parseInt(apiResponse.data);

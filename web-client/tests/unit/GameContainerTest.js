@@ -138,4 +138,9 @@ describe("GameContainer", () => {
             expect(playerIndices).toContain(i);
         }
     });
+
+    it("does not show game menu button", () => {
+        let gameContainer = factory();
+        expect(gameContainer.find(".game-menu__button").exists()).toBe(false);
+    });
 });

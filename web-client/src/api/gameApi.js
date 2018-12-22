@@ -28,6 +28,26 @@ export default class GameApi {
         return axios.post(addPlayerPath);
     }
 
+    removePlayer(playerId) {
+        let deletePlayerPath = this.apiPath + "/games/0/players/" + playerId;
+        return axios.delete(deletePlayerPath);
+    }
+
+    removePlayers(playerIdList) {
+        let promises = [];
+        playerIdList.forEach(playerId => {
+            promises.push(this.removePlayer(playerId));
+        });
+        return axios.all(promises);
+    }
+
+    replacePlayer(playerId, algorithm) {
+        let replacePlayerPath = this.apiPath + "/games/0/players/" + playerId;
+        return axios.put(replacePlayerPath, {
+            type: algorithm
+        });
+    }
+
     fetchState() {
         var getStatePath =
             this.apiPath + "/games/0/state?p_id=" + this.playerId;

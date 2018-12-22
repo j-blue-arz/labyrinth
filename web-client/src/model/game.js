@@ -84,6 +84,16 @@ export default class Game {
         this._players.set(player.id, player);
     }
 
+    getComputerPlayers() {
+        let result = [];
+        for (var player of this._players.values()) {
+            if (player.isComputer) {
+                result.push(player);
+            }
+        }
+        return result;
+    }
+
     move(playerId, targetLocation) {
         var player = this.getPlayer(playerId);
         var targetMazeCard = this.getMazeCard(targetLocation);
@@ -143,6 +153,10 @@ export default class Game {
             let apiPlayer = apiState.players[index];
             let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
             let player = new Player(apiPlayer.id, playerCard, index);
+            if (apiPlayer.isComputerPlayer) {
+                player.isComputer = true;
+                player.algorithm = apiPlayer.algorithm;
+            }
             playerCard.addPlayer(player);
             this.addPlayer(player);
         }

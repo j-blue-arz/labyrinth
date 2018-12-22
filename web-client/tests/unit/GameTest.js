@@ -165,6 +165,24 @@ describe("Game", () => {
         });
     });
 
+    describe(".getComputerPlayers()", () => {
+        it("returns all computer players.", () => {
+            let game = new Game();
+            _buildMazeCardMatrix(game);
+            _addPlayer(game, loc(1, 1), 7);
+            let player1 = _addPlayer(game, loc(1, 1), 42);
+            player1.isComputer = true;
+            let player2 = _addPlayer(game, loc(1, 1), 99);
+            player2.isComputer = true;
+            let expected = [player1, player2];
+
+            let computerPlayers = game.getComputerPlayers();
+
+            expect(computerPlayers).toEqual(expect.arrayContaining(expected));
+            expect(computerPlayers.length).toBe(2);
+        });
+    });
+
     describe(".move()", () => {
         it("moves player to correct location.", () => {
             let game = new Game();
@@ -294,6 +312,17 @@ describe("Game", () => {
             ];
             expect(playerIndexList).toContain(0);
             expect(playerIndexList).toContain(1);
+        });
+
+        it("sets attributes for computer players", () => {
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+            let computerPlayer = game.getPlayer(42);
+            expect(computerPlayer.isComputer).toBe(true);
+            expect(computerPlayer.algorithm).toBe("random");
+            let player = game.getPlayer(17);
+            expect(player.isComputer).toBe(false);
         });
     });
 });
@@ -427,7 +456,9 @@ let GET_STATE_RESULT_FOR_N_3 = `{
   }],
   "players": [{
     "id": 42,
-    "mazeCardId": 16
+    "mazeCardId": 16,
+    "isComputerPlayer": true,
+    "algorithm": "random"
   },{
     "id": 17,
     "mazeCardId": 15

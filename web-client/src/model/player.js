@@ -3,6 +3,8 @@ export default class Player {
         this.id = id;
         this.mazeCard = mazeCard;
         this.playerIndex = playerIndex;
+        this.isComputer = false;
+        this.algorithm = "";
     }
 
     static withId(id) {

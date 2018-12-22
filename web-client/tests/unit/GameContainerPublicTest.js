@@ -38,10 +38,7 @@ beforeEach(() => {
     mockCancel.mockClear();
 });
 
-const factory = function(locations) {
-    if (locations === undefined) {
-        locations = [];
-    }
+const factory = function() {
     return mount(GameContainer, {
         propsData: {
             gameFactory: null
@@ -49,7 +46,7 @@ const factory = function(locations) {
     });
 };
 
-describe("GameContainerPublic", () => {
+describe("GameContainer as web-client", () => {
     it("sets player id according to result of API call.", async () => {
         let gameContainer = factory();
         expect(mockAddPlayer).toHaveBeenCalledTimes(1);
@@ -97,6 +94,11 @@ describe("GameContainerPublic", () => {
         const shiftOperation = jest.spyOn(gameContainer.vm.$data.game, "shift");
         await flushPromises();
         expect(shiftOperation).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows menu button", () => {
+        let gameContainer = factory();
+        expect(gameContainer.find(".game-menu__button").exists()).toBe(true);
     });
 });
 
