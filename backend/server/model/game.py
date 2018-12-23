@@ -205,10 +205,7 @@ class Maze:
         :raises InvalidShiftLocationException: for invalid insert location
         :return: the pushed out maze card
         """
-        self._validate_location(insert_location)
-        if insert_location not in self.insert_locations:
-            raise exceptions.InvalidShiftLocationException(
-                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
+        self._validate_insert_location(insert_location)
         direction = self._determine_shift_direction(insert_location)
         shift_line_locations = []
         current_location = insert_location
@@ -279,12 +276,17 @@ class Maze:
         if not cls.is_inside(location):
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
+    def _validate_insert_location(self, insert_location):
+        self._validate_location(insert_location)
+        if insert_location not in self.insert_locations:
+            raise exceptions.InvalidShiftLocationException(
+                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
+
 
 class Board:
     """
     The board state of a game of labyrinth.
     """
-
     def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
         if not maze:
@@ -301,6 +303,7 @@ class Board:
             BoardLocation(0, self._maze.MAZE_SIZE - 1),
             BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
             BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
+        self.validate_moves = True
 
     @property
     def leftover_card(self):
@@ -362,12 +365,16 @@ class Board:
         """ Performs a move action """
         piece_location = self._maze.maze_card_location(piece.maze_card)
         target = self._maze[target_location]
-        if not Graph(self._maze).is_reachable(piece_location, target_location):
-            raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
-                piece_location, target_location))
+        self._validate_move_location(piece_location, target_location)
         piece.maze_card = target
         if target == self.objective_maze_card:
             self._objective_maze_card = self._random_unoccupied_maze_card()
+
+    def _validate_move_location(self, piece_location, target_location):
+        if self.validate_moves:
+            if not Graph(self._maze).is_reachable(piece_location, target_location):
+                raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
+                    piece_location, target_location))
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
