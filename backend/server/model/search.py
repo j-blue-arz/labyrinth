@@ -4,7 +4,8 @@ from .maze_algorithm import Graph
 
 
 class GameTreeNode:
-    """ Board instance is expected to only have one piece """
+    """ Represents a node in the game tree. Each shift and move action is a node on its own.
+    Board instance is expected to only have one piece """
 
     def __init__(self, parent=None, shift_action=None, move_location=None):
         self.parent = parent
@@ -22,12 +23,14 @@ class GameTreeNode:
 
     @classmethod
     def get_root(cls, board):
+        """ Returns a root to the tree, with parent = None """
         root = cls()
         root.board = copy.deepcopy(board)
         root.board.validate_moves = False
         return root
 
     def children(self):
+        """ Returns iterable over children of this node """
         self._compute()
         if self.move_location or self.is_root():
             for insert_location in self.board.maze.insert_locations:
@@ -52,6 +55,8 @@ class GameTreeNode:
                 self._reachable_locations = Graph(self.board.maze).reachable_locations(piece_location)
 
     def is_winning(self):
+        """ If this node is a shift, returns True iff the objective can be reached
+        Returns False if this node is a move. """
         if self.shift_action:
             self._compute()
             for location in self._reachable_locations:
@@ -61,56 +66,57 @@ class GameTreeNode:
         return False
 
     def is_root(self):
+        """ Returns True iff this node is a root, i.e. iff parent is None """
         return not self.parent
 
 
 class Optimizer:
+    """ Searches for a winning node in the game tree. """
     def __init__(self, board, piece):
         self._board = board
         self._board.clear_pieces()
         self._board.pieces.append(piece)
+        self._aborted = False
 
-    def find_optimal_move_succession(self):
+    def find_optimal_actions(self):
+        """ Finds the optimal succession of actions which reaches the objective.
+        Runs until it has found a solution, or abort_search() was called.
+        In the former case, returns the solution as a list,
+        where each even entry represents a shift action and is a tuple of the form (insert_location, rotation),
+        and each odd entry represents a move location.
+        Returns None if the search was aborted. """
         root = GameTreeNode.get_root(self._board)
-        winning_node = _search_winning_node(root)
-        return _actions_succession(winning_node)
+        winning_node = self._search_winning_node(root)
+        if winning_node:
+            return self._actions(winning_node)
+        return None
 
-    def find_optimal_move(self):
-        root = GameTreeNode.get_root(self._board)
-        winning_node = _search_winning_node(root)
-        return _first_branching_actions(winning_node)
+    def abort_search(self):
+        """ Aborts the search """
+        self._aborted = True
 
-
-def _first_branching_actions(node):
-    if node.parent.is_root():
-        return node.shift_action, node.move_location, node.depth
-    move_node = node.parent
-    shift_node = move_node.parent
-    while not shift_node.parent.is_root():
-        shift_node, move_node = shift_node.parent.parent, move_node.parent.parent
-    return shift_node.shift_action, move_node.move_location, shift_node.depth
-
-
-def _actions_succession(node):
-    actions = []
-    while not node.is_root():
-        if node.move_location:
-            actions.append(node.move_location)
-        if node.shift_action:
-            actions.append(node.shift_action)
-        node = node.parent
-    actions.reverse()
-    return actions
+    def _actions(self, node):
+        actions = []
+        while not node.is_root():
+            if node.move_location:
+                actions.append(node.move_location)
+            if node.shift_action:
+                actions.append(node.shift_action)
+            node = node.parent
+        actions.reverse()
+        return actions
 
 
-def _search_winning_node(root):
-    current_layer = [root]
-    next_layer = []
-    while current_layer:
-        for node in current_layer:
-            for child in node.children():
-                if child.is_winning():
-                    child.is_winning()
-                    return child
-                next_layer.append(child)
-        current_layer, next_layer = next_layer, []
+    def _search_winning_node(self, root):
+        current_layer = [root]
+        next_layer = []
+        while current_layer:
+            for node in current_layer:
+                if self._aborted:
+                    return None
+                for child in node.children():
+                    if child.is_winning():
+                        child.is_winning()
+                        return child
+                    next_layer.append(child)
+            current_layer, next_layer = next_layer, []

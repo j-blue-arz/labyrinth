@@ -16,13 +16,13 @@ from threading import Thread
 import requests
 import server.mapper.api
 from .maze_algorithm import Graph
-from .game import Player, Turns, Piece
-
+from .game import Player, Turns
+from .search import Optimizer
 
 
 class ComputerPlayer(Player, Thread):
     """ This class represents a computer player. It is instantiated with
-    an algorithm_name parameter, currently only 'random' is implemented. Defaults to 'random'.
+    an algorithm_name parameter, either 'random' or 'exhaustive-single'. Default is 'exhaustive-single'.
     A second required parameter is a supplier for the shift and move API URLs.
     This supplier is expected to have methods get_shift_url(game_id, player_id), and
     get_move_url(game_id, player_id).
@@ -35,8 +35,8 @@ class ComputerPlayer(Player, Thread):
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
-        algorithms = [RandomActionsAlgorithm]
-        self.algorithm = RandomActionsAlgorithm
+        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm]
+        self.algorithm = ExhaustiveSearchAlgorithm
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
@@ -56,10 +56,21 @@ class ComputerPlayer(Player, Thread):
 
     def run(self):
         board = copy.deepcopy(self._board)
-        piece = next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
+        piece = self._find_equal_piece(board)
         algorithm = self.algorithm(board, piece)
         algorithm.start()
         time.sleep(self._SECONDS_TO_ANSWER)
+        shift_action = algorithm.shift_action
+        move_action = algorithm.move_action
+
+        if shift_action is None or move_action is None:
+            algorithm.abort_search()
+            board = copy.deepcopy(self._board)
+            piece = self._find_equal_piece(board)
+            fallback_algorithm = RandomActionsAlgorithm(board, piece)
+            fallback_algorithm.start()
+            shift_action = fallback_algorithm.shift_action
+            move_action = fallback_algorithm.move_action
         self._post_shift(*(algorithm.shift_action))
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_move(algorithm.move_action)
@@ -81,6 +92,9 @@ class ComputerPlayer(Player, Thread):
     def _post_move(self, move_location):
         dto = server.mapper.api.move_action_to_dto(move_location)
         requests.post(self.move_url, json=dto)
+
+    def _find_equal_piece(self, board):
+        return next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
 
 
 class RandomActionsAlgorithm(Thread):
@@ -107,6 +121,10 @@ class RandomActionsAlgorithm(Thread):
         """ Getter for move_action """
         return self._move_action
 
+    def abort_search(self):
+        """ To fulfill the interface """
+        pass
+
     def run(self):
         insert_location = choice(tuple(self._maze.insert_locations))
         insert_rotation = choice([0, 90, 180, 270])
@@ -115,3 +133,31 @@ class RandomActionsAlgorithm(Thread):
         piece_location = self._maze.maze_card_location(self._piece.maze_card)
         reachable_locations = Graph(self._maze).reachable_locations(piece_location)
         self._move_action = choice(tuple(reachable_locations))
+
+
+class ExhaustiveSearchAlgorithm(Thread, Optimizer):
+    """ Uses an exhaustive search to compute best single-player solution to objective.
+    abort_search() is already implemented in superclass, Optimizer. """
+    SHORT_NAME = "exhaustive-single"
+
+    def __init__(self, board, piece):
+        Optimizer.__init__(self, board, piece)
+        Thread.__init__(self)
+        self._shift_action = None
+        self._move_action = None
+
+    @property
+    def shift_action(self):
+        """ Getter for shift_action """
+        return self._shift_action
+
+    @property
+    def move_action(self):
+        """ Getter for move_action """
+        return self._move_action
+
+    def run(self):
+        actions = self.find_optimal_actions()
+        if actions:
+            self._shift_action = actions[0]
+            self._move_action = actions[1]

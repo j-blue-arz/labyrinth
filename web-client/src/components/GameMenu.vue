@@ -51,7 +51,7 @@ export default {
         replaceByComputer: function() {
             this.menuIsVisible = false;
             this.api
-                .replacePlayer(this.playerId, "random")
+                .replacePlayer(this.playerId, "exhaustive-single")
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },
