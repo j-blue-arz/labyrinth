@@ -18,6 +18,7 @@ class GameTreeNode:
         else:
             self.depth = 0
         self.board = None
+        self._reachable_locations = []
 
     @classmethod
     def get_root(cls, board):
@@ -33,9 +34,7 @@ class GameTreeNode:
                 for rotation in [0, 90, 180, 270]:
                     yield GameTreeNode(parent=self, shift_action=(insert_location, rotation), move_location=None)
         elif self.shift_action:
-            piece = self.board.pieces[0]
-            piece_location = self.board.maze.maze_card_location(piece.maze_card)
-            for move_location in Graph(self.board.maze).reachable_locations(piece_location):
+            for move_location in self._reachable_locations:
                 yield GameTreeNode(self, None, move_location)
         return []
 
@@ -48,14 +47,14 @@ class GameTreeNode:
             elif self.shift_action:
                 shift_location, shift_rotation = self.shift_action
                 self.board.shift(shift_location, shift_rotation)
+                piece = self.board.pieces[0]
+                piece_location = self.board.maze.maze_card_location(piece.maze_card)
+                self._reachable_locations = Graph(self.board.maze).reachable_locations(piece_location)
 
     def is_winning(self):
         if self.shift_action:
             self._compute()
-            piece = self.board.pieces[0]
-            piece_location = self.board.maze.maze_card_location(piece.maze_card)
-            reachable_locations = Graph(self.board.maze).reachable_locations(piece_location)
-            for location in reachable_locations:
+            for location in self._reachable_locations:
                 if self.board.maze[location] == self.board.objective_maze_card:
                     self.move_location = location
                     return True
@@ -71,6 +70,11 @@ class Optimizer:
         self._board.clear_pieces()
         self._board.pieces.append(piece)
 
+    def find_optimal_move_succession(self):
+        root = GameTreeNode.get_root(self._board)
+        winning_node = _search_winning_node(root)
+        return _actions_succession(winning_node)
+
     def find_optimal_move(self):
         root = GameTreeNode.get_root(self._board)
         winning_node = _search_winning_node(root)
@@ -85,6 +89,18 @@ def _first_branching_actions(node):
     while not shift_node.parent.is_root():
         shift_node, move_node = shift_node.parent.parent, move_node.parent.parent
     return shift_node.shift_action, move_node.move_location, shift_node.depth
+
+
+def _actions_succession(node):
+    actions = []
+    while not node.is_root():
+        if node.move_location:
+            actions.append(node.move_location)
+        if node.shift_action:
+            actions.append(node.shift_action)
+        node = node.parent
+    actions.reverse()
+    return actions
 
 
 def _search_winning_node(root):

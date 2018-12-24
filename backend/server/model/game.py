@@ -362,13 +362,15 @@ class Board:
             card_piece.maze_card = pushed_card
 
     def move(self, piece, target_location):
-        """ Performs a move action """
+        """ Performs a move action. Returns True iff objective was reached. """
         piece_location = self._maze.maze_card_location(piece.maze_card)
         target = self._maze[target_location]
         self._validate_move_location(piece_location, target_location)
         piece.maze_card = target
         if target == self.objective_maze_card:
             self._objective_maze_card = self._random_unoccupied_maze_card()
+            return True
+        return False
 
     def _validate_move_location(self, piece_location, target_location):
         if self.validate_moves:
