@@ -131,7 +131,7 @@ describe("GameContainer", () => {
         let vPlayerPieces = gameContainer.findAll(VPlayerPiece);
         let playerColors = new Set();
         for (let i = 0; i < vPlayerPieces.length; i++) {
-            playerColors.add(vPlayerPieces.at(i).props("colorIndex"));
+            playerColors.add(vPlayerPieces.at(i).props("player").colorIndex);
         }
         expect(playerColors.size).toBe(4);
         for (let i = 0; i < vPlayerPieces.length; i++) {

@@ -72,6 +72,8 @@ export default {
             } else {
                 this.game.shift(event.location);
                 this.game.nextAction.action = actions.MOVE_ACTION;
+                this.game.getPlayer(this.playerId).turnAction =
+                    actions.MOVE_ACTION;
             }
         },
         onMovePlayerPiece: function(targetLocation) {
@@ -85,6 +87,8 @@ export default {
             } else {
                 this.game.move(this.playerId, targetLocation);
                 this.game.nextAction.action = actions.SHIFT_ACTION;
+                this.game.getPlayer(this.playerId).turnAction =
+                    actions.SHIFT_ACTION;
             }
         },
         handleError: function(error) {
@@ -113,11 +117,12 @@ export default {
                 .catch(this.handleError);
         },
         createGameFromApi: function(apiResponse) {
-            this.game.createFromApi(apiResponse.data);
+            this.game.createFromApi(apiResponse.data, this.playerId);
         },
         addPlayer: function(apiResponse) {
             this.playerId = parseInt(apiResponse.data);
             this.api.playerId = this.playerId;
+            this.game.selfId = this.playerId;
             if (this.useStorage()) {
                 sessionStorage.playerId = this.playerId;
             }

@@ -29,10 +29,12 @@ export default class GameFactory {
         for (var i = 0; i < this._initialPlayerLocations.length; i++) {
             let location = this._initialPlayerLocations[i];
             let playerMazeCard = game.getMazeCard(location);
-            let player = new Player(i, playerMazeCard, i);
+            let player = new Player(i, i);
+            player.mazeCard = playerMazeCard;
             playerMazeCard.addPlayer(player);
             game.addPlayer(player);
         }
+        game.getPlayer(0).isUser = true;
 
         game.getMazeCard(this._randomLocation(game.n)).hasObject = true;
 

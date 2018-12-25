@@ -141,7 +141,7 @@ export default class Game {
         }
     }
 
-    createFromApi(apiState) {
+    createFromApi(apiState, userId = 0) {
         var apiMazeCards = apiState.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
         if (this.leftoverMazeCard.id != apiMazeCards[0].id) {
@@ -153,23 +153,32 @@ export default class Game {
         for (var player of this._players.values()) {
             remainingColors.delete(player.colorIndex);
         }
+        let toRemove = new Set(this._players.keys());
         for (let index = 0; index < apiState.players.length; index++) {
             let apiPlayer = apiState.players[index];
             let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
             let player = this._players.get(apiPlayer.id);
-            if (player) {
-                player.mazeCard = playerCard;
-            } else {
+            if (!player) {
                 let nextColor = remainingColors.values().next().value;
-                player = new Player(apiPlayer.id, playerCard, nextColor);
+                player = new Player(apiPlayer.id, nextColor);
                 remainingColors.delete(nextColor);
+                if (userId === player.id) {
+                    player.isUser = true;
+                }
             }
+            player.mazeCard = playerCard;
             if (apiPlayer.isComputerPlayer) {
                 player.isComputer = true;
                 player.algorithm = apiPlayer.algorithm;
             }
+            player.turnAction = "NONE";
             playerCard.addPlayer(player);
             this.addPlayer(player);
+            toRemove.delete(player.id);
+        }
+
+        for (let id of toRemove) {
+            this._players.delete(id);
         }
 
         if (apiState.objectiveMazeCardId) {
@@ -188,6 +197,7 @@ export default class Game {
     setNextAction(playerId, action) {
         this.nextAction.playerId = playerId;
         this.nextAction.action = action;
+        this.getPlayer(playerId).turnAction = action;
     }
 
     _sortApiMazeCards(apiMazeCards) {

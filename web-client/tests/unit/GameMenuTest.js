@@ -109,7 +109,7 @@ describe("GameMenu", () => {
             expect(menu.isVisible()).toBe(false);
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'random'", () => {
+        it("calls replacePlayer() on gameApi with player's ID and 'exhaustive-single'", () => {
             let gameMenu = factory();
             gameMenu.find(".game-menu__button").trigger("dblclick");
             gameMenu
@@ -117,7 +117,10 @@ describe("GameMenu", () => {
                 .find({ ref: "replace" })
                 .trigger("click");
             expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "random");
+            expect(mockReplacePlayer).toHaveBeenCalledWith(
+                7,
+                "exhaustive-single"
+            );
         });
     });
 });

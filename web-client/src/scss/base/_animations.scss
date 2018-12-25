@@ -14,3 +14,10 @@
         }
     }
 }
+@mixin glowing($color) {
+    @keyframes glowing {
+        0% { filter: drop-shadow(0 0 0px $color); }
+        50% { filter: drop-shadow(0 0 10px $color); }
+        100% { filter: drop-shadow(0 0 0px $color); }
+    }
+}

@@ -365,7 +365,8 @@ function _copyMazeCardMatrix(game) {
 
 function _addPlayer(game, location, id) {
     let originMazeCard = game.getMazeCard(location);
-    let player = new Player(id, originMazeCard);
+    let player = new Player(id, id);
+    player.mazeCard = originMazeCard;
     originMazeCard.players.push(player);
     game.addPlayer(player);
     return player;
