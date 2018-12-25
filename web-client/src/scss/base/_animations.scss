@@ -21,3 +21,11 @@
         100% { filter: drop-shadow(0 0 0px $color); }
     }
 }
+
+@mixin pulsating($name) {
+    @keyframes #{$name} {
+        0% { opacity: 0 }
+        50% { opacity: 1 }
+        100% { opacity: 0 }
+    }
+}

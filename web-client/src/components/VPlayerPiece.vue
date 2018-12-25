@@ -1,7 +1,6 @@
 <template>
 <svg
-    class="player-piece"
-    :class="{'player-piece__user--to-move': hasToMove && isUser}">
+    class="player-piece">
     <circle
         ref="playerPiece"
         :cx="xCenterPos"
@@ -9,6 +8,14 @@
         :r="maxSize/2"
         class="player-piece__circle"
         :class="[{'player-piece__user': isUser}, fillColorClass]"/>
+    <circle
+        :cx="xCenterPos"
+        :cy="yCenterPos"
+        :r="maxSize/2 + 2"
+        fill="none"
+        stroke="blue"
+        class="player-piece__halo player-piece__user--to-move"
+        v-if="hasToMove && isUser"/>
     <text
         :x="xCenterPos"
         :y="yCenterPos"
@@ -81,6 +88,21 @@ export default {
         font-family: sans-serif;
     }
 
+    &__halo {
+        fill: none;
+        stroke: $color-outline-active;
+        stroke-width: 2px;
+        opacity: 1;
+    }
+
+    &__user {
+        opacity: 1;
+
+        &--to-move {
+            animation: halo-pulse 1s infinite;
+        }
+    }
+
     &__player-0 {
         &--fill {
             fill: $color-player-0;
@@ -116,14 +138,7 @@ export default {
             fill: $text-color-player-3;
         }
     }
-
-    &__user {
-        opacity: 1;
-        &--to-move {
-            animation: glowing 2s infinite;
-        }
-    }
 }
 
-@include glowing($color-glow);
+@include pulsating("halo-pulse");
 </style>
