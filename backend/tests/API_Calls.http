@@ -2,11 +2,11 @@ POST http://localhost:5000/api/games/0/players
 
 ###
 
-GET http://localhost:5000/api/games/0/state?p_id=0
+GET http://localhost:5000/api/games/0/state?p_id=1
 
 ###
 
-POST http://localhost:5000/api/games/0/shift?p_id=0
+POST http://localhost:5000/api/games/0/shift?p_id=1
 content-type: application/json
 
 {
@@ -19,7 +19,7 @@ content-type: application/json
 
 ###
 
-POST http://localhost:5000/api/games/0/move?p_id=0
+POST http://localhost:5000/api/games/0/move?p_id=1
 content-type: application/json
 
 {
@@ -31,4 +31,4 @@ content-type: application/json
 
 ###
 
-GET http://localhost/api/games/0/state?p_id=0
+GET http://localhost/api/games/0/state?p_id=1
