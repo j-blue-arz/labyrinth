@@ -1,34 +1,34 @@
 <template>
-<svg
-    class="player-piece">
-    <circle
+    <svg
         ref="playerPiece"
-        :cx="xCenterPos"
-        :cy="yCenterPos"
-        :r="maxSize/2"
-        class="player-piece__circle"
-        :class="[{'player-piece__user': isUser}, fillColorClass]"/>
-    <circle
-        :cx="xCenterPos"
-        :cy="yCenterPos"
-        :r="maxSize/2 + 2"
-        fill="none"
-        stroke="blue"
-        class="player-piece__halo player-piece__user--to-move"
-        v-if="hasToMove && isUser"/>
-    <text
-        :x="xCenterPos"
-        :y="yCenterPos"
-        :textLength="maxSize/2"
-        :font-size="maxSize-3"
-        :class="textColorClass"
-        class="player-piece__text"
-        dominant-baseline="central"
-        text-anchor="middle"
-        >
-        {{ playerId }}
-    </text>
-</svg>
+        class="player-piece"
+        :class="[{'player-piece__user': isUser, 'player-piece__user--to-move': isUser && hasToMove}, colorIndexClass]"
+    >
+        <circle
+            :cx="xCenterPos"
+            :cy="yCenterPos"
+            :r="maxSize/2"
+            class="player-piece__shape"
+        ></circle>
+        <circle
+            v-if="hasToMove && isUser"
+            :cx="xCenterPos"
+            :cy="yCenterPos"
+            :r="maxSize/2 + 2"
+            fill="none"
+            stroke="blue"
+            class="player-piece__halo"
+        ></circle>
+        <text
+            :x="xCenterPos"
+            :y="yCenterPos"
+            :textLength="maxSize/2"
+            :font-size="maxSize-3"
+            class="player-piece__text"
+            dominant-baseline="central"
+            text-anchor="middle"
+        >{{ playerId }}</text>
+    </svg>
 </template>
 
 <script>
@@ -55,11 +55,8 @@ export default {
         }
     },
     computed: {
-        textColorClass: function() {
-            return "player-piece__player-" + this.player.colorIndex + "--text";
-        },
-        fillColorClass: function() {
-            return "player-piece__player-" + this.player.colorIndex + "--fill";
+        colorIndexClass: function() {
+            return "player-piece__player-" + this.player.colorIndex;
         },
         isUser: function() {
             return this.player.isUser;
@@ -76,7 +73,7 @@ export default {
 
 <style lang="scss">
 .player-piece {
-    &__circle {
+    &__shape {
         stroke: $color-player-stroke;
         stroke-width: 3px;
         opacity: $opacity-player-not-user;
@@ -86,6 +83,7 @@ export default {
         pointer-events: none;
         font-weight: bold;
         font-family: sans-serif;
+        opacity: $opacity-player-not-user;
     }
 
     &__halo {
@@ -96,49 +94,57 @@ export default {
     }
 
     &__user {
-        opacity: 1;
+        .player-piece__shape {
+            opacity: 1;
+        }
+
+        .player-piece__text {
+            opacity: 1;
+        }
 
         &--to-move {
-            animation: halo-pulse 1s infinite;
+            .player-piece__halo {
+                animation: player-piece__halo--pulse 1s infinite;
+            }
         }
     }
 
     &__player-0 {
-        &--fill {
+        .player-piece__shape {
             fill: $color-player-0;
         }
-        &--text {
+        .player-piece__text {
             fill: $text-color-player-0;
         }
     }
 
     &__player-1 {
-        &--fill {
+        .player-piece__shape {
             fill: $color-player-1;
         }
-        &--text {
+        .player-piece__text {
             fill: $text-color-player-1;
         }
     }
 
     &__player-2 {
-        &--fill {
+        .player-piece__shape {
             fill: $color-player-2;
         }
-        &--text {
+        .player-piece__text {
             fill: $text-color-player-2;
         }
     }
 
     &__player-3 {
-        &--fill {
+        .player-piece__shape {
             fill: $color-player-3;
         }
-        &--text {
+        .player-piece__text {
             fill: $text-color-player-3;
         }
     }
 }
 
-@include pulsating("halo-pulse");
+@include pulsating("player-piece__halo--pulse");
 </style>

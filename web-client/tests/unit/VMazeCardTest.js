@@ -75,7 +75,7 @@ describe("VMazeCard", () => {
             mazeCard: mazeCard,
             cardSize: 50
         });
-        var playerPieces = wrapper.findAll(".player-piece");
+        var playerPieces = wrapper.findAll(".player-piece__shape");
         expect(playerPieces.length).toBe(2);
         var cx0 = Number.parseFloat(
             playerPieces.at(0).element.getAttribute("cx")

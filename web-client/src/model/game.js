@@ -149,22 +149,22 @@ export default class Game {
         }
 
         this._mazeCardsFromSortedApi(apiMazeCards);
-        let remainingColors = new Set([0, 1, 2, 3]);
-        for (var player of this._players.values()) {
-            remainingColors.delete(player.colorIndex);
-        }
+        let remainingColors = [3, 2, 1, 0];
         let toRemove = new Set(this._players.keys());
+        apiState.players.sort(function(p1, p2) {
+            return p1.id - p2.id;
+        });
         for (let index = 0; index < apiState.players.length; index++) {
             let apiPlayer = apiState.players[index];
             let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
             let player = this._players.get(apiPlayer.id);
             if (!player) {
-                let nextColor = remainingColors.values().next().value;
-                player = new Player(apiPlayer.id, nextColor);
-                remainingColors.delete(nextColor);
+                player = new Player(apiPlayer.id, remainingColors.pop());
                 if (userId === player.id) {
                     player.isUser = true;
                 }
+            } else {
+                player.colorIndex = remainingColors.pop();
             }
             player.mazeCard = playerCard;
             if (apiPlayer.isComputerPlayer) {
