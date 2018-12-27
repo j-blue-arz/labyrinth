@@ -68,12 +68,13 @@ class ComputerPlayer(Player, Thread):
             board = copy.deepcopy(self._board)
             piece = self._find_equal_piece(board)
             fallback_algorithm = RandomActionsAlgorithm(board, piece)
-            fallback_algorithm.start()
+            # Calling run directly, so that fallback waits for algorithm to finish before posting actions
+            fallback_algorithm.run()
             shift_action = fallback_algorithm.shift_action
             move_action = fallback_algorithm.move_action
-        self._post_shift(*(algorithm.shift_action))
+        self._post_shift(*shift_action)
         time.sleep(self._SECONDS_TO_ANSWER)
-        self._post_move(algorithm.move_action)
+        self._post_move(move_action)
 
     @property
     def shift_url(self):
