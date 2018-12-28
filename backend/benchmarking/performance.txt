@@ -1,0 +1,24 @@
+First implementation:
+Test case d1-direct-path         best of 3: 11.78ms
+Test case d1-shift-req           best of 3: 27.30ms
+Test case d2-two-shifts          best of 3: 748.54ms
+Test case d2-self-push-out       best of 3: 179.97ms
+Test case d2-long-running        best of 3: 27277.45ms
+Test case d3-obj-push-out        best of 3: 7395.12ms
+Test case d3-long-running        best of 3: 9826.71ms
+Test case d3-generated-8s        best of 3: 7291.56ms
+Test case d3-generated-23s       best of 3: 22331.70ms
+Test case d3-generated-33s       best of 3: 28034.21ms
+
+Caching reachable_locations (computing once instead of twice per node):
+Test case d1-direct-path         best of 3: 11.34ms
+Test case d1-shift-req           best of 3: 26.08ms
+Test case d2-two-shifts          best of 3: 747.43ms
+Test case d2-self-push-out       best of 3: 177.10ms
+Test case d2-long-running        best of 3: 27652.26ms
+Test case d3-obj-push-out        best of 3: 6928.46ms
+Test case d3-long-running        best of 3: 9166.55ms
+Test case d3-generated-8s        best of 3: 6958.76ms
+Test case d3-generated-23s       best of 3: 21122.86ms
+Test case d3-generated-33s       best of 3: 27975.67ms
+-> No significant impact

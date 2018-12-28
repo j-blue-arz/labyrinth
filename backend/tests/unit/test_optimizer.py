@@ -50,7 +50,7 @@ def test_d2_long_running():
 
 
 def test_d3_obj_push_out():
-    """ Test-case where solution is to push objective out, three turns required """
+    """ Test-case where solution is to push objective out, three turns required (ca. 7s)"""
     optimizer, board, piece = create_optimizer("d3-obj-push-out")
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
@@ -59,8 +59,31 @@ def test_d3_obj_push_out():
 
 @pytest.mark.skip("long running-time")
 def test_d3_long_running():
-    """ Long running test-case (ca. 100s), three turns required """
+    """ Long running test-case (ca. 10s), three turns required """
     optimizer, board, piece = create_optimizer("d3-long-running")
+    actions = optimizer.find_optimal_actions()
+    assert len(actions) == 6
+    _check_actions(board, piece, actions)
+
+def test_d3_generated_1():
+    """ three turns required """
+    optimizer, board, piece = create_optimizer("d3-generated-8s")
+    actions = optimizer.find_optimal_actions()
+    assert len(actions) == 6
+    _check_actions(board, piece, actions)
+
+@pytest.mark.skip("long running-time")
+def test_d3_generated_2():
+    """ three turns required """
+    optimizer, board, piece = create_optimizer("d3-generated-23s")
+    actions = optimizer.find_optimal_actions()
+    assert len(actions) == 6
+    _check_actions(board, piece, actions)
+
+@pytest.mark.skip("long running-time")
+def test_d3_generated_3():
+    """ three turns required """
+    optimizer, board, piece = create_optimizer("d3-generated-33s")
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -130,6 +153,37 @@ DIFFICULT_MAZE_STRING = """
 
 """
 
+GENERATED_WITH_LINE_LEFTOVER = """
+###|#.#|###|#.#|###|###|###|
+#..|#.#|...|..#|...|...|..#|
+#.#|#.#|#.#|###|#.#|###|#.#|
+---------------------------|
+###|###|#.#|#.#|###|###|###|
+..#|...|#.#|..#|..#|...|#..|
+#.#|###|#.#|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|###|#.#|#.#|###|###|#.#|
+#..|...|#..|#.#|...|...|..#|
+#.#|###|#.#|#.#|#.#|###|#.#|
+---------------------------|
+#.#|###|#.#|#.#|###|#.#|###|
+#..|..#|#..|#..|...|#.#|...|
+#.#|#.#|###|###|#.#|#.#|###|
+---------------------------|
+#.#|###|#.#|###|#.#|###|#.#|
+#..|..#|...|..#|..#|..#|..#|
+#.#|#.#|###|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|#.#|###|#.#|###|###|###|
+#..|#..|..#|#.#|..#|...|...|
+#.#|###|#.#|#.#|#.#|###|###|
+---------------------------|
+#.#|###|#.#|#.#|#.#|#.#|#.#|
+#..|..#|...|#..|...|#..|..#|
+###|#.#|###|###|###|#.#|###|
+---------------------------*
+"""
+
 CASES_PARAMS = {
     "d1-direct-path": (MAZE_STRING, "NE", 0, (3, 3), (6, 2)),
     "d1-shift-req": (MAZE_STRING, "NE", 0, (3, 3), (0, 3)),
@@ -137,7 +191,10 @@ CASES_PARAMS = {
     "d2-self-push-out": (DIFFICULT_MAZE_STRING, "NE", 0, (0, 6), (6, 6)),
     "d2-long-running": (MAZE_STRING, "NES", 270, (3, 2), (0, 5)),
     "d3-obj-push-out": (DIFFICULT_MAZE_STRING, "NE", 0, (0, 6), (5, 1)),
-    "d3-long-running": (DIFFICULT_MAZE_STRING, "NS", 180, (4, 6), (1, 1))
+    "d3-long-running": (DIFFICULT_MAZE_STRING, "NS", 180, (4, 6), (1, 1)),
+    "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (1, 4), (6, 2)),
+    "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (6, 6), (0, 0)),
+    "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 270, (1, 4), (5, 6))
 }
 
 

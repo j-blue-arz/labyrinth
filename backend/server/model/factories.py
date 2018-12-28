@@ -138,3 +138,27 @@ def create_maze(maze_string):
         maze[location] = create_maze_card(field(location.row, location.column))
 
     return maze
+
+
+def print_maze(maze):
+    """ Writes a maze as a multi-line string, as defined in create_maze() """
+    def as_multi_line_string(maze_card):
+        result = [
+            ["#", "N", "#", ],
+            ["W", ".", "E"],
+            ["#", "S", "#"]
+        ]
+        path_to_symbol = {True: ".", False: "#"}
+        result[0][1] = path_to_symbol[maze_card.has_out_path((-1, 0))]
+        result[1][0] = path_to_symbol[maze_card.has_out_path((0, -1))]
+        result[1][2] = path_to_symbol[maze_card.has_out_path((0, 1))]
+        result[2][1] = path_to_symbol[maze_card.has_out_path((1, 0))]
+        return list(map(lambda char_list: "".join(char_list), result))
+
+    for row in range(0, maze.MAZE_SIZE):
+        string_arrays = [as_multi_line_string(maze[BoardLocation(row, column)]) for column in range(0, maze.MAZE_SIZE)]
+        for line_part in zip(*string_arrays):
+            line = "|".join(line_part)
+            line = line + "|"
+            print(line)
+        print("-" * (maze.MAZE_SIZE * 4 - 1) + "|")
