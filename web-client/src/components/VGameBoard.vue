@@ -3,21 +3,26 @@
         :x="boardOffset - borderWidth"
         :y="boardOffset - borderWidth"
         :width="boardSize + 2*borderWidth"
-        :height="boardSize + 2*borderWidth">
+        :height="boardSize + 2*borderWidth"
+    >
         <rect
             :width="boardSize + 2*borderWidth"
             :height="boardSize + 2*borderWidth"
-            class="game-board__background" />
-        <v-maze-card
-            v-for="mazeCard in mazeCards"
-            @click.native="onMazeCardClick($event, mazeCard)"
-            :maze-card="mazeCard"
-            :key="mazeCard.id"
-            :card-size="cardSize"
-            :x="xPos(mazeCard.location) + borderWidth"
-            :y="yPos(mazeCard.location) + borderWidth"
-            class="game-board__maze-card"
-            :class="{interaction: interaction}"/>
+            class="game-board__background"
+        ></rect>
+        <transition-group name="game-board__maze-card-" tag="g">
+            <v-maze-card
+                v-for="mazeCard in mazeCards"
+                @click.native="onMazeCardClick($event, mazeCard)"
+                :maze-card="mazeCard"
+                :key="mazeCard.id"
+                :card-size="cardSize"
+                :x="xPos(mazeCard.location) + borderWidth"
+                :y="yPos(mazeCard.location) + borderWidth"
+                :class="{interaction: interaction}"
+                class="game-board__maze-card"
+            ></v-maze-card>
+        </transition-group>
     </svg>
 </template>
 
@@ -85,6 +90,22 @@ export default {
 .game-board {
     &__background {
         fill: $color-game-board;
+    }
+
+    &__maze-card {
+        &--move {
+            transition: transform 1s;
+        }
+
+        &--enter-active,
+        &--leave-active {
+            transition: opacity 2s;
+        }
+
+        &--enter,
+        &--leave-to {
+            opacity: 0;
+        }
     }
 }
 </style>

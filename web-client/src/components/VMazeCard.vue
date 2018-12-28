@@ -192,8 +192,6 @@ export default {
 
 <style lang="scss">
 .maze-card {
-    overflow: visible;
-
     &__outline {
         stroke: $color-outline;
         stroke-width: 1px;

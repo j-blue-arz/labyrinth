@@ -27,6 +27,7 @@
             class="interactive-board__leftover"
             ref="leftover"
             :class="{interaction: isMyTurnToShift}"
+            overflow="visible"
         ></v-maze-card>
     </svg>
 </template>
