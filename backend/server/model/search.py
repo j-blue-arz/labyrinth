@@ -34,12 +34,19 @@ class GameTreeNode:
         self._compute()
         if self.move_location or self.is_root():
             for insert_location in self.board.maze.insert_locations:
-                for rotation in [0, 90, 180, 270]:
+                for rotation in self._current_rotations():
                     yield GameTreeNode(parent=self, shift_action=(insert_location, rotation), move_location=None)
         elif self.shift_action:
             for move_location in self._reachable_locations:
                 yield GameTreeNode(self, None, move_location)
         return []
+
+    def _current_rotations(self):
+        rotations = [0, 90, 180, 270]
+        leftover_card = self.board.leftover_card
+        if leftover_card.doors == leftover_card.STRAIGHT:
+            rotations = [0, 90]
+        return rotations
 
     def _compute(self):
         if not self.board:

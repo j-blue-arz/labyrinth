@@ -22,3 +22,16 @@ Test case d3-generated-8s        best of 3: 6958.76ms
 Test case d3-generated-23s       best of 3: 21122.86ms
 Test case d3-generated-33s       best of 3: 27975.67ms
 -> No significant impact
+
+Straight leftover only required two different rotations to try:
+Test case d1-direct-path         best of 3: 11.29ms
+Test case d1-shift-req           best of 3: 25.85ms
+Test case d2-two-shifts          best of 3: 751.50ms
+Test case d2-self-push-out       best of 3: 115.44ms
+Test case d2-long-running        best of 3: 27987.16ms
+Test case d3-obj-push-out        best of 3: 5638.81ms
+Test case d3-long-running        best of 3: 4242.02ms
+Test case d3-generated-8s        best of 3: 5233.23ms
+Test case d3-generated-23s       best of 3: 15570.14ms
+Test case d3-generated-33s       best of 3: 12037.69ms
+-> Faster by a factor of two for the test cases where the leftover is a straight 
