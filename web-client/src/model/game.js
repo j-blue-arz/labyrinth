@@ -181,10 +181,8 @@ export default class Game {
             this._players.delete(id);
         }
 
-        if (apiState.objectiveMazeCardId) {
-            let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
-            objectiveCard.hasObject = true;
-        }
+        let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
+        objectiveCard.hasObject = true;
 
         if (apiState.nextAction) {
             this.setNextAction(

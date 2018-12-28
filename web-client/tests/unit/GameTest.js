@@ -302,6 +302,17 @@ describe("Game", () => {
             expect(count).toBe(1);
         });
 
+        it("sets objective flag for maze card id 0", () => {
+            let apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
+            apiState.objectiveMazeCardId = 0;
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(apiState);
+
+            let objectiveMazeCard = game.mazeCardById(0);
+            expect(objectiveMazeCard.hasObject).toBeTruthy();
+        });
+
         it("assigns each player an ascending index, starting from 0", () => {
             let game = new Game();
             game.n = 3;
