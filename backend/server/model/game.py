@@ -139,7 +139,7 @@ class MazeCard:
         return hash((self.identifier))
 
     def __str__(self):
-        return "(MazeCard: identifer: {}, rotation: {}, doors: {})".format(self.identifier, self.rotation, self.doors)
+        return "(MazeCard: identifier: {}, rotation: {}, doors: {})".format(self.identifier, self.rotation, self.doors)
 
     def __repr__(self):
         return self.__str__()

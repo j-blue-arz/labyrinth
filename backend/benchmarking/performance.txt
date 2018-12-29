@@ -34,4 +34,18 @@ Test case d3-long-running        best of 3: 4242.02ms
 Test case d3-generated-8s        best of 3: 5233.23ms
 Test case d3-generated-23s       best of 3: 15570.14ms
 Test case d3-generated-33s       best of 3: 12037.69ms
--> Faster by a factor of two for the test cases where the leftover is a straight 
+-> Faster by a factor of two for the test cases where the leftover is a straight
+
+No new node for each move, instead regard all reached maze cards at once with multi-start bfs:
+Test case d1-direct-path         best of 3: 13.06ms
+Test case d1-shift-req           best of 3: 28.20ms
+Test case d2-two-shifts          best of 3: 129.73ms
+Test case d2-self-push-out       best of 3: 66.99ms
+Test case d2-long-running        best of 3: 2868.10ms
+Test case d3-obj-push-out        best of 3: 1930.92ms
+Test case d3-long-running        best of 3: 1699.68ms
+Test case d3-generated-8s        best of 3: 3515.96ms
+Test case d3-generated-23s       best of 3: 4257.29ms
+Test case d3-generated-33s       best of 3: 8038.63ms
+-> Nearly everything much faster, up to factor of 10 for d2-long-running, presumably because it reached a many locations at depth 1.
+Slight overhead noticable for depth 1. 
