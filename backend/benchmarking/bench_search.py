@@ -13,44 +13,13 @@ from server.model.factories import create_maze, create_random_maze_card, create_
 from server.model.game import BoardLocation
 import tests.unit.test_optimizer as setup
 
-GENERATED_WITH_LINE_LEFTOVER = """
-###|#.#|###|#.#|###|###|###|
-#..|#.#|...|..#|...|...|..#|
-#.#|#.#|#.#|###|#.#|###|#.#|
----------------------------|
-###|###|#.#|#.#|###|###|###|
-..#|...|#.#|..#|..#|...|#..|
-#.#|###|#.#|#.#|#.#|#.#|#.#|
----------------------------|
-#.#|###|#.#|#.#|###|###|#.#|
-#..|...|#..|#.#|...|...|..#|
-#.#|###|#.#|#.#|#.#|###|#.#|
----------------------------|
-#.#|###|#.#|#.#|###|#.#|###|
-#..|..#|#..|#..|...|#.#|...|
-#.#|#.#|###|###|#.#|#.#|###|
----------------------------|
-#.#|###|#.#|###|#.#|###|#.#|
-#..|..#|...|..#|..#|..#|..#|
-#.#|#.#|###|#.#|#.#|#.#|#.#|
----------------------------|
-#.#|#.#|###|#.#|###|###|###|
-#..|#..|..#|#.#|..#|...|...|
-#.#|###|#.#|#.#|#.#|###|###|
----------------------------|
-#.#|###|#.#|#.#|#.#|#.#|#.#|
-#..|..#|...|#..|...|#..|..#|
-###|#.#|###|###|###|#.#|###|
----------------------------*
-"""
-
 
 def _find_setups():
     actions = []
     maze_card = None
     start_location = None
     objective_location = None
-    maze = create_maze(GENERATED_WITH_LINE_LEFTOVER)
+    maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER)
     while len(actions) <= 6:
         maze_card = create_random_maze_card(doors="NS")
         start_location = BoardLocation(randint(0, 6), randint(0, 6))
