@@ -4,6 +4,23 @@ export default class Graph {
         this.maze = game.mazeCard;
     }
 
+    isReachable(sourceLocation, targetLocation) {
+        let locations = this.reachableLocations(sourceLocation);
+        for (var location of locations) {
+            if (this._locationsEqual(location, targetLocation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    _locationsEqual(locationA, locationB) {
+        return (
+            locationA.row === locationB.row &&
+            locationA.column == locationB.column
+        );
+    }
+
     reachableLocations(sourceLocation) {
         let reachedLocations = this._initReached();
         this._setReached(sourceLocation, reachedLocations);
@@ -90,7 +107,7 @@ export default class Graph {
                     reached.push({
                         row: row,
                         column: col
-                    })
+                    });
                 }
             }
         }

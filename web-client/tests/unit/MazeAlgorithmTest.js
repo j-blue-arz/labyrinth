@@ -2,78 +2,110 @@ import Game from "@/model/game";
 import Graph from "@/model/mazeAlgorithm";
 import { loc } from "./testutils.js";
 
-describe("reachableLocations", () => {
-    it("returns the source location for a component of size 1", () => {
-        let game = new Game();
-        game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-        let graph = new Graph(game);
-        let reachable = graph.reachableLocations(loc(0, 0));
+describe("Graph", () => {
+    describe("reachableLocations", () => {
+        it("returns the source location for a component of size 1", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
+            let reachable = graph.reachableLocations(loc(0, 0));
 
-        expect(reachable.length).toBe(1);
-        expect(reachable).toEqual(expect.arrayContaining([loc(0, 0)]));
+            expect(reachable.length).toBe(1);
+            expect(reachable).toEqual(expect.arrayContaining([loc(0, 0)]));
+        });
+
+        it("finds all locations for a component of size 6 with cycle", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
+            let reachable = graph.reachableLocations(loc(5, 3));
+
+            expect(reachable.length).toBe(6);
+            expect(reachable).toEqual(
+                expect.arrayContaining([
+                    loc(4, 2),
+                    loc(4, 3),
+                    loc(5, 3),
+                    loc(5, 4),
+                    loc(6, 3),
+                    loc(6, 4)
+                ])
+            );
+        });
+
+        it("finds all locations for a component with outside connections to the north", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
+            let reachable = graph.reachableLocations(loc(0, 2));
+
+            expect(reachable.length).toBe(5);
+            expect(reachable).toEqual(
+                expect.arrayContaining([
+                    loc(0, 2),
+                    loc(0, 3),
+                    loc(1, 2),
+                    loc(2, 2),
+                    loc(3, 2)
+                ])
+            );
+        });
+
+        it("finds all locations for a component with outside connections to the west and south", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
+            let reachable = graph.reachableLocations(loc(6, 2));
+
+            expect(reachable.length).toBe(13);
+            expect(reachable).toEqual(
+                expect.arrayContaining([
+                    loc(1, 0),
+                    loc(2, 0),
+                    loc(3, 0),
+                    loc(4, 0),
+                    loc(5, 0),
+                    loc(6, 0),
+                    loc(2, 1),
+                    loc(3, 1),
+                    loc(4, 1),
+                    loc(5, 1),
+                    loc(6, 1),
+                    loc(5, 2),
+                    loc(6, 2)
+                ])
+            );
+        });
     });
 
-    it("finds all locations for a component of size 6 with cycle", () => {
-        let game = new Game();
-        game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-        let graph = new Graph(game);
-        let reachable = graph.reachableLocations(loc(5, 3));
+    describe("isReachable", () => {
+        it("returns true for locations in same component", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
 
-        expect(reachable.length).toBe(6);
-        expect(reachable).toEqual(
-            expect.arrayContaining([
-                loc(4, 2),
-                loc(4, 3),
-                loc(5, 3),
-                loc(5, 4),
-                loc(6, 3),
-                loc(6, 4)
-            ])
-        );
-    });
+            expect(graph.isReachable(loc(0, 4), loc(0, 6))).toEqual(true);
+        });
 
-    it("finds all locations for a component with outside connections to the north", () => {
-        let game = new Game();
-        game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-        let graph = new Graph(game);
-        let reachable = graph.reachableLocations(loc(0, 2));
+        it("returns false for locations in different components", () => {
+            let game = new Game();
+            game.createFromApi(
+                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
+            );
+            let graph = new Graph(game);
 
-        expect(reachable.length).toBe(5);
-        expect(reachable).toEqual(
-            expect.arrayContaining([
-                loc(0, 2),
-                loc(0, 3),
-                loc(1, 2),
-                loc(2, 2),
-                loc(3, 2)
-            ])
-        );
-    });
-
-    it("finds all locations for a component with outside connections to the west and south", () => {
-        let game = new Game();
-        game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-        let graph = new Graph(game);
-        let reachable = graph.reachableLocations(loc(6, 2));
-
-        expect(reachable.length).toBe(13);
-        expect(reachable).toEqual(
-            expect.arrayContaining([
-                loc(1, 0),
-                loc(2, 0),
-                loc(3, 0),
-                loc(4, 0),
-                loc(5, 0),
-                loc(6, 0),
-                loc(2, 1),
-                loc(3, 1),
-                loc(4, 1),
-                loc(5, 1),
-                loc(6, 1),
-                loc(5, 2),
-                loc(6, 2)
-            ])
-        );
+            expect(graph.isReachable(loc(6, 0), loc(0, 6))).toEqual(false);
+        });
     });
 });
 
