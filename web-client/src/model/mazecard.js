@@ -85,6 +85,21 @@ export default class MazeCard {
         return this.doors.indexOf(door) != -1;
     }
 
+    hasRotationEquivalentDoor(door) {
+        var rotationDoor = MazeCard.rotationEquivalentDoor(
+            door,
+            -this._rotation
+        );
+        return this.doors.indexOf(rotationDoor) != -1;
+    }
+
+    static rotationEquivalentDoor(originalDoor, rotation) {
+        return MazeCard.doorsRotation[
+            (MazeCard.doorsRotation.indexOf(originalDoor) + rotation / 90 + 4) %
+                4
+        ];
+    }
+
     get rotation() {
         return this._rotation;
     }
@@ -137,3 +152,5 @@ MazeCard.validCombinations = [
     "EW",
     "SW"
 ];
+
+MazeCard.doorsRotation = ["N", "E", "S", "W"];

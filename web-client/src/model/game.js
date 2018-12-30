@@ -34,7 +34,7 @@ export default class Game {
     }
 
     getMazeCard(location) {
-        if (this._isInside(location)) {
+        if (this.isInside(location)) {
             return this.mazeCards[location.row][location.column];
         } else {
             throw new RangeError();
@@ -42,7 +42,7 @@ export default class Game {
     }
 
     setMazeCard(location, mazeCard) {
-        if (this._isInside(location)) {
+        if (this.isInside(location)) {
             this.mazeCards[location.row][location.column] = mazeCard;
         } else {
             throw new RangeError();
@@ -50,7 +50,7 @@ export default class Game {
     }
 
     shift(location) {
-        if (!this._isInside(location)) {
+        if (!this.isInside(location)) {
             throw new RangeError();
         }
         var shiftLocations = [];
@@ -233,7 +233,7 @@ export default class Game {
         }
     }
 
-    _isInside(location) {
+    isInside(location) {
         return (
             location.row >= 0 &&
             location.row < this.n &&

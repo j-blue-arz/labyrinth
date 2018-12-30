@@ -100,4 +100,30 @@ describe("MazeCard", () => {
             expect(mazeCard.hasWestDoor()).toBe(false);
         });
     });
+
+    describe("hasRotationEquivalentDoor", () => {
+        it("respects rotation for straights", () => {
+            var mazeCard = new MazeCard(4, 1, 4, "NS", 270);
+            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(false);
+            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(false);
+            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(true);
+        });
+
+        it("respects rotation for corner", () => {
+            var mazeCard = new MazeCard(4, 1, 4, "NE", 90);
+            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(false);
+            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(false);
+        });
+
+        it("respects rotation for t-shape", () => {
+            var mazeCard = new MazeCard(4, 1, 4, "NES", 0);
+            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(true);
+            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(false);
+        });
+    });
 });
