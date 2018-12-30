@@ -141,7 +141,10 @@ export default {
             }
         },
         onMazeCardClick: function(mazeCard) {
-            if (this.isMyTurnToMove) {
+            if (
+                this.isMyTurnToMove &&
+                this.game.isMoveValid(this.playerId, mazeCard.location)
+            ) {
                 this.$emit("move-piece", mazeCard.location);
             }
         },

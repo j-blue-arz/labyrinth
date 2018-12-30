@@ -51,3 +51,7 @@ export function extractIdMatrix(gameContainer) {
     }
     return ids;
 }
+
+export function copyObjectStructure(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}

@@ -2,7 +2,7 @@ import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import flushPromises from "flush-promises";
-import { loc } from "./testutils.js";
+import { loc, copyObjectStructure } from "./testutils.js";
 import GameApi from "@/api/gameApi.js";
 
 jest.useFakeTimers();
@@ -10,6 +10,7 @@ jest.useFakeTimers();
 var mockFetchState = jest.fn();
 var mockAddPlayer = jest.fn();
 var mockShift = jest.fn();
+var mockMove = jest.fn();
 var mockCancel = jest.fn();
 var mockErrorWasThrownByCancel = jest.fn();
 jest.mock("@/api/gameApi.js", () => {
@@ -18,23 +19,25 @@ jest.mock("@/api/gameApi.js", () => {
             fetchState: mockFetchState,
             doAddPlayer: mockAddPlayer,
             doShift: mockShift,
+            doMove: mockMove,
             cancelAllFetches: mockCancel,
             errorWasThrownByCancel: mockErrorWasThrownByCancel
         };
     });
 });
 
-mockFetchState.mockImplementation(() => Promise.resolve({ data: state }));
-mockAddPlayer.mockImplementation(() => Promise.resolve({ data: 7 }));
-mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
-mockErrorWasThrownByCancel.mockReturnValue(true);
-
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
+    mockFetchState.mockImplementation(() => Promise.resolve({ data: state }));
+    mockAddPlayer.mockImplementation(() => Promise.resolve({ data: 5 }));
+    mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
+    mockMove.mockImplementation(() => Promise.resolve({ data: "" }));
+    mockErrorWasThrownByCancel.mockReturnValue(true);
     GameApi.mockClear();
     mockFetchState.mockClear();
     mockAddPlayer.mockClear();
     mockShift.mockClear();
+    mockMove.mockClear();
     mockCancel.mockClear();
 });
 
@@ -51,7 +54,7 @@ describe("GameContainer as web-client", () => {
         let gameContainer = factory();
         expect(mockAddPlayer).toHaveBeenCalledTimes(1);
         await flushPromises();
-        expect(gameContainer.vm.playerId).toBe(7);
+        expect(gameContainer.vm.playerId).toBe(5);
     });
 
     it("sets leftover maze card according to fetched state.", async () => {
@@ -100,13 +103,61 @@ describe("GameContainer as web-client", () => {
         let gameContainer = factory();
         expect(gameContainer.find(".game-menu__button").exists()).toBe(true);
     });
+
+    it("calls API on move", async () => {
+        let stateWithMove = copyObjectStructure(state);
+        stateWithMove.nextAction.action = "MOVE";
+        mockFetchState.mockImplementation(() =>
+            Promise.resolve({ data: stateWithMove })
+        );
+        var gameContainer = factory();
+        await flushPromises();
+        var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
+
+        interactiveBoard.vm.$emit("move-piece", loc(0, 3));
+        await flushPromises();
+        expect(mockMove).toHaveBeenCalledTimes(1);
+        let location = mockMove.mock.calls[0][0];
+        expect(location.row).toEqual(0);
+        expect(location.column).toEqual(3);
+    });
 });
+
+/* GENERATED_WITH_LINE_LEFTOVER =
+###|#.#|###|#.#|###|###|###|
+#..|#.#|...|..#|...|...|..#|
+#.#|#.#|#.#|###|#.#|###|#.#|
+---------------------------|
+###|###|#.#|#.#|###|###|###|
+..#|...|#.#|..#|..#|...|#..|
+#.#|###|#.#|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|###|#.#|#.#|###|###|#.#|
+#..|...|#..|#.#|...|...|..#|
+#.#|###|#.#|#.#|#.#|###|#.#|
+---------------------------|
+#.#|###|#.#|#.#|###|#.#|###|
+#..|..#|#..|#..|...|#.#|...|
+#.#|#.#|###|###|#.#|#.#|###|
+---------------------------|
+#.#|###|#.#|###|#.#|###|#.#|
+#..|..#|...|..#|..#|..#|..#|
+#.#|#.#|###|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|#.#|###|#.#|###|###|###|
+#..|#..|..#|#..|..#|...|...|
+#.#|###|#.#|#.#|#.#|###|###|
+---------------------------|
+#.#|###|#.#|#.#|#.#|#.#|#.#|
+#..|..#|...|#..|...|#..|..#|
+###|#.#|###|###|###|#.#|###|
+---------------------------* */
 
 var state = {
     mazeCards: [
         {
-            doors: "NES",
-            id: 7,
+            doors: "NS",
+            id: 49,
             location: null,
             rotation: 270
         },
@@ -120,49 +171,49 @@ var state = {
             rotation: 90
         },
         {
-            doors: "NES",
+            doors: "NS",
             id: 1,
             location: {
                 column: 1,
                 row: 0
             },
-            rotation: 270
+            rotation: 180
         },
         {
-            doors: "NS",
+            doors: "NES",
             id: 2,
             location: {
                 column: 2,
                 row: 0
             },
-            rotation: 270
+            rotation: 90
         },
         {
-            doors: "NS",
+            doors: "NE",
             id: 3,
             location: {
                 column: 3,
+                row: 0
+            },
+            rotation: 270
+        },
+        {
+            doors: "NES",
+            id: 4,
+            location: {
+                column: 4,
                 row: 0
             },
             rotation: 90
         },
         {
             doors: "NS",
-            id: 4,
-            location: {
-                column: 4,
-                row: 0
-            },
-            rotation: 180
-        },
-        {
-            doors: "NS",
-            id: 49,
+            id: 5,
             location: {
                 column: 5,
                 row: 0
             },
-            rotation: 180
+            rotation: 90
         },
         {
             doors: "NE",
@@ -174,53 +225,53 @@ var state = {
             rotation: 180
         },
         {
-            doors: "NES",
-            id: 8,
+            doors: "NE",
+            id: 7,
             location: {
                 column: 0,
                 row: 1
             },
-            rotation: 270
+            rotation: 180
         },
         {
-            doors: "NE",
-            id: 9,
+            doors: "NS",
+            id: 8,
             location: {
                 column: 1,
+                row: 1
+            },
+            rotation: 90
+        },
+        {
+            doors: "NS",
+            id: 9,
+            location: {
+                column: 2,
+                row: 1
+            },
+            rotation: 180
+        },
+        {
+            doors: "NES",
+            id: 10,
+            location: {
+                column: 3,
                 row: 1
             },
             rotation: 180
         },
         {
             doors: "NE",
-            id: 10,
-            location: {
-                column: 2,
-                row: 1
-            },
-            rotation: 90
-        },
-        {
-            doors: "NS",
             id: 11,
-            location: {
-                column: 3,
-                row: 1
-            },
-            rotation: 90
-        },
-        {
-            doors: "NE",
-            id: 5,
             location: {
                 column: 4,
                 row: 1
             },
-            rotation: 0
+            rotation: 180
         },
         {
-            doors: "NS",
-            id: 13,
+            doors: "NES",
+            id: 12,
             location: {
                 column: 5,
                 row: 1
@@ -229,12 +280,12 @@ var state = {
         },
         {
             doors: "NE",
-            id: 47,
+            id: 13,
             location: {
                 column: 6,
                 row: 1
             },
-            rotation: 270
+            rotation: 90
         },
         {
             doors: "NES",
@@ -243,37 +294,37 @@ var state = {
                 column: 0,
                 row: 2
             },
-            rotation: 180
+            rotation: 0
         },
         {
-            doors: "NES",
+            doors: "NS",
             id: 15,
             location: {
                 column: 1,
                 row: 2
             },
-            rotation: 270
+            rotation: 90
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 16,
             location: {
                 column: 2,
                 row: 2
             },
-            rotation: 90
+            rotation: 0
         },
         {
-            doors: "NES",
+            doors: "NS",
             id: 17,
             location: {
                 column: 3,
                 row: 2
             },
-            rotation: 90
+            rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 18,
             location: {
                 column: 4,
@@ -283,7 +334,7 @@ var state = {
         },
         {
             doors: "NS",
-            id: 12,
+            id: 19,
             location: {
                 column: 5,
                 row: 2
@@ -297,7 +348,7 @@ var state = {
                 column: 6,
                 row: 2
             },
-            rotation: 270
+            rotation: 180
         },
         {
             doors: "NES",
@@ -306,7 +357,7 @@ var state = {
                 column: 0,
                 row: 3
             },
-            rotation: 90
+            rotation: 0
         },
         {
             doors: "NE",
@@ -318,7 +369,7 @@ var state = {
             rotation: 180
         },
         {
-            doors: "NS",
+            doors: "NE",
             id: 23,
             location: {
                 column: 2,
@@ -327,16 +378,16 @@ var state = {
             rotation: 0
         },
         {
-            doors: "NES",
+            doors: "NE",
             id: 24,
             location: {
                 column: 3,
                 row: 3
             },
-            rotation: 180
+            rotation: 0
         },
         {
-            doors: "NS",
+            doors: "NES",
             id: 25,
             location: {
                 column: 4,
@@ -345,13 +396,13 @@ var state = {
             rotation: 90
         },
         {
-            doors: "NE",
-            id: 19,
+            doors: "NS",
+            id: 26,
             location: {
                 column: 5,
                 row: 3
             },
-            rotation: 90
+            rotation: 180
         },
         {
             doors: "NS",
@@ -360,7 +411,7 @@ var state = {
                 column: 6,
                 row: 3
             },
-            rotation: 270
+            rotation: 90
         },
         {
             doors: "NES",
@@ -372,22 +423,22 @@ var state = {
             rotation: 0
         },
         {
-            doors: "NS",
+            doors: "NE",
             id: 29,
             location: {
                 column: 1,
                 row: 4
             },
-            rotation: 0
+            rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 30,
             location: {
                 column: 2,
                 row: 4
             },
-            rotation: 90
+            rotation: 270
         },
         {
             doors: "NE",
@@ -396,28 +447,28 @@ var state = {
                 column: 3,
                 row: 4
             },
-            rotation: 270
+            rotation: 180
         },
         {
-            doors: "NS",
+            doors: "NES",
             id: 32,
             location: {
                 column: 4,
                 row: 4
             },
-            rotation: 270
+            rotation: 180
         },
         {
-            doors: "NS",
-            id: 26,
+            doors: "NE",
+            id: 33,
             location: {
                 column: 5,
                 row: 4
             },
-            rotation: 0
+            rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 34,
             location: {
                 column: 6,
@@ -426,13 +477,13 @@ var state = {
             rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 35,
             location: {
                 column: 0,
                 row: 5
             },
-            rotation: 270
+            rotation: 0
         },
         {
             doors: "NE",
@@ -441,19 +492,19 @@ var state = {
                 column: 1,
                 row: 5
             },
-            rotation: 90
+            rotation: 0
         },
         {
-            doors: "NES",
+            doors: "NE",
             id: 37,
             location: {
                 column: 2,
                 row: 5
             },
-            rotation: 90
+            rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 38,
             location: {
                 column: 3,
@@ -462,31 +513,31 @@ var state = {
             rotation: 0
         },
         {
-            doors: "NS",
+            doors: "NE",
             id: 39,
             location: {
                 column: 4,
                 row: 5
             },
-            rotation: 90
+            rotation: 180
         },
         {
-            doors: "NES",
-            id: 33,
+            doors: "NS",
+            id: 40,
             location: {
                 column: 5,
                 row: 5
             },
-            rotation: 270
+            rotation: 90
         },
         {
-            doors: "NES",
+            doors: "NS",
             id: 41,
             location: {
                 column: 6,
                 row: 5
             },
-            rotation: 0
+            rotation: 90
         },
         {
             doors: "NE",
@@ -498,7 +549,7 @@ var state = {
             rotation: 0
         },
         {
-            doors: "NES",
+            doors: "NE",
             id: 43,
             location: {
                 column: 1,
@@ -507,13 +558,13 @@ var state = {
             rotation: 180
         },
         {
-            doors: "NE",
+            doors: "NES",
             id: 44,
             location: {
                 column: 2,
                 row: 6
             },
-            rotation: 90
+            rotation: 270
         },
         {
             doors: "NE",
@@ -522,25 +573,25 @@ var state = {
                 column: 3,
                 row: 6
             },
-            rotation: 180
+            rotation: 0
         },
         {
-            doors: "NS",
+            doors: "NES",
             id: 46,
             location: {
                 column: 4,
                 row: 6
             },
-            rotation: 90
+            rotation: 270
         },
         {
-            doors: "NS",
-            id: 40,
+            doors: "NES",
+            id: 47,
             location: {
                 column: 5,
                 row: 6
             },
-            rotation: 90
+            rotation: 0
         },
         {
             doors: "NE",
@@ -554,12 +605,13 @@ var state = {
     ],
     nextAction: {
         action: "SHIFT",
-        playerId: 0
+        playerId: 5
     },
-    objectiveMazeCardId: 48,
+    objectiveMazeCardId: 34,
     players: [
         {
-            id: 0,
+            id: 5,
+            isComputerPlayer: false,
             mazeCardId: 3
         }
     ]

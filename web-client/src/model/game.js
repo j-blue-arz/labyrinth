@@ -1,6 +1,7 @@
 import Vue from "vue";
 import MazeCard from "@/model/mazecard.js";
 import Player from "@/model/player.js";
+import Graph from "@/model/mazeAlgorithm.js";
 import ValueError from "@/util/exceptions";
 
 export const MOVE_ACTION = "MOVE";
@@ -101,6 +102,18 @@ export default class Game {
         sourceMazeCard.removePlayer(player);
         targetMazeCard.addPlayer(player);
         player.mazeCard = targetMazeCard;
+    }
+
+    isMoveValid(playerId, targetLocation) {
+        if (this.nextAction.playerId !== playerId) {
+            return false;
+        }
+        if (this.nextAction.action !== "MOVE") {
+            return false;
+        }
+        let player = this.getPlayer(playerId);
+        let sourceLocation = player.mazeCard.location;
+        return new Graph(this).isReachable(sourceLocation, targetLocation);
     }
 
     _columnLocations(column) {

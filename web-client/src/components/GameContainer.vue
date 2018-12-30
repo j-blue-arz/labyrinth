@@ -77,15 +77,14 @@ export default {
             }
         },
         onMovePlayerPiece: function(targetLocation) {
-            this.stopPolling();
+            this.game.move(this.playerId, targetLocation);
             if (this.useApi()) {
+                this.stopPolling();
                 this.api
                     .doMove(targetLocation)
-                    .then(() => this.game.move(this.playerId, targetLocation))
                     .catch(this.handleError)
                     .then(this.startPolling);
             } else {
-                this.game.move(this.playerId, targetLocation);
                 this.game.nextAction.action = actions.SHIFT_ACTION;
                 this.game.getPlayer(this.playerId).turnAction =
                     actions.SHIFT_ACTION;
