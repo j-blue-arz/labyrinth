@@ -6,7 +6,7 @@
             :n="mazeSize"
             :maze-cards="mazeCards"
             :card-size="cardSize"
-            :interaction="isMyTurnToMove"
+            :interactive-maze-cards="interactiveMazeCards"
         ></v-game-board>
         <rect
             v-for="(insertPanel, itemIndex) in insertPanels"
@@ -37,6 +37,7 @@ import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import Game, * as action from "@/model/game.js";
 import MazeCard from "@/model/mazecard.js";
+import Graph from "@/model/mazeAlgorithm.js";
 
 export default {
     name: "interactive-board",
@@ -81,12 +82,16 @@ export default {
         mazeSize: function() {
             return this.game.n;
         },
-        isMyTurnToMove: function() {
-            return (
-                this.game.nextAction.playerId === this.playerId &&
-                this.game.nextAction.action === action.MOVE_ACTION &&
-                !this.game.getPlayer(this.playerId).isComputer
-            );
+        interactiveMazeCards: function() {
+            if (!this.isMyTurnToMove() || this.game.isLoading) {
+                return new Set([]);
+            } else {
+                let player = this.game.getPlayer(this.playerId);
+                let pieceLocation = player.mazeCard.location;
+                let graph = new Graph(this.game);
+                let locations = graph.reachableLocations(pieceLocation);
+                return new Set(locations.map(location => this.game.getMazeCard(location)));
+            }
         },
         isMyTurnToShift: function() {
             return (
@@ -112,6 +117,13 @@ export default {
         }
     },
     methods: {
+        isMyTurnToMove: function() {
+            return (
+                this.game.nextAction.playerId === this.playerId &&
+                this.game.nextAction.action === action.MOVE_ACTION &&
+                !this.game.getPlayer(this.playerId).isComputer
+            );
+        },
         xPos(location) {
             return this.cardSize * location.column;
         },
@@ -141,10 +153,7 @@ export default {
             }
         },
         onMazeCardClick: function(mazeCard) {
-            if (
-                this.isMyTurnToMove &&
-                this.game.isMoveValid(this.playerId, mazeCard.location)
-            ) {
+            if (this.isMyTurnToMove && this.game.isMoveValid(this.playerId, mazeCard.location)) {
                 this.$emit("move-piece", mazeCard.location);
             }
         },

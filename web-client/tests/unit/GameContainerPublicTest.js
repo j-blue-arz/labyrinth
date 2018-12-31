@@ -107,9 +107,7 @@ describe("GameContainer as web-client", () => {
     it("calls API on move", async () => {
         let stateWithMove = copyObjectStructure(state);
         stateWithMove.nextAction.action = "MOVE";
-        mockFetchState.mockImplementation(() =>
-            Promise.resolve({ data: stateWithMove })
-        );
+        mockFetchState.mockImplementation(() => Promise.resolve({ data: stateWithMove }));
         var gameContainer = factory();
         await flushPromises();
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });

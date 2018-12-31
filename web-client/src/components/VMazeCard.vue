@@ -144,8 +144,7 @@ export default {
                     }
                 ];
             } else {
-                var midpointCircleRadius =
-                    this.cardSize / sizeToSmallPieceCircleRadiusRatio;
+                var midpointCircleRadius = this.cardSize / sizeToSmallPieceCircleRadiusRatio;
                 var fullCircle = Math.PI * 2;
                 var angles = [fullCircle / numPieces / 2];
                 for (var i = 1; i < numPieces; i++) {
@@ -154,12 +153,8 @@ export default {
                 var centers = [];
                 angles.forEach(angle =>
                     centers.push({
-                        x:
-                            Math.floor(midpointCircleRadius * Math.sin(angle)) +
-                            this.cardSize / 2,
-                        y:
-                            Math.floor(midpointCircleRadius * Math.cos(angle)) +
-                            this.cardSize / 2
+                        x: Math.floor(midpointCircleRadius * Math.sin(angle)) + this.cardSize / 2,
+                        y: Math.floor(midpointCircleRadius * Math.cos(angle)) + this.cardSize / 2
                     })
                 );
                 return centers;

@@ -19,7 +19,7 @@
                 :card-size="cardSize"
                 :x="xPos(mazeCard.location) + borderWidth"
                 :y="yPos(mazeCard.location) + borderWidth"
-                :class="{interaction: interaction}"
+                :class="{interaction: isInteractive(mazeCard)}"
                 class="game-board__maze-card"
             ></v-maze-card>
         </transition-group>
@@ -55,8 +55,7 @@ export default {
             type: Number,
             default: 100
         },
-        interaction: {
-            type: Boolean,
+        interactiveMazeCards: {
             required: false,
             default: false
         }
@@ -73,6 +72,16 @@ export default {
         }
     },
     methods: {
+        interactiveMazeCardSet() {
+            if (this.interactiveMazeCards !== false) {
+                return new Set(this.interactiveMazeCards);
+            }
+            return new Set([]);
+        },
+        isInteractive(mazeCard) {
+            let interactiveSet = this.interactiveMazeCardSet();
+            return interactiveSet.has(mazeCard);
+        },
         xPos(location) {
             return this.cardSize * location.column;
         },
@@ -94,7 +103,7 @@ export default {
 
     &__maze-card {
         &--move {
-            transition: transform 1s;
+            transition: transform 10s;
         }
 
         &--enter-active,

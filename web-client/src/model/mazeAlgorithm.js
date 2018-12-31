@@ -1,7 +1,6 @@
 export default class Graph {
     constructor(game) {
         this.game = game;
-        this.maze = game.mazeCard;
     }
 
     isReachable(sourceLocation, targetLocation) {
@@ -15,10 +14,7 @@ export default class Graph {
     }
 
     _locationsEqual(locationA, locationB) {
-        return (
-            locationA.row === locationB.row &&
-            locationA.column == locationB.column
-        );
+        return locationA.row === locationB.row && locationA.column == locationB.column;
     }
 
     reachableLocations(sourceLocation) {

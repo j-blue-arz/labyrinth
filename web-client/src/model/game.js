@@ -6,6 +6,7 @@ import ValueError from "@/util/exceptions";
 
 export const MOVE_ACTION = "MOVE";
 export const SHIFT_ACTION = "SHIFT";
+export const NO_ACTION = "NONE";
 
 export default class Game {
     constructor() {
@@ -13,7 +14,8 @@ export default class Game {
         this.mazeCards = [];
         this.leftoverMazeCard = {};
         this._players = new Map();
-        this.nextAction = { playerId: 0, action: "NONE" };
+        this.nextAction = { playerId: 0, action: NO_ACTION };
+        this.isLoading = false;
     }
 
     mazeCardsAsList() {
@@ -108,7 +110,7 @@ export default class Game {
         if (this.nextAction.playerId !== playerId) {
             return false;
         }
-        if (this.nextAction.action !== "MOVE") {
+        if (this.nextAction.action !== MOVE_ACTION) {
             return false;
         }
         let player = this.getPlayer(playerId);
@@ -155,6 +157,7 @@ export default class Game {
     }
 
     createFromApi(apiState, userId = 0) {
+        this.isLoading = true;
         var apiMazeCards = apiState.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
         if (this.leftoverMazeCard.id != apiMazeCards[0].id) {
@@ -184,7 +187,7 @@ export default class Game {
                 player.isComputer = true;
                 player.algorithm = apiPlayer.algorithm;
             }
-            player.turnAction = "NONE";
+            player.turnAction = NO_ACTION;
             playerCard.addPlayer(player);
             this.addPlayer(player);
             toRemove.delete(player.id);
@@ -198,11 +201,9 @@ export default class Game {
         objectiveCard.hasObject = true;
 
         if (apiState.nextAction) {
-            this.setNextAction(
-                apiState.nextAction.playerId,
-                apiState.nextAction.action
-            );
+            this.setNextAction(apiState.nextAction.playerId, apiState.nextAction.action);
         }
+        this.isLoading = false;
     }
 
     setNextAction(playerId, action) {
@@ -238,9 +239,7 @@ export default class Game {
         for (var row = 0; row < this.n; row++) {
             this.mazeCards.push([]);
             for (var col = 0; col < this.n; col++) {
-                this.mazeCards[row].push(
-                    MazeCard.createFromApi(sortedApiMazeCards[index])
-                );
+                this.mazeCards[row].push(MazeCard.createFromApi(sortedApiMazeCards[index]));
                 index++;
             }
         }

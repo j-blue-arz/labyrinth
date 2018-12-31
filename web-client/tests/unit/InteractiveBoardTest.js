@@ -1,13 +1,26 @@
-import { shallowMount } from "@vue/test-utils";
+import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
 import { copyObjectStructure } from "./testutils.js";
 import Game from "@/model/game.js";
+import { loc } from "./testutils.js";
+
+const shallowFactory = function(state = API_STATE) {
+    let game = new Game();
+    game.createFromApi(state, 5);
+    return shallowMount(InteractiveBoard, {
+        propsData: {
+            game: game,
+            cardSize: 100,
+            playerId: 5
+        }
+    });
+};
 
 const factory = function(state = API_STATE) {
     let game = new Game();
     game.createFromApi(state, 5);
-    return shallowMount(InteractiveBoard, {
+    return mount(InteractiveBoard, {
         propsData: {
             game: game,
             cardSize: 100,
@@ -30,11 +43,8 @@ function stateWithMoveAction() {
 
 describe("InteractiveBoard", () => {
     it("rotates leftover maze card when clicked", () => {
-        let board = factory(stateWithShiftAction());
-        const rotateOperation = jest.spyOn(
-            board.props("game").leftoverMazeCard,
-            "rotateClockwise"
-        );
+        let board = shallowFactory(stateWithShiftAction());
+        const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         let oldRotation = leftoverVMazeCard.props().mazeCard.rotation;
         leftoverVMazeCard.trigger("click");
@@ -44,49 +54,77 @@ describe("InteractiveBoard", () => {
     });
 
     it("does not rotate leftover maze card when next action is move", () => {
-        let board = factory(stateWithMoveAction());
-        const rotateOperation = jest.spyOn(
-            board.props("game").leftoverMazeCard,
-            "rotateClockwise"
-        );
+        let board = shallowFactory(stateWithMoveAction());
+        const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         leftoverVMazeCard.trigger("click");
         expect(rotateOperation).toHaveBeenCalledTimes(0);
     });
 
     it("assigns class 'interaction' on leftover maze card if next action is shift.", () => {
-        let board = factory(stateWithShiftAction());
+        let board = shallowFactory(stateWithShiftAction());
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         expect(leftoverVMazeCard.classes()).toContain("interaction");
     });
 
     it("removes class 'interaction' on leftover maze card if next action is move.", () => {
-        let board = factory(stateWithMoveAction());
+        let board = shallowFactory(stateWithMoveAction());
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         expect(leftoverVMazeCard.classes()).not.toContain("interaction");
     });
 
-    it("emits 'move-piece' event when maze card is clicked", () => {
+    it("sets interaction class on reachable maze cards", () => {
         let board = factory(stateWithMoveAction());
-        let clickedMazeCard = board.props().game.mazeCards[1][2];
+        let game = board.props().game;
+        let reachableCardLocations = [loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)];
+        let reachableCardIds = reachableCardLocations.map(
+            location => game.getMazeCard(location).id
+        );
+
+        let interactiveCardIds = fetchInteractiveCardIds(board);
+        expect(interactiveCardIds.length).toBe(reachableCardIds.length);
+        expect(interactiveCardIds).toEqual(expect.arrayContaining(reachableCardIds));
+    });
+
+    it("does not set interaction class if shift is required", () => {
+        let board = factory(stateWithShiftAction());
+        let interactiveCardIds = fetchInteractiveCardIds(board);
+        expect(interactiveCardIds.length).toBe(1); // leftover
+    });
+
+    it("emits 'move-piece' event when maze card is clicked", () => {
+        let board = shallowFactory(stateWithMoveAction());
+        let clickedMazeCard = board.props().game.mazeCards[0][2];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeTruthy();
     });
 
     it("does not emit 'move-piece' event if shift is required", () => {
-        let board = factory(stateWithShiftAction());
-        let clickedMazeCard = board.props().game.mazeCards[1][2];
+        let board = shallowFactory(stateWithShiftAction());
+        let clickedMazeCard = board.props().game.mazeCards[0][2];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeFalsy();
     });
 
-    it("does not emit 'move-piece' event if there is not path to clicked maze card", () => {
-        let board = factory(stateWithShiftAction());
+    it("does not emit 'move-piece' event if clicked maze card is not reachable", () => {
+        let board = shallowFactory(stateWithShiftAction());
         let clickedMazeCard = board.props().game.mazeCards[0][0];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeFalsy();
     });
 });
+
+function fetchInteractiveCardIds(board) {
+    let mazeCards = board.findAll(".maze-card");
+    let interactiveCardIds = [];
+    for (var i = 0; i < mazeCards.length; i++) {
+        let card = mazeCards.at(i);
+        if (card.classes("interaction")) {
+            interactiveCardIds.push(parseInt(card.attributes("id")));
+        }
+    }
+    return interactiveCardIds;
+}
 
 /* GENERATED_WITH_LINE_LEFTOVER =
 ###|#.#|###|#.#|###|###|###|

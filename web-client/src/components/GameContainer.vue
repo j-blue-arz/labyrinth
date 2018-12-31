@@ -72,8 +72,7 @@ export default {
             } else {
                 this.game.shift(event.location);
                 this.game.nextAction.action = actions.MOVE_ACTION;
-                this.game.getPlayer(this.playerId).turnAction =
-                    actions.MOVE_ACTION;
+                this.game.getPlayer(this.playerId).turnAction = actions.MOVE_ACTION;
             }
         },
         onMovePlayerPiece: function(targetLocation) {
@@ -86,8 +85,7 @@ export default {
                     .then(this.startPolling);
             } else {
                 this.game.nextAction.action = actions.SHIFT_ACTION;
-                this.game.getPlayer(this.playerId).turnAction =
-                    actions.SHIFT_ACTION;
+                this.game.getPlayer(this.playerId).turnAction = actions.SHIFT_ACTION;
             }
         },
         handleError: function(error) {
