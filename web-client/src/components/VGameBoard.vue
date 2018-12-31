@@ -17,8 +17,8 @@
                 :maze-card="mazeCard"
                 :key="mazeCard.id"
                 :card-size="cardSize"
-                :x="xPos(mazeCard.location) + borderWidth"
-                :y="yPos(mazeCard.location) + borderWidth"
+                :xPos="xPos(mazeCard.location) + borderWidth"
+                :yPos="yPos(mazeCard.location) + borderWidth"
                 :class="{interaction: isInteractive(mazeCard)}"
                 class="game-board__maze-card"
             ></v-maze-card>
@@ -102,10 +102,6 @@ export default {
     }
 
     &__maze-card {
-        &--move {
-            transition: transform 10s;
-        }
-
         &--enter-active,
         &--leave-active {
             transition: opacity 2s;

@@ -3,6 +3,8 @@
         :height="cardSize"
         :width="cardSize"
         :id="mazeCard.id"
+        :x="xPosAnimated"
+        :y="yPosAnimated"
         viewBox="0 0 100 100"
         class="maze-card"
     >
@@ -75,6 +77,7 @@
 import MazeCard from "@/model/mazecard.js";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import VObjective from "@/components/VObjective.vue";
+import { TweenLite, Power3 } from "gsap";
 
 const sizeToPathWidthRatio = 2.7;
 const sizeToEdgeRadiusRatio = 7;
@@ -97,12 +100,24 @@ export default {
         cardSize: {
             type: Number,
             default: 100
+        },
+        xPos: {
+            type: Number,
+            required: false,
+            default: 0
+        },
+        yPos: {
+            type: Number,
+            required: false,
+            default: 0
         }
     },
     data() {
         return {
             animatedRotationClass: "",
-            timer: 0
+            timer: 0,
+            xPosAnimated: 0,
+            yPosAnimated: 0
         };
     },
     watch: {
@@ -112,6 +127,12 @@ export default {
             this.timer = setTimeout(() => {
                 this.animatedRotationClass = "rotate" + newValue;
             }, 500);
+        },
+        xPos: function(newValue) {
+            TweenLite.to(this.$data, 1, { xPosAnimated: newValue, ease: Power3.easeInOut });
+        },
+        yPos: function(newValue) {
+            TweenLite.to(this.$data, 1, { yPosAnimated: newValue, ease: Power3.easeInOut });
         }
     },
     computed: {
@@ -181,6 +202,10 @@ export default {
         hasWest: function() {
             return this.mazeCard.hasWestDoor();
         }
+    },
+    mounted: function() {
+        this.xPosAnimated = this.xPos;
+        this.yPosAnimated = this.yPos;
     }
 };
 </script>

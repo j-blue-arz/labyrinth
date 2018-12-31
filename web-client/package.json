@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "gsap": "^2.0.2",
     "vue": "^2.5.17"
   },
   "devDependencies": {
