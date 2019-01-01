@@ -7,9 +7,7 @@ import { loc, extractIdMatrix } from "./testutils.js";
 
 const determineLeftOverId = function(gameContainer) {
     let board = gameContainer.find(InteractiveBoard);
-    return Number.parseInt(
-        board.find({ ref: "leftover" }).element.getAttribute("id")
-    );
+    return Number.parseInt(board.find({ ref: "leftover" }).element.getAttribute("id"));
 };
 
 const determineMazeCardIdsWithPlayers = function(gameContainer) {
@@ -18,7 +16,7 @@ const determineMazeCardIdsWithPlayers = function(gameContainer) {
     for (var i = 0; i < vPlayerPieces.length; i++) {
         mazeCardIds.push(
             Number.parseInt(
-                vPlayerPieces.at(i).element.parentElement.getAttribute("id")
+                vPlayerPieces.at(i).element.parentElement.parentElement.getAttribute("id")
             )
         );
     }

@@ -77,27 +77,13 @@ describe("VMazeCard", () => {
         });
         var playerPieces = wrapper.findAll(".player-piece__shape");
         expect(playerPieces.length).toBe(2);
-        var cx0 = Number.parseFloat(
-            playerPieces.at(0).element.getAttribute("cx")
-        );
-        var cy0 = Number.parseFloat(
-            playerPieces.at(0).element.getAttribute("cy")
-        );
-        var cx1 = Number.parseFloat(
-            playerPieces.at(1).element.getAttribute("cx")
-        );
-        var cy1 = Number.parseFloat(
-            playerPieces.at(1).element.getAttribute("cy")
-        );
-        var r0 = Number.parseFloat(
-            playerPieces.at(0).element.getAttribute("r")
-        );
-        var r1 = Number.parseFloat(
-            playerPieces.at(1).element.getAttribute("r")
-        );
-        var distance = Math.sqrt(
-            Math.pow(cx0 - cx1, 2) + Math.pow(cy0 - cy1, 2)
-        );
+        var cx0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("cx"));
+        var cy0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("cy"));
+        var cx1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("cx"));
+        var cy1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("cy"));
+        var r0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("r"));
+        var r1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("r"));
+        var distance = Math.sqrt(Math.pow(cx0 - cx1, 2) + Math.pow(cy0 - cy1, 2));
         var radiusSums = r0 + r1;
         expect(distance).toBeGreaterThan(radiusSums);
     });

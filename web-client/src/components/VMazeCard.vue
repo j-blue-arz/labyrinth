@@ -61,35 +61,30 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <v-player-piece
-            v-for="(player, index) in players"
-            :xCenterPos="pieceCenters[index].x"
-            :yCenterPos="pieceCenters[index].y"
-            :maxSize="pieceSize"
-            :key="player.id"
-            :player="player"
-        ></v-player-piece>
+        <player-piece-group
+            :players="players"
+            :mid-point="piecesPosition"
+            :max-size="piecesSize"
+        />
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
 
 <script>
 import MazeCard from "@/model/mazecard.js";
-import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
 import { TweenLite, Power3 } from "gsap";
 
+const sizeToPiecesRatio = 3.5;
 const sizeToPathWidthRatio = 2.7;
 const sizeToEdgeRadiusRatio = 7;
-const sizeToPieceSizeRatio = 3.5;
-const sizeToSmallPieceSizeRatio = 5;
-const sizeToSmallPieceCircleRadiusRatio = 6;
 
 export default {
     name: "v-maze-card",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VPlayerPiece,
+        PlayerPieceGroup,
         VObjective
     },
     props: {
@@ -148,44 +143,17 @@ export default {
         players: function() {
             return this.mazeCard.players;
         },
-        pieceSize: function() {
-            if (this.players.length === 1) {
-                return Math.floor(this.cardSize / sizeToPieceSizeRatio);
-            } else {
-                return Math.floor(this.cardSize / sizeToSmallPieceSizeRatio);
-            }
-        },
-        pieceCenters: function() {
-            var numPieces = this.mazeCard.players.length;
-            if (numPieces <= 1) {
-                return [
-                    {
-                        x: Math.floor(this.cardSize / 2),
-                        y: Math.floor(this.cardSize / 2)
-                    }
-                ];
-            } else {
-                var midpointCircleRadius = this.cardSize / sizeToSmallPieceCircleRadiusRatio;
-                var fullCircle = Math.PI * 2;
-                var angles = [fullCircle / numPieces / 2];
-                for (var i = 1; i < numPieces; i++) {
-                    angles.push(angles[i - 1] + fullCircle / numPieces);
-                }
-                var centers = [];
-                angles.forEach(angle =>
-                    centers.push({
-                        x: Math.floor(midpointCircleRadius * Math.sin(angle)) + this.cardSize / 2,
-                        y: Math.floor(midpointCircleRadius * Math.cos(angle)) + this.cardSize / 2
-                    })
-                );
-                return centers;
-            }
-        },
         pathWidth: function() {
             return Math.floor(this.cardSize / sizeToPathWidthRatio);
         },
         edgeRadius: function() {
             return Math.floor(this.cardSize / sizeToEdgeRadiusRatio);
+        },
+        piecesSize: function() {
+            return Math.floor(this.cardSize / sizeToPiecesRatio);
+        },
+        piecesPosition: function() {
+            return Math.floor(this.cardSize / 2);
         },
         remainingSpace: function() {
             return Math.floor((this.cardSize - this.pathWidth) / 2);

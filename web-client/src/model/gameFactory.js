@@ -15,9 +15,7 @@ export default class GameFactory {
         for (var row = 0; row < game.n; row++) {
             game.mazeCards.push([]);
             for (var col = 0; col < game.n; col++) {
-                game.mazeCards[row].push(
-                    MazeCard.createNewRandom(id, row, col)
-                );
+                game.mazeCards[row].push(MazeCard.createNewRandom(id, row, col));
                 id++;
             }
         }

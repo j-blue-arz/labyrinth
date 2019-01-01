@@ -2,14 +2,15 @@
     <svg
         ref="playerPiece"
         class="player-piece"
-        :class="[{'player-piece__user': isUser, 'player-piece__user--to-move': isUser && hasToMove}, colorIndexClass]"
+        :class="[{'player-piece__user': isUser, 'player-piece__user--to-move': isUser && hasToMove},
+        colorIndexClass]"
     >
         <circle
             :cx="xCenterPos"
             :cy="yCenterPos"
             :r="maxSize/2"
             class="player-piece__shape"
-        ></circle>
+        />
         <circle
             v-if="hasToMove && isUser"
             :cx="xCenterPos"
