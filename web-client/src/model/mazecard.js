@@ -10,25 +10,17 @@ export default class MazeCard {
         this.hasObject = false;
 
         if (!Number.isInteger(id))
-            throw new Error(
-                "Invalid constructor argument for id, should be integer."
-            );
+            throw new Error("Invalid constructor argument for id, should be integer.");
         if (!Number.isInteger(row))
-            throw new Error(
-                "Invalid constructor argument for row, should be integer."
-            );
+            throw new Error("Invalid constructor argument for row, should be integer.");
         if (!Number.isInteger(column))
-            throw new Error(
-                "Invalid constructor argument for column, should be integer."
-            );
+            throw new Error("Invalid constructor argument for column, should be integer.");
         if (!Number.isInteger(rotation / 90))
             throw new Error(
                 "Invalid constructor argument for rotation, should be integer divisible by 90."
             );
         if (typeof doors !== "string")
-            throw new Error(
-                "Invalid constructor argument for doors, should be string."
-            );
+            throw new Error("Invalid constructor argument for doors, should be string.");
         if (!/^[NESW]{2,4}$/.test(doors))
             throw new Error(
                 "Invalid constructor argument for doors, should comply pattern '[NESW]{2,4}'."
@@ -86,17 +78,13 @@ export default class MazeCard {
     }
 
     hasRotationEquivalentDoor(door) {
-        var rotationDoor = MazeCard.rotationEquivalentDoor(
-            door,
-            -this._rotation
-        );
+        var rotationDoor = MazeCard.rotationEquivalentDoor(door, -this._rotation);
         return this.doors.indexOf(rotationDoor) != -1;
     }
 
     static rotationEquivalentDoor(originalDoor, rotation) {
         return MazeCard.doorsRotation[
-            (MazeCard.doorsRotation.indexOf(originalDoor) + rotation / 90 + 4) %
-                4
+            (MazeCard.doorsRotation.indexOf(originalDoor) + rotation / 90 + 4) % 4
         ];
     }
 
@@ -136,6 +124,10 @@ export default class MazeCard {
     setLeftoverLocation() {
         this.location.row = -1;
         this.location.column = -1;
+    }
+
+    isLeftoverLocation() {
+        return this.location.row === -1 || this.location.column === -1;
     }
 }
 

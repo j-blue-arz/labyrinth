@@ -1,5 +1,6 @@
 <template>
     <svg :viewBox="`0 0 ${interactionSize} ${interactionSize}`" class="interactive-board">
+        <v-svg-defs></v-svg-defs>
         <v-game-board
             @maze-card-clicked="onMazeCardClick"
             :board-offset="boardOffset"
@@ -8,6 +9,12 @@
             :card-size="cardSize"
             :interactive-maze-cards="interactiveMazeCards"
         ></v-game-board>
+        <v-move-animation
+            :board-offset="boardOffset"
+            :card-size="cardSize"
+            :player-id="playerId"
+            :game="game"
+        ></v-move-animation>
         <rect
             v-for="(insertPanel, itemIndex) in insertPanels"
             @click="onInsertPanelClick($event, itemIndex)"
@@ -35,6 +42,8 @@
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
+import VMoveAnimation from "@/components/VMoveAnimation.vue";
+import VSvgDefs from "@/components/VSvgDefs.vue";
 import Game, * as action from "@/model/game.js";
 import MazeCard from "@/model/mazecard.js";
 import Graph from "@/model/mazeAlgorithm.js";
@@ -44,7 +53,9 @@ export default {
     components: {
         /* eslint-disable vue/no-unused-components */
         VGameBoard,
-        VMazeCard
+        VMazeCard,
+        VMoveAnimation,
+        VSvgDefs
     },
     props: {
         game: {

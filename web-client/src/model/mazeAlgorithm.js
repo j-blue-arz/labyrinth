@@ -137,8 +137,8 @@ export default class Graph {
         let path = [location];
         let current = location;
         while (!this._locationsEqual(this._getReached(current).parent, current)) {
-            path.push(current);
             current = this._getReached(current).parent;
+            path.push(current);
         }
         return path.reverse();
     }
