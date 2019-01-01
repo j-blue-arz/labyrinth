@@ -171,7 +171,7 @@ export default {
             return this.mazeCard.hasWestDoor();
         }
     },
-    mounted: function() {
+    created: function() {
         this.xPosAnimated = this.xPos;
         this.yPosAnimated = this.yPos;
     }
