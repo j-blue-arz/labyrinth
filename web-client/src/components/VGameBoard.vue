@@ -57,7 +57,7 @@ export default {
         },
         interactiveMazeCards: {
             required: false,
-            default: false
+            default: () => new Set([])
         }
     },
     data() {
@@ -72,15 +72,8 @@ export default {
         }
     },
     methods: {
-        interactiveMazeCardSet() {
-            if (this.interactiveMazeCards !== false) {
-                return new Set(this.interactiveMazeCards);
-            }
-            return new Set([]);
-        },
         isInteractive(mazeCard) {
-            let interactiveSet = this.interactiveMazeCardSet();
-            return interactiveSet.has(mazeCard);
+            return this.interactiveMazeCards.has(mazeCard);
         },
         xPos(location) {
             return this.cardSize * location.column;

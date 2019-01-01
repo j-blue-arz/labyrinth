@@ -1,6 +1,30 @@
 export default class Graph {
     constructor(game) {
         this.game = game;
+        this._reachedLocations = [];
+        for (var row = 0; row < this.game.n; row++) {
+            this._reachedLocations.push([]);
+            for (var col = 0; col < this.game.n; col++) {
+                this._reachedLocations[row].push(false);
+            }
+        }
+    }
+
+    path(sourceLocation, targetLocation) {
+        this._setReached(sourceLocation, { parent: sourceLocation });
+        let nextElements = [sourceLocation];
+        var currentLocation;
+        while ((currentLocation = nextElements.shift()) !== undefined) {
+            if (this._locationsEqual(currentLocation, targetLocation)) {
+                return this._reachedToPath(currentLocation);
+            }
+            this._neighborLocations(currentLocation).forEach(neighbor => {
+                if (!this._getReached(neighbor)) {
+                    this._setReached(neighbor, { parent: currentLocation });
+                    nextElements.push(neighbor);
+                }
+            });
+        }
     }
 
     isReachable(sourceLocation, targetLocation) {
@@ -18,22 +42,21 @@ export default class Graph {
     }
 
     reachableLocations(sourceLocation) {
-        let reachedLocations = this._initReached();
-        this._setReached(sourceLocation, reachedLocations);
+        this._setReached(sourceLocation, true);
         let nextElements = [sourceLocation];
         var currentLocation;
         while ((currentLocation = nextElements.shift()) !== undefined) {
-            this._neighbors(currentLocation).forEach(neighbor => {
-                if (!this._hasReached(neighbor, reachedLocations)) {
-                    this._setReached(neighbor, reachedLocations);
+            this._neighborLocations(currentLocation).forEach(neighbor => {
+                if (!this._getReached(neighbor)) {
+                    this._setReached(neighbor, true);
                     nextElements.push(neighbor);
                 }
             });
         }
-        return this._reachedToArray(reachedLocations);
+        return this._reachedToArray();
     }
 
-    _neighbors(location) {
+    _neighborLocations(location) {
         let neighbors = [];
         let mazeCard = this.game.getMazeCard(location);
         let outPaths = this._outPaths(mazeCard);
@@ -87,19 +110,19 @@ export default class Graph {
         return reached;
     }
 
-    _hasReached(location, reachedLocations) {
-        return reachedLocations[location.row][location.column];
+    _getReached(location) {
+        return this._reachedLocations[location.row][location.column];
     }
 
-    _setReached(location, reachedLocations) {
-        reachedLocations[location.row][location.column] = true;
+    _setReached(location, value) {
+        this._reachedLocations[location.row][location.column] = value;
     }
 
-    _reachedToArray(reachedLocations) {
+    _reachedToArray() {
         let reached = [];
         for (var row = 0; row < this.game.n; row++) {
             for (var col = 0; col < this.game.n; col++) {
-                if (reachedLocations[row][col]) {
+                if (this._reachedLocations[row][col]) {
                     reached.push({
                         row: row,
                         column: col
@@ -108,5 +131,15 @@ export default class Graph {
             }
         }
         return reached;
+    }
+
+    _reachedToPath(location) {
+        let path = [location];
+        let current = location;
+        while (!this._locationsEqual(this._getReached(current).parent, current)) {
+            path.push(current);
+            current = this._getReached(current).parent;
+        }
+        return path.reverse();
     }
 }

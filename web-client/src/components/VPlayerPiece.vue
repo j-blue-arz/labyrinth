@@ -39,19 +39,19 @@ export default {
     props: {
         player: {
             type: Player,
-            require: true
+            required: true
         },
         xCenterPos: {
             type: Number,
-            require: true
+            required: true
         },
         yCenterPos: {
             type: Number,
-            require: true
+            required: true
         },
         maxSize: {
             type: Number,
-            require: true
+            required: true
         }
     },
     computed: {
