@@ -13,7 +13,7 @@ export default class Game {
         this.n = 7;
         this.mazeCards = [];
         this.leftoverMazeCard = {};
-        this._players = new Map();
+        this._players = [];
         this.nextAction = { playerId: 0, action: NO_ACTION };
         this.isLoading = false;
     }
@@ -75,21 +75,33 @@ export default class Game {
         }
     }
 
-    getPlayer(playerId) {
-        let player = this._players.get(playerId);
-        if (!player) {
-            throw new ValueError();
+    hasPlayer(playerId) {
+        for (let player of this._players) {
+            if (player.id === playerId) {
+                return true;
+            }
         }
-        return player;
+        return false;
+    }
+
+    getPlayer(playerId) {
+        for (let player of this._players) {
+            if (player.id === playerId) {
+                return player;
+            }
+        }
+        throw new ValueError();
     }
 
     addPlayer(player) {
-        this._players.set(player.id, player);
+        if (!this.hasPlayer(player.id)) {
+            this._players.push(player);
+        }
     }
 
     getComputerPlayers() {
         let result = [];
-        for (var player of this._players.values()) {
+        for (var player of this._players) {
             if (player.isComputer) {
                 result.push(player);
             }
@@ -98,7 +110,19 @@ export default class Game {
     }
 
     getPlayers() {
-        return Array.from(this._players.values());
+        return this._players;
+    }
+
+    deletePlayerById(playerId) {
+        let position = -1;
+        for (var index = 0; index < this._players.length; index++) {
+            if (this._players[index].id === playerId) {
+                position = index;
+            }
+        }
+        if (position > 0) {
+            this._players.splice(position, 1);
+        }
     }
 
     move(playerId, targetLocation) {
@@ -170,21 +194,22 @@ export default class Game {
 
         this._mazeCardsFromSortedApi(apiMazeCards);
         let remainingColors = [3, 2, 1, 0];
-        let toRemove = new Set(this._players.keys());
+        let toRemove = new Set(this._players.map(player => player.id));
         apiState.players.sort(function(p1, p2) {
             return p1.id - p2.id;
         });
         for (let index = 0; index < apiState.players.length; index++) {
             let apiPlayer = apiState.players[index];
             let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
-            let player = this._players.get(apiPlayer.id);
-            if (!player) {
+            let player;
+            if (this.hasPlayer(apiPlayer.id)) {
+                player = this.getPlayer(apiPlayer.id);
+                player.colorIndex = remainingColors.pop();
+            } else {
                 player = new Player(apiPlayer.id, remainingColors.pop());
                 if (userId === player.id) {
                     player.isUser = true;
                 }
-            } else {
-                player.colorIndex = remainingColors.pop();
             }
             player.mazeCard = playerCard;
             if (apiPlayer.isComputerPlayer) {
@@ -193,12 +218,14 @@ export default class Game {
             }
             player.turnAction = NO_ACTION;
             playerCard.addPlayer(player);
-            this.addPlayer(player);
             toRemove.delete(player.id);
+            if (!this.hasPlayer(player.id)) {
+                this.addPlayer(player);
+            }
         }
 
         for (let id of toRemove) {
-            this._players.delete(id);
+            this.deletePlayerById(id);
         }
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);

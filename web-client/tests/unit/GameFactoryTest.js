@@ -21,7 +21,7 @@ describe("GameFactory.createGame()", () => {
 
     it("creates a game with one player with id 0.", () => {
         let game = new GameFactory().createGame();
-        expect(game._players.size).toBe(1);
+        expect(game.getPlayers().length).toBe(1);
         expect(game.getPlayer(0)).toBeTruthy();
         expect(game.getPlayer(0).id).toBe(0);
     });
@@ -42,7 +42,7 @@ describe("GameFactory.createGame()", () => {
         it("creates three players with consistent consecutive ids", () => {
             let playerLocations = [loc(0, 0), loc(3, 4), loc(2, 5)];
             let game = new GameFactory(playerLocations).createGame();
-            expect(game._players.size).toBe(3);
+            expect(game.getPlayers().length).toBe(3);
             expect(game.getPlayer(0).id).toBe(0);
             expect(game.getPlayer(1).id).toBe(1);
             expect(game.getPlayer(2).id).toBe(2);

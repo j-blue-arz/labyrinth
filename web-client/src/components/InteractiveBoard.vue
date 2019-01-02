@@ -15,6 +15,7 @@
             :board-offset="boardOffset"
             :card-size="cardSize"
             :player="player"
+            :maze-card-id="player.mazeCard.id"
             :game="game"
         ></v-move-animation>
         <rect

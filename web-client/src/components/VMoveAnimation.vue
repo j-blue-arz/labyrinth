@@ -26,6 +26,10 @@ export default {
             type: Player,
             required: true
         },
+        mazeCardId: {
+            type: Number,
+            required: true
+        },
         cardSize: {
             type: Number,
             default: 100
@@ -42,7 +46,9 @@ export default {
         };
     },
     watch: {
-        mazeCard: function(newMazeCard, oldMazeCard) {
+        mazeCardId: function(newMazeCardId, oldMazeCardId) {
+            let newMazeCard = this.game.mazeCardById(newMazeCardId);
+            let oldMazeCard = this.game.mazeCardById(oldMazeCardId);
             if (newMazeCard && oldMazeCard) {
                 if (!this.isLeftover(newMazeCard)) {
                     let sourceLocation = oldMazeCard.location;
@@ -50,15 +56,13 @@ export default {
                     let graph = new Graph(this.game);
                     let locations = graph.path(sourceLocation, targetLocation);
                     this.path = locations.map(location => this.locationToPosition(location));
+                    this.correctLastSegment();
                     this.animatePath();
                 }
             }
         }
     },
     computed: {
-        mazeCard: function() {
-            return this.player.mazeCard;
-        },
         colorIndexClass: function() {
             return "move-animation__path--player-" + this.player.colorIndex;
         }
@@ -69,6 +73,14 @@ export default {
             setTimeout(() => {
                 this.isAnimating = false;
             }, 1400);
+        },
+        correctLastSegment: function() {
+            if (this.path.length > 1) {
+                let lastSegment = this.path[this.path.length - 1];
+                let secondLastSegment = this.path[this.path.length - 2];
+                lastSegment[0] = (3 * lastSegment[0] + secondLastSegment[0]) / 4;
+                lastSegment[1] = (3 * lastSegment[1] + secondLastSegment[1]) / 4;
+            }
         },
         locationToPosition: function(location) {
             let cardMidpoint = this.cardSize / 2;
@@ -86,8 +98,8 @@ export default {
 
 <style lang="scss">
 @mixin move-animation__path--final {
-    opacity: 0.8;
-    stroke-width: 8;
+    opacity: 0.85;
+    stroke-width: 9;
 }
 .move-animation {
     &__path {
