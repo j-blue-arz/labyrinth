@@ -25,6 +25,7 @@ export default class Graph {
                 }
             });
         }
+        return [];
     }
 
     isReachable(sourceLocation, targetLocation) {
@@ -134,6 +135,7 @@ export default class Graph {
     }
 
     _reachedToPath(location) {
+        console.log(this._reachedLocations);
         let path = [location];
         let current = location;
         while (!this._locationsEqual(this._getReached(current).parent, current)) {

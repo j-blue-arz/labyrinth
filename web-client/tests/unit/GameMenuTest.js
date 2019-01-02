@@ -31,7 +31,7 @@ const factory = function() {
         propsData: {
             api: new GameApi("foo"),
             game: mockGame,
-            playerId: 7
+            userPlayerId: 7
         }
     });
 };

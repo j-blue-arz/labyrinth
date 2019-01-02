@@ -5,14 +5,14 @@
             @insert-card="onInsertCard"
             :game="game"
             :card-size="cardSize"
-            :player-id="playerId"
+            :user-player-id="userPlayerId"
             ref="interactive-board"
         />
         <game-menu
             v-if="isUsingApi"
             :api="api"
             :game="game"
-            :player-id="playerId"
+            :user-player-id="userPlayerId"
             @called-api-method="startPolling"
         />
     </div>
@@ -49,7 +49,7 @@ export default {
         return {
             game: new Game(),
             cardSize: 100,
-            playerId: 0,
+            userPlayerId: 0,
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
         };
@@ -72,11 +72,11 @@ export default {
             } else {
                 this.game.shift(event.location);
                 this.game.nextAction.action = actions.MOVE_ACTION;
-                this.game.getPlayer(this.playerId).turnAction = actions.MOVE_ACTION;
+                this.game.getPlayer(this.userPlayerId).turnAction = actions.MOVE_ACTION;
             }
         },
         onMovePlayerPiece: function(targetLocation) {
-            this.game.move(this.playerId, targetLocation);
+            this.game.move(this.userPlayerId, targetLocation);
             if (this.useApi()) {
                 this.stopPolling();
                 this.api
@@ -85,7 +85,7 @@ export default {
                     .then(this.startPolling);
             } else {
                 this.game.nextAction.action = actions.SHIFT_ACTION;
-                this.game.getPlayer(this.playerId).turnAction = actions.SHIFT_ACTION;
+                this.game.getPlayer(this.userPlayerId).turnAction = actions.SHIFT_ACTION;
             }
         },
         handleError: function(error) {
@@ -114,14 +114,13 @@ export default {
                 .catch(this.handleError);
         },
         createGameFromApi: function(apiResponse) {
-            this.game.createFromApi(apiResponse.data, this.playerId);
+            this.game.createFromApi(apiResponse.data, this.userPlayerId);
         },
         addPlayer: function(apiResponse) {
-            this.playerId = parseInt(apiResponse.data);
-            this.api.playerId = this.playerId;
-            this.game.selfId = this.playerId;
+            this.userPlayerId = parseInt(apiResponse.data);
+            this.api.playerId = this.userPlayerId;
             if (this.useStorage()) {
-                sessionStorage.playerId = this.playerId;
+                sessionStorage.playerId = this.userPlayerId;
             }
         },
         useApi: function() {
@@ -140,8 +139,8 @@ export default {
             this.game = gameFactory.createGame();
         } else {
             if (this.useStorage() && sessionStorage.playerId) {
-                this.playerId = parseInt(sessionStorage.playerId);
-                this.api.playerId = this.playerId;
+                this.userPlayerId = parseInt(sessionStorage.playerId);
+                this.api.playerId = this.userPlayerId;
                 this.api
                     .fetchState()
                     .catch(error => {

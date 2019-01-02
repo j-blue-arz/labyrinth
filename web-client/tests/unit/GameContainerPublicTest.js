@@ -54,7 +54,7 @@ describe("GameContainer as web-client", () => {
         let gameContainer = factory();
         expect(mockAddPlayer).toHaveBeenCalledTimes(1);
         await flushPromises();
-        expect(gameContainer.vm.playerId).toBe(5);
+        expect(gameContainer.vm.userPlayerId).toBe(5);
     });
 
     it("sets leftover maze card according to fetched state.", async () => {

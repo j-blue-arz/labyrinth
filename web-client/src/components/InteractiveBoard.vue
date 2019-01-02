@@ -10,15 +10,17 @@
             :interactive-maze-cards="interactiveMazeCards"
         ></v-game-board>
         <v-move-animation
+            v-for="player in players"
+            :key="'player-' + player.id"
             :board-offset="boardOffset"
             :card-size="cardSize"
-            :player-id="playerId"
+            :player="player"
             :game="game"
         ></v-move-animation>
         <rect
             v-for="(insertPanel, itemIndex) in insertPanels"
             @click="onInsertPanelClick($event, itemIndex)"
-            :key="insertPanel.id"
+            :key="'panel-' + insertPanel.id"
             :x="xPos(insertPanel) + boardOffset"
             :y="yPos(insertPanel) + boardOffset"
             :height="cardSize"
@@ -66,7 +68,7 @@ export default {
             type: Number,
             required: true
         },
-        playerId: {
+        userPlayerId: {
             type: Number,
             required: true
         }
@@ -97,7 +99,7 @@ export default {
             if (!this.isMyTurnToMove() || this.game.isLoading) {
                 return new Set([]);
             } else {
-                let player = this.game.getPlayer(this.playerId);
+                let player = this.game.getPlayer(this.userPlayerId);
                 let pieceLocation = player.mazeCard.location;
                 let graph = new Graph(this.game);
                 let locations = graph.reachableLocations(pieceLocation);
@@ -106,9 +108,9 @@ export default {
         },
         isMyTurnToShift: function() {
             return (
-                this.game.nextAction.playerId === this.playerId &&
+                this.game.nextAction.playerId === this.userPlayerId &&
                 this.game.nextAction.action === action.SHIFT_ACTION &&
-                !this.game.getPlayer(this.playerId).isComputer
+                !this.game.getPlayer(this.userPlayerId).isComputer
             );
         },
         interactionSize: function() {
@@ -125,14 +127,17 @@ export default {
         },
         leftoverMazeCard: function() {
             return this.game.leftoverMazeCard;
+        },
+        players: function() {
+            return this.game.getPlayers();
         }
     },
     methods: {
         isMyTurnToMove: function() {
             return (
-                this.game.nextAction.playerId === this.playerId &&
+                this.game.nextAction.playerId === this.userPlayerId &&
                 this.game.nextAction.action === action.MOVE_ACTION &&
-                !this.game.getPlayer(this.playerId).isComputer
+                !this.game.getPlayer(this.userPlayerId).isComputer
             );
         },
         xPos(location) {
@@ -164,7 +169,10 @@ export default {
             }
         },
         onMazeCardClick: function(mazeCard) {
-            if (this.isMyTurnToMove && this.game.isMoveValid(this.playerId, mazeCard.location)) {
+            if (
+                this.isMyTurnToMove &&
+                this.game.isMoveValid(this.userPlayerId, mazeCard.location)
+            ) {
                 this.$emit("move-piece", mazeCard.location);
             }
         },

@@ -22,7 +22,7 @@ export default {
         game: {
             require: true
         },
-        playerId: {
+        userPlayerId: {
             type: Number,
             require: true
         }
@@ -51,7 +51,7 @@ export default {
         replaceByComputer: function() {
             this.menuIsVisible = false;
             this.api
-                .replacePlayer(this.playerId, "exhaustive-single")
+                .replacePlayer(this.userPlayerId, "exhaustive-single")
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },

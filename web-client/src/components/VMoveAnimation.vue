@@ -13,6 +13,7 @@
 <script>
 import Game from "@/model/game.js";
 import Graph from "@/model/mazeAlgorithm.js";
+import Player from "@/model/player.js";
 
 export default {
     name: "v-move-animation",
@@ -21,8 +22,8 @@ export default {
             type: Game,
             required: true
         },
-        playerId: {
-            type: Number,
+        player: {
+            type: Player,
             required: true
         },
         cardSize: {
@@ -43,13 +44,9 @@ export default {
     watch: {
         mazeCard: function(newMazeCard, oldMazeCard) {
             if (newMazeCard && oldMazeCard) {
-                if (!this.isLeftover(oldMazeCard)) {
+                if (!this.isLeftover(newMazeCard)) {
                     let sourceLocation = oldMazeCard.location;
                     let targetLocation = newMazeCard.location;
-                    console.log(sourceLocation.row);
-                    console.log(sourceLocation.column);
-                    console.log(targetLocation.row);
-                    console.log(targetLocation.column);
                     let graph = new Graph(this.game);
                     let locations = graph.path(sourceLocation, targetLocation);
                     this.path = locations.map(location => this.locationToPosition(location));
@@ -60,10 +57,10 @@ export default {
     },
     computed: {
         mazeCard: function() {
-            return this.game.getPlayer(this.playerId).mazeCard;
+            return this.player.mazeCard;
         },
         colorIndexClass: function() {
-            return "move-animation__path--player-" + this.game.getPlayer(this.playerId).colorIndex;
+            return "move-animation__path--player-" + this.player.colorIndex;
         }
     },
     methods: {

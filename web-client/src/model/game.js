@@ -97,6 +97,10 @@ export default class Game {
         return result;
     }
 
+    getPlayers() {
+        return Array.from(this._players.values());
+    }
+
     move(playerId, targetLocation) {
         var player = this.getPlayer(playerId);
         var targetMazeCard = this.getMazeCard(targetLocation);

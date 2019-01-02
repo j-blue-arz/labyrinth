@@ -12,7 +12,7 @@ const shallowFactory = function(state = API_STATE) {
         propsData: {
             game: game,
             cardSize: 100,
-            playerId: 5
+            userPlayerId: 5
         }
     });
 };
@@ -24,7 +24,7 @@ const factory = function(state = API_STATE) {
         propsData: {
             game: game,
             cardSize: 100,
-            playerId: 5
+            userPlayerId: 5
         }
     });
 };

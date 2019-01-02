@@ -5,7 +5,7 @@
             :xCenterPos="pieceCenters[index].x"
             :yCenterPos="pieceCenters[index].y"
             :maxSize="pieceSize"
-            :key="player.id"
+            :key="'piece-' + player.id"
             :player="player"
         />
     </g>

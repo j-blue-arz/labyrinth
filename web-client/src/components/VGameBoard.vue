@@ -15,7 +15,7 @@
                 v-for="mazeCard in mazeCards"
                 @click.native="onMazeCardClick($event, mazeCard)"
                 :maze-card="mazeCard"
-                :key="mazeCard.id"
+                :key="'mazeCard-' + mazeCard.id"
                 :card-size="cardSize"
                 :xPos="xPos(mazeCard.location) + borderWidth"
                 :yPos="yPos(mazeCard.location) + borderWidth"
