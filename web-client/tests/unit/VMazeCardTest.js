@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 import Player from "@/model/player.js";
 
 const wrapperFactory = (

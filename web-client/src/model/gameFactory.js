@@ -1,5 +1,5 @@
 import Game, { SHIFT_ACTION } from "@/model/game.js";
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 import Player from "@/model/player.js";
 
 export default class GameFactory {

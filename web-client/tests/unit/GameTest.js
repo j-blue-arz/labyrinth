@@ -1,5 +1,5 @@
 import Game from "@/model/game";
-import MazeCard from "@/model/mazecard";
+import MazeCard from "@/model/mazeCard";
 import Player from "@/model/player";
 import ValueError from "@/util/exceptions";
 import { assertConsistentLocation, loc } from "./testutils.js";

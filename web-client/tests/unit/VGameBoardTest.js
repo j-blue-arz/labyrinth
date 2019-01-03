@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 
 const mazeCardListFactory = function(n) {
     var mazeCards = [];

@@ -1,5 +1,5 @@
 import Vue from "vue";
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 import Player from "@/model/player.js";
 import Graph from "@/model/mazeAlgorithm.js";
 import ValueError from "@/util/exceptions";

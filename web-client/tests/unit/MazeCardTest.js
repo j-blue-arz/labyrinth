@@ -1,4 +1,4 @@
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 
 var hasValidState = function(mazeCard) {
     return (

@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
 import { TweenLite, Power3 } from "gsap";

@@ -48,7 +48,7 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
 import Game, * as action from "@/model/game.js";
-import MazeCard from "@/model/mazecard.js";
+import MazeCard from "@/model/mazeCard.js";
 import Graph from "@/model/mazeAlgorithm.js";
 
 export default {
