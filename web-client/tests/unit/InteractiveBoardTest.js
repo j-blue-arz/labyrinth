@@ -5,9 +5,7 @@ import { copyObjectStructure } from "./testutils.js";
 import Game from "@/model/game.js";
 import { loc } from "./testutils.js";
 
-const shallowFactory = function(state = API_STATE) {
-    let game = new Game();
-    game.createFromApi(state, 5);
+const shallowFactory = function(game) {
     return shallowMount(InteractiveBoard, {
         propsData: {
             game: game,
@@ -17,9 +15,7 @@ const shallowFactory = function(state = API_STATE) {
     });
 };
 
-const factory = function(state = API_STATE) {
-    let game = new Game();
-    game.createFromApi(state, 5);
+const factory = function(game) {
     return mount(InteractiveBoard, {
         propsData: {
             game: game,
@@ -29,21 +25,25 @@ const factory = function(state = API_STATE) {
     });
 };
 
-function stateWithShiftAction() {
+function fromStateWithShiftAction() {
     let stateCopy = copyObjectStructure(API_STATE);
     stateCopy.nextAction.action = "SHIFT";
-    return stateCopy;
+    let game = new Game();
+    game.createFromApi(stateCopy, 5);
+    return game;
 }
 
-function stateWithMoveAction() {
+function fromStateWithMoveAction() {
     let stateCopy = copyObjectStructure(API_STATE);
     stateCopy.nextAction.action = "MOVE";
-    return stateCopy;
+    let game = new Game();
+    game.createFromApi(stateCopy, 5);
+    return game;
 }
 
 describe("InteractiveBoard", () => {
     it("rotates leftover maze card when clicked", () => {
-        let board = shallowFactory(stateWithShiftAction());
+        let board = shallowFactory(fromStateWithShiftAction());
         const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         let oldRotation = leftoverVMazeCard.props().mazeCard.rotation;
@@ -54,7 +54,7 @@ describe("InteractiveBoard", () => {
     });
 
     it("does not rotate leftover maze card when next action is move", () => {
-        let board = shallowFactory(stateWithMoveAction());
+        let board = shallowFactory(fromStateWithMoveAction());
         const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         leftoverVMazeCard.trigger("click");
@@ -62,19 +62,19 @@ describe("InteractiveBoard", () => {
     });
 
     it("assigns class 'interaction' on leftover maze card if next action is shift.", () => {
-        let board = shallowFactory(stateWithShiftAction());
+        let board = shallowFactory(fromStateWithShiftAction());
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         expect(leftoverVMazeCard.classes()).toContain("interaction");
     });
 
     it("removes class 'interaction' on leftover maze card if next action is move.", () => {
-        let board = shallowFactory(stateWithMoveAction());
+        let board = shallowFactory(fromStateWithMoveAction());
         let leftoverVMazeCard = board.find({ ref: "leftover" });
         expect(leftoverVMazeCard.classes()).not.toContain("interaction");
     });
 
     it("sets interaction class on reachable maze cards", () => {
-        let board = factory(stateWithMoveAction());
+        let board = factory(fromStateWithMoveAction());
         let game = board.props().game;
         let reachableCardLocations = [loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)];
         let reachableCardIds = reachableCardLocations.map(
@@ -87,30 +87,60 @@ describe("InteractiveBoard", () => {
     });
 
     it("does not set interaction class if shift is required", () => {
-        let board = factory(stateWithShiftAction());
+        let board = factory(fromStateWithShiftAction());
         let interactiveCardIds = fetchInteractiveCardIds(board);
         expect(interactiveCardIds.length).toBe(1); // leftover
     });
 
     it("emits 'move-piece' event when maze card is clicked", () => {
-        let board = shallowFactory(stateWithMoveAction());
+        let board = shallowFactory(fromStateWithMoveAction());
         let clickedMazeCard = board.props().game.mazeCards[0][2];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeTruthy();
     });
 
     it("does not emit 'move-piece' event if shift is required", () => {
-        let board = shallowFactory(stateWithShiftAction());
+        let board = shallowFactory(fromStateWithShiftAction());
         let clickedMazeCard = board.props().game.mazeCards[0][2];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeFalsy();
     });
 
     it("does not emit 'move-piece' event if clicked maze card is not reachable", () => {
-        let board = shallowFactory(stateWithShiftAction());
+        let board = shallowFactory(fromStateWithShiftAction());
         let clickedMazeCard = board.props().game.mazeCards[0][0];
         board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(board.emitted("move-piece")).toBeFalsy();
+    });
+
+    it("sets interaction class on insert panels if shift is required", () => {
+        let board = shallowFactory(fromStateWithShiftAction());
+        let insertPanels = board.findAll(".insert-location");
+        expect(insertPanels.is(".insert-location--interaction")).toBe(true);
+    });
+
+    it("does not set interaction class on insert panels if move is required", () => {
+        let board = shallowFactory(fromStateWithMoveAction());
+        let insertPanels = board.findAll(".insert-location");
+        let insertPanelsWithInteraction = insertPanels.filter(panel =>
+            panel.classes(".insert-location--interaction")
+        );
+        expect(insertPanelsWithInteraction.length).toBe(0);
+    });
+
+    it("enables all insert panels but the one which is disabled in game props instance", () => {
+        let game = fromStateWithShiftAction();
+        game.disabledInsertLocation = {
+            row: 0,
+            column: 1
+        };
+        let board = shallowFactory(game);
+        let disabledPanels = board.findAll(".insert-location--disabled");
+        expect(disabledPanels.length).toBe(1);
+        let xPos = Number.parseInt(disabledPanels.at(0).attributes("x"));
+        let yPos = Number.parseInt(disabledPanels.at(0).attributes("y"));
+        expect(xPos).toBe(2 * 100);
+        expect(yPos).toBe(0 * 100);
     });
 });
 

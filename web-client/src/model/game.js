@@ -16,6 +16,7 @@ export default class Game {
         this._players = [];
         this.nextAction = { playerId: 0, action: NO_ACTION };
         this.isLoading = false;
+        this.disabledInsertLocation = false;
     }
 
     mazeCardsAsList() {

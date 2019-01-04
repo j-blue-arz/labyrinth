@@ -19,15 +19,15 @@
             :game="game"
         ></v-move-animation>
         <rect
-            v-for="(insertPanel, itemIndex) in insertPanels"
-            @click="onInsertPanelClick($event, itemIndex)"
+            v-for="insertPanel in insertPanels"
+            @click="onInsertPanelClick($event, insertPanel)"
             :key="'panel-' + insertPanel.id"
-            :x="xPos(insertPanel) + boardOffset"
-            :y="yPos(insertPanel) + boardOffset"
+            :x="xPos(insertPanel.displayLocation) + boardOffset"
+            :y="yPos(insertPanel.displayLocation) + boardOffset"
             :height="cardSize"
             :width="cardSize"
-            class="interactive-board__insert-location"
-            :class="{interaction: isMyTurnToShift}"
+            class="insert-location"
+            :class="insertPanelClass(insertPanel)"
         ></rect>
         <v-maze-card
             @click.native="onLeftoverClick"
@@ -76,21 +76,14 @@ export default {
     },
     data() {
         return {
-            insertPanels: [
-                { id: 0, row: -1, column: 1 },
-                { id: 1, row: -1, column: 3 },
-                { id: 2, row: -1, column: 5 },
-                { id: 3, row: this.game.n, column: 1 },
-                { id: 4, row: this.game.n, column: 3 },
-                { id: 5, row: this.game.n, column: 5 },
-                { id: 6, row: 1, column: -1 },
-                { id: 7, row: 3, column: -1 },
-                { id: 8, row: 5, column: -1 },
-                { id: 9, row: 1, column: this.game.n },
-                { id: 10, row: 3, column: this.game.n },
-                { id: 11, row: 5, column: this.game.n }
-            ]
+            insertPanels: []
         };
+    },
+    watch: {
+        disabledInsertLocation: function() {
+            console.log("called");
+            this.updateDisabledInsertLocation();
+        }
     },
     computed: {
         mazeSize: function() {
@@ -131,6 +124,9 @@ export default {
         },
         players: function() {
             return this.game.getPlayers();
+        },
+        disabledInsertLocation: function() {
+            return this.game.disabledInsertLocation;
         }
     },
     methods: {
@@ -147,23 +143,10 @@ export default {
         yPos(location) {
             return this.cardSize * location.row;
         },
-        toInsidePosition(maybeOutside) {
-            if (maybeOutside === -1) {
-                return 0;
-            }
-            if (maybeOutside === this.mazeSize) {
-                return this.mazeSize - 1;
-            }
-            return maybeOutside;
-        },
-        onInsertPanelClick: function(event, itemIndex) {
-            if (this.isMyTurnToShift) {
-                let insertPanel = this.insertPanels[itemIndex];
+        onInsertPanelClick: function(event, insertPanel) {
+            if (this.isMyTurnToShift && insertPanel.enabled) {
                 let insertEvent = {
-                    location: {
-                        row: this.toInsidePosition(insertPanel.row),
-                        column: this.toInsidePosition(insertPanel.column)
-                    },
+                    location: insertPanel.insertLocation,
                     leftoverRotation: this.leftoverMazeCard.rotation
                 };
                 this.$emit("insert-card", insertEvent);
@@ -181,7 +164,61 @@ export default {
             if (this.isMyTurnToShift) {
                 this.leftoverMazeCard.rotateClockwise();
             }
+        },
+        locationsEqual(locA, locB) {
+            return locA && locB && locA.row === locB.row && locA.column === locB.column;
+        },
+        updateDisabledInsertLocation: function() {
+            let disabledInsertLocation = this.game.disabledInsertLocation;
+            for (var insertPanel of this.insertPanels) {
+                if (this.locationsEqual(insertPanel.insertLocation, disabledInsertLocation)) {
+                    insertPanel.enabled = false;
+                } else {
+                    insertPanel.enabled = true;
+                }
+            }
+        },
+        inside: function(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        },
+        panelToInsertLocation: function(location) {
+            return {
+                row: this.inside(location.row, 0, this.mazeSize - 1),
+                column: this.inside(location.column, 0, this.mazeSize - 1)
+            };
+        },
+        createInsertPanel: function(id, row, column) {
+            let displayLocation = {
+                row: row,
+                column: column
+            };
+            return {
+                id: id,
+                displayLocation: displayLocation,
+                insertLocation: this.panelToInsertLocation(displayLocation),
+                enabled: true
+            };
+        },
+        insertPanelClass: function(insertPanel) {
+            if (insertPanel.enabled) {
+                if (this.isMyTurnToShift) {
+                    return ["insert-location--enabled", "insert-location--interaction"];
+                }
+                return "insert-location--enabled";
+            } else {
+                return "insert-location--disabled";
+            }
         }
+    },
+    created: function() {
+        let id = 0;
+        for (var position of [1, 3, 5]) {
+            this.insertPanels.push(this.createInsertPanel(id++, -1, position));
+            this.insertPanels.push(this.createInsertPanel(id++, position, -1));
+            this.insertPanels.push(this.createInsertPanel(id++, this.game.n, position));
+            this.insertPanels.push(this.createInsertPanel(id++, position, this.game.n));
+        }
+        this.updateDisabledInsertLocation();
     }
 };
 </script>
@@ -193,19 +230,20 @@ export default {
     max-height: 100%;
     max-width: 100%;
     height: 100%;
-    &__insert-location {
-        transition: all 0.2s;
-        &:not(.interaction) {
-            fill: black;
-            opacity: 0.2;
-        }
+}
 
-        &.interaction {
-            opacity: 0.3;
-            cursor: pointer;
-            &:hover {
-                fill: blue;
-            }
+.insert-location {
+    transition: all 0.2s;
+    &:not(&--interaction) {
+        fill: black;
+        opacity: 0.2;
+    }
+
+    &--interaction {
+        opacity: 0.3;
+        cursor: pointer;
+        &:hover {
+            fill: blue;
         }
     }
 }
