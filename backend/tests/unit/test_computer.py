@@ -49,8 +49,11 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
     """
     board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
     piece = board.create_piece()
+    game = MagicMock()
+    type(game).identifier = PropertyMock(return_value=7)
+    game.get_enabled_shift_locations.return_value = board.insert_locations
     player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
-                            game=None, identifier=9, board=board, piece=piece)
+                            game=game, identifier=9, board=board, piece=piece)
     player.run()
     algorithm_start.assert_called_once()
     post_shift.assert_called_once()
@@ -70,7 +73,9 @@ def test_random_actions_algorithm_computes_valid_actions():
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        algorithm = RandomActionsAlgorithm(board, piece)
+        game = MagicMock()
+        game.get_enabled_shift_locations.return_value = board.insert_locations
+        algorithm = RandomActionsAlgorithm(board, piece, game)
         assert algorithm.shift_action is None
         assert algorithm.move_action is None
         algorithm.run()
@@ -103,7 +108,9 @@ def test_random_actions_algorithm_should_have_different_results():
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        algorithm = RandomActionsAlgorithm(board, piece)
+        game = MagicMock()
+        game.get_enabled_shift_locations.return_value = board.insert_locations
+        algorithm = RandomActionsAlgorithm(board, piece, game)
         algorithm.run()
         move_locations.add(algorithm.move_action)
     assert BoardLocation(2, 1) in move_locations
@@ -124,8 +131,10 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
+    game = MagicMock()
+    game.get_enabled_shift_locations.return_value = board.insert_locations
     player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
-                            game=None, identifier=9, board=board, piece=piece)
+                            game=game, identifier=9, board=board, piece=piece)
     for _ in range(100):
         player.run()
         insert_location, _ = post_shift.call_args[0]
@@ -139,7 +148,7 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
         assert move_location in allowed_moves
 
 
-def test_random_actions_algorithm_should_obey_no_pushback_rule():
+def test_random_actions_algorithm_should_respect_no_pushback_rule():
     """ Runs algorithm 50 times and checks that none of the computed shifts reverts the previous shift action """
 
     orig_board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
@@ -150,10 +159,36 @@ def test_random_actions_algorithm_should_obey_no_pushback_rule():
         piece.maze_card = maze[BoardLocation(0, 0)]
         game = Game(0, board=orig_board)
         game.previous_shift_location = BoardLocation(0, 3)
-        algorithm = RandomActionsAlgorithm(board, piece, game.get_enabled_shift_locations())
+        algorithm = RandomActionsAlgorithm(board, piece, game)
         algorithm.run()
         insert_location, _ = algorithm.shift_action
         assert insert_location != BoardLocation(6, 3)
+
+
+@patch('time.sleep', return_value=None)
+@patch.object(RandomActionsAlgorithm, "start", autospec=True, side_effect=RandomActionsAlgorithm.run)
+@patch.object(ComputerPlayer, "_post_shift")
+@patch.object(ComputerPlayer, "_post_move")
+def test_computer_player_random_algorith_respects_no_pushback_rule(post_move, post_shift, algorithm_start, time_sleep):
+    """ Tests case where a previous shift cannot be reversed
+    Runs algorithm 100 times. No shift should reverse previous shift.
+    .start() is patched so that the algorithm runs sequentially.
+    This test recreates a bug, where the algorithm was not informed of the previous shift,
+    leading to invalid shift actions.
+    """
+    board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    piece = board.create_piece()
+    previous_shift_location = BoardLocation(6, 1)
+    game = MagicMock()
+    game.get_enabled_shift_locations.return_value = board.insert_locations.difference({previous_shift_location})
+    type(game).identifier = PropertyMock(return_value=7)
+    piece.maze_card = board.maze[BoardLocation(3, 6)]
+    player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
+                            game=game, identifier=9, board=board, piece=piece)
+    for _ in range(100):
+        player.run()
+        insert_location, _ = post_shift.call_args[0]
+        assert insert_location != BoardLocation(6, 1)
 
 
 MAZE_STRING = """

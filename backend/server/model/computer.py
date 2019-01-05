@@ -57,7 +57,7 @@ class ComputerPlayer(Player, Thread):
     def run(self):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        algorithm = self.algorithm(board, piece)
+        algorithm = self.algorithm(board, piece, self._game)
         algorithm.start()
         time.sleep(self._SECONDS_TO_ANSWER)
         shift_action = algorithm.shift_action
@@ -67,7 +67,7 @@ class ComputerPlayer(Player, Thread):
             algorithm.abort_search()
             board = copy.deepcopy(self._board)
             piece = self._find_equal_piece(board)
-            fallback_algorithm = RandomActionsAlgorithm(board, piece, self._game.get_enabled_shift_locations())
+            fallback_algorithm = RandomActionsAlgorithm(board, piece, self._game)
             # Calling run directly, so that fallback waits for algorithm to finish before posting actions
             fallback_algorithm.run()
             shift_action = fallback_algorithm.shift_action
@@ -104,17 +104,14 @@ class RandomActionsAlgorithm(Thread):
 
     SHORT_NAME = "random"
 
-    def __init__(self, board, piece, enabled_shift_locations=None):
+    def __init__(self, board, piece, game):
         super().__init__()
         self._board = board
         self._maze = board.maze
         self._piece = piece
         self._shift_action = None
         self._move_action = None
-        if enabled_shift_locations:
-            self._enabled_shift_locations = enabled_shift_locations
-        else:
-            self._enabled_shift_locations = self._board.insert_locations
+        self._enabled_shift_locations = game.get_enabled_shift_locations()
 
     @property
     def shift_action(self):
@@ -145,8 +142,8 @@ class ExhaustiveSearchAlgorithm(Thread, Optimizer):
     abort_search() is already implemented in superclass, Optimizer. """
     SHORT_NAME = "exhaustive-single"
 
-    def __init__(self, board, piece):
-        Optimizer.__init__(self, board, piece)
+    def __init__(self, board, piece, game):
+        Optimizer.__init__(self, board, piece, game.previous_shift_location)
         Thread.__init__(self)
         self._shift_action = None
         self._move_action = None
