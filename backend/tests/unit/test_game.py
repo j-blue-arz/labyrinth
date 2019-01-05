@@ -57,7 +57,7 @@ def test_change_player_calls_constructor_with_correct_arguments(mock_player_clas
     board = game.get_player(player_id).board
     game.change_player(player_id, mock_player_class, param_name="value")
     mock_player_class.assert_called_once_with(
-        identifier=player_id, game_identifier=7, param_name="value", piece=piece, board=board)
+        identifier=player_id, game=game, param_name="value", piece=piece, board=board)
 
 
 def test_change_player_keeps_id_and_piece_of_existing_player():
@@ -109,7 +109,7 @@ def test_add_player_calls_constructor_with_correct_arguments(mock_player_class):
     game.add_player(mock_player_class, param_name="value")
     mock_player_class.assert_called_once()
     assert mock_player_class.call_args[0] == ()
-    assert mock_player_class.call_args[1]["game_identifier"] == 7
+    assert mock_player_class.call_args[1]["game"] == game
     assert mock_player_class.call_args[1]["param_name"] == "value"
     assert "identifier" in mock_player_class.call_args[1]
 
@@ -167,3 +167,19 @@ def test_move_does_not_raise_error_after_shift():
     game.move(player_id, BoardLocation(0, 0))
     board.move.assert_called_once()
     turns.is_action_possible.assert_called_once_with(player, PlayerAction.MOVE_ACTION)
+
+def test_get_enabled_shift_locations_without_previous_shift():
+    """ Tests get_enabled_shift_locations where the previous shift is None """
+    board = Board()
+    game = Game(identifier=0, board=board)
+    enabled_shift_locations = game.get_enabled_shift_locations()
+    assert set(enabled_shift_locations) == set(board.insert_locations)
+
+def test_get_enabled_shift_locations_with_previous_shift():
+    """ Tests get_enabled_shift_locations where the previous shift is (3, 0) """
+    board = Board()
+    game = Game(identifier=0, board=board)
+    game.previous_shift_location = BoardLocation(3, 0)
+    expected_disabled = BoardLocation(3, board.maze.MAZE_SIZE - 1)
+    enabled_shift_locations = game.get_enabled_shift_locations()
+    assert expected_disabled not in enabled_shift_locations

@@ -5,7 +5,7 @@ which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
 from server.model.computer import ComputerPlayer
-from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location
+from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
 from .constants import *
 
 
@@ -20,6 +20,7 @@ def game_to_dto(game: Game):
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
     game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
+    game_dto[PREVIOUS_SHIFT_LOCATION] = _board_location_to_dto(game.previous_shift_location)
     return game_dto
 
 
@@ -43,11 +44,14 @@ def dto_to_game(game_dto):
         maze_card_by_id[maze_card.identifier] = maze_card
     objective_maze_card = maze_card_by_id[game_dto[OBJECTIVE]]
     board = Board(maze, leftover_card, objective_maze_card=objective_maze_card)
-    players = [_dto_to_player(player_dto, 0, board, maze_card_by_id)
+    players = [_dto_to_player(player_dto, None, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
     turns = _dto_to_turns(game_dto[NEXT_ACTION], players)
     game = Game(0, board=board, players=players, turns=turns)
+    for player in players:
+        player._game = game
+    game.previous_shift_location = _dto_to_board_location(game_dto[PREVIOUS_SHIFT_LOCATION])
     return game
 
 
@@ -78,7 +82,7 @@ def _turns_to_next_action_dto(turns: Turns):
             ACTION: player_action.action}
 
 
-def _dto_to_player(player_dto, game_id, board, maze_card_dict):
+def _dto_to_player(player_dto, game, board, maze_card_dict):
     """ maps a DTO to a Player
 
     :param player: a dictionary representing game's (sub-)structure of a player,
@@ -93,12 +97,12 @@ def _dto_to_player(player_dto, game_id, board, maze_card_dict):
         player = ComputerPlayer(
             algorithm_name=player_dto[ALGORITHM],
             identifier=player_dto[ID],
-            game_identifier=game_id,
+            game=game,
             shift_url=player_dto[SHIFT_URL],
             move_url=player_dto[MOVE_URL],
             piece=piece)
     else:
-        player = Player(identifier=player_dto[ID], game_identifier=game_id, piece=piece)
+        player = Player(identifier=player_dto[ID], game=game, piece=piece)
     player._board = board
     return player
 

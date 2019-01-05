@@ -12,6 +12,7 @@ def _create_test_game():
     """ Creates a Game instance,
     returns this instance and one of the player's identifier """
     game = create_game()
+    game.previous_shift_location = BoardLocation(0, 1)
     game.add_player(Player)
     game.add_player(Player)
     game.add_player(ComputerPlayer, algorithm_name="random", shift_url="shift-url",
@@ -85,6 +86,16 @@ def test_mapping_objectives():
     game_dto = mapper.player_state_to_dto(game)
     assert mapper.OBJECTIVE in game_dto
     assert game_dto[mapper.OBJECTIVE] == game.board.objective_maze_card.identifier
+
+def test_mapping_enabled_shift_loctions():
+    """ Tests correct mapping of enabled shift loctions """
+    game = _create_test_game()
+    game_dto = mapper.player_state_to_dto(game)
+    assert mapper.ENABLED_SHIFT_LOCATIONS in game_dto
+    assert len(game_dto[mapper.ENABLED_SHIFT_LOCATIONS]) == 11
+    for enabled_shift_location in game_dto[mapper.ENABLED_SHIFT_LOCATIONS]:
+        assert mapper.ROW in enabled_shift_location
+        assert mapper.COLUMN in enabled_shift_location
 
 
 def test_dto_to_shift_action():

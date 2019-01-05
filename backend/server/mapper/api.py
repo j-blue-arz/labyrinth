@@ -23,6 +23,7 @@ def player_state_to_dto(game: Game):
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
     game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_player_action_dto(game.turns)
+    game_dto[ENABLED_SHIFT_LOCATIONS] = _enabled_shift_locations_to_dto(game)
     return game_dto
 
 
@@ -117,3 +118,9 @@ def _turns_to_next_player_action_dto(turns: Turns):
         return None
     return {PLAYER_ID: next_player_action.player.identifier,
             ACTION: next_player_action.action}
+
+def _enabled_shift_locations_to_dto(game: Game):
+    """ Maps the shift locations of the Board without the previous shift location of Game
+    to a DTO.
+    """
+    return list(map(_board_location_to_dto, game.get_enabled_shift_locations()))

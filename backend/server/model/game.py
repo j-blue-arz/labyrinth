@@ -162,12 +162,6 @@ class Maze:
 
     def __init__(self):
         self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
-        self.insert_locations = set()
-        for position in range(1, Maze.MAZE_SIZE, 2):
-            self.insert_locations.add(BoardLocation(0, position))
-            self.insert_locations.add(BoardLocation(position, 0))
-            self.insert_locations.add(BoardLocation(Maze.MAZE_SIZE - 1, position))
-            self.insert_locations.add(BoardLocation(position, Maze.MAZE_SIZE - 1))
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -278,15 +272,13 @@ class Maze:
 
     def _validate_insert_location(self, insert_location):
         self._validate_location(insert_location)
-        if insert_location not in self.insert_locations:
-            raise exceptions.InvalidShiftLocationException(
-                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
 
 
 class Board:
     """
     The board state of a game of labyrinth.
     """
+
     def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
         if not maze:
@@ -304,6 +296,12 @@ class Board:
             BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
             BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
         self.validate_moves = True
+        self.insert_locations = set()
+        for position in range(1, Maze.MAZE_SIZE, 2):
+            self.insert_locations.add(BoardLocation(0, position))
+            self.insert_locations.add(BoardLocation(position, 0))
+            self.insert_locations.add(BoardLocation(Maze.MAZE_SIZE - 1, position))
+            self.insert_locations.add(BoardLocation(position, Maze.MAZE_SIZE - 1))
 
     @property
     def leftover_card(self):
@@ -355,6 +353,7 @@ class Board:
 
     def shift(self, new_leftover_location, leftover_rotation):
         """ Performs a shifting action """
+        self._validate_insert_location(new_leftover_location)
         self._leftover_card.rotation = leftover_rotation
         pushed_card = self._leftover_card
         self._leftover_card = self._maze.shift(new_leftover_location, self._leftover_card)
@@ -372,11 +371,28 @@ class Board:
             return True
         return False
 
+    def opposing_insert_location(self, insert_location):
+        """ Returns the insert location directly opposite of the given location """
+        row, column = insert_location.row, insert_location.column
+        limit = self.maze.MAZE_SIZE - 1
+        borders = {0, limit}
+        if row in borders:
+            return BoardLocation(limit - row, column)
+        if column in borders:
+            return BoardLocation(row, limit - column)
+        raise exceptions.InvalidStateException("Location {} is not on the border".format(insert_location))
+
+
     def _validate_move_location(self, piece_location, target_location):
         if self.validate_moves:
             if not Graph(self._maze).is_reachable(piece_location, target_location):
                 raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
                     piece_location, target_location))
+
+    def _validate_insert_location(self, insert_location):
+        if insert_location not in self.insert_locations:
+            raise exceptions.InvalidShiftLocationException(
+                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
@@ -400,11 +416,11 @@ class Board:
 class Player:
     """ This class represents a player playing a game """
 
-    def __init__(self, identifier=None, game_identifier=None, piece=None, board=None):
+    def __init__(self, identifier=None, game=None, piece=None, board=None):
         self._id = identifier
         self._board = board
         self._piece = piece
-        self._game_id = game_identifier
+        self._game = game
 
     @property
     def piece(self):
@@ -585,6 +601,7 @@ class Game:
             self._turns = turns
         else:
             self._turns = Turns()
+        self.previous_shift_location = None
 
     @property
     def turns(self):
@@ -616,7 +633,7 @@ class Game:
         if len(self._players) >= self.MAX_PLAYERS:
             raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
         next_id = max([player.identifier for player in self._players], default=0) + 1
-        player = player_class(identifier=next_id, game_identifier=self._id, **player_class_kwargs)
+        player = player_class(identifier=next_id, game=self, **player_class_kwargs)
         player.set_board(self._board)
         player.register_in_turns(self._turns)
         self._players.append(player)
@@ -655,7 +672,7 @@ class Game:
         :param player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
         """
         old_player = self.get_player(player_id)
-        new_player = player_class(identifier=player_id, game_identifier=self._id,
+        new_player = player_class(identifier=player_id, game=self,
                                   piece=old_player.piece, board=old_player.board, **player_class_kwargs)
         self.players[self.players.index(old_player)] = new_player
         self.start_game()
@@ -675,7 +692,9 @@ class Game:
         """
         player = self.get_player(player_id)
         if self._turns.is_action_possible(player, PlayerAction.SHIFT_ACTION):
+            self._validate_pushback_rule(new_leftover_location)
             self._board.shift(new_leftover_location, leftover_rotation)
+        self.previous_shift_location = new_leftover_location
         self._turns.perform_action(player, PlayerAction.SHIFT_ACTION)
 
     def move(self, player_id, target_location):
@@ -688,3 +707,23 @@ class Game:
         if self._turns.is_action_possible(player, PlayerAction.MOVE_ACTION):
             self._board.move(player.piece, target_location)
         self._turns.perform_action(player, PlayerAction.MOVE_ACTION)
+
+    def get_enabled_shift_locations(self):
+        """ Returns all currently enabled shift locations.
+        These are the shift locations of the board, without the shift location of the previous turn
+        """
+        opposing_shift_location = None
+        if self.previous_shift_location:
+            opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
+        return self.board.insert_locations.difference({opposing_shift_location})
+
+    def _validate_pushback_rule(self, shift_location):
+        """ Checks if the requested shift location is different to the shift location of the previous turn
+        Throws exception if this rule is violated
+        """
+        opposing_shift_location = None
+        if self.previous_shift_location:
+            opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
+        if shift_location == opposing_shift_location:
+            raise exceptions.InvalidShiftLocationException(
+                "Location {} is not shiftable (no-pushback rule)".format(str(shift_location)))

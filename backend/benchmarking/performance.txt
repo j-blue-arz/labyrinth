@@ -1,3 +1,28 @@
+Test case d1-direct-path                 resulted in actions [((5, 6), 0), (6, 2)]
+Test case d1-shift-req                   resulted in actions [((1, 6), 0), (0, 3)]
+Test case d2-two-shifts                  resulted in actions [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
+Test case d2-self-push-out               resulted in actions [((0, 1), 0), (0, 5), ((6, 5), 90), (6, 6)]
+Test case d2-pushback-violation          resulted in actions [((0, 1), 180), (0, 1), ((6, 1), 90), (6, 0)]
+Test case d2-long-running                resulted in actions [((0, 5), 0), (3, 0), ((3, 6), 0), (1, 5)]
+Test case d3-obj-push-out                resulted in actions [((0, 1), 0), (0, 6), ((0, 1), 0), (0, 6), ((1, 6), 0), (1, 6)]
+Test case d3-long-running                resulted in actions [((0, 1), 0), (4, 6), ((3, 6), 0), (3, 6), ((3, 0), 0), (2, 1)]
+Test case d3-generated-8s                resulted in actions [((0, 1), 90), (1, 4), ((1, 6), 0), (1, 3), ((6, 3), 0), (6, 2)]
+Test case d3-generated-23s               resulted in actions [((0, 1), 90), (6, 6), ((6, 3), 0), (6, 6), ((0, 5), 0), (0, 0)]
+Test case d3-generated-33s               resulted in actions [((5, 6), 0), (1, 4), ((0, 3), 0), (1, 4), ((0, 3), 0), (5, 5)]
+After no-pushback-rule:
+Test case d1-direct-path                 resulted in actions [((5, 6), 0), (6, 2)]
+Test case d1-shift-req                   resulted in actions [((1, 6), 0), (0, 3)]
+Test case d2-two-shifts                  resulted in actions [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
+Test case d2-self-push-out               resulted in actions [((0, 1), 0), (0, 5), ((6, 5), 90), (6, 6)]
+Test case d2-pushback-violation          resulted in actions [((6, 1), 0), (0, 1), ((6, 1), 180), (6, 0)]
+Test case d2-long-running                resulted in actions [((0, 5), 0), (3, 0), ((3, 6), 0), (1, 5)]
+Test case d3-obj-push-out                resulted in actions [((0, 1), 0), (0, 6), ((0, 1), 0), (0, 6), ((1, 6), 0), (1, 6)]
+Test case d3-long-running                resulted in actions [((0, 1), 0), (4, 5), ((6, 5), 0), (3, 6), ((3, 0), 0), (2, 1)]
+Test case d3-generated-8s                resulted in actions [((0, 1), 90), (1, 4), ((1, 6), 0), (1, 3), ((6, 3), 0), (6, 2)]
+Test case d3-generated-23s               resulted in actions [((0, 1), 90), (6, 6), ((6, 3), 0), (6, 6), ((0, 5), 0), (0, 0)]
+Test case d3-generated-33s               resulted in actions [((5, 6), 0), (1, 4), ((0, 3), 0), (1, 4), ((0, 3), 0), (5, 5)]
+->d3 long running and d2-pushback-violation have to use different paths, but the depths stays the same
+
 First implementation:
 Test case d1-direct-path         best of 3: 11.78ms
 Test case d1-shift-req           best of 3: 27.30ms
@@ -49,3 +74,19 @@ Test case d3-generated-23s       best of 3: 4257.29ms
 Test case d3-generated-33s       best of 3: 8038.63ms
 -> Nearly everything much faster, up to factor of 10 for d2-long-running, presumably because it reached a many locations at depth 1.
 Slight overhead noticable for depth 1. 
+
+After respecting no-pushback-rule, timeings differ in all directions.
+The reason for the changes in running time is the alteration of search order, due to the usage of set.difference() to implement the no-pushback-rule. 
+To make comparison to the old values easier, I implement the rule with an if-statement to keep search order the same:
+Test case d1-direct-path         best of 3: 12.28ms
+Test case d1-shift-req           best of 3: 28.07ms
+Test case d2-two-shifts          best of 3: 117.32ms
+Test case d2-self-push-out       best of 3: 64.33ms
+Test case d2-pushback-violation  best of 3: 419.72ms
+Test case d2-long-running        best of 3: 2597.17ms
+Test case d3-obj-push-out        best of 3: 1778.15ms
+Test case d3-long-running        best of 3: 1748.26ms
+Test case d3-generated-8s        best of 3: 3042.44ms
+Test case d3-generated-23s       best of 3: 3645.34ms
+Test case d3-generated-33s       best of 3: 7006.33ms
+-> Slight improvement of about 15% for the d3 cases. d3-long-running is slightly slower, because it has to find another solution.

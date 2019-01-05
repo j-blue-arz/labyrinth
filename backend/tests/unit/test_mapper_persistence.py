@@ -22,10 +22,10 @@ def _create_test_game(with_computer=False):
             else:
                 board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.T_JUNCT, 0)
     player_ids = [3, 4]
-    players = [Player(identifier=player_id, game_identifier=7) for player_id in player_ids]
+    players = [Player(identifier=player_id, game=None) for player_id in player_ids]
     if with_computer:
         player_ids.append(42)
-        players.append(ComputerPlayer(identifier=42, game_identifier=7,
+        players.append(ComputerPlayer(identifier=42, game=None,
                                       algorithm_name="random", shift_url="shift-url", move_url="move-url"))
     for player in players:
         player.set_board(board)
@@ -34,6 +34,9 @@ def _create_test_game(with_computer=False):
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
     turns = Turns(players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
     game = Game(identifier=7, turns=turns, board=board, players=players)
+    for player in players:
+        player._game = game
+    game.previous_shift_location = BoardLocation(0, 3)
     return game, player_ids
 
 
@@ -102,6 +105,14 @@ def test_mapping_turns():
         game.turns.perform_action(game.turns.next_player_action().player, game.turns.next_player_action().action)
         created_game.turns.perform_action(created_game.turns.next_player_action().player,
                                           created_game.turns.next_player_action().action)
+
+def test_mapping_previous_shift_location():
+    """ Tests correct mapping of previous shift location """
+    created_game, player_ids = _create_test_game()
+    game_dto = mapper
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    assert game.previous_shift_location == BoardLocation(0, 3)
 
 
 def _compare_maze_cards(maze_card1, maze_card2):

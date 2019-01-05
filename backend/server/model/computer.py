@@ -41,8 +41,8 @@ class ComputerPlayer(Player, Thread):
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
         if url_supplier:
-            self._shift_url = url_supplier.get_shift_url(self._game_id, self._id)
-            self._move_url = url_supplier.get_move_url(self._game_id, self._id)
+            self._shift_url = url_supplier.get_shift_url(self._game.identifier, self._id)
+            self._move_url = url_supplier.get_move_url(self._game.identifier, self._id)
         elif move_url and shift_url:
             self._shift_url = shift_url
             self._move_url = move_url
@@ -67,7 +67,7 @@ class ComputerPlayer(Player, Thread):
             algorithm.abort_search()
             board = copy.deepcopy(self._board)
             piece = self._find_equal_piece(board)
-            fallback_algorithm = RandomActionsAlgorithm(board, piece)
+            fallback_algorithm = RandomActionsAlgorithm(board, piece, self._game.get_enabled_shift_locations())
             # Calling run directly, so that fallback waits for algorithm to finish before posting actions
             fallback_algorithm.run()
             shift_action = fallback_algorithm.shift_action
@@ -104,13 +104,17 @@ class RandomActionsAlgorithm(Thread):
 
     SHORT_NAME = "random"
 
-    def __init__(self, board, piece):
+    def __init__(self, board, piece, enabled_shift_locations=None):
         super().__init__()
         self._board = board
         self._maze = board.maze
         self._piece = piece
         self._shift_action = None
         self._move_action = None
+        if enabled_shift_locations:
+            self._enabled_shift_locations = enabled_shift_locations
+        else:
+            self._enabled_shift_locations = self._board.insert_locations
 
     @property
     def shift_action(self):
@@ -127,7 +131,7 @@ class RandomActionsAlgorithm(Thread):
         pass
 
     def run(self):
-        insert_location = choice(tuple(self._maze.insert_locations))
+        insert_location = choice(tuple(self._enabled_shift_locations))
         insert_rotation = choice([0, 90, 180, 270])
         self._shift_action = (insert_location, insert_rotation)
         self._board.shift(insert_location, insert_rotation)

@@ -199,12 +199,9 @@ def test_post_move_invalid_move(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    _assert_invalid_action_and_unchanged_state(client, "move", data={
-        "location": {
-            "row": 7,
-            "column": 0
-        }
-    })
+    response = _post_player(client, player_type="human", alone=True)
+    player_id = _assert_ok_single_int(response)
+    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_move(client, player_id, 7, 0))
 
 
 def test_post_move_nonexisting_game(client):
@@ -262,13 +259,9 @@ def test_post_shift_with_invalid_rotation(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    _assert_invalid_action_and_unchanged_state(client, "shift", data={
-        "location": {
-            "row": 0,
-            "column": 1
-        },
-        "leftoverRotation": 66
-    })
+    response = _post_player(client, player_type="human", alone=True)
+    player_id = _assert_ok_single_int(response)
+    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_shift(client, player_id, 0, 1, 66))
 
 
 def test_post_shift_with_invalid_location(client):
@@ -278,13 +271,9 @@ def test_post_shift_with_invalid_location(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    _assert_invalid_action_and_unchanged_state(client, "shift", data={
-        "location": {
-            "row": 0,
-            "column": 0
-        },
-        "leftoverRotation": 90
-    })
+    response = _post_player(client, player_type="human", alone=True)
+    player_id = _assert_ok_single_int(response)
+    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_shift(client, player_id, 0, 0, 90))
 
 
 def test_post_move_with_invalid_turn_action(client):
@@ -294,12 +283,9 @@ def test_post_move_with_invalid_turn_action(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    _assert_invalid_action_and_unchanged_state(client, "move", data={
-        "location": {
-            "row": 0,
-            "column": 0
-        }
-    })
+    response = _post_player(client, player_type="human", alone=True)
+    player_id = _assert_ok_single_int(response)
+    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_move(client, player_id, 0, 0))
 
 
 def test_turn_action_progression(client):
@@ -329,6 +315,16 @@ def test_turn_action_progression(client):
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
 
+def test_no_pushback_rule(client):
+    """ Tests POST for /api/games/0/shift
+
+    expects the second shift, which tries to revert the previous shift, to fail
+    """
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _post_shift(client, player_id_0, 0, 1, 270)
+    _post_move(client, player_id_0, 0, 0)
+    _assert_invalid_action_and_unchanged_state(client, player_id_1, lambda: _post_shift(client, player_id_1, 6, 1, 270))
 
 def test_delete_player(client):
     """ Tests GET for /api/games/0/state and delete for /api/games/0/players/<player_id>
@@ -363,15 +359,12 @@ def test_put_player(client):
 
 
 
-def _assert_invalid_action_and_unchanged_state(client, action_resource, data):
+def _assert_invalid_action_and_unchanged_state(client, player_id, action_callable):
     """ Sets a game up, performs invalid action on given resource with given data,
     asserts error response and checks that state has not changed """
-    response = _post_player(client, player_type="human", alone=True)
-    player_id = _assert_ok_single_int(response)
     response = _get_state(client, player_id)
     old_data = response.get_data()
-    response = client.post("/api/games/0/{}?p_id={}".format(action_resource, player_id),
-                           data=json.dumps(data))
+    response = action_callable()
     _assert_error_response(response, user_message="The sent action is invalid.",
                            key="INVALID_ACTION", status=400)
     response = _get_state(client, player_id)

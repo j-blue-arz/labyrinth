@@ -48,12 +48,16 @@ def _benchmark(name):
     runs = 1
     optimizer, _, _ = setup.create_optimizer(name)
     min_time = min(timeit.Timer(optimizer.find_optimal_actions).repeat(repeat, runs)) / runs * 1000
-    print("Test case {:<17} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
+    print("Test case {:<24} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
 
 
 def _profile(name):
     optimizer, _, _ = setup.create_optimizer(name)
     cProfile.runctx("optimizer.find_optimal_actions()", globals(), locals(), filename=name)
+
+def _results(name):
+    optimizer, _, _ = setup.create_optimizer(name)
+    print("Test case {:<24} \t resulted in actions {}".format(name, optimizer.find_optimal_actions()))
 
 
 def _main(argv):
@@ -73,6 +77,8 @@ def _main(argv):
             _benchmark(name)
         elif mode == "profile":
             _profile(name)
+        elif mode == "result":
+            _results(name)
 
 
 if __name__ == "__main__":

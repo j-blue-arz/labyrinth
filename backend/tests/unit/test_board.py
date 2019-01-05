@@ -26,6 +26,7 @@ def test_remove_piece_after_create_piece():
     board.remove_piece(piece)
     assert not board.pieces
 
+
 def test_after_series_of_creates_and_removes_no_corners_empty():
     """ Tests create_piece. Adds three pieces, removes two, adds three,
     and checks that all pieces are on a different corner """
@@ -41,7 +42,7 @@ def test_after_series_of_creates_and_removes_no_corners_empty():
     assert len(board.pieces) == 4
     piece_cards = set()
     for piece in board.pieces:
-        piece_cards.add(piece.maze_card) 
+        piece_cards.add(piece.maze_card)
     assert len(piece_cards) == 4
 
 
@@ -145,6 +146,26 @@ def test_move_raises_error_on_invalid_location():
     piece = board.create_piece()
     with pytest.raises(InvalidLocationException):
         board.move(piece, BoardLocation(-1, -1))
+
+
+def test_opposing_insert_location_for_east_location():
+    """ Tests opposing_insert_location """
+    board = Board()
+    size = board.maze.MAZE_SIZE
+    assert board.opposing_insert_location(BoardLocation(5, size-1)) == BoardLocation(5, 0)
+
+
+def test_opposing_insert_location_for_south_location():
+    """ Tests opposing_insert_location """
+    board = Board()
+    size = board.maze.MAZE_SIZE
+    assert board.opposing_insert_location(BoardLocation(size-1, 3)) == BoardLocation(0, 3)
+
+def test_opposing_insert_location_for_west_location():
+    """ Tests opposing_insert_location """
+    board = Board()
+    size = board.maze.MAZE_SIZE
+    assert board.opposing_insert_location(BoardLocation(1, 0)) == BoardLocation(1, size-1)
 
 
 MAZE_STRING = """

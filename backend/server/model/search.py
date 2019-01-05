@@ -30,6 +30,7 @@ class GameTreeNode:
         else:
             self.depth = 0
         self.board = None
+        
 
     @classmethod
     def get_root(cls, board):
@@ -45,9 +46,14 @@ class GameTreeNode:
     def children(self):
         """ Returns iterable over children of this node """
         self._compute()
-        for insert_location in self.board.maze.insert_locations:
-            for rotation in self._current_rotations():
-                yield GameTreeNode(parent=self, shift_action=(insert_location, rotation))
+        disabled_shift_location = None
+        if self.shift_action:
+            previous_shift_location, _ = self.shift_action
+            disabled_shift_location = self.board.opposing_insert_location(previous_shift_location)
+        for insert_location in self.board.insert_locations:
+            if insert_location != disabled_shift_location:
+                for rotation in self._current_rotations():
+                    yield GameTreeNode(parent=self, shift_action=(insert_location, rotation))
         return []
 
     def _current_rotations(self):
@@ -106,11 +112,12 @@ class GameTreeNode:
 class Optimizer:
     """ Searches for a winning node in the game tree. """
 
-    def __init__(self, board, piece):
+    def __init__(self, board, piece, previous_shift_location=None):
         self._board = board
         self._board.clear_pieces()
         self._board.pieces.append(piece)
         self._aborted = False
+        self._previous_shift_location = previous_shift_location
 
     def find_optimal_actions(self):
         """ Finds the optimal succession of actions which reaches the objective.
@@ -120,6 +127,8 @@ class Optimizer:
         and each odd entry represents a move location.
         Returns None if the search was aborted. """
         root = GameTreeNode.get_root(self._board)
+        if self._previous_shift_location:
+            root.shift_action = (self._previous_shift_location, 0)
         winning_node = self._search_winning_node(root)
         if winning_node:
             return self._actions(winning_node)
