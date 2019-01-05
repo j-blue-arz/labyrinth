@@ -34,9 +34,7 @@ describe("Game", () => {
             let mazeCards = _buildMazeCardMatrix(game);
             let expectedMazeCard = mazeCards[1];
 
-            expect(game.mazeCardById(expectedMazeCard.id)).toBe(
-                expectedMazeCard
-            );
+            expect(game.mazeCardById(expectedMazeCard.id)).toBe(expectedMazeCard);
         });
 
         it("returns leftover card if given ID matches", () => {
@@ -46,9 +44,7 @@ describe("Game", () => {
             game.leftoverMazeCard = MazeCard.createNewRandom(nextId, -1, -1);
             let leftover_card_id = game.leftoverMazeCard.id;
 
-            expect(game.mazeCardById(leftover_card_id)).toBe(
-                game.leftoverMazeCard
-            );
+            expect(game.mazeCardById(leftover_card_id)).toBe(game.leftoverMazeCard);
         });
 
         it("returns null for ID which is not in the game.", () => {
@@ -84,9 +80,7 @@ describe("Game", () => {
             let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
             let mazeCard = MazeCard.createNewRandom(nextId, -1, -1);
             let invalidLocation = loc(3, 0);
-            expect(() => game.setMazeCard(invalidLocation, mazeCard)).toThrow(
-                RangeError
-            );
+            expect(() => game.setMazeCard(invalidLocation, mazeCard)).toThrow(RangeError);
         });
     });
 
@@ -127,9 +121,7 @@ describe("Game", () => {
             expect(player1.mazeCard).toBe(pushedInCard);
             expect(player2.mazeCard).toBe(pushedInCard);
             expect(pushedInCard.players.length).toBe(2);
-            expect(pushedInCard.players).toEqual(
-                expect.arrayContaining([player1, player2])
-            );
+            expect(pushedInCard.players).toEqual(expect.arrayContaining([player1, player2]));
         });
 
         it("throws ValueError on board location which is not on the border.", () => {
@@ -246,9 +238,7 @@ describe("Game", () => {
 
             for (let row = 0; row < game.n; row++) {
                 for (let col = 0; col < game.n; col++) {
-                    expect(game.getMazeCard(loc(row, col)).location).toEqual(
-                        loc(row, col)
-                    );
+                    expect(game.getMazeCard(loc(row, col)).location).toEqual(loc(row, col));
                 }
             }
         });
@@ -317,10 +307,7 @@ describe("Game", () => {
             let game = new Game();
             game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
-            let colorIndexList = [
-                game.getPlayer(42).colorIndex,
-                game.getPlayer(17).colorIndex
-            ];
+            let colorIndexList = [game.getPlayer(42).colorIndex, game.getPlayer(17).colorIndex];
             expect(colorIndexList).toContain(0);
             expect(colorIndexList).toContain(1);
         });
@@ -334,6 +321,22 @@ describe("Game", () => {
             expect(computerPlayer.algorithm).toBe("random");
             let player = game.getPlayer(17);
             expect(player.isComputer).toBe(false);
+        });
+
+        it("disables insert location, if enabled locations is missing one", () => {
+            let game = new Game();
+            game.n = 3;
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+            expect(game.disabledInsertLocation).toEqual({ column: 1, row: 2 });
+        });
+
+        it("sets disabled insert location to null if all locations are enabled", () => {
+            let game = new Game();
+            game.n = 3;
+            let apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
+            apiState.enabledShiftLocations.push({ column: 1, row: 2 });
+            game.createFromApi(apiState);
+            expect(game.disabledInsertLocation).toEqual(null);
         });
     });
 });
@@ -475,5 +478,10 @@ let GET_STATE_RESULT_FOR_N_3 = `{
     "id": 17,
     "mazeCardId": 15
   }],
-  "objectiveMazeCardId": 8
+  "objectiveMazeCardId": 8,
+  "enabledShiftLocations": [
+    {"column": 1, "row": 0},
+    {"column": 0, "row": 1},
+    {"column": 2, "row": 1}
+  ]
 }`;

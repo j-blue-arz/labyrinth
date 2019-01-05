@@ -1,5 +1,6 @@
 import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
+import InsertPanels from "@/components/InsertPanels.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
 import { copyObjectStructure } from "./testutils.js";
 import Game from "@/model/game.js";
@@ -113,34 +114,28 @@ describe("InteractiveBoard", () => {
         expect(board.emitted("move-piece")).toBeFalsy();
     });
 
-    it("sets interaction class on insert panels if shift is required", () => {
+    it("sets interaction on insert panels if shift is required", () => {
         let board = shallowFactory(fromStateWithShiftAction());
-        let insertPanels = board.findAll(".insert-location");
-        expect(insertPanels.is(".insert-location--interaction")).toBe(true);
+        let insertPanels = board.find(InsertPanels);
+        expect(insertPanels.props().interaction).toBeTruthy();
     });
 
-    it("does not set interaction class on insert panels if move is required", () => {
+    it("does not set interaction on insert panels if move is required", () => {
         let board = shallowFactory(fromStateWithMoveAction());
-        let insertPanels = board.findAll(".insert-location");
-        let insertPanelsWithInteraction = insertPanels.filter(panel =>
-            panel.classes(".insert-location--interaction")
-        );
-        expect(insertPanelsWithInteraction.length).toBe(0);
+        let insertPanels = board.find(InsertPanels);
+        expect(insertPanels.props().interaction).toBeFalsy();
     });
 
-    it("enables all insert panels but the one which is disabled in game props instance", () => {
+    it("forwards disabled insert location from game to insert panels", () => {
         let game = fromStateWithShiftAction();
         game.disabledInsertLocation = {
             row: 0,
             column: 1
         };
         let board = shallowFactory(game);
-        let disabledPanels = board.findAll(".insert-location--disabled");
-        expect(disabledPanels.length).toBe(1);
-        let xPos = Number.parseInt(disabledPanels.at(0).attributes("x"));
-        let yPos = Number.parseInt(disabledPanels.at(0).attributes("y"));
-        expect(xPos).toBe(2 * 100);
-        expect(yPos).toBe(0 * 100);
+        let insertPanels = board.find(InsertPanels);
+        expect(insertPanels.props().disabledInsertLocation).toEqual(game.disabledInsertLocation);
+
     });
 });
 
@@ -646,6 +641,56 @@ var API_STATE = {
             id: 5,
             isComputerPlayer: false,
             mazeCardId: 3
+        }
+    ],
+    enabledShiftLocations: [
+        {
+            column: 0,
+            row: 3
+        },
+        {
+            column: 6,
+            row: 5
+        },
+        {
+            column: 6,
+            row: 1
+        },
+        {
+            column: 5,
+            row: 0
+        },
+        {
+            column: 0,
+            row: 1
+        },
+        {
+            column: 3,
+            row: 0
+        },
+        {
+            column: 5,
+            row: 6
+        },
+        {
+            column: 1,
+            row: 0
+        },
+        {
+            column: 1,
+            row: 6
+        },
+        {
+            column: 3,
+            row: 6
+        },
+        {
+            column: 6,
+            row: 3
+        },
+        {
+            column: 0,
+            row: 5
         }
     ]
 };

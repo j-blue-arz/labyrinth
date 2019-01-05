@@ -16,7 +16,7 @@ export default class Game {
         this._players = [];
         this.nextAction = { playerId: 0, action: NO_ACTION };
         this.isLoading = false;
-        this.disabledInsertLocation = false;
+        this.disabledInsertLocation = null;
     }
 
     mazeCardsAsList() {
@@ -54,26 +54,40 @@ export default class Game {
     }
 
     shift(location) {
+        if (this._locationsEqual(location, this.disabledInsertLocation)) {
+            throw new ValueError();
+        }
+
         if (!this.isInside(location)) {
             throw new RangeError();
         }
         var shiftLocations = [];
+        let opposite_location = null;
         if (location.row === 0) {
             shiftLocations = this._columnLocations(location.column);
+            opposite_location = { row: this.n - 1, column: location.column };
         } else if (location.row === this.n - 1) {
             shiftLocations = this._columnLocations(location.column);
             shiftLocations.reverse();
+            opposite_location = { row: 0, column: location.column };
         } else if (location.column === this.n - 1) {
             shiftLocations = this._rowLocations(location.row);
             shiftLocations.reverse();
+            opposite_location = { row: location.row, column: 0 };
         } else if (location.column === 0) {
             shiftLocations = this._rowLocations(location.row);
+            opposite_location = { row: location.row, column: this.n - 1 };
         }
         if (shiftLocations.length === this.n) {
             this._shiftAlongLocations(shiftLocations);
+            this.disabledInsertLocation = opposite_location;
         } else {
             throw new ValueError();
         }
+    }
+
+    _locationsEqual(locA, locB) {
+        return locA && locB && locA.row === locB.row && locA.column === locB.column;
     }
 
     hasPlayer(playerId) {
@@ -235,7 +249,40 @@ export default class Game {
         if (apiState.nextAction) {
             this.setNextAction(apiState.nextAction.playerId, apiState.nextAction.action);
         }
+
+        this.disabledInsertLocation = this._findMissingInsertLocation(
+            apiState.enabledShiftLocations
+        );
+
         this.isLoading = false;
+    }
+
+    _findMissingInsertLocation(apiInsertLocations) {
+        let enabledInsertLocations = new Set();
+        for (let location of apiInsertLocations) {
+            enabledInsertLocations.add(this._key(location));
+        }
+        let allInsertLocations = [];
+        for (let position = 1; position < this.n - 1; position += 2) {
+            allInsertLocations.push({ row: 0, column: position });
+            allInsertLocations.push({ row: position, column: 0 });
+            allInsertLocations.push({ row: this.n - 1, column: position });
+            allInsertLocations.push({ row: position, column: this.n - 1 });
+        }
+        for (let location of allInsertLocations) {
+            if (!enabledInsertLocations.has(this._key(location))) {
+                return location;
+            }
+        }
+        return null;
+    }
+
+    _key(location) {
+        return location.row * this.n + location.column;
+    }
+
+    _addInsertLocation(locationsMap, location) {
+        locationsMap.set(location.row * this.n + location.column, location);
     }
 
     setNextAction(playerId, action) {

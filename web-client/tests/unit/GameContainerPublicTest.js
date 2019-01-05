@@ -612,5 +612,55 @@ var state = {
             isComputerPlayer: false,
             mazeCardId: 3
         }
+    ],
+    enabledShiftLocations: [
+        {
+            column: 0,
+            row: 3
+        },
+        {
+            column: 6,
+            row: 5
+        },
+        {
+            column: 6,
+            row: 1
+        },
+        {
+            column: 5,
+            row: 0
+        },
+        {
+            column: 0,
+            row: 1
+        },
+        {
+            column: 3,
+            row: 0
+        },
+        {
+            column: 5,
+            row: 6
+        },
+        {
+            column: 1,
+            row: 0
+        },
+        {
+            column: 1,
+            row: 6
+        },
+        {
+            column: 3,
+            row: 6
+        },
+        {
+            column: 6,
+            row: 3
+        },
+        {
+            column: 0,
+            row: 5
+        }
     ]
 };

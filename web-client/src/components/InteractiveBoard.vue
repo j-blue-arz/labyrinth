@@ -18,17 +18,12 @@
             :maze-card-id="player.mazeCard.id"
             :game="game"
         ></v-move-animation>
-        <rect
-            v-for="insertPanel in insertPanels"
-            @click="onInsertPanelClick($event, insertPanel)"
-            :key="'panel-' + insertPanel.id"
-            :x="xPos(insertPanel.displayLocation) + boardOffset"
-            :y="yPos(insertPanel.displayLocation) + boardOffset"
-            :height="cardSize"
-            :width="cardSize"
-            class="insert-location"
-            :class="insertPanelClass(insertPanel)"
-        ></rect>
+        <insert-panels
+            @insert-panel-clicked="onInsertPanelClick"
+            :disabledInsertLocation="disabledInsertLocation"
+            :interaction="isMyTurnToShift"
+            :cardSize="cardSize"
+            />
         <v-maze-card
             @click.native="onLeftoverClick"
             v-if="hasStarted"
@@ -44,6 +39,7 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
+import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
@@ -56,6 +52,7 @@ export default {
     components: {
         /* eslint-disable vue/no-unused-components */
         VGameBoard,
+        InsertPanels,
         VMazeCard,
         VMoveAnimation,
         VSvgDefs
@@ -78,12 +75,6 @@ export default {
         return {
             insertPanels: []
         };
-    },
-    watch: {
-        disabledInsertLocation: function() {
-            console.log("called");
-            this.updateDisabledInsertLocation();
-        }
     },
     computed: {
         mazeSize: function() {
@@ -137,20 +128,12 @@ export default {
                 !this.game.getPlayer(this.userPlayerId).isComputer
             );
         },
-        xPos(location) {
-            return this.cardSize * location.column;
-        },
-        yPos(location) {
-            return this.cardSize * location.row;
-        },
-        onInsertPanelClick: function(event, insertPanel) {
-            if (this.isMyTurnToShift && insertPanel.enabled) {
-                let insertEvent = {
-                    location: insertPanel.insertLocation,
-                    leftoverRotation: this.leftoverMazeCard.rotation
-                };
-                this.$emit("insert-card", insertEvent);
-            }
+        onInsertPanelClick: function(insertLocation) {
+            let insertEvent = {
+                location: insertLocation,
+                leftoverRotation: this.leftoverMazeCard.rotation
+            };
+            this.$emit("insert-card", insertEvent);
         },
         onMazeCardClick: function(mazeCard) {
             if (
@@ -164,61 +147,7 @@ export default {
             if (this.isMyTurnToShift) {
                 this.leftoverMazeCard.rotateClockwise();
             }
-        },
-        locationsEqual(locA, locB) {
-            return locA && locB && locA.row === locB.row && locA.column === locB.column;
-        },
-        updateDisabledInsertLocation: function() {
-            let disabledInsertLocation = this.game.disabledInsertLocation;
-            for (var insertPanel of this.insertPanels) {
-                if (this.locationsEqual(insertPanel.insertLocation, disabledInsertLocation)) {
-                    insertPanel.enabled = false;
-                } else {
-                    insertPanel.enabled = true;
-                }
-            }
-        },
-        inside: function(value, min, max) {
-            return Math.min(Math.max(value, min), max);
-        },
-        panelToInsertLocation: function(location) {
-            return {
-                row: this.inside(location.row, 0, this.mazeSize - 1),
-                column: this.inside(location.column, 0, this.mazeSize - 1)
-            };
-        },
-        createInsertPanel: function(id, row, column) {
-            let displayLocation = {
-                row: row,
-                column: column
-            };
-            return {
-                id: id,
-                displayLocation: displayLocation,
-                insertLocation: this.panelToInsertLocation(displayLocation),
-                enabled: true
-            };
-        },
-        insertPanelClass: function(insertPanel) {
-            if (insertPanel.enabled) {
-                if (this.isMyTurnToShift) {
-                    return ["insert-location--enabled", "insert-location--interaction"];
-                }
-                return "insert-location--enabled";
-            } else {
-                return "insert-location--disabled";
-            }
         }
-    },
-    created: function() {
-        let id = 0;
-        for (var position of [1, 3, 5]) {
-            this.insertPanels.push(this.createInsertPanel(id++, -1, position));
-            this.insertPanels.push(this.createInsertPanel(id++, position, -1));
-            this.insertPanels.push(this.createInsertPanel(id++, this.game.n, position));
-            this.insertPanels.push(this.createInsertPanel(id++, position, this.game.n));
-        }
-        this.updateDisabledInsertLocation();
     }
 };
 </script>
@@ -230,21 +159,5 @@ export default {
     max-height: 100%;
     max-width: 100%;
     height: 100%;
-}
-
-.insert-location {
-    transition: all 0.2s;
-    &:not(&--interaction) {
-        fill: black;
-        opacity: 0.2;
-    }
-
-    &--interaction {
-        opacity: 0.3;
-        cursor: pointer;
-        &:hover {
-            fill: blue;
-        }
-    }
 }
 </style>
