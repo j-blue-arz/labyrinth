@@ -1,5 +1,8 @@
+$interaction-color: rgb(60, 101, 177);
+$disabled-color: rgb(230, 102, 64);
+
 $color-outline: black;
-$color-outline-active: blue;
+$color-outline-active: $interaction-color;
 
 $color-pathways: white;
 
@@ -21,4 +24,4 @@ $text-color-player-2: black;
 $color-player-3: #50a28c;
 $text-color-player-3: white;
 
-$color-glow: blue;
+$color-glow: $interaction-color;

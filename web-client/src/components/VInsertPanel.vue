@@ -1,12 +1,36 @@
 <template>
-    <rect
+    <svg
+        :viewBox="`0 0 ${size} ${size}`"
         :height="size"
         :width="size"
-        :x="xPos"
-        :y="yPos"
-        class="insert-location"
+        class="insert-panel"
         :class="insertPanelClass"
-    ></rect>
+        :x="xPos"
+        :y="yPos">
+        <rect
+            :height="size"
+            :width="size"
+            class="insert-panel__click-area"
+            @click="onClick"
+        />
+        <transition name="insert-panel__fade-animation-">
+            <path
+                v-if="isDisabled"
+                :d="pathCross"
+                class="insert-panel__cross"
+            />
+        </transition>
+        <transition name="insert-panel__fade-animation-">
+            <path
+                v-if="isEnabled"
+                :id="'panel-path-' + insertPanel.id"
+                @click="onClick"
+                :d="pathArrow"
+                class="insert-panel__arrow"
+            />
+        </transition>
+    </svg>
+
 </template>
 
 <script>
@@ -38,33 +62,114 @@ export default {
         }
     },
     computed: {
+        isEnabled: function() {
+            return this.insertPanel.enabled;
+        },
+        isDisabled: function() {
+            return !this.insertPanel.enabled;
+        },
         insertPanelClass: function() {
             if (this.insertPanel.enabled) {
                 if (this.interaction) {
-                    return ["insert-location--enabled", "insert-location--interaction"];
+                    return ["insert-panel--enabled", "insert-panel--interaction"];
                 }
-                return "insert-location--enabled";
+                return "insert-panel--enabled";
             } else {
-                return "insert-location--disabled";
+                if (this.interaction) {
+                    return ["insert-panel--disabled", "insert-panel--interaction"];
+                }
+                return "insert-panel--disabled";
             }
+        },
+        pathCross: function() {
+            let paths = [[[25, 25], [75, 75]], [[75, 25], [25, 75]]];
+            return "M" + paths.join("M");
+        },
+        pathArrow: function() {
+            let paths = [[[25, 45], [50, 25], [75, 45]], [[25, 70], [50, 50], [75, 70]]];
+            this.rotateAndTranslatePaths(paths);
+            return "M" + paths.join("M");
+        },
+        transformOriginStyle() {
+            let mid = this.size / 2;
+            return "transform-origin: " + mid + "px " + mid + "px";
+        }
+    },
+    methods: {
+        rotateAndTranslatePaths(paths) {
+            let mid = this.size / 2;
+            let angle = this.angle();
+            if (angle !== 0) {
+                for (var path of paths) {
+                    for (var point of path) {
+                        point[0] = point[0] - mid;
+                        point[1] = point[1] - mid;
+                        let q = [0, 0];
+                        q[0] = point[0] * Math.cos(angle) - point[1] * Math.sin(angle);
+                        q[1] = point[0] * Math.sin(angle) + point[1] * Math.cos(angle);
+                        point[0] = Math.round(q[0] + mid);
+                        point[1] = Math.round(q[1] + mid);
+                    }
+                }
+            }
+        },
+        angle: function() {
+            if (this.isDisabled) {
+                return 0;
+            }
+            let degree = ["N", "E", "S", "W"].indexOf(this.insertPanel.direction) * 90;
+            return 2 * Math.PI * (degree / 360.0);
+        },
+        onClick: function() {
+            this.$emit("panel-click");
         }
     }
 };
 </script>
 
 <style lang="scss">
-.insert-location {
-    transition: all 0.2s;
+.insert-panel {
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-width: 14;
+
     &:not(&--interaction) {
-        fill: black;
-        opacity: 0.2;
+        filter: url(#grayscale);
     }
 
     &--interaction {
-        opacity: 0.3;
-        cursor: pointer;
-        &:hover {
-            fill: blue;
+        filter: none;
+
+        .insert-panel__arrow {
+            cursor: pointer;
+            filter: url(#drop-shadow);
+        }
+    }
+
+    &__cross {
+        fill: none;
+        stroke: $disabled-color;
+    }
+
+    &__arrow {
+        fill: none;
+        stroke: $interaction-color;
+    }
+
+    &__click-area {
+        fill: white;
+        opacity: 0.1;
+    }
+
+    &__fade-animation {
+        &--enter-active,
+        &--leave-active {
+            transition: opacity 1s;
+        }
+
+        &--enter,
+        &--leave-to {
+            opacity: 0;
         }
     }
 }

@@ -5,10 +5,10 @@
         :id="mazeCard.id"
         :x="xPosAnimated"
         :y="yPosAnimated"
-        viewBox="0 0 100 100"
+        :viewBox="`0 0 ${cardSize} ${cardSize}`"
         class="maze-card"
     >
-        <g class="maze-card__group" :class="rotationClass">
+        <g class="maze-card__group" :style="transformOriginStyle" :class="rotationClass">
             <rect
                 x="0"
                 y="0"
@@ -61,11 +61,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group
-            :players="players"
-            :mid-point="piecesPosition"
-            :max-size="piecesSize"
-        />
+        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"/>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
@@ -169,6 +165,10 @@ export default {
         },
         hasWest: function() {
             return this.mazeCard.hasWestDoor();
+        },
+        transformOriginStyle() {
+            let mid = this.cardSize / 2;
+            return "transform-origin: " + mid + "px " + mid + "px";
         }
     },
     created: function() {
@@ -210,10 +210,6 @@ export default {
 
     &.interaction {
         cursor: pointer;
-    }
-
-    &__group {
-        transform-origin: 50px 50px;
     }
 }
 

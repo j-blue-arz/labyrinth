@@ -2,7 +2,7 @@
     <g>
         <v-insert-panel
             v-for="insertPanel in insertPanels"
-            @click.native="onClick($event, insertPanel)"
+            @panel-click="onClick($event, insertPanel)"
             :key="'panel-' + insertPanel.id"
             :insert-panel="insertPanel"
             :x-pos="xPos(insertPanel)"
