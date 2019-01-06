@@ -237,6 +237,7 @@ export default class Game {
             if (this.hasPlayer(apiPlayer.id)) {
                 player = this.getPlayer(apiPlayer.id);
                 player.colorIndex = remainingColors.pop();
+                player.fillFromApi(apiPlayer);
             } else {
                 player = Player.newFromApi(apiPlayer, remainingColors.pop());
                 if (userId === player.id) {

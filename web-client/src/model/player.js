@@ -29,6 +29,7 @@ export default class Player {
     }
 
     fillFromApi(apiPlayer) {
+        this.score = apiPlayer.score;
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
             this.algorithm = apiPlayer.algorithm;
