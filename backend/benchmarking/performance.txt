@@ -104,3 +104,18 @@ Test case d3-generated-8s                best of 3: 2517.32ms
 Test case d3-generated-23s               best of 3: 3133.73ms
 Test case d3-generated-33s               best of 3: 5683.61ms
 -> already small removals of members to be copied has a big impact on the running time.
+
+Now implementing deep copy myself, instead of using copy.deepcopy(). 
+First try: external method with constructor calls and mapping maze cards from ids for objective and piece maze card
+Test case d1-direct-path                 best of 3: 5.93ms
+Test case d1-shift-req                   best of 3: 15.67ms
+Test case d2-two-shifts                  best of 3: 74.67ms
+Test case d2-self-push-out               best of 3: 21.80ms
+Test case d2-pushback-violation          best of 3: 146.85ms
+Test case d2-long-running                best of 3: 1864.24ms
+Test case d3-obj-push-out                best of 3: 639.97ms
+Test case d3-long-running                best of 3: 737.72ms
+Test case d3-generated-8s                best of 3: 1006.78ms
+Test case d3-generated-23s               best of 3: 1727.62ms
+Test case d3-generated-33s               best of 3: 2325.37ms
+-> Big impact, all d3 below 3 seconds.

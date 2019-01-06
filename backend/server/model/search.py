@@ -1,6 +1,7 @@
 """ This module contains algorithms performing searches on a game tree. """
 import copy
 from .maze_algorithm import Graph
+from .game import Board, Piece, MazeCard, Maze
 
 
 class ReachedMazeCard:
@@ -16,6 +17,24 @@ class ReachedMazeCard:
         self.location = location
         self.from_reached_maze_card = from_reached_maze_card
 
+def _copy_board(board):
+    maze_card_by_id = {}
+    leftover_card = _copy_maze_card(board.leftover_card)
+    maze_card_by_id[leftover_card.identifier] = leftover_card
+    maze = Maze()
+    for location in board.maze.maze_locations():
+        maze_card = _copy_maze_card(board.maze[location])
+        maze_card_by_id[maze_card.identifier] = maze_card
+        maze[location] = maze_card
+    objective = maze_card_by_id[board.objective_maze_card.identifier]
+    board_copy = Board(maze, leftover_card, objective)
+    board_copy.validate_moves = False
+    piece_maze_card = maze_card_by_id[board.pieces[0].maze_card.identifier]
+    board_copy.pieces.append(Piece(piece_maze_card))
+    return board_copy
+
+def _copy_maze_card(maze_card):
+    return MazeCard(maze_card.identifier, maze_card.doors, maze_card.rotation)
 
 class GameTreeNode:
     """ Represents a node in the game tree. Each shift and move action is a node on its own.
@@ -30,13 +49,13 @@ class GameTreeNode:
         else:
             self.depth = 0
         self.board = None
-        
+
 
     @classmethod
     def get_root(cls, board):
         """ Returns a root to the tree, with parent = None """
         root = cls()
-        root.board = copy.deepcopy(board)
+        root.board = _copy_board(board)
         root.board.validate_moves = False
         piece = root.board.pieces[0]
         location = root.board.maze.maze_card_location(piece.maze_card)
@@ -65,7 +84,7 @@ class GameTreeNode:
 
     def _compute(self):
         if not self.board:
-            self.board = copy.deepcopy(self.parent.board)
+            self.board = _copy_board(self.parent.board)
             shift_location, shift_rotation = self.shift_action
             self.board.shift(shift_location, shift_rotation)
             piece_locations = [self._location_by_id(reached.maze_card_id) for reached in self.parent.reached_maze_cards]
@@ -107,7 +126,6 @@ class GameTreeNode:
 
     def _shift_location(self):
         return self.shift_action[0]
-
 
 class Optimizer:
     """ Searches for a winning node in the game tree. """
