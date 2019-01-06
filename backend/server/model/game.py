@@ -153,12 +153,12 @@ class Piece:
     def __init__(self, maze_card: MazeCard):
         self.maze_card = maze_card
 
-
 class Maze:
     """ Represent the state of the maze.
     The state is maintained in a 2-d array of MazeCard instances.
     """
     MAZE_SIZE = 7
+    MAZE_LOCATIONS = [BoardLocation(row, column) for row in range(7) for column in range(7)]
 
     def __init__(self):
         self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
@@ -261,9 +261,7 @@ class Maze:
     @classmethod
     def maze_locations(cls):
         """ Returns an iterator of all BoardLocations """
-        for row in range(cls.MAZE_SIZE):
-            for column in range(cls.MAZE_SIZE):
-                yield BoardLocation(row, column)
+        return cls.MAZE_LOCATIONS
 
     @classmethod
     def _validate_location(cls, location):

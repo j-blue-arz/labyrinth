@@ -118,4 +118,20 @@ Test case d3-long-running                best of 3: 737.72ms
 Test case d3-generated-8s                best of 3: 1006.78ms
 Test case d3-generated-23s               best of 3: 1727.62ms
 Test case d3-generated-33s               best of 3: 2325.37ms
--> Big impact, all d3 below 3 seconds.
+-> Big impact, all d3 below 3 seconds. For d2-long-running, copying takes only about 10% of total running time. Now the biggest factor
+in running time is _location_by_id, with 50%. This test case has about 1100 nodes, with 21400 calls to this method.
+For d3-generated-33s, copy_board still has the greatest part of running time, with about 60%. _location_by_id only has 10%.
+This test case has 7600 nodes, but only 10100 calls to _location_by_id.
+
+Iterator over board locations created new BoardLocations for each call. Now returns precomputed list:
+Test case d1-direct-path                 best of 3: 5.65ms
+Test case d1-shift-req                   best of 3: 13.43ms
+Test case d2-two-shifts                  best of 3: 64.15ms
+Test case d2-self-push-out               best of 3: 19.59ms
+Test case d2-pushback-violation          best of 3: 132.64ms
+Test case d2-long-running                best of 3: 1529.62ms
+Test case d3-obj-push-out                best of 3: 545.92ms
+Test case d3-long-running                best of 3: 616.49ms
+Test case d3-generated-8s                best of 3: 868.71ms
+Test case d3-generated-23s               best of 3: 1420.97ms
+Test case d3-generated-33s               best of 3: 2099.65ms
