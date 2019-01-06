@@ -29,6 +29,7 @@
     "node-sass": "^4.9.0",
     "sass-loader": "^7.0.1",
     "style-resources-loader": "^1.2.1",
-    "vue-template-compiler": "^2.5.17"
+    "vue-template-compiler": "^2.5.17",
+    "vue-jest": "^1.0.0"
   }
 }
