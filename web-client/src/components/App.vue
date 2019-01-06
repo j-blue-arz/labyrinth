@@ -17,6 +17,10 @@ export default {
 </script>
 
 <style lang="scss">
+* {
+    font-family: sans-serif;
+}
+
 body {
     height: 100vh;
     width: 100vw;

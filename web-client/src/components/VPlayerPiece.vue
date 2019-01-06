@@ -2,8 +2,12 @@
     <svg
         ref="playerPiece"
         class="player-piece"
-        :class="[{'player-piece__user': isUser, 'player-piece__user--to-move': isUser && hasToMove},
-        colorIndexClass]"
+        :class="[{'player-piece__user': isUser,
+                'player-piece__user--to-move': isUser && interaction},
+                colorIndexClass]"
+        :viewBox="`0 0 ${svgSize} ${svgSize}`"
+        :height="`${svgSize}px`"
+        :width="`${svgSize}px`"
     >
         <circle
             :cx="xCenterPos"
@@ -12,7 +16,7 @@
             class="player-piece__shape"
         />
         <circle
-            v-if="hasToMove && isUser"
+            v-if="interaction && isUser"
             :cx="xCenterPos"
             :cy="yCenterPos"
             :r="maxSize/2 + 2"
@@ -53,6 +57,16 @@ export default {
         maxSize: {
             type: Number,
             required: true
+        },
+        svgSize: {
+            type: Number,
+            required: false,
+            default: 100
+        },
+        interaction: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     computed: {
@@ -61,9 +75,6 @@ export default {
         },
         isUser: function() {
             return this.player.isUser;
-        },
-        hasToMove: function() {
-            return this.player.hasToMove();
         },
         playerId: function() {
             return this.player.colorIndex;

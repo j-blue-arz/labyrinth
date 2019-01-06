@@ -7,6 +7,7 @@ export default class Player {
         this.algorithm = "";
         this.isUser = false;
         this.turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
+        this.score = 0;
     }
 
     hasToMove() {
@@ -21,7 +22,16 @@ export default class Player {
         return new this(id, null);
     }
 
-    static compareById(player1, player2) {
-        return player1.id - player2.id;
+    static newFromApi(apiPlayer, colorIndex) {
+        let player = new this(apiPlayer.id, colorIndex);
+        player.fillFromApi(apiPlayer, colorIndex);
+        return player;
+    }
+
+    fillFromApi(apiPlayer) {
+        if (apiPlayer.isComputerPlayer) {
+            this.isComputer = true;
+            this.algorithm = apiPlayer.algorithm;
+        }
     }
 }

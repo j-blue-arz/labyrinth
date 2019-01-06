@@ -8,7 +8,8 @@ const wrapperFactory = function(player) {
             player: player,
             xCenterPos: 50,
             yCenterPos: 50,
-            maxSize: 30
+            maxSize: 30,
+            interaction: player.hasToMove()
         }
     });
 };
@@ -39,9 +40,7 @@ describe("VPlayerPiece", () => {
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
         svgElement.classes().forEach(elementClass => {
-            expect(elementClass).toEqual(
-                expect.not.stringContaining("player-piece__user")
-            );
+            expect(elementClass).toEqual(expect.not.stringContaining("player-piece__user"));
         });
     });
 

@@ -1,5 +1,3 @@
-import Player from "@/model/player.js";
-
 export default class MazeCard {
     constructor(id, row, column, doors, rotation) {
         this.id = id;
@@ -102,7 +100,9 @@ export default class MazeCard {
 
     addPlayer(player) {
         this._players.push(player);
-        this._players.sort(Player.compareById);
+        this._players.sort(function(p1, p2) {
+            return p1.id - p2.id;
+        });
     }
 
     removePlayer(player) {

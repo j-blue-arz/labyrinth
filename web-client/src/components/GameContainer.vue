@@ -15,6 +15,9 @@
             :user-player-id="userPlayerId"
             @called-api-method="startPolling"
         />
+        <score-board
+            :players="players"
+        />
     </div>
 </template>
 
@@ -22,6 +25,7 @@
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
+import ScoreBoard from "@/components/ScoreBoard.vue";
 import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
@@ -31,7 +35,8 @@ export default {
     name: "game-container",
     components: {
         InteractiveBoard,
-        GameMenu
+        GameMenu,
+        ScoreBoard
     },
     props: {
         gameFactory: {
@@ -57,6 +62,9 @@ export default {
     computed: {
         isUsingApi: function() {
             return this.useApi();
+        },
+        players: function() {
+            return this.game.getPlayers();
         }
     },
     methods: {

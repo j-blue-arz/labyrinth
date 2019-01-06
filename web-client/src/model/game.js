@@ -208,40 +208,7 @@ export default class Game {
         }
 
         this._mazeCardsFromSortedApi(apiMazeCards);
-        let remainingColors = [3, 2, 1, 0];
-        let toRemove = new Set(this._players.map(player => player.id));
-        apiState.players.sort(function(p1, p2) {
-            return p1.id - p2.id;
-        });
-        for (let index = 0; index < apiState.players.length; index++) {
-            let apiPlayer = apiState.players[index];
-            let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
-            let player;
-            if (this.hasPlayer(apiPlayer.id)) {
-                player = this.getPlayer(apiPlayer.id);
-                player.colorIndex = remainingColors.pop();
-            } else {
-                player = new Player(apiPlayer.id, remainingColors.pop());
-                if (userId === player.id) {
-                    player.isUser = true;
-                }
-            }
-            player.mazeCard = playerCard;
-            if (apiPlayer.isComputerPlayer) {
-                player.isComputer = true;
-                player.algorithm = apiPlayer.algorithm;
-            }
-            player.turnAction = NO_ACTION;
-            playerCard.addPlayer(player);
-            toRemove.delete(player.id);
-            if (!this.hasPlayer(player.id)) {
-                this.addPlayer(player);
-            }
-        }
-
-        for (let id of toRemove) {
-            this.deletePlayerById(id);
-        }
+        this._playersFromApi(apiState, userId);
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
@@ -255,6 +222,37 @@ export default class Game {
         );
 
         this.isLoading = false;
+    }
+
+    _playersFromApi(apiState, userId) {
+        let remainingColors = [3, 2, 1, 0];
+        let toRemove = new Set(this._players.map(player => player.id));
+        apiState.players.sort(function(p1, p2) {
+            return p1.id - p2.id;
+        });
+        for (let index = 0; index < apiState.players.length; index++) {
+            let apiPlayer = apiState.players[index];
+            let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
+            let player;
+            if (this.hasPlayer(apiPlayer.id)) {
+                player = this.getPlayer(apiPlayer.id);
+                player.colorIndex = remainingColors.pop();
+            } else {
+                player = Player.newFromApi(apiPlayer, remainingColors.pop());
+                if (userId === player.id) {
+                    player.isUser = true;
+                }
+            }
+            player.mazeCard = playerCard;
+            playerCard.addPlayer(player);
+            toRemove.delete(player.id);
+            if (!this.hasPlayer(player.id)) {
+                this.addPlayer(player);
+            }
+        }
+        for (let id of toRemove) {
+            this.deletePlayerById(id);
+        }
     }
 
     _findMissingInsertLocation(apiInsertLocations) {

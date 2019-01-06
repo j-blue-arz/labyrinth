@@ -7,6 +7,7 @@
             :maxSize="pieceSize"
             :key="'piece-' + player.id"
             :player="player"
+            :interaction="player.hasToMove()"
         />
     </g>
 </template>

@@ -12,7 +12,7 @@ const determineLeftOverId = function(gameContainer) {
 
 const determineMazeCardIdsWithPlayers = function(gameContainer) {
     var mazeCardIds = [];
-    var vPlayerPieces = gameContainer.findAll(VPlayerPiece);
+    var vPlayerPieces = gameContainer.find(InteractiveBoard).findAll(VPlayerPiece);
     for (var i = 0; i < vPlayerPieces.length; i++) {
         mazeCardIds.push(
             Number.parseInt(
@@ -126,7 +126,7 @@ describe("GameContainer", () => {
     it("assigns colors to all VPlayerPiece components ascending from 0", () => {
         let playerLocations = [loc(0, 0), loc(0, 1), loc(0, 2), loc(0, 3)];
         let gameContainer = factory(playerLocations);
-        let vPlayerPieces = gameContainer.findAll(VPlayerPiece);
+        let vPlayerPieces = gameContainer.find(InteractiveBoard).findAll(VPlayerPiece);
         let playerColors = new Set();
         for (let i = 0; i < vPlayerPieces.length; i++) {
             playerColors.add(vPlayerPieces.at(i).props("player").colorIndex);
