@@ -73,7 +73,8 @@ def test_get_state_has_correct_initial_state(client):
 
     for existing game. Expects players locations set to top left corner for first player.
     Expects top left corner to be a corner. Expects a single leftover card.
-    Expects an objective to be set for the player
+    Expects an objective to be set for the player.
+    Expects scores to be set to 0.
     """
     player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     response = _get_state(client, player_id)
@@ -98,6 +99,8 @@ def test_get_state_has_correct_initial_state(client):
     leftover_card = leftover_cards[0]
     assert not "W" in leftover_card["doors"]
     assert "N" in leftover_card["doors"]
+    for player in state["players"]:
+        assert player["score"] == 0
 
 
 def test_get_state_for_nonexisting_game(client):

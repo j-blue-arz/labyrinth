@@ -183,3 +183,15 @@ def test_get_enabled_shift_locations_with_previous_shift():
     expected_disabled = BoardLocation(3, board.maze.MAZE_SIZE - 1)
     enabled_shift_locations = game.get_enabled_shift_locations()
     assert expected_disabled not in enabled_shift_locations
+
+def test_player_reaches_objective_increase_score():
+    """ Tests that the score on a player is increased once he reaches an objective """
+    board = Mock()
+    turns = Mock()
+    turns.is_action_possible.return_value = True
+    board.move.return_value = True
+    game = Game(identifier=0, board=board, turns=turns)
+    player_id = game.add_player(Player)
+    old_score = game.get_player(player_id).score
+    game.move(player_id, BoardLocation(0, 1))
+    assert game.get_player(player_id).score == old_score + 1

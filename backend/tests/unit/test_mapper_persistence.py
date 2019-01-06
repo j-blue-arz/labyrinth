@@ -31,6 +31,8 @@ def _create_test_game(with_computer=False):
         player.set_board(board)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]
     players[1].piece.maze_card = board.maze[BoardLocation(5, 5)]
+    players[0].score = 7
+    players[1].score = 8
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
     turns = Turns(players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
     game = Game(identifier=7, turns=turns, board=board, players=players)
@@ -47,10 +49,10 @@ def test_mapping_for_player():
     game = mapper.dto_to_game(game_dto)
     assert game.get_player(player_ids[0]).identifier == player_ids[0]
     assert game.get_player(player_ids[1]).identifier == player_ids[1]
-    assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.get_player(player_ids[0]).piece.maze_card.identifier)
-    assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.get_player(player_ids[1]).piece.maze_card.identifier)
+    _assert_games_using_function(created_game, game,
+                                 lambda g: g.get_player(player_ids[0]).piece.maze_card.identifier)
+    _assert_games_using_function(created_game, game,
+                                 lambda g: g.get_player(player_ids[1]).piece.maze_card.identifier)
 
 
 def test_mapping_for_computer_player():
@@ -88,8 +90,8 @@ def test_mapping_for_objectives():
     created_game, player_ids = _create_test_game()
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
-    assert _compare_games_using_function(created_game, game,
-                                         lambda g: g.board.objective_maze_card.identifier)
+    _assert_games_using_function(created_game, game,
+                                 lambda g: g.board.objective_maze_card.identifier)
 
 
 def test_mapping_turns():
@@ -98,21 +100,30 @@ def test_mapping_turns():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     for _ in range(len(player_ids) * 2):
-        _compare_games_using_function(created_game, game,
-                                      lambda g: g.turns.next_player_action().player)
-        _compare_games_using_function(created_game, game,
-                                      lambda g: g.turns.next_player_action().action)
+        _assert_games_using_function(created_game, game,
+                                     lambda g: g.turns.next_player_action().player.identifier)
+        _assert_games_using_function(created_game, game,
+                                     lambda g: g.turns.next_player_action().action)
         game.turns.perform_action(game.turns.next_player_action().player, game.turns.next_player_action().action)
         created_game.turns.perform_action(created_game.turns.next_player_action().player,
                                           created_game.turns.next_player_action().action)
 
+
 def test_mapping_previous_shift_location():
     """ Tests correct mapping of previous shift location """
     created_game, player_ids = _create_test_game()
-    game_dto = mapper
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert game.previous_shift_location == BoardLocation(0, 3)
+
+
+def test_mapping_score():
+    """ Tests correct mapping of player's score """
+    created_game, player_ids = _create_test_game()
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    for player_id in player_ids:
+        _assert_games_using_function(created_game, game, lambda g: g.get_player(player_id).score)
 
 
 def _compare_maze_cards(maze_card1, maze_card2):
@@ -122,8 +133,8 @@ def _compare_maze_cards(maze_card1, maze_card2):
         maze_card1.rotation == maze_card2.rotation
 
 
-def _compare_games_using_function(game1, game2, func):
+def _assert_games_using_function(game1, game2, func):
     """ compares two instances of Game using a function, i.e.
     determines if func(game1) == func(game2)
     """
-    return func(game1) == func(game2)
+    assert func(game1) == func(game2)
