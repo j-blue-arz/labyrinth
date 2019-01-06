@@ -19,11 +19,12 @@ class ReachedMazeCard:
 
 def _copy_board(board):
     maze_card_by_id = {}
-    leftover_card = _copy_maze_card(board.leftover_card)
+    leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
     maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze()
+    maze = Maze(validation=False)
     for location in board.maze.maze_locations():
-        maze_card = _copy_maze_card(board.maze[location])
+        old_maze_card = board.maze[location]
+        maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
         maze_card_by_id[maze_card.identifier] = maze_card
         maze[location] = maze_card
     objective = maze_card_by_id[board.objective_maze_card.identifier]
@@ -32,9 +33,6 @@ def _copy_board(board):
     piece_maze_card = maze_card_by_id[board.pieces[0].maze_card.identifier]
     board_copy.pieces.append(Piece(piece_maze_card))
     return board_copy
-
-def _copy_maze_card(maze_card):
-    return MazeCard(maze_card.identifier, maze_card.doors, maze_card.rotation)
 
 class GameTreeNode:
     """ Represents a node in the game tree. Each shift and move action is a node on its own.

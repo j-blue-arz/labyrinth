@@ -160,8 +160,9 @@ class Maze:
     MAZE_SIZE = 7
     MAZE_LOCATIONS = [BoardLocation(row, column) for row in range(7) for column in range(7)]
 
-    def __init__(self):
+    def __init__(self, validation=True):
         self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
+        self._validation = validation
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -170,7 +171,8 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :return: the MazeCard instance
         """
-        self._validate_location(location)
+        if self._validation:
+            self._validate_location(location)
         return self._maze_cards[location.row][location.column]
 
     def __setitem__(self, location, maze_card):
@@ -180,7 +182,8 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :param maze_card: the maze card to set
         """
-        self._validate_location(location)
+        if self._validation:
+            self._validate_location(location)
         self._maze_cards[location.row][location.column] = maze_card
 
     def maze_card_location(self, maze_card):
@@ -269,7 +272,8 @@ class Maze:
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
     def _validate_insert_location(self, insert_location):
-        self._validate_location(insert_location)
+        if self._validation:
+            self._validate_location(insert_location)
 
 def _generate_insert_locations():
     insert_locations = []

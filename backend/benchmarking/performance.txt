@@ -121,9 +121,10 @@ Test case d3-generated-33s               best of 3: 2325.37ms
 -> Big impact, all d3 below 3 seconds. For d2-long-running, copying takes only about 10% of total running time. Now the biggest factor
 in running time is _location_by_id, with 50%. This test case has about 1100 nodes, with 21400 calls to this method.
 For d3-generated-33s, copy_board still has the greatest part of running time, with about 60%. _location_by_id only has 10%.
-This test case has 7600 nodes, but only 10100 calls to _location_by_id.
+This test case has 7600 nodes, but only 10100 calls to _location_by_id. Biggest factors of copy_board:
+running time of method itself, then iterator over board locations, validation of getitem and setitem, maze card construction
 
-Iterator over board locations created new BoardLocations for each call. Now returns precomputed list:
+Iterator over board locations created new BoardLocations for each call. Now returns precomputed list.
 Test case d1-direct-path                 best of 3: 5.65ms
 Test case d1-shift-req                   best of 3: 13.43ms
 Test case d2-two-shifts                  best of 3: 64.15ms
@@ -135,3 +136,19 @@ Test case d3-long-running                best of 3: 616.49ms
 Test case d3-generated-8s                best of 3: 868.71ms
 Test case d3-generated-23s               best of 3: 1420.97ms
 Test case d3-generated-33s               best of 3: 2099.65ms
+
+Removed validation, inlined constructor call:
+Test case d1-direct-path                 best of 3: 4.53ms
+Test case d1-shift-req                   best of 3: 11.22ms
+Test case d2-two-shifts                  best of 3: 48.82ms
+Test case d2-self-push-out               best of 3: 14.31ms
+Test case d2-pushback-violation          best of 3: 94.51ms
+Test case d2-long-running                best of 3: 1114.79ms
+Test case d3-obj-push-out                best of 3: 399.25ms
+Test case d3-long-running                best of 3: 441.35ms
+Test case d3-generated-8s                best of 3: 629.17ms
+Test case d3-generated-23s               best of 3: 1006.78ms
+Test case d3-generated-33s               best of 3: 1495.85ms
+Also tried to get rid of id to maze card map, which is required to set the objective's and pieces' maze card.
+There are 50 insertions, but only two fetches on this map. Tried to replace it and setting objective and piece during loop. This was slower, though.
+Further optimizations require more intensive work, e.g. reimplementing a dynamic graph, which can handle shift operations and copying by itself.
