@@ -426,6 +426,7 @@ class Player:
         self._board = board
         self._piece = piece
         self._game = game
+        self.score = 0
 
     @property
     def piece(self):
@@ -710,7 +711,9 @@ class Game:
         """
         player = self.get_player(player_id)
         if self._turns.is_action_possible(player, PlayerAction.MOVE_ACTION):
-            self._board.move(player.piece, target_location)
+            has_reached = self._board.move(player.piece, target_location)
+            if has_reached:
+                player.score += 1
         self._turns.perform_action(player, PlayerAction.MOVE_ACTION)
 
     def get_enabled_shift_locations(self):

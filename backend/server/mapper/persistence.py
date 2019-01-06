@@ -68,7 +68,8 @@ def _player_to_dto(player: Player):
     :return: a structure whose JSON representation is valid for the API
     """
     player_dto = {ID: player.identifier,
-                  MAZE_CARD_ID: player.piece.maze_card.identifier}
+                  MAZE_CARD_ID: player.piece.maze_card.identifier,
+                  SCORE: player.score}
     if type(player) is server.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
@@ -110,6 +111,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     else:
         player = Player(identifier=player_dto[ID], game=game, piece=piece)
     player._board = board
+    player.score = player_dto[SCORE]
     return player
 
 
