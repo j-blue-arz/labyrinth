@@ -90,3 +90,17 @@ Test case d3-generated-8s        best of 3: 3042.44ms
 Test case d3-generated-23s       best of 3: 3645.34ms
 Test case d3-generated-33s       best of 3: 7006.33ms
 -> Slight improvement of about 15% for the d3 cases. d3-long-running is slightly slower, because it has to find another solution.
+
+After small refactoring of Board (insert locations now static, start locations now local variable):
+Test case d1-direct-path                 best of 3: 10.50ms
+Test case d1-shift-req                   best of 3: 24.57ms
+Test case d2-two-shifts                  best of 3: 105.56ms
+Test case d2-self-push-out               best of 3: 56.08ms
+Test case d2-pushback-violation          best of 3: 352.45ms
+Test case d2-long-running                best of 3: 2399.78ms
+Test case d3-obj-push-out                best of 3: 1487.31ms
+Test case d3-long-running                best of 3: 1508.94ms
+Test case d3-generated-8s                best of 3: 2517.32ms
+Test case d3-generated-23s               best of 3: 3133.73ms
+Test case d3-generated-33s               best of 3: 5683.61ms
+-> already small removals of members to be copied has a big impact on the running time.

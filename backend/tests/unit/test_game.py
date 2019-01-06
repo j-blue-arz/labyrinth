@@ -173,7 +173,7 @@ def test_get_enabled_shift_locations_without_previous_shift():
     board = Board()
     game = Game(identifier=0, board=board)
     enabled_shift_locations = game.get_enabled_shift_locations()
-    assert set(enabled_shift_locations) == set(board.insert_locations)
+    assert set(enabled_shift_locations) == set(board.INSERT_LOCATIONS)
 
 def test_get_enabled_shift_locations_with_previous_shift():
     """ Tests get_enabled_shift_locations where the previous shift is (3, 0) """

@@ -50,7 +50,7 @@ class GameTreeNode:
         if self.shift_action:
             previous_shift_location, _ = self.shift_action
             disabled_shift_location = self.board.opposing_insert_location(previous_shift_location)
-        for insert_location in self.board.insert_locations:
+        for insert_location in self.board.INSERT_LOCATIONS:
             if insert_location != disabled_shift_location:
                 for rotation in self._current_rotations():
                     yield GameTreeNode(parent=self, shift_action=(insert_location, rotation))

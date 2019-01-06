@@ -4,7 +4,7 @@ These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
-from server.model.computer import ComputerPlayer
+import server.model.computer
 from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
 from .constants import *
 
@@ -32,16 +32,7 @@ def dto_to_game(game_dto):
     created by game_to_dto
     :return: a Game instance whose state is equal to the DTO
     """
-    maze = Maze()
-    leftover_card = None
-    maze_card_by_id = {}
-    for maze_card_dto in game_dto[MAZE_CARDS]:
-        maze_card, board_location = _dto_to_maze_card(maze_card_dto)
-        if board_location is None:
-            leftover_card = maze_card
-        else:
-            maze[board_location] = maze_card
-        maze_card_by_id[maze_card.identifier] = maze_card
+    maze, leftover_card, maze_card_by_id = _dto_to_maze_cards_and_dictionary(game_dto[MAZE_CARDS])
     objective_maze_card = maze_card_by_id[game_dto[OBJECTIVE]]
     board = Board(maze, leftover_card, objective_maze_card=objective_maze_card)
     players = [_dto_to_player(player_dto, None, board, maze_card_by_id)
@@ -55,6 +46,21 @@ def dto_to_game(game_dto):
     return game
 
 
+def _dto_to_maze_cards_and_dictionary(maze_cards_dto):
+    maze = Maze()
+    leftover_card = None
+    maze_card_by_id = {}
+    maze = Maze()
+    for maze_card_dto in maze_cards_dto:
+        maze_card, board_location = _dto_to_maze_card(maze_card_dto)
+        if board_location is None:
+            leftover_card = maze_card
+        else:
+            maze[board_location] = maze_card
+        maze_card_by_id[maze_card.identifier] = maze_card
+    return maze, leftover_card, maze_card_by_id
+
+
 def _player_to_dto(player: Player):
     """Maps a player to a DTO
 
@@ -63,7 +69,7 @@ def _player_to_dto(player: Player):
     """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier}
-    if type(player) is ComputerPlayer:
+    if type(player) is server.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
         player_dto[SHIFT_URL] = player.shift_url
@@ -94,7 +100,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     piece = Piece(maze_card_dict[player_dto[MAZE_CARD_ID]])
     player = None
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
-        player = ComputerPlayer(
+        player = server.model.computer.ComputerPlayer(
             algorithm_name=player_dto[ALGORITHM],
             identifier=player_dto[ID],
             game=game,

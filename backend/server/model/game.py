@@ -273,11 +273,20 @@ class Maze:
     def _validate_insert_location(self, insert_location):
         self._validate_location(insert_location)
 
+def _generate_insert_locations():
+    insert_locations = []
+    for position in range(1, Maze.MAZE_SIZE, 2):
+        insert_locations.append(BoardLocation(0, position))
+        insert_locations.append(BoardLocation(position, 0))
+        insert_locations.append(BoardLocation(Maze.MAZE_SIZE - 1, position))
+        insert_locations.append(BoardLocation(position, Maze.MAZE_SIZE - 1))
+    return frozenset(insert_locations)
 
 class Board:
     """
     The board state of a game of labyrinth.
     """
+    INSERT_LOCATIONS = _generate_insert_locations()
 
     def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
@@ -290,18 +299,7 @@ class Board:
         if not objective_maze_card:
             objective_maze_card = self._random_unoccupied_maze_card()
         self._objective_maze_card = objective_maze_card
-        self._start_locations = [
-            BoardLocation(0, 0),
-            BoardLocation(0, self._maze.MAZE_SIZE - 1),
-            BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
-            BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
         self.validate_moves = True
-        self.insert_locations = set()
-        for position in range(1, Maze.MAZE_SIZE, 2):
-            self.insert_locations.add(BoardLocation(0, position))
-            self.insert_locations.add(BoardLocation(position, 0))
-            self.insert_locations.add(BoardLocation(Maze.MAZE_SIZE - 1, position))
-            self.insert_locations.add(BoardLocation(position, Maze.MAZE_SIZE - 1))
 
     @property
     def leftover_card(self):
@@ -331,10 +329,16 @@ class Board:
         """ Creates and places a piece on the board.
         Generates new objective, because the old one could be the same as the new piece's starting location. """
 
+        start_locations = [
+            BoardLocation(0, 0),
+            BoardLocation(0, self._maze.MAZE_SIZE - 1),
+            BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
+            BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
+
         def next_least_pieces_start_location():
             least_pieces = 1000
             least_pieces_location = None
-            for location in self._start_locations:
+            for location in start_locations:
                 num_pieces = len([piece for piece in self.pieces if piece.maze_card is self.maze[location]])
                 if num_pieces < least_pieces:
                     least_pieces_location = location
@@ -390,7 +394,7 @@ class Board:
                     piece_location, target_location))
 
     def _validate_insert_location(self, insert_location):
-        if insert_location not in self.insert_locations:
+        if insert_location not in self.INSERT_LOCATIONS:
             raise exceptions.InvalidShiftLocationException(
                 "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
 
@@ -411,7 +415,6 @@ class Board:
         for piece in self._pieces:
             maze_cards.discard(piece.maze_card)
         return choice(tuple(maze_cards))
-
 
 class Player:
     """ This class represents a player playing a game """
@@ -715,7 +718,7 @@ class Game:
         opposing_shift_location = None
         if self.previous_shift_location:
             opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
-        return self.board.insert_locations.difference({opposing_shift_location})
+        return self.board.INSERT_LOCATIONS.difference({opposing_shift_location})
 
     def _validate_pushback_rule(self, shift_location):
         """ Checks if the requested shift location is different to the shift location of the previous turn

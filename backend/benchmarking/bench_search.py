@@ -7,7 +7,7 @@ import timeit
 import cProfile
 import sys
 from random import randint
-from server.model.search import Optimizer
+import server.model.search as search
 from server.model.factories import create_maze, create_random_maze_card, create_random_original_maze_and_leftover, \
                                    print_maze
 from server.model.game import BoardLocation
@@ -25,7 +25,7 @@ def _find_setups():
         start_location = BoardLocation(randint(0, 6), randint(0, 6))
         objective_location = BoardLocation(randint(0, 6), randint(0, 6))
         board, piece = setup._create_board_and_piece(maze, maze_card, start_location, objective_location)
-        optimizer = Optimizer(board, piece)
+        optimizer = search.Optimizer(board, piece)
         start = timeit.default_timer()
         actions = optimizer.find_optimal_actions()
         stop = timeit.default_timer()

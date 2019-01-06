@@ -51,7 +51,7 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
     piece = board.create_piece()
     game = MagicMock()
     type(game).identifier = PropertyMock(return_value=7)
-    game.get_enabled_shift_locations.return_value = board.insert_locations
+    game.get_enabled_shift_locations.return_value = board.INSERT_LOCATIONS
     player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     player.run()
@@ -61,7 +61,7 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
     insert_location, rotation = post_shift.call_args[0]
     move_location = post_move.call_args[0][0]
     assert rotation in [0, 90, 180, 270]
-    assert insert_location in board.insert_locations
+    assert insert_location in board.INSERT_LOCATIONS
     assert move_location in board.maze.maze_locations()
 
 
@@ -74,7 +74,7 @@ def test_random_actions_algorithm_computes_valid_actions():
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
         game = MagicMock()
-        game.get_enabled_shift_locations.return_value = board.insert_locations
+        game.get_enabled_shift_locations.return_value = board.INSERT_LOCATIONS
         algorithm = RandomActionsAlgorithm(board, piece, game)
         assert algorithm.shift_action is None
         assert algorithm.move_action is None
@@ -82,7 +82,7 @@ def test_random_actions_algorithm_computes_valid_actions():
         insert_location, insert_rotation = algorithm.shift_action
         move_location = algorithm.move_action
         assert insert_rotation in [0, 90, 180, 270]
-        assert insert_location in board.insert_locations
+        assert insert_location in board.INSERT_LOCATIONS
         allowed_coordinates = [(0, 0)]
         if insert_location == BoardLocation(0, 1) and insert_rotation == 270:
             allowed_coordinates = allowed_coordinates + [(0, 1)]
@@ -109,7 +109,7 @@ def test_random_actions_algorithm_should_have_different_results():
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
         game = MagicMock()
-        game.get_enabled_shift_locations.return_value = board.insert_locations
+        game.get_enabled_shift_locations.return_value = board.INSERT_LOCATIONS
         algorithm = RandomActionsAlgorithm(board, piece, game)
         algorithm.run()
         move_locations.add(algorithm.move_action)
@@ -132,7 +132,7 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
     game = MagicMock()
-    game.get_enabled_shift_locations.return_value = board.insert_locations
+    game.get_enabled_shift_locations.return_value = board.INSERT_LOCATIONS
     player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     for _ in range(100):
@@ -180,7 +180,7 @@ def test_computer_player_random_algorith_respects_no_pushback_rule(post_move, po
     piece = board.create_piece()
     previous_shift_location = BoardLocation(6, 1)
     game = MagicMock()
-    game.get_enabled_shift_locations.return_value = board.insert_locations.difference({previous_shift_location})
+    game.get_enabled_shift_locations.return_value = board.INSERT_LOCATIONS.difference({previous_shift_location})
     type(game).identifier = PropertyMock(return_value=7)
     piece.maze_card = board.maze[BoardLocation(3, 6)]
     player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
