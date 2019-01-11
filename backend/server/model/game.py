@@ -32,6 +32,11 @@ class BoardLocation:
         """ Returns a new BoardLocation by adding the deltas to the current location """
         return BoardLocation(self.row + row_delta, self.column + column_delta)
 
+    @classmethod
+    def copy(cls, board_location):
+        """ Create new BoardLocation as a copy from another """
+        return cls(board_location.row, board_location.column)
+
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
             self.column == other.column and \
@@ -191,7 +196,7 @@ class Maze:
         or None if the card is not in the maze """
         for location in self.maze_locations():
             if self[location] == maze_card:
-                return location
+                return BoardLocation.copy(location)
         return None
 
     def shift(self, insert_location, inserted_maze_card):

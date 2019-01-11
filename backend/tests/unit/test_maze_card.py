@@ -1,7 +1,7 @@
 """ Tests for MazeCard of game.py """
 import pytest
-from model.game import MazeCard
-from model.factories import create_random_maze_card
+from server.model.game import MazeCard
+from server.model.factories import create_random_maze_card
 
 
 def test_generate_assigns_unique_ids():

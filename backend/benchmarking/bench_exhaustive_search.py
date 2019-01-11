@@ -1,5 +1,5 @@
 """ Usage:
-bench_search <task> <case>
+bench_exhaustive_search <task> <case>
 where task is either 'profile' or 'benchmark'
 and 'case' is one of "d1-direct-path", "d1-shift-req", "d2-two-shifts", "d2-self-push-out", "d3-obj-push-out".
 """
@@ -7,11 +7,11 @@ import timeit
 import cProfile
 import sys
 from random import randint
-import server.model.search as search
+import server.model.exhaustive_search as exh
 from server.model.factories import create_maze, create_random_maze_card, create_random_original_maze_and_leftover, \
                                    print_maze
 from server.model.game import BoardLocation
-import tests.unit.test_optimizer as setup
+import tests.unit.test_exhaustive_search as setup
 
 
 def _find_setups():
@@ -25,7 +25,7 @@ def _find_setups():
         start_location = BoardLocation(randint(0, 6), randint(0, 6))
         objective_location = BoardLocation(randint(0, 6), randint(0, 6))
         board, piece = setup._create_board_and_piece(maze, maze_card, start_location, objective_location)
-        optimizer = search.Optimizer(board, piece)
+        optimizer = exh.Optimizer(board, piece)
         start = timeit.default_timer()
         actions = optimizer.find_optimal_actions()
         stop = timeit.default_timer()

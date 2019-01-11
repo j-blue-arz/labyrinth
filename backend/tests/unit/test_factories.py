@@ -1,7 +1,7 @@
 """ Tests for module model.factories """
 from collections import Counter
-from model.factories import create_random_maze, create_random_original_maze_and_leftover
-from model.game import BoardLocation, MazeCard
+from server.model.factories import create_random_maze, create_random_original_maze_and_leftover
+from server.model.game import BoardLocation, MazeCard
 
 
 def test_create_random_maze_generates_unique_ids_for_each_maze_card():

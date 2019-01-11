@@ -3,7 +3,7 @@ Each testcase verifies the precomputed depth of the found solution,
 and asserts that the solution is valid """
 import copy
 import pytest
-from server.model.search import Optimizer
+from server.model.exhaustive_search import Optimizer
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 

@@ -17,7 +17,7 @@ import requests
 import server.mapper.api
 from .maze_algorithm import Graph
 from .game import Player, Turns
-from .search import Optimizer
+import server.model.exhaustive_search as exh
 
 
 class ComputerPlayer(Player, Thread):
@@ -137,13 +137,13 @@ class RandomActionsAlgorithm(Thread):
         self._move_action = choice(tuple(reachable_locations))
 
 
-class ExhaustiveSearchAlgorithm(Thread, Optimizer):
+class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
     """ Uses an exhaustive search to compute best single-player solution to objective.
     abort_search() is already implemented in superclass, Optimizer. """
     SHORT_NAME = "exhaustive-single"
 
     def __init__(self, board, piece, game):
-        Optimizer.__init__(self, board, piece, game.previous_shift_location)
+        exh.Optimizer.__init__(self, board, piece, game.previous_shift_location)
         Thread.__init__(self)
         self._shift_action = None
         self._move_action = None

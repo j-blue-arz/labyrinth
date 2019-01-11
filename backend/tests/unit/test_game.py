@@ -1,8 +1,8 @@
 """ Tests for Game of game.py """
 from unittest.mock import Mock, patch, call
 import pytest
-from model.game import Game, BoardLocation, Player, PlayerAction, Board
-from model.exceptions import PlayerNotFoundException, GameFullException
+from server.model.game import Game, BoardLocation, Player, PlayerAction, Board
+from server.model.exceptions import PlayerNotFoundException, GameFullException
 
 
 def test_add_get_player():

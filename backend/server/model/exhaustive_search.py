@@ -1,7 +1,6 @@
 """ This module contains algorithms performing searches on a game tree. """
-import copy
 from .maze_algorithm import Graph
-from .game import Board, Piece, MazeCard, Maze
+from .game import Board, Piece, MazeCard, Maze, BoardLocation
 
 
 class ReachedMazeCard:
@@ -35,7 +34,7 @@ def _copy_board(board):
     return board_copy
 
 class GameTreeNode:
-    """ Represents a node in the game tree. Each shift and move action is a node on its own.
+    """ Represents a node in the game tree. Each node represents a shift action and all reachable maze cards
     Board instance is expected to only have one piece """
 
     def __init__(self, parent=None, shift_action=None):
@@ -92,7 +91,7 @@ class GameTreeNode:
     def _location_by_id(self, maze_card_id):
         for location in self.board.maze.maze_locations():
             if self.board.maze[location].identifier == maze_card_id:
-                return location
+                return BoardLocation.copy(location)
         if self.board.leftover_card.identifier == maze_card_id:
             return self._shift_location()
         return None
@@ -126,7 +125,9 @@ class GameTreeNode:
         return self.shift_action[0]
 
 class Optimizer:
-    """ Searches for a winning node in the game tree. """
+    """ Searches for a winning node in the game tree. 
+    The algorithm searches for a path which leads to the objective.
+    """
 
     def __init__(self, board, piece, previous_shift_location=None):
         self._board = board

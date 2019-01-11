@@ -1,5 +1,5 @@
 """ Tests for BoardLocation of game.py """
-from model.game import BoardLocation
+from server.model.game import BoardLocation
 
 def test_add_should_not_alter_current():
     """ Tests add method of BoardLocation """

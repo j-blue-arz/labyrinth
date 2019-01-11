@@ -2,7 +2,7 @@
 More specifically, it tests the method player_state_to_dto(),
 which maps a Game instance to an object used to transfer the state """
 import json
-import mapper.api as mapper
+import server.mapper.api as mapper
 from server.model.game import BoardLocation, Player
 from server.model.factories import create_game
 from server.model.computer import ComputerPlayer

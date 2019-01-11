@@ -1,6 +1,6 @@
 """ Tests for Maze of game.py """
-from model.game import Maze, MazeCard, BoardLocation
-from model.factories import create_random_maze, create_random_maze_card
+from server.model.game import Maze, MazeCard, BoardLocation
+from server.model.factories import create_random_maze, create_random_maze_card
 
 
 def _get_id_matrix(maze):

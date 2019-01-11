@@ -1,8 +1,8 @@
 """ Tests for Game of game.py """
 import pytest
-from model.game import Board, BoardLocation
-from model.factories import create_maze, create_random_maze, create_random_maze_card
-from model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
+from server.model.game import Board, BoardLocation
+from server.model.factories import create_maze, create_random_maze, create_random_maze_card
+from server.model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
     MoveUnreachableException, InvalidLocationException
 
 
