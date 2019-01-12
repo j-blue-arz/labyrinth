@@ -77,18 +77,21 @@ class GameTreeNode:
         self.pushed_out_rotation = 0
         if parent:
             self.player_index = 1 - parent.player_index
+            self.depth = parent.depth - 1
         else:
+            self.depth = None
             self.player_index = 1
         self.board = board
 
     @classmethod
-    def get_root(cls, board, previous_shift_location=None):
+    def get_root(cls, board, previous_shift_location=None, max_depth=3):
         """ Returns a root to the tree, with parent = None.
         Also sets up the objective identifier. This is necessary, because the objective in board is moved
         after it has been reached (making it impossible to compare the location of piece and objective) """
         board_copy = _copy_board(board)
         board_copy.validate_moves = False
         root = cls(board=board_copy, previous_shift_location=previous_shift_location)
+        root.depth = max_depth
         cls.objective_identifier = board.objective_maze_card.identifier
         return root
 
@@ -103,14 +106,7 @@ class GameTreeNode:
                 for rotation in self._current_rotations(): # TODO simply rotate inserted card
                     self._do_shift(insert_location, rotation)
                     piece_location = self.board.maze.maze_card_location(piece.maze_card)
-                    reachable_locations = Graph(self.board.maze).reachable_locations(piece_location)
-                    objective_reachable_location = None
-                    for reachable_location in reachable_locations:
-                        if self.board.maze[reachable_location].identifier == self.objective_identifier:
-                            objective_reachable_location = reachable_location
-                            break
-                    if objective_reachable_location:
-                        reachable_locations = [objective_reachable_location]
+                    reachable_locations = self._determine_reachable_locations(piece_location)
                     for location in reachable_locations:
                         self._do_move(piece, piece_location, location)
                         yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
@@ -123,6 +119,23 @@ class GameTreeNode:
         if leftover_card.doors == leftover_card.STRAIGHT:
             rotations = [0, 90]
         return rotations
+
+    def _determine_reachable_locations(self, source):
+        """ If the objective can be reached, return only that one location.
+        If depth <= 2, this is the last move made by the current player. Return only one (any) location.
+        Else return all reachable locations. """
+        reachable_locations = Graph(self.board.maze).reachable_locations(source)
+        objective_reachable_location = None
+        for reachable_location in reachable_locations:
+            if self.board.maze[reachable_location].identifier == self.objective_identifier:
+                objective_reachable_location = reachable_location
+                break
+        if objective_reachable_location:
+            reachable_locations = [objective_reachable_location]
+        elif self.depth <= 2:
+            reachable_locations = [reachable_locations.pop()]
+        return reachable_locations
+
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board
@@ -196,7 +209,7 @@ class Optimizer:
 
         :param depth: the maximum search depth, defaults to 3
         """
-        root = GameTreeNode.get_root(self._board)
+        root = GameTreeNode.get_root(self._board, max_depth=self._depth)
         value = -self._negamax(node=root, depth=self._depth)
         return self._best_actions, value
 
