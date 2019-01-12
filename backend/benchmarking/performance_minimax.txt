@@ -1,0 +1,8 @@
+First implementation:
+Test case big-component-d1-shift-req             best of 3: 18.67ms
+Test case big-component-d2-cannot-prevent        best of 3: 604.27ms
+Test case big-component-d3-reach                 best of 1: 372654.59ms
+Test case difficult-d1-shift-req                 best of 3: 19.96ms
+Test case difficult-d2-cannot-prevent            best of 3: 260.05ms
+Test case difficult-d2-can-prevent               best of 3: 2110.12ms
+Test case difficult-d3-reach                     best of 3: 161798.55ms
