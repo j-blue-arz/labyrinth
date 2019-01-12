@@ -10,7 +10,10 @@ import tests.unit.test_minimax as setup
 
 
 def _benchmark(name):
-    repeat = 1
+    depth=_extract_depth(name)
+    repeat = 3
+    if depth >= 3:
+        repeat = 1
     runs = 1
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     min_time = min(timeit.Timer(optimizer.find_actions).repeat(repeat, runs)) / runs * 1000

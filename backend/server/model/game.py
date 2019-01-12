@@ -20,7 +20,7 @@ from .maze_algorithm import Graph
 
 
 class BoardLocation:
-    """A board location, defined by the row and the column.
+    """ A board location, defined by the row and the column.
     The location does now know the extent of the maze.
     """
 
@@ -197,7 +197,7 @@ class Maze:
         or None if the card is not in the maze """
         for location in self.maze_locations():
             if self[location] == maze_card:
-                return BoardLocation.copy(location)
+                return location
         return None
 
     def shift(self, insert_location, inserted_maze_card):

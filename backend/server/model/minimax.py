@@ -4,45 +4,9 @@ from .game import Board, Piece, MazeCard, Maze, BoardLocation
 
 
 _MAZE_SIZE = 7
-# TODO refactor: use location.add, directly create new location instead of update
-# TODO make BoardLocation immutable, then no need to return copies
-
-
-def _setup_shift_correction(shift_location):
-    if shift_location.row == 0:
-        def constant_part(location): return location.column
-
-        def update_location(location): return _change_row(location, 1)
-    elif shift_location.row == _MAZE_SIZE - 1:
-        def constant_part(location): return location.column
-
-        def update_location(location): return _change_row(location, -1)
-    elif shift_location.column == 0:
-        def constant_part(location): return location.row
-
-        def update_location(location): return _change_column(location, 1)
-    elif shift_location.column == _MAZE_SIZE - 1:
-        def constant_part(location): return location.row
-
-        def update_location(location): return _change_column(location, -1)
-    return constant_part, update_location
-
-
-def _change_row(location, delta):
-    location.row = (location.row + delta) % _MAZE_SIZE
-
-
-def _change_column(location, delta):
-    location.column = (location.column + delta) % _MAZE_SIZE
-
-
-def _sign(player):
-    return 1 - 2*player
-
 
 def _other(player):
     return 1 - player
-
 
 def _copy_board(board):
     maze_card_by_id = {}
@@ -235,7 +199,7 @@ class Minimax:
     def _copy_actions(self, node):
         shift_location, rotation = node.current_shift_action
         shift_action = BoardLocation.copy(shift_location), rotation
-        source, target = node.current_move_action
+        _, target = node.current_move_action
         move_action = BoardLocation.copy(target)
         self._best_actions = (shift_action, move_action)
 
@@ -245,7 +209,7 @@ class Minimax:
 
 
 class IterativeDeepening:
-    """ Iteratively starts a minimax with increasing depths. The search is aborted in two ways: 
+    """ Iteratively starts a minimax with increasing depths. The search is aborted in two ways:
     either the algorithm returns a certain win or loss (of reaching the objective first), or
     the stop_iterating() method is called """
 
