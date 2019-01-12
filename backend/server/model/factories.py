@@ -77,10 +77,17 @@ def create_random_original_maze_and_leftover():
     return maze, leftover
 
 
-def create_board():
+def create_board(maze_string=None, leftover_doors=None, start_locations=None, objective_location=None):
     """ Creates a Board instance. Random maze, random leftover. """
-    return Board(maze=create_random_maze(), leftover_card=create_random_maze_card())
-
+    if maze_string:
+        maze = create_maze(maze_string)
+    else:
+        maze = create_random_maze()
+    if start_locations:
+        Board.START_LOCATIONS = start_locations
+    if objective_location:
+        Board.OBJECTIVE_LOCATION = objective_location
+    return Board(maze=maze, leftover_card=create_random_maze_card(leftover_doors))
 
 def create_original_board():
     """ Creates a Board instance. Original maze, original random leftover """
@@ -88,12 +95,18 @@ def create_original_board():
     return Board(maze=maze, leftover_card=leftover)
 
 
-def create_game(original=False):
+def create_game(original=False, maze_string=None, leftover_doors=None, 
+                start_coordinates=None, objective_coordinates=None):
     """ Creates a game instance with a random board. Player and piece initialization
     is not done here, but dynamically depending on the number of players """
     if original:
         return Game(0, board=create_original_board())
-    return Game(0, board=create_board())
+    start_locations, objective_location = None, None
+    if start_coordinates:
+        start_locations = [BoardLocation(*coordinates) for coordinates in start_coordinates]
+    if objective_coordinates:
+        objective_location = BoardLocation(*objective_coordinates)
+    return Game(0, board=create_board(maze_string, leftover_doors, start_locations, objective_location))
 
 
 def create_maze(maze_string):

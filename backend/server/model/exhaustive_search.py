@@ -20,7 +20,7 @@ def _copy_board(board):
     maze_card_by_id = {}
     leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
     maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze(validation=False)
+    maze = Maze(validate_locations=False)
     for location in board.maze.maze_locations():
         old_maze_card = board.maze[location]
         maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)

@@ -36,12 +36,17 @@ def _change_row(location, delta):
 def _change_column(location, delta):
     location.column = (location.column + delta) % _MAZE_SIZE
 
+def _sign(player):
+    return 1 - 2*player
+
+def _other(player):
+    return 1 - player
 
 def _copy_board(board):
     maze_card_by_id = {}
     leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
     maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze(validation=False)
+    maze = Maze(validate_locations=False)
     for location in board.maze.maze_locations():
         old_maze_card = board.maze[location]
         maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
@@ -58,43 +63,59 @@ def _copy_board(board):
 
 class GameTreeNode:
     """ Represents a node in the game tree for two players.
-    Each node represents a shift action and all maze cards reached for each player.
+    Each node represents a shift action and a subsequent move action
     Board instance is expected to have two pieces, which are indexed by 0 and 1, respectively,
     Player 0 is expected to move first (root) """
 
-    def __init__(self, parent=None, shift_action=None):
+    objective_identifier = 0
+
+    def __init__(self, board=None, parent=None, previous_shift_location=None):
         self.parent = parent
-        self.shift_action = shift_action
-        self.reached_locations = [[], []]
+        self.current_shift_action = None
+        self.current_move_action = None
+        self.previous_shift_location = previous_shift_location
+        self.pushed_out_rotation = 0
         if parent:
             self.player_index = 1 - parent.player_index
         else:
             self.player_index = 1
-        self.board = None
+        self.board = board
 
     @classmethod
-    def get_root(cls, board):
-        """ Returns a root to the tree, with parent = None """
-        root = cls()
-        root.board = _copy_board(board)
-        root.board.validate_moves = False
-        for index, piece in enumerate(root.board.pieces):
-            location = root.board.maze.maze_card_location(piece.maze_card)
-            root.reached_locations[index] = [ReachedLocation(location, None)]
+    def get_root(cls, board, previous_shift_location=None):
+        """ Returns a root to the tree, with parent = None.
+        Also sets up the objective identifier. This is necessary, because the objective in board is moved
+        after it has been reached (making it impossible to compare the location of piece and objective) """
+        board_copy = _copy_board(board)
+        board_copy.validate_moves = False
+        root = cls(board=board_copy, previous_shift_location=previous_shift_location)
+        cls.objective_identifier = board.objective_maze_card.identifier
         return root
 
     def children(self):
         """ Returns iterable over children of this node """
-        self._compute()
         disabled_shift_location = None
-        if self.shift_action:
-            previous_shift_location, _ = self.shift_action
-            disabled_shift_location = self.board.opposing_insert_location(previous_shift_location)
+        if self.previous_shift_location:
+            disabled_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
+        piece = self.board.pieces[_other(self.player_index)]
         for insert_location in self.board.INSERT_LOCATIONS:
             if insert_location != disabled_shift_location:
-                for rotation in self._current_rotations():
-                    yield GameTreeNode(parent=self, shift_action=(insert_location, rotation))
-        return []
+                for rotation in self._current_rotations(): # TODO simply rotate inserted card
+                    self._do_shift(insert_location, rotation)
+                    piece_location = self.board.maze.maze_card_location(piece.maze_card)
+                    reachable_locations = Graph(self.board.maze).reachable_locations(piece_location)
+                    objective_reachable_location = None
+                    for reachable_location in reachable_locations:
+                        if self.board.maze[reachable_location].identifier == self.objective_identifier:
+                            objective_reachable_location = reachable_location
+                            break
+                    if objective_reachable_location:
+                        reachable_locations = [objective_reachable_location]
+                    for location in reachable_locations:
+                        self._do_move(piece, piece_location, location)
+                        yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
+                        self._undo_move(piece)
+                    self._undo_shift()
 
     def _current_rotations(self):
         rotations = [0, 90, 180, 270]
@@ -103,45 +124,45 @@ class GameTreeNode:
             rotations = [0, 90]
         return rotations
 
-    def _compute(self):
-        if not self.board:
-            self.board = _copy_board(self.parent.board)
-            shift_location, shift_rotation = self.shift_action
-            self.board.shift(shift_location, shift_rotation)
-            other_index = 1 - self.player_index
-            other_locations = self._get_updated_parent_reached_locations(other_index)
-            self.reached_locations[other_index] = \
-                    [ReachedLocation(location, location) for location in other_locations]
-            player_locations = self._get_updated_parent_reached_locations(self.player_index)
-            reachable_locations = \
-                    list(Graph(self.board.maze).reachable_locations(sources=player_locations, with_sources=True))
-            self.reached_locations[self.player_index] = reachable_locations
+    def reset_board(self):
+        """ The children() iterator alters the board state. Call this method to reset the board
+        to its original state if iteration is aborted, e.g. returning from a loop """
+        piece = self.board.pieces[_other(self.player_index)]
+        self._undo_move(piece)
+        self._undo_shift()
 
-    def _get_updated_parent_reached_locations(self, player_index):
-        shift_location, _ = self.shift_action
-        constant_part, update_location = _setup_shift_correction(shift_location)
-        locations = [reached.location for reached in self.parent.reached_locations[player_index]]
-        for index, location in enumerate(locations):
-            if constant_part(location) == constant_part(shift_location):
-                locations[index] = BoardLocation.copy(location)
-                update_location(locations[index])
-        return locations
+    def _do_shift(self, insert_location, rotation):
+        self.current_shift_action = (insert_location, rotation)
+        self.board.shift(insert_location, rotation)
+        self.pushed_out_rotation = self.board.leftover_card.rotation
+
+    def _undo_shift(self):
+        insert_location, _ = self.current_shift_action
+        opposing_insert_location = self.board.opposing_insert_location(insert_location)
+        rotation = self.pushed_out_rotation
+        self.board.shift(opposing_insert_location, rotation)
+
+    def _do_move(self, piece, source, target):
+        self.current_move_action = (source, target)
+        self.board.move(piece, target)
+
+    def _undo_move(self, piece):
+        source, _ = self.current_move_action
+        piece.maze_card = self.board.maze[source]
 
     def is_winning(self):
-        """ If this node is a shift, returns True iff the objective can be reached
-        Returns False if this node is a move. """
-        self._compute()
-        for reached in self.reached_locations[self.player_index]:
-            if self.board.objective_maze_card.identifier == self.board.maze[reached.location].identifier:
-                return True
-        return False
+        """ returns True iff the current player has reached the objective """
+        return self.board.pieces[self.player_index].maze_card.identifier == self.objective_identifier
+
+    def value(self):
+        """ Returns 1 if player 0 is winning, -1 if player 1 is winning, 0 else """
+        if self.is_winning():
+            return 1
+        return 0
 
     def is_root(self):
         """ Returns True iff this node is a root, i.e. iff parent is None """
         return not self.parent
-
-    def _shift_location(self):
-        return self.shift_action[0]
 
 
 class Optimizer:
@@ -160,59 +181,44 @@ class Optimizer:
     LOSS = -1
 
     def __init__(self, board, pieces, previous_shift_location=None, depth=3):
-        self._board = board
+        self._board = _copy_board(board)
         self._board.clear_pieces()
         self._board.pieces.extend(pieces)
         self._aborted = False
         self._previous_shift_location = previous_shift_location
         self._depth = depth
+        self._best_actions = None
 
     def find_optimal_actions(self):
-        """ Finds a succession of actions where the opponent does not reach the 
+        """ Finds a succession of actions where the opponent does not reach the
         objective before the player does. If there exists such actions up to d turns, it is found.
         This algorithm only returns the best next action, not the entire path.
 
         :param depth: the maximum search depth, defaults to 3
         """
         root = GameTreeNode.get_root(self._board)
-        value, leaf = self._negamax(node=root, depth=self._depth, player=0)
-        return self._actions(leaf), value
+        value = -self._negamax(node=root, depth=self._depth)
+        return self._best_actions, value
 
-    def _actions(self, leaf):
-        current = leaf
-        move = current.reached_locations[0][0]
-        for reached in current.reached_locations[0]:
-            if current.board.maze[reached.location].identifier == self._board.objective_maze_card.identifier:
-                move = reached
-        while not current.parent.is_root():
-            move = self._find_location_in_shift_corrected_parent_targets(move.source, current)
-            current = current.parent
-        return current.shift_action, move.location
-
-    def _find_location_in_shift_corrected_parent_targets(self, location, node):
-        shift_location, _ = node.shift_action
-        constant_part, update_location = _setup_shift_correction(shift_location)
-        for reached in node.parent.reached_locations[0]:
-            if constant_part(reached.location) == constant_part(shift_location):
-                update_location(reached.location)
-            if reached.location == location:
-                return reached
-        return None
-
-    def _negamax(self, node, depth, player):
-        if node.is_winning():
-            return 1, node
-        if depth == 0:
-            return 0, node
+    def _negamax(self, node, depth):
+        if depth == 0 or node.is_winning():
+            return node.value()
         best_value = -self.INF
-        best_leaf = None
         for child in node.children():
-            value, leaf = self._negamax(child, depth - 1, 1 - player)
-            if depth != self._depth:
-                value = -value
+            value = self._negamax(child, depth - 1)
             if value > best_value:
                 best_value = value
-                best_leaf = leaf
+                if depth == self._depth:
+                    self._copy_actions(node)
             if best_value == 1:
+                node.reset_board()
                 break
-        return best_value, best_leaf
+        return -best_value
+
+    def _copy_actions(self, node):
+        shift_location, rotation = node.current_shift_action
+        shift_action = BoardLocation.copy(shift_location), rotation
+        source, target = node.current_move_action
+        move_action = BoardLocation.copy(target)
+        self._best_actions = (shift_action, move_action)
+

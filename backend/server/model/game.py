@@ -158,6 +158,7 @@ class Piece:
     def __init__(self, maze_card: MazeCard):
         self.maze_card = maze_card
 
+
 class Maze:
     """ Represent the state of the maze.
     The state is maintained in a 2-d array of MazeCard instances.
@@ -165,9 +166,9 @@ class Maze:
     MAZE_SIZE = 7
     MAZE_LOCATIONS = [BoardLocation(row, column) for row in range(7) for column in range(7)]
 
-    def __init__(self, validation=True):
+    def __init__(self, validate_locations=True):
         self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
-        self._validation = validation
+        self._validation = validate_locations
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -280,6 +281,7 @@ class Maze:
         if self._validation:
             self._validate_location(insert_location)
 
+
 def _generate_insert_locations():
     insert_locations = []
     for position in range(1, Maze.MAZE_SIZE, 2):
@@ -289,11 +291,14 @@ def _generate_insert_locations():
         insert_locations.append(BoardLocation(position, Maze.MAZE_SIZE - 1))
     return frozenset(insert_locations)
 
+
 class Board:
     """
     The board state of a game of labyrinth.
     """
     INSERT_LOCATIONS = _generate_insert_locations()
+    START_LOCATIONS = None
+    OBJECTIVE_LOCATION = None
 
     def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
@@ -304,7 +309,7 @@ class Board:
             leftover_card = MazeCard()
         self._leftover_card = leftover_card
         if not objective_maze_card:
-            objective_maze_card = self._random_unoccupied_maze_card()
+            objective_maze_card = self._find_new_objective_maze_card()
         self._objective_maze_card = objective_maze_card
         self.validate_moves = True
 
@@ -336,11 +341,13 @@ class Board:
         """ Creates and places a piece on the board.
         Generates new objective, because the old one could be the same as the new piece's starting location. """
 
-        start_locations = [
-            BoardLocation(0, 0),
-            BoardLocation(0, self._maze.MAZE_SIZE - 1),
-            BoardLocation(self._maze.MAZE_SIZE - 1, self._maze.MAZE_SIZE - 1),
-            BoardLocation(self._maze.MAZE_SIZE - 1, 0)]
+        if not self.START_LOCATIONS:
+            start_locations = [BoardLocation(0, 0),
+                               BoardLocation(0, Maze.MAZE_SIZE - 1),
+                               BoardLocation(Maze.MAZE_SIZE - 1, Maze.MAZE_SIZE - 1),
+                               BoardLocation(Maze.MAZE_SIZE - 1, 0)]
+        else:
+            start_locations = self.START_LOCATIONS
 
         def next_least_pieces_start_location():
             least_pieces = 1000
@@ -355,7 +362,7 @@ class Board:
         next_location = next_least_pieces_start_location()
         piece = Piece(self._maze[next_location])
         self._pieces.append(piece)
-        self._objective_maze_card = self._random_unoccupied_maze_card()
+        self._objective_maze_card = self._find_new_objective_maze_card()
         return piece
 
     def remove_piece(self, piece):
@@ -378,7 +385,7 @@ class Board:
         self._validate_move_location(piece_location, target_location)
         piece.maze_card = target
         if target == self.objective_maze_card:
-            self._objective_maze_card = self._random_unoccupied_maze_card()
+            self._objective_maze_card = self._find_new_objective_maze_card()
             return True
         return False
 
@@ -392,7 +399,6 @@ class Board:
         if column in borders:
             return BoardLocation(row, limit - column)
         raise exceptions.InvalidStateException("Location {} is not on the border".format(insert_location))
-
 
     def _validate_move_location(self, piece_location, target_location):
         if self.validate_moves:
@@ -412,16 +418,16 @@ class Board:
         """
         return [piece for piece in self._pieces if piece.maze_card is maze_card]
 
-    def _random_unoccupied_maze_card(self):
-        """ Finds a random unoccupied maze card,
-        where a maze card is either occupied by a player's piece or by a
-        player's objective
-        """
-        maze_cards = set([self._maze[location]
-                          for location in self._maze.maze_locations()] + [self._leftover_card])
-        for piece in self._pieces:
-            maze_cards.discard(piece.maze_card)
-        return choice(tuple(maze_cards))
+    def _find_new_objective_maze_card(self):
+        """ Finds a random maze card not occupied by a player's piece """
+        if not self.OBJECTIVE_LOCATION:
+            maze_cards = set([self._maze[location]
+                            for location in self._maze.maze_locations()] + [self._leftover_card])
+            for piece in self._pieces:
+                maze_cards.discard(piece.maze_card)
+            return choice(tuple(maze_cards))
+        return self._maze[self.OBJECTIVE_LOCATION]
+
 
 class Player:
     """ This class represents a player playing a game """

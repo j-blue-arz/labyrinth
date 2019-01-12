@@ -112,7 +112,7 @@ def test_d3_generated_3():
     _check_actions(board, piece, actions)
 
 
-MAZE_STRING = """
+BIG_COMPONENT_MAZE = """
 ###|#.#|#.#|###|#.#|#.#|###|
 #..|#..|...|...|#..|..#|..#|
 #.#|###|###|#.#|###|###|#.#|
@@ -144,7 +144,7 @@ MAZE_STRING = """
 
 """
 
-DIFFICULT_MAZE_STRING = """
+DIFFICULT_MAZE = """
 ###|#.#|###|###|#.#|###|###|
 #..|#..|...|#..|#..|#..|..#|
 #.#|###|#.#|#.#|###|#.#|#.#|
@@ -208,14 +208,14 @@ GENERATED_WITH_LINE_LEFTOVER = """
 """
 
 CASES_PARAMS = {
-    "d1-direct-path": (MAZE_STRING, "NE", 0, (3, 3), (6, 2)),
-    "d1-shift-req": (MAZE_STRING, "NE", 0, (3, 3), (0, 3)),
-    "d2-two-shifts": (MAZE_STRING, "NE", 0, (3, 3), (6, 6)),
-    "d2-self-push-out": (DIFFICULT_MAZE_STRING, "NE", 0, (0, 6), (6, 6)),
-    "d2-pushback-violation": (DIFFICULT_MAZE_STRING, "NE", 0, (0, 0), (6, 0)),
-    "d2-long-running": (MAZE_STRING, "NES", 270, (3, 2), (0, 5)),
-    "d3-obj-push-out": (DIFFICULT_MAZE_STRING, "NE", 0, (0, 6), (5, 1)),
-    "d3-long-running": (DIFFICULT_MAZE_STRING, "NS", 180, (4, 6), (1, 1)),
+    "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (6, 2)),
+    "d1-shift-req": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (0, 3)),
+    "d2-two-shifts": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (6, 6)),
+    "d2-self-push-out": (DIFFICULT_MAZE, "NE", 0, (0, 6), (6, 6)),
+    "d2-pushback-violation": (DIFFICULT_MAZE, "NE", 0, (0, 0), (6, 0)),
+    "d2-long-running": (BIG_COMPONENT_MAZE, "NES", 270, (3, 2), (0, 5)),
+    "d3-obj-push-out": (DIFFICULT_MAZE, "NE", 0, (0, 6), (5, 1)),
+    "d3-long-running": (DIFFICULT_MAZE, "NS", 180, (4, 6), (1, 1)),
     "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (1, 4), (6, 2)),
     "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (6, 6), (0, 0)),
     "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 270, (1, 4), (5, 6))
