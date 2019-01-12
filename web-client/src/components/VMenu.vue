@@ -2,7 +2,8 @@
     <ul class="menu" v-show="visible">
         <li class="menu__item" ref="close" @click="onCloseClick">close</li>
         <li class="menu__item" ref="remove" @click="onRemoveComputersClick">remove</li>
-        <li class="menu__item" ref="replace" @click="onReplaceByComputerClick">replace</li>
+        <li class="menu__item" ref="exhaustive" @click="onReplaceByExhaustiveClick">replace by exhaustive search</li>
+        <li class="menu__item" ref="minimax" @click="onReplaceByMinimaxClick">replace by minimax</li>
     </ul>
 </template>
 
@@ -22,8 +23,11 @@ export default {
         onRemoveComputersClick() {
             this.$emit("remove-computers");
         },
-        onReplaceByComputerClick() {
-            this.$emit("replace-by-computer");
+        onReplaceByExhaustiveClick() {
+            this.$emit("replace-by-exhaustive");
+        },
+        onReplaceByMinimaxClick() {
+            this.$emit("replace-by-minimax");
         }
     }
 };

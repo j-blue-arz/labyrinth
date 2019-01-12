@@ -6,10 +6,6 @@ and 'case' is one of "d1-direct-path", "d1-shift-req", "d2-two-shifts", "d2-self
 import timeit
 import cProfile
 import sys
-from random import randint
-import server.model.minimax as mm
-from server.model.factories import create_maze
-from server.model.game import BoardLocation
 import tests.unit.test_minimax as setup
 
 
@@ -17,17 +13,17 @@ def _benchmark(name):
     repeat = 1
     runs = 1
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    min_time = min(timeit.Timer(optimizer.find_optimal_actions).repeat(repeat, runs)) / runs * 1000
+    min_time = min(timeit.Timer(optimizer.find_actions).repeat(repeat, runs)) / runs * 1000
     print("Test case {:<30} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
 
 
 def _profile(name):
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    cProfile.runctx("optimizer.find_optimal_actions()", globals(), locals(), filename=name)
+    cProfile.runctx("optimizer.find_actions()", globals(), locals(), filename=name)
 
 def _results(name):
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    print("Test case {:<30} \t resulted in actions {}".format(name, optimizer.find_optimal_actions()))
+    print("Test case {:<30} \t resulted in actions {}".format(name, optimizer.find_actions()))
 
 def _extract_depth(test_case):
     pos = test_case.find("-d") + 2

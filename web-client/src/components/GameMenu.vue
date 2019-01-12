@@ -2,7 +2,8 @@
     <div @dblclick="onOpenMenu" class="game-menu__button">
         <v-menu
             @remove-computers="removeComputers"
-            @replace-by-computer="replaceByComputer"
+            @replace-by-exhaustive="replaceByExhaustive"
+            @replace-by-minimax="replaceByMinimax"
             @close-menu="closeMenu"
             :visible="menuIsVisible"
         />
@@ -48,10 +49,16 @@ export default {
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },
-        replaceByComputer: function() {
+        replaceByExhaustive: function() {
+            this.replaceByComputer("exhaustive-single");
+        },
+        replaceByMinimax: function() {
+            this.replaceByComputer("minimax");
+        },
+        replaceByComputer: function(type) {
             this.menuIsVisible = false;
             this.api
-                .replacePlayer(this.userPlayerId, "exhaustive-single")
+                .replacePlayer(this.userPlayerId, type)
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },

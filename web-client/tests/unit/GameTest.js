@@ -483,5 +483,9 @@ let GET_STATE_RESULT_FOR_N_3 = `{
     {"column": 1, "row": 0},
     {"column": 0, "row": 1},
     {"column": 2, "row": 1}
-  ]
+  ],
+  "nextAction": {
+    "action": "SHIFT",
+    "playerId": 17
+  }
 }`;

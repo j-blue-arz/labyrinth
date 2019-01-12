@@ -21,10 +21,7 @@ var mockGetComputerPlayers = jest.fn();
 var mockGame = {
     getComputerPlayers: mockGetComputerPlayers
 };
-mockGetComputerPlayers.mockImplementation(() => [
-    new Player(4, 44, 444),
-    new Player(1, 11, 111)
-]);
+mockGetComputerPlayers.mockImplementation(() => [new Player(4, 44, 444), new Player(1, 11, 111)]);
 
 const factory = function() {
     return mount(GameMenu, {
@@ -97,14 +94,14 @@ describe("GameMenu", () => {
         });
     });
 
-    describe("entry replace", () => {
+    describe("entry exhaustive", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
             gameMenu.find(".game-menu__button").trigger("dblclick");
             gameMenu
                 .find(VMenu)
-                .find({ ref: "replace" })
+                .find({ ref: "exhaustive" })
                 .trigger("click");
             expect(menu.isVisible()).toBe(false);
         });
@@ -114,13 +111,34 @@ describe("GameMenu", () => {
             gameMenu.find(".game-menu__button").trigger("dblclick");
             gameMenu
                 .find(VMenu)
-                .find({ ref: "replace" })
+                .find({ ref: "exhaustive" })
                 .trigger("click");
             expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(
-                7,
-                "exhaustive-single"
-            );
+            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "exhaustive-single");
+        });
+    });
+
+    describe("entry minimax", () => {
+        it("closes menu", () => {
+            let gameMenu = factory();
+            let menu = gameMenu.find(".menu");
+            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu
+                .find(VMenu)
+                .find({ ref: "minimax" })
+                .trigger("click");
+            expect(menu.isVisible()).toBe(false);
+        });
+
+        it("calls replacePlayer() on gameApi with player's ID and 'minimax'", () => {
+            let gameMenu = factory();
+            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu
+                .find(VMenu)
+                .find({ ref: "minimax" })
+                .trigger("click");
+            expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
+            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "minimax");
         });
     });
 });

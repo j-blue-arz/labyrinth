@@ -1,6 +1,5 @@
 """ This module contains algorithms performing searches on a game tree. """
-import copy
-from .maze_algorithm import Graph, ReachedLocation
+from .maze_algorithm import Graph
 from .game import Board, Piece, MazeCard, Maze, BoardLocation
 
 
@@ -36,11 +35,14 @@ def _change_row(location, delta):
 def _change_column(location, delta):
     location.column = (location.column + delta) % _MAZE_SIZE
 
+
 def _sign(player):
     return 1 - 2*player
 
+
 def _other(player):
     return 1 - player
+
 
 def _copy_board(board):
     maze_card_by_id = {}
@@ -103,7 +105,7 @@ class GameTreeNode:
         piece = self.board.pieces[_other(self.player_index)]
         for insert_location in self.board.INSERT_LOCATIONS:
             if insert_location != disabled_shift_location:
-                for rotation in self._current_rotations(): # TODO simply rotate inserted card
+                for rotation in self._current_rotations():  # TODO simply rotate inserted card
                     self._do_shift(insert_location, rotation)
                     piece_location = self.board.maze.maze_card_location(piece.maze_card)
                     reachable_locations = self._determine_reachable_locations(piece_location)
@@ -135,7 +137,6 @@ class GameTreeNode:
         elif self.depth <= 2:
             reachable_locations = [reachable_locations.pop()]
         return reachable_locations
-
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board
@@ -178,7 +179,7 @@ class GameTreeNode:
         return not self.parent
 
 
-class Optimizer:
+class Minimax:
     """ Recursively searches for the best action in a two-player game,
     up to a given search depth.
 
@@ -202,14 +203,15 @@ class Optimizer:
         self._depth = depth
         self._best_actions = None
 
-    def find_optimal_actions(self):
+    def find_actions(self):
         """ Finds a succession of actions where the opponent does not reach the
         objective before the player does. If there exists such actions up to d turns, it is found.
         This algorithm only returns the best next action, not the entire path.
 
         :param depth: the maximum search depth, defaults to 3
         """
-        root = GameTreeNode.get_root(self._board, max_depth=self._depth)
+        root = GameTreeNode.get_root(self._board, max_depth=self._depth,
+                                     previous_shift_location=self._previous_shift_location)
         value = -self._negamax(node=root, depth=self._depth)
         return self._best_actions, value
 
@@ -219,6 +221,8 @@ class Optimizer:
         best_value = -self.INF
         for child in node.children():
             value = self._negamax(child, depth - 1)
+            if self._aborted:
+                break
             if value > best_value:
                 best_value = value
                 if depth == self._depth:
@@ -235,3 +239,37 @@ class Optimizer:
         move_action = BoardLocation.copy(target)
         self._best_actions = (shift_action, move_action)
 
+    def abort_algorithm(self):
+        """ Sets a flag to abort the algorithm, which is checked regularly. """
+        self._aborted = True
+
+
+class IterativeDeepening:
+    """ Iteratively starts a minimax with increasing depths. The search is aborted in two ways: 
+    either the algorithm returns a certain win or loss (of reaching the objective first), or
+    the stop_iterating() method is called """
+
+    def __init__(self, board, pieces, previous_shift_location=None):
+        self._board = board
+        self._pieces = pieces
+        self._previous_shift_location = previous_shift_location
+        self._aborted = False
+        self._current_minimax = None
+        self._shift_action = None
+        self._move_action = None
+
+    def start_iterating(self):
+        """ Starts iterating """
+        depth = 0
+        value = 0
+        while not self._aborted and abs(value) != 1:
+            depth = depth + 1
+            self._current_minimax = Minimax(self._board, self._pieces, self._previous_shift_location, depth)
+            actions, value = self._current_minimax.find_actions()
+            if not self._aborted:
+                self._shift_action, self._move_action = actions
+
+    def stop_iterating(self):
+        """ Stops the currently running iteration """
+        self._aborted = True
+        self._current_minimax.abort_algorithm()

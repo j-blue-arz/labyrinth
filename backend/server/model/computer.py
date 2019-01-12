@@ -18,11 +18,12 @@ import server.mapper.api
 from .maze_algorithm import Graph
 from .game import Player, Turns
 import server.model.exhaustive_search as exh
+import server.model.minimax as mm
 
 
 class ComputerPlayer(Player, Thread):
     """ This class represents a computer player. It is instantiated with
-    an algorithm_name parameter, either 'random' or 'exhaustive-single'. Default is 'exhaustive-single'.
+    an algorithm_name parameter, either 'random', 'exhaustive-single', or 'minimax'. Default is 'exhaustive-single'.
     A second required parameter is a supplier for the shift and move API URLs.
     This supplier is expected to have methods get_shift_url(game_id, player_id), and
     get_move_url(game_id, player_id).
@@ -35,7 +36,7 @@ class ComputerPlayer(Player, Thread):
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
-        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm]
+        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm, MinimaxAlgorithm]
         self.algorithm = ExhaustiveSearchAlgorithm
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
@@ -125,7 +126,6 @@ class RandomActionsAlgorithm(Thread):
 
     def abort_search(self):
         """ To fulfill the interface """
-        pass
 
     def run(self):
         insert_location = choice(tuple(self._enabled_shift_locations))
@@ -139,7 +139,7 @@ class RandomActionsAlgorithm(Thread):
 
 class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
     """ Uses an exhaustive search to compute best single-player solution to objective.
-    abort_search() is already implemented in superclass, Optimizer. """
+    abort_search() is already implemented in superclass, exh.Optimizer. """
     SHORT_NAME = "exhaustive-single"
 
     def __init__(self, board, piece, game):
@@ -163,3 +163,30 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
         if actions:
             self._shift_action = actions[0]
             self._move_action = actions[1]
+
+class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
+    """ Uses the minimax algorithm to determine an action in a two-player game. """
+    SHORT_NAME = "minimax"
+
+    def __init__(self, board, player_piece, game):
+        other_piece = next(piece for piece in board.pieces if piece is not player_piece)
+        pieces = [player_piece, other_piece]
+        mm.IterativeDeepening.__init__(self, board, pieces, game.previous_shift_location)
+        Thread.__init__(self)
+
+    @property
+    def shift_action(self):
+        """ Getter for shift_action """
+        return self._shift_action
+
+    @property
+    def move_action(self):
+        """ Getter for move_action """
+        return self._move_action
+
+    def abort_search(self):
+        """ Aborts the search """
+        self.stop_iterating()
+
+    def run(self):
+        self.start_iterating()
