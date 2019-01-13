@@ -99,17 +99,6 @@ def test_multi_sources_reachable_locations():
     assert set(reachable) == expected
 
 
-def test_reachable_locations_with_sources():
-    """ Tests single-source reachable_locations with returned source """
-    maze = create_maze(MAZE_STRING)
-    graph = Graph(maze)
-    reachable = graph.reachable_locations(source=BoardLocation(3, 3), with_sources=True)
-    assert len(reachable) == 29
-    for reached in reachable:
-        assert reached.source == BoardLocation(3, 3)
-        assert isinstance(reached.location, BoardLocation)
-
-
 def test_multi_source_reachable_locations_with_sources():
     """ Tests multi-source reachable_locations with returned sources """
     maze = create_maze(MAZE_STRING)

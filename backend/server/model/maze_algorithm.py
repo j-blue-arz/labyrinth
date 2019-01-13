@@ -43,6 +43,7 @@ class Graph:
 
     def __init__(self, maze):
         self._maze = maze
+        self._reached_locations = {}
 
     def is_reachable(self, source_location, target_location):
         """ Performs a BFS in a graph represented by the current maze to
@@ -62,12 +63,19 @@ class Graph:
 
         :param source: a BoardLocations to start from.
         :param sources: an iterable of BoardLocations.
-        :param with_sources: if True, includes the sources of the reached board locations
+        :param with_sources: if True, includes the sources of the reached board locations. 
+                             Only possible if multiple sources are given
         :return: a set of BoardLocations, or ReachedLocations if with_sources was set to True
         """
         if sources is None:
-            sources = [source]
+            return self._single_source_bfs(source)
+        else:
+            return self._multi_source_bfs(sources, with_sources)
+        
+
+    def _multi_source_bfs(self, sources, with_sources=False):
         reached_locations = {ReachedLocation(source, source) for source in sources}
+        self._reached_locations = set(sources)
         next_elements = deque(reached_locations)
         while next_elements:
             current = next_elements.popleft()
@@ -75,10 +83,23 @@ class Graph:
                 reached_location = ReachedLocation(neighbor, current.source)
                 if reached_location not in reached_locations:
                     reached_locations.add(reached_location)
+                    self._reached_locations.add(neighbor)
                     next_elements.append(reached_location)
         if not with_sources:
             return {reached.location for reached in reached_locations}
         return reached_locations
+
+    def _single_source_bfs(self, source):
+        self._reached_locations = {source}
+        next_elements = deque([source])
+        while next_elements:
+            current = next_elements.popleft()
+            for neighbor in self._neighbors(current):
+                if neighbor not in self._reached_locations:
+                    self._reached_locations.add(neighbor)
+                    next_elements.append(neighbor)
+        return self._reached_locations
+
 
     def _neighbors(self, location):
         """ Returns an iterator over valid neighbor BoardLocations
@@ -88,7 +109,8 @@ class Graph:
         maze_card = self._maze[location]
         for delta in maze_card.out_paths():
             location_to_test = location.add(*delta)
-            if self._maze.is_inside(location_to_test):
-                card_to_test = self._maze[location_to_test]
-                if card_to_test.has_out_path(_mirror(delta)):
-                    yield location_to_test
+            if location_to_test not in self._reached_locations:
+                if self._maze.is_inside(location_to_test):
+                    card_to_test = self._maze[location_to_test]
+                    if card_to_test.has_out_path(_mirror(delta)):
+                        yield location_to_test

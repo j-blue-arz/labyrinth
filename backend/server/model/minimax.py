@@ -69,7 +69,7 @@ class GameTreeNode:
         piece = self.board.pieces[_other(self.player_index)]
         for insert_location in self.board.INSERT_LOCATIONS:
             if insert_location != disabled_shift_location:
-                for rotation in self._current_rotations():  # TODO simply rotate inserted card
+                for rotation in self._current_rotations():
                     self._do_shift(insert_location, rotation)
                     piece_location = self.board.maze.maze_card_location(piece.maze_card)
                     reachable_locations = self._determine_reachable_locations(piece_location)

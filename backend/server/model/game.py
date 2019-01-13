@@ -55,6 +55,30 @@ class BoardLocation:
         return self.__str__()
 
 
+def _generate_out_path_dict():
+    _direction_to_door = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
+
+    def _has_out_path(direction, rotation, doors):
+        door = _direction_to_door[direction]
+        door_index = "NESW".find(door)
+        turns = (rotation // 90)
+        adapted_index = (door_index - turns + 4) % 4
+        adapted_door = "NESW"[adapted_index]
+        return adapted_door in doors
+
+    def _out_paths(doors, rotation):
+        for direction in _direction_to_door:
+            if _has_out_path(direction, rotation, doors):
+                yield direction
+
+    out_path_dict = dict()
+    for doors in ["NS", "NE", "NES"]:
+        for rotation in [0, 90, 180, 270]:
+            out_paths = _out_paths(doors, rotation)
+            out_path_dict[(doors, rotation)] = set(out_paths)
+    return out_path_dict
+
+
 class MazeCard:
     """ Represents one maze card
     The doors field defines the type of the card.
@@ -69,7 +93,7 @@ class MazeCard:
     CORNER = "NE"
     T_JUNCT = "NES"
     next_id = 0
-    _DIRECTION_TO_DOOR = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
+    _OUT_PATHS_DICT = _generate_out_path_dict()
 
     def __init__(self, identifier=0, doors=STRAIGHT, rotation=0):
         self._doors = doors
@@ -105,20 +129,13 @@ class MazeCard:
         :param direction: a tuple describing the direction of the path, e.g. (-1, 0) for north
         :return: true iff there is a path in the given direction
         """
-        door = self._DIRECTION_TO_DOOR[direction]
-        door_index = "NESW".find(door)
-        turns = (self._rotation // 90)
-        adapted_index = (door_index - turns + 4) % 4
-        adapted_door = "NESW"[adapted_index]
-        return adapted_door in self._doors
+        return direction in self._OUT_PATHS_DICT[(self._doors, self._rotation)]
 
     def out_paths(self):
-        """ Returns an iterator over all directions
+        """ Returns an iteratable over all directions
         with outgoing paths, taking rotation into account.
         """
-        for direction in self._DIRECTION_TO_DOOR:
-            if self.has_out_path(direction):
-                yield direction
+        return self._OUT_PATHS_DICT[(self._doors, self._rotation)]
 
     @classmethod
     def reset_ids(cls):
@@ -422,7 +439,7 @@ class Board:
         """ Finds a random maze card not occupied by a player's piece """
         if not self.OBJECTIVE_LOCATION:
             maze_cards = set([self._maze[location]
-                            for location in self._maze.maze_locations()] + [self._leftover_card])
+                              for location in self._maze.maze_locations()] + [self._leftover_card])
             for piece in self._pieces:
                 maze_cards.discard(piece.maze_card)
             return choice(tuple(maze_cards))

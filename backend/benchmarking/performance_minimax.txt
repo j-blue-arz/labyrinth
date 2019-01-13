@@ -17,3 +17,30 @@ Test case difficult-d2-cannot-prevent            best of 3: 35.77ms
 Test case difficult-d2-can-prevent               best of 3: 175.90ms
 Test case difficult-d3-reach                     best of 3: 16467.26ms
 -> Faster by a factor of up to 10
+
+Implemented out_paths() of MazeCard with a table lookup. 
+Test case big-component-d1-shift-req             best of 3: 7.01ms
+Test case big-component-d2-cannot-prevent        best of 3: 24.17ms
+Test case difficult-d1-shift-req                 best of 3: 9.59ms
+Test case difficult-d2-cannot-prevent            best of 3: 30.57ms
+Test case difficult-d2-can-prevent               best of 3: 153.34ms
+Test case difficult-d3-reach                     best of 1: 14620.49ms
+-> Faster by about 10%
+
+No neighbor check for already reached maze cards (in reachable_locations):
+Test case big-component-d1-shift-req             best of 3: 6.29ms
+Test case big-component-d2-cannot-prevent        best of 3: 24.13ms
+Test case difficult-d1-shift-req                 best of 3: 9.08ms
+Test case difficult-d2-cannot-prevent            best of 3: 28.53ms
+Test case difficult-d2-can-prevent               best of 3: 146.99ms
+Test case difficult-d3-reach                     best of 1: 13492.86ms
+-> Another 10%
+
+Implemented single-source bfs which does not require tracking parents:
+Test case big-component-d1-shift-req             best of 3: 5.48ms
+Test case big-component-d2-cannot-prevent        best of 3: 19.97ms
+Test case difficult-d1-shift-req                 best of 3: 7.57ms
+Test case difficult-d2-cannot-prevent            best of 3: 26.42ms
+Test case difficult-d2-can-prevent               best of 3: 135.75ms
+Test case difficult-d3-reach                     best of 1: 12470.99ms
+-> 8%
