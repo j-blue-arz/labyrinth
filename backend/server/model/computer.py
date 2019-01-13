@@ -17,6 +17,8 @@ import requests
 import server.mapper.api
 from .maze_algorithm import Graph
 from .game import Player, Turns
+from .exceptions import LabyrinthDomainException
+from .factories import maze_to_string
 import server.model.exhaustive_search as exh
 import server.model.minimax as mm
 
@@ -31,6 +33,7 @@ class ComputerPlayer(Player, Thread):
     If the player is requested to make its action, it starts a thread for time keeping,
     and a thread for letting the algorithm compute the next shift and move action. """
 
+    _SECONDS_TO_COMPUTE = 2
     _SECONDS_TO_ANSWER = 2
 
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
@@ -60,12 +63,12 @@ class ComputerPlayer(Player, Thread):
         piece = self._find_equal_piece(board)
         algorithm = self.algorithm(board, piece, self._game)
         algorithm.start()
+        time.sleep(self._SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
         shift_action = algorithm.shift_action
         move_action = algorithm.move_action
 
         if shift_action is None or move_action is None:
-            algorithm.abort_search()
             board = copy.deepcopy(self._board)
             piece = self._find_equal_piece(board)
             fallback_algorithm = RandomActionsAlgorithm(board, piece, self._game)
@@ -73,9 +76,12 @@ class ComputerPlayer(Player, Thread):
             fallback_algorithm.run()
             shift_action = fallback_algorithm.shift_action
             move_action = fallback_algorithm.move_action
+
+        #self._validate(shift_action, move_action)
         self._post_shift(*shift_action)
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_move(move_action)
+        algorithm.abort_search()
 
     @property
     def shift_url(self):
@@ -97,6 +103,30 @@ class ComputerPlayer(Player, Thread):
 
     def _find_equal_piece(self, board):
         return next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
+
+    def _validate(self, shift_action, move_action):
+        board = copy.deepcopy(self._board)
+        piece = self._find_equal_piece(board)
+        insert_location, rotation = shift_action
+        maze_string = maze_to_string(board.maze)
+        piece_locations = [board.maze.maze_card_location(piece.maze_card) for piece in board.pieces]
+        self_location = board.maze.maze_card_location(piece.maze_card)
+        objective_location = board.maze.maze_card_location(board.objective_maze_card)
+        try:
+            self._game._validate_pushback_rule(insert_location)
+            board.shift(insert_location, rotation)
+            self_location = board.maze.maze_card_location(piece.maze_card)
+            board._validate_move_location(self_location, move_action)
+        except LabyrinthDomainException as exc:
+            print(exc)
+            print("piece locations: {}".format(piece_locations))
+            print("self location: {}".format(self_location))
+            print("objective location: {}".format(objective_location))
+            print("shift_action: {}, move_action: {}".format(shift_action, move_action))
+            print(maze_string)
+
+
+
 
 
 class RandomActionsAlgorithm(Thread):

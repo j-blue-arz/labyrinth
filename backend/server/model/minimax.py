@@ -8,7 +8,7 @@ _MAZE_SIZE = 7
 def _other(player):
     return 1 - player
 
-def _copy_board(board):
+def _copy_board(board, pieces=None):
     maze_card_by_id = {}
     leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
     maze_card_by_id[leftover_card.identifier] = leftover_card
@@ -21,7 +21,9 @@ def _copy_board(board):
     objective = maze_card_by_id[board.objective_maze_card.identifier]
     board_copy = Board(maze, leftover_card, objective)
     board_copy.validate_moves = False
-    piece_maze_cards = [maze_card_by_id[piece.maze_card.identifier] for piece in board.pieces]
+    if not pieces:
+        pieces = board.pieces
+    piece_maze_cards = [maze_card_by_id[piece.maze_card.identifier] for piece in pieces]
     for maze_card in piece_maze_cards:
         board_copy.pieces.append(Piece(maze_card))
     return board_copy
@@ -77,7 +79,7 @@ class GameTreeNode:
                 piece_location = self.board.maze.maze_card_location(piece.maze_card)
                 rotation_depended_locations = self._determine_reachable_locations(piece_location, insert_location)
                 for rotation in rotation_depended_locations:
-                    self.board.maze[insert_location].rotation = rotation
+                    self._do_rotate(insert_location, rotation)
                     for location in rotation_depended_locations[rotation]:
                         self._do_move(piece, piece_location, location)
                         yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
@@ -139,6 +141,10 @@ class GameTreeNode:
         self.board.shift(insert_location, rotation)
         self.pushed_out_rotation = self.board.leftover_card.rotation
 
+    def _do_rotate(self, insert_location, rotation):
+        self.current_shift_action = (insert_location, rotation)
+        self.board.maze[insert_location].rotation = rotation
+
     def _undo_shift(self):
         insert_location, _ = self.current_shift_action
         opposing_insert_location = self.board.opposing_insert_location(insert_location)
@@ -184,9 +190,7 @@ class Minimax:
     LOSS = -1
 
     def __init__(self, board, pieces, previous_shift_location=None, depth=3):
-        self._board = _copy_board(board)
-        self._board.clear_pieces()
-        self._board.pieces.extend(pieces)
+        self._board = _copy_board(board, pieces)
         self._aborted = False
         self._previous_shift_location = previous_shift_location
         self._depth = depth

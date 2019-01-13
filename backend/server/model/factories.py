@@ -153,7 +153,7 @@ def create_maze(maze_string):
     return maze
 
 
-def print_maze(maze):
+def maze_to_string(maze):
     """ Writes a maze as a multi-line string, as defined in create_maze() """
     def as_multi_line_string(maze_card):
         result = [
@@ -168,10 +168,12 @@ def print_maze(maze):
         result[2][1] = path_to_symbol[maze_card.has_out_path((1, 0))]
         return list(map(lambda char_list: "".join(char_list), result))
 
+    result = []
     for row in range(0, maze.MAZE_SIZE):
         string_arrays = [as_multi_line_string(maze[BoardLocation(row, column)]) for column in range(0, maze.MAZE_SIZE)]
         for line_part in zip(*string_arrays):
             line = "|".join(line_part)
             line = line + "|"
-            print(line)
-        print("-" * (maze.MAZE_SIZE * 4 - 1) + "|")
+            result.append(line)
+        result.append("-" * (maze.MAZE_SIZE * 4 - 1) + "|")
+    return "\n".join(result)

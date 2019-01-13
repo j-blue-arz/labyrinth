@@ -16,6 +16,7 @@ import pytest
 import server.model.minimax as mm
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
+from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE
 
 def test_big_component_d1_shift_req_with_depth_1():
     """ Test-case where one shift action is required to reach objective.
@@ -109,76 +110,31 @@ def test_difficult_d3_reach():
            (shift_location == BoardLocation(6, 3) and move_location == BoardLocation(4, 2)) or \
            (shift_location == BoardLocation(6, 3) and move_location == BoardLocation(3, 3))
 
-BIG_COMPONENT_MAZE = """
-###|#.#|#.#|###|#.#|#.#|###|
-#..|#..|...|...|#..|..#|..#|
-#.#|###|###|#.#|###|###|#.#|
----------------------------|
-###|###|#.#|#.#|#.#|#.#|#.#|
-...|...|#.#|#..|#.#|...|..#|
-#.#|#.#|#.#|###|#.#|###|#.#|
----------------------------|
-#.#|#.#|#.#|#.#|#.#|#.#|#.#|
-#..|#..|..#|#..|..#|#.#|..#|
-#.#|#.#|#.#|#.#|#.#|#.#|#.#|
----------------------------|
-#.#|#.#|#.#|###|#.#|###|###|
-..#|..#|#..|...|...|...|..#|
-###|#.#|###|#.#|###|#.#|#.#|
----------------------------|
-###|#.#|###|#.#|###|#.#|###|
-#..|..#|#..|#.#|...|#..|...|
-#.#|###|#.#|#.#|#.#|###|###|
----------------------------|
-###|#.#|###|#.#|#.#|#.#|#.#|
-..#|#..|...|...|#.#|#..|..#|
-#.#|#.#|###|###|#.#|#.#|#.#|
----------------------------|
-#.#|#.#|###|###|#.#|#.#|#.#|
-#..|...|...|...|#.#|#..|..#|
-###|###|#.#|###|#.#|###|###|
----------------------------*
-"""
+def test_bug_d1_with_depth_1():
+    """ Test case which resulted in a bug where the leftover straight was inserted at (6, 3), 0,
+    and the algorithm then tried to move to the unconnected objective location (6, 2) """
+    optimizer, board, pieces = create_optimizer("bug-d1", depth=1)
+    actions, value = optimizer.find_actions()
+    assert value == 1
+    _check_actions(board, pieces[0], actions)
 
-DIFFICULT_MAZE = """
-###|#.#|###|###|#.#|#.#|###|
-#..|#..|...|#..|#..|#..|..#|
-#.#|###|#.#|#.#|###|#.#|#.#|
----------------------------|
-#.#|#.#|#.#|###|#.#|#.#|###|
-#..|..#|..#|...|#..|#.#|...|
-###|###|#.#|###|###|#.#|###|
----------------------------|
-#.#|###|#.#|#.#|###|###|#.#|
-#..|#..|#..|#.#|...|...|..#|
-#.#|#.#|#.#|#.#|#.#|###|#.#|
----------------------------|
-###|#.#|###|#.#|###|###|###|
-...|..#|#..|#.#|#..|...|...|
-###|#.#|#.#|#.#|#.#|###|###|
----------------------------|
-#.#|#.#|#.#|#.#|#.#|###|#.#|
-#..|#..|#..|#.#|..#|...|...|
-#.#|###|#.#|#.#|#.#|###|###|
----------------------------|
-###|#.#|#.#|#.#|#.#|#.#|#.#|
-..#|#..|#..|...|#.#|#..|..#|
-#.#|###|#.#|###|#.#|#.#|#.#|
----------------------------|
-#.#|###|###|###|#.#|#.#|#.#|
-#..|...|#..|...|#.#|...|..#|
-###|###|#.#|###|#.#|###|###|
----------------------------*
-"""
+def test_bug_d1_with_depth_2():
+    """ Test case which resulted in a bug where the leftover straight was inserted at (6, 3), 0,
+    and the algorithm then tried to move to the unconnected objective location (6, 2) """
+    optimizer, board, pieces = create_optimizer("bug-d1", depth=2)
+    actions, value = optimizer.find_actions()
+    assert value == 1
+    _check_actions(board, pieces[0], actions)
 
 CASES_PARAMS = {
-    "big-component-d1-shift-req": (BIG_COMPONENT_MAZE, "NE", [(3, 3), (6, 6)], (0, 3)),
-    "big-component-d2-cannot-prevent": (BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)),
-    "big-component-d3-reach": (BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)), #solution: ((0, 5), x), (6, 5)
-    "difficult-d1-shift-req": (DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)), #solution: ((0, 3), x), (6, 2)
-    "difficult-d2-cannot-prevent": (DIFFICULT_MAZE, "NE", [(3, 3), (0, 0)], (1, 1)),
-    "difficult-d2-can-prevent": (DIFFICULT_MAZE, "NE", [(3, 3), (2, 6)], (0, 6)), #solution: ((1, 6), x)
-    "difficult-d3-reach": (DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)) # ((0, 3), 270) , (6, 3)
+    "big-component-d1-shift-req": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(3, 3), (6, 6)], (0, 3)),
+    "big-component-d2-cannot-prevent": (MINIMAX_BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)),
+    "big-component-d3-reach": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)), #solution: ((0, 5), x), (6, 5)
+    "difficult-d1-shift-req": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)), #solution: ((0, 3), x), (6, 2)
+    "difficult-d2-cannot-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (0, 0)], (1, 1)),
+    "difficult-d2-can-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (2, 6)], (0, 6)), #solution: ((1, 6), x)
+    "difficult-d3-reach": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)), # ((0, 3), 270) , (6, 3)
+    "bug-d1": (MINIMAX_BUG_MAZE, "NS", [(4, 5), (0, 2)], (6, 2))
 }
 
 

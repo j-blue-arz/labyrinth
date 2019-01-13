@@ -9,7 +9,7 @@ import sys
 from random import randint
 import server.model.exhaustive_search as exh
 from server.model.factories import create_maze, create_random_maze_card, create_random_original_maze_and_leftover, \
-                                   print_maze
+                                   maze_to_string
 from server.model.game import BoardLocation
 import tests.unit.test_exhaustive_search as setup
 
@@ -38,7 +38,7 @@ def _find_setups():
 
 def _generate_and_print_maze_string():
     maze, leftover = create_random_original_maze_and_leftover()
-    print_maze(maze)
+    print(maze_to_string(maze))
     print(leftover)
 
 
