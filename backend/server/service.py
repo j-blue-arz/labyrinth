@@ -8,7 +8,6 @@ from .model.exceptions import LabyrinthDomainException
 from .model.game import Player
 from .model.computer import ComputerPlayer
 
-
 def add_player(game_id, player_request_dto):
     """ Adds a player to a game.
     Creates the game if it does not exist.

@@ -71,7 +71,6 @@ class Graph:
             return self._single_source_bfs(source)
         else:
             return self._multi_source_bfs(sources, with_sources)
-        
 
     def _multi_source_bfs(self, sources, with_sources=False):
         reached_locations = {ReachedLocation(source, source) for source in sources}
@@ -149,7 +148,6 @@ class RotatableMazeCardGraph:
         self._certainly_reached = {}
         self._rotatable = rotatable_maze_card_location
         self._rotatable_touched_directions = []
-
         self._rotation_map = dict()
 
     def reachable_locations(self, source):
@@ -192,7 +190,7 @@ class RotatableMazeCardGraph:
         if self._rotatable_touched_directions:
             rotatable_card = self._maze[self._rotatable]
             original_rotation = rotatable_card.rotation
-            for rotation in [0, 90, 180, 270]:
+            for rotation in self._rotations(rotatable_card):
                 rotatable_card.rotation = rotation
                 entered_paths = list(filter(rotatable_card.has_out_path, self._rotatable_touched_directions))
                 if entered_paths:
@@ -214,3 +212,9 @@ class RotatableMazeCardGraph:
                 card_to_test = self._maze[location_to_test]
                 if card_to_test.has_out_path(_mirror(delta)):
                     yield location_to_test
+
+    def _rotations(self, maze_card):
+        rotations = [0, 90, 180, 270]
+        if maze_card.doors == maze_card.STRAIGHT:
+            rotations = [0, 90]
+        return rotations

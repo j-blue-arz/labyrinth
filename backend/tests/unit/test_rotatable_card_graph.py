@@ -38,13 +38,13 @@ def test_start_from_rotatable():
 
 def test_rotatable_straight():
     """ Tests reachable_locations where the rotatable is a straight.
-    Map is expected to have an entry for two rotations. """
+    Map is expected to only have one entry. """
     maze = create_maze(MAZE_STRING)
     graph = RotatableMazeCardGraph(maze, BoardLocation(5, 4))
     reachable, reachable_map = graph.reachable_locations(BoardLocation(6, 4))
     assert reachable == {BoardLocation(6, 4)}
     expected_0_and_180 = {BoardLocation(*coord) for coord in [(5, 4), (4, 4)]}
-    assert reachable_map == {0: expected_0_and_180, 180: expected_0_and_180}
+    assert reachable_map == {0: expected_0_and_180}
 
 
 def test_rotatable_t_junct_four_subtrees():

@@ -1,5 +1,5 @@
 """ This module contains algorithms performing searches on a game tree. """
-from .maze_algorithm import Graph
+from .maze_algorithm import RotatableMazeCardGraph
 from .game import Board, Piece, MazeCard, Maze, BoardLocation
 
 
@@ -26,6 +26,10 @@ def _copy_board(board):
         board_copy.pieces.append(Piece(maze_card))
     return board_copy
 
+def _union(dict_of_items, key, items):
+    if key in dict_of_items:
+        return dict_of_items[key].union(items)
+    return items
 
 class GameTreeNode:
     """ Represents a node in the game tree for two players.
@@ -69,38 +73,59 @@ class GameTreeNode:
         piece = self.board.pieces[_other(self.player_index)]
         for insert_location in self.board.INSERT_LOCATIONS:
             if insert_location != disabled_shift_location:
-                for rotation in self._current_rotations():
-                    self._do_shift(insert_location, rotation)
-                    piece_location = self.board.maze.maze_card_location(piece.maze_card)
-                    reachable_locations = self._determine_reachable_locations(piece_location)
-                    for location in reachable_locations:
+                self._do_shift(insert_location, 0)
+                piece_location = self.board.maze.maze_card_location(piece.maze_card)
+                rotation_depended_locations = self._determine_reachable_locations(piece_location, insert_location)
+                for rotation in rotation_depended_locations:
+                    self.board.maze[insert_location].rotation = rotation
+                    for location in rotation_depended_locations[rotation]:
                         self._do_move(piece, piece_location, location)
                         yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
                         self._undo_move(piece)
-                    self._undo_shift()
+                self._undo_shift()
 
-    def _current_rotations(self):
+    def _rotations(self, location):
         rotations = [0, 90, 180, 270]
-        leftover_card = self.board.leftover_card
-        if leftover_card.doors == leftover_card.STRAIGHT:
+        maze_card = self.board.maze[location]
+        if maze_card.doors == maze_card.STRAIGHT:
             rotations = [0, 90]
         return rotations
 
-    def _determine_reachable_locations(self, source):
-        """ If the objective can be reached, return only that one location.
+    def _determine_reachable_locations(self, source, rotatable_location):
+        """ If the objective can be reached for any rotation, return only that one rotation and location.
         If depth <= 2, this is the last move made by the current player. Return only one (any) location.
-        Else return all reachable locations. """
-        reachable_locations = Graph(self.board.maze).reachable_locations(source)
-        objective_reachable_location = None
-        for reachable_location in reachable_locations:
-            if self.board.maze[reachable_location].identifier == self.objective_identifier:
-                objective_reachable_location = reachable_location
-                break
-        if objective_reachable_location:
-            reachable_locations = [objective_reachable_location]
-        elif self.depth <= 2:
-            reachable_locations = [reachable_locations.pop()]
-        return reachable_locations
+        if depth == 1, also return only one rotation
+        Else return all reachable locations. 
+        Returns a dictionary, where keys are the rotations, and values are iterables over BoardLocations
+        """
+        graph = RotatableMazeCardGraph(self.board.maze, rotatable_location)
+        reachable, reachable_map = graph.reachable_locations(source)
+        for location in reachable:
+            if self.board.maze[location].identifier == self.objective_identifier:
+                return {0: [location]}
+        for rotation, locations in reachable_map.items():
+            for location in locations:
+                if self.board.maze[location].identifier == self.objective_identifier:
+                    return {rotation: [location]}
+        if self.depth >= 3:
+            result = dict()
+            for rotation in self._rotations(rotatable_location):
+                result[rotation] = _union(reachable_map, rotation, reachable)
+            return result
+        if self.depth == 2:
+            result = dict()
+            for rotation in self._rotations(rotatable_location):
+                if rotation in reachable_map:
+                    result[rotation] = [next(iter(reachable_map[rotation]))]
+                else:
+                    result[rotation] = [next(iter(reachable))]
+            return result
+        if self.depth == 1:
+            if reachable_map:
+                available_rotation = next(iter(reachable_map))
+                return {available_rotation: [next(iter(reachable_map[available_rotation]))]}
+            return {0: [next(iter(reachable))]}
+
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board

@@ -44,3 +44,26 @@ Test case difficult-d2-cannot-prevent            best of 3: 26.42ms
 Test case difficult-d2-can-prevent               best of 3: 135.75ms
 Test case difficult-d3-reach                     best of 1: 12470.99ms
 -> 8%
+
+Implemented rotation aware bfs:
+Test case big-component-d1-shift-req             best of 3: 2.05ms
+Test case big-component-d2-cannot-prevent        best of 3: 9.92ms
+Test case big-component-d3-reach                 best of 1: 11635.50ms
+Test case difficult-d1-shift-req                 best of 3: 2.49ms
+Test case difficult-d2-cannot-prevent            best of 3: 17.13ms
+Test case difficult-d2-can-prevent               best of 3: 56.59ms
+Test case difficult-d3-reach                     best of 1: 4632.21ms
+-> 60% faster. difficult-d3-reach now below 5s
+
+
+Implemented own hash function for BoardLocation:
+Test case big-component-d1-shift-req             best of 3: 1.97ms
+Test case big-component-d2-cannot-prevent        best of 3: 9.07ms
+Test case big-component-d3-reach                 best of 1: 4442.58ms
+Test case difficult-d1-shift-req                 best of 3: 0.58ms
+Test case difficult-d2-cannot-prevent            best of 3: 17.46ms
+Test case difficult-d2-can-prevent               best of 3: 40.57ms
+Test case difficult-d3-reach                     best of 1: 907.34ms
+-> d3 cases faster by big amount. However, the order the solutions are searched has changed, so the performance increase
+is not really conclusive. 
+

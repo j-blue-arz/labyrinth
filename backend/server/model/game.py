@@ -46,7 +46,7 @@ class BoardLocation:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash((self.row, self.column))
+        return self.row*7 + self.column
 
     def __str__(self):
         return "({}, {})".format(self.row, self.column)
