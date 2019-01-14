@@ -20,8 +20,6 @@
             :cx="xCenterPos"
             :cy="yCenterPos"
             :r="maxSize/2 + 2"
-            fill="none"
-            stroke="blue"
             class="player-piece__halo"
         ></circle>
         <text
@@ -88,14 +86,17 @@ export default {
     &__shape {
         stroke: $color-player-stroke;
         stroke-width: 3px;
-        opacity: $opacity-player-not-user;
     }
 
     &__text {
         pointer-events: none;
         font-weight: bold;
         font-family: sans-serif;
-        opacity: $opacity-player-not-user;
+        opacity: $text-opacity-player-not-user;
+
+        .player-piece__user {
+            opacity: 1;
+        }
     }
 
     &__halo {
@@ -105,25 +106,13 @@ export default {
         opacity: 1;
     }
 
-    &__user {
-        .player-piece__shape {
-            opacity: 1;
-        }
-
-        .player-piece__text {
-            opacity: 1;
-        }
-
-        &--to-move {
-            .player-piece__halo {
-                animation: player-piece__halo--pulse 1s infinite;
-            }
-        }
-    }
-
     &__player-0 {
         .player-piece__shape {
             fill: $color-player-0;
+
+            .player-piece__user {
+                fill: $color-player-0-secondary;
+            }
         }
         .player-piece__text {
             fill: $text-color-player-0;
@@ -133,6 +122,10 @@ export default {
     &__player-1 {
         .player-piece__shape {
             fill: $color-player-1;
+
+            .player-piece__user {
+                fill: $color-player-1-secondary;
+            }
         }
         .player-piece__text {
             fill: $text-color-player-1;
@@ -142,6 +135,10 @@ export default {
     &__player-2 {
         .player-piece__shape {
             fill: $color-player-2;
+
+            .player-piece__user {
+                fill: $color-player-2-secondary;
+            }
         }
         .player-piece__text {
             fill: $text-color-player-2;
@@ -151,12 +148,14 @@ export default {
     &__player-3 {
         .player-piece__shape {
             fill: $color-player-3;
+
+            .player-piece__user {
+                fill: $color-player-3-secondary;
+            }
         }
         .player-piece__text {
             fill: $text-color-player-3;
         }
     }
 }
-
-@include pulsating("player-piece__halo--pulse");
 </style>

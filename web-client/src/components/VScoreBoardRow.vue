@@ -42,19 +42,19 @@ export default {
     height: 40px;
 
     &--player-0 {
-        background: rgba($color-player-0, 0.2);
+        background: $color-player-0-secondary;
     }
 
     &--player-1 {
-        background: rgba($color-player-1, 0.2);
+        background: $color-player-1-secondary;
     }
 
     &--player-2 {
-        background: rgba($color-player-2, 0.2);
+        background: $color-player-2-secondary;
     }
 
     &--player-3 {
-        background: rgba($color-player-3, 0.2);
+        background: $color-player-3-secondary;
     }
 
     td {

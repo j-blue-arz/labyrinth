@@ -22,10 +22,19 @@
     }
 }
 
-@mixin pulsating($name) {
+@mixin pulsating-opacity($name) {
     @keyframes #{$name} {
         0% { opacity: 0 }
         50% { opacity: 1 }
         100% { opacity: 0 }
+    }
+}
+
+@mixin pulsating-fill($name, $color1, $color2) {
+    @keyframes #{$name} {
+        0% { fill: $color2 }
+        30% { fill: $color1 }
+        70% { fill: $color1 }
+        100% { fill: $color2 }
     }
 }

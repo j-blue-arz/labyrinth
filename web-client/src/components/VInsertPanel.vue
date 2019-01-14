@@ -17,7 +17,7 @@
             <path
                 v-if="isDisabled"
                 :d="pathCross"
-                class="insert-panel__cross"
+                class="insert-panel__symbol insert-panel__cross"
             />
         </transition>
         <transition name="insert-panel__fade-animation-">
@@ -26,7 +26,7 @@
                 :id="'panel-path-' + insertPanel.id"
                 @click="onClick"
                 :d="pathArrow"
-                class="insert-panel__arrow"
+                class="insert-panel__symbol insert-panel__arrow"
             />
         </transition>
     </svg>
@@ -131,10 +131,20 @@ export default {
 .insert-panel {
     stroke-linejoin: round;
     stroke-linecap: round;
-    stroke-width: 14;
+    stroke-width: 12;
+
+    &path {
+        transition: all 1s;
+    }
 
     &:not(&--interaction) {
-        filter: url(#grayscale);
+        .insert-panel__cross {
+            stroke: $disabled-color-secondary;
+        }
+
+        .insert-panel__arrow {
+            stroke: $interaction-color-secondary;
+        }
     }
 
     &--interaction {
@@ -146,13 +156,16 @@ export default {
         }
     }
 
-    &__cross {
+    &__symbol {
         fill: none;
+        transition: stroke 0.3s;
+    }
+
+    &__cross {
         stroke: $disabled-color;
     }
 
     &__arrow {
-        fill: none;
         stroke: $interaction-color;
     }
 

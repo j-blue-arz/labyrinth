@@ -192,6 +192,10 @@ export default {
             stroke-opacity: 1;
         }
 
+        .maze-card__wall {
+            animation: maze-card__wall--pulse 2s infinite;
+        }
+
         &:hover {
             .maze-card__outline {
                 stroke: $color-outline-active;
@@ -212,6 +216,8 @@ export default {
         cursor: pointer;
     }
 }
+
+@include pulsating-fill("maze-card__wall--pulse", $color-walls, $interaction-color-secondary);
 
 $degrees: 0 90 180 270;
 @each $rotation in $degrees {
