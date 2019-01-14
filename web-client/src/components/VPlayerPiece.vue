@@ -101,7 +101,7 @@ export default {
 
     &__halo {
         fill: none;
-        stroke: $color-outline-active;
+        stroke: $interaction-color;
         stroke-width: 2px;
         opacity: 1;
     }

@@ -7,6 +7,7 @@
             :card-size="cardSize"
             :user-player-id="userPlayerId"
             ref="interactive-board"
+            class="game-container__main-content"
         />
         <game-menu
             v-if="isUsingApi"
@@ -14,10 +15,9 @@
             :game="game"
             :user-player-id="userPlayerId"
             @called-api-method="startPolling"
+            class="game-container__sidebar"
         />
-        <score-board
-            :players="players"
-        />
+        <score-board :players="players" class="game-container__sidebar"/>
     </div>
 </template>
 
@@ -177,10 +177,33 @@ export default {
 
 <style lang="scss">
 .game-container {
+    box-sizing: border-box;
     width: 100%;
     height: 100%;
-    position: relative;
     display: flex;
-    flex-flow: row wrap;
+    position: relative;
+    justify-content: space-around;
+    align-items: flex-start;
+    align-content: flex-start;
+
+    &__main-content {
+        flex: 1 100%;
+    }
+
+    &__sidebar {
+        flex: 1 0 0;
+    }
+}
+
+@media all and (orientation: landscape) {
+    .game-container {
+        flex-flow: column wrap;
+    }
+}
+
+@media all and (orientation: portrait) {
+    .game-container {
+        flex-flow: row wrap;
+    }
 }
 </style>

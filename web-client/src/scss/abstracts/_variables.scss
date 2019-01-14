@@ -5,7 +5,6 @@ $interaction-color-secondary: desaturate($interaction-color, 30%);
 $disabled-color-secondary: desaturate($disabled-color, 30%);
 
 $color-outline: black;
-$color-outline-active: $interaction-color;
 
 $color-pathways: white;
 
@@ -19,6 +18,8 @@ $rotation-animation-duration: 0.5s;
 
 $color-player-stroke: black;
 $text-opacity-player-not-user: 0.8;
+
+$objective-color: #ff3399;
 
 $color-player-0: #274594;
 $color-player-0-secondary: lighten($color-player-0, 50%);

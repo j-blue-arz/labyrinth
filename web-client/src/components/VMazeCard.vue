@@ -61,7 +61,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"/>
+        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"></player-piece-group>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
@@ -190,15 +190,12 @@ export default {
         .maze-card__outline {
             stroke-width: 2px;
             stroke-opacity: 1;
-        }
-
-        .maze-card__wall {
-            animation: maze-card__wall--pulse 2s infinite;
+            animation: maze-card__outline--pulse 2s infinite;
         }
 
         &:hover {
-            .maze-card__outline {
-                stroke: $color-outline-active;
+            .maze-card__wall {
+                fill: $interaction-color-secondary;
             }
         }
     }
@@ -217,7 +214,11 @@ export default {
     }
 }
 
-@include pulsating-fill("maze-card__wall--pulse", $color-walls, $interaction-color-secondary);
+@include pulsating-stroke(
+    "maze-card__outline--pulse",
+    $color-outline,
+    $interaction-color-secondary
+);
 
 $degrees: 0 90 180 270;
 @each $rotation in $degrees {

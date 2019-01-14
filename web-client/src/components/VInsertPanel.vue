@@ -154,6 +154,10 @@ export default {
             cursor: pointer;
             filter: url(#drop-shadow);
         }
+
+        .insert-panel__click-area {
+            cursor: pointer;
+        }
     }
 
     &__symbol {

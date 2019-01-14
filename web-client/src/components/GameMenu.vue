@@ -1,5 +1,5 @@
 <template>
-    <div @dblclick="onOpenMenu" class="game-menu__button">
+    <div @dblclick="onOpenMenu" class="game-menu game-menu__button">
         <v-menu
             @remove-computers="removeComputers"
             @replace-by-exhaustive="replaceByExhaustive"

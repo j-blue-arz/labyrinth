@@ -38,3 +38,12 @@
         100% { fill: $color2 }
     }
 }
+
+@mixin pulsating-stroke($name, $color1, $color2) {
+    @keyframes #{$name} {
+        0% { stroke: $color2 }
+        30% { stroke: $color1 }
+        70% { stroke: $color1 }
+        100% { stroke: $color2 }
+    }
+}

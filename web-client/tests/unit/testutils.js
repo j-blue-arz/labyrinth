@@ -15,7 +15,7 @@ export function extractIdMatrix(gameContainer) {
     var htmlCards = [];
     for (let i = 0; i < vMazeCards.length; i++) {
         var card = vMazeCards.at(i);
-        if (!card.classes("interactive-board__leftover")) {
+        if (!card.classes("leftover")) {
             var x = Number.parseInt(card.props("xPos"));
             var y = Number.parseInt(card.props("yPos"));
             var id = Number.parseInt(card.element.getAttribute("id"));

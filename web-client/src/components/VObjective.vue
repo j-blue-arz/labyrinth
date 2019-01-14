@@ -57,8 +57,8 @@ export default {
 
 <style lang="scss">
 .objective {
-    stroke: #ff3399;
-    fill: #ff3399;
+    stroke: $objective-color;
+    fill: $objective-color;
 
     line {
         stroke-width: 2px;

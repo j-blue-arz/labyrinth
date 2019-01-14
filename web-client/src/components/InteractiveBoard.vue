@@ -1,5 +1,5 @@
 <template>
-    <svg :viewBox="`0 0 ${interactionSize} ${interactionSize}`" class="interactive-board">
+    <svg :viewBox="`0 0 ${interactionWidth} ${interactionHeight}`" class="interactive-board">
         <v-svg-defs></v-svg-defs>
         <v-game-board
             @maze-card-clicked="onMazeCardClick"
@@ -23,28 +23,25 @@
             :disabledInsertLocation="disabledInsertLocation"
             :interaction="isMyTurnToShift"
             :cardSize="cardSize"
-            />
-        <v-maze-card
-            @click.native="onLeftoverClick"
-            v-if="hasStarted"
-            :maze-card="leftoverMazeCard"
+        ></insert-panels>
+        <leftover-maze-card
+            :x="leftoverX"
+            :y="leftoverY"
             :card-size="cardSize"
-            class="interactive-board__leftover"
-            ref="leftover"
-            :class="{interaction: isMyTurnToShift}"
-            overflow="visible"
-        ></v-maze-card>
+            :maze-card="leftoverMazeCard"
+            :interaction="isMyTurnToShift"
+        ></leftover-maze-card>
     </svg>
 </template>
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
+import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
 import Game, * as action from "@/model/game.js";
-import MazeCard from "@/model/mazeCard.js";
 import Graph from "@/model/mazeAlgorithm.js";
 
 export default {
@@ -55,7 +52,8 @@ export default {
         InsertPanels,
         VMazeCard,
         VMoveAnimation,
-        VSvgDefs
+        VSvgDefs,
+        LeftoverMazeCard
     },
     props: {
         game: {
@@ -73,7 +71,11 @@ export default {
     },
     data() {
         return {
-            insertPanels: []
+            insertPanels: [],
+            interactionWidth: 900,
+            interactionHeight: 900,
+            leftoverX: 0,
+            leftoverY: 0
         };
     },
     computed: {
@@ -98,17 +100,11 @@ export default {
                 !this.game.getPlayer(this.userPlayerId).isComputer
             );
         },
-        interactionSize: function() {
-            return this.cardSize * (this.mazeSize + 2);
-        },
         boardOffset: function() {
             return this.cardSize;
         },
         mazeCards: function() {
             return this.game.mazeCardsAsList();
-        },
-        hasStarted: function() {
-            return this.game.leftoverMazeCard instanceof MazeCard;
         },
         leftoverMazeCard: function() {
             return this.game.leftoverMazeCard;
@@ -143,21 +139,41 @@ export default {
                 this.$emit("move-piece", mazeCard.location);
             }
         },
-        onLeftoverClick: function() {
-            if (this.isMyTurnToShift) {
-                this.leftoverMazeCard.rotateClockwise();
+        landscape: function() {
+            return window.innerWidth > window.innerHeight;
+        },
+        interactiveBoardSize: function() {
+            return this.cardSize * (this.mazeSize + 2);
+        },
+        leftoverSize: function() {
+            return this.cardSize;
+        },
+        leftoverOffset: function() {
+            return this.cardSize * 0.5;
+        },
+        handleResize: function() {
+            if (this.landscape()) {
+                this.interactionWidth = this.interactiveBoardSize() + this.leftoverSize();
+                this.interactionHeight = this.interactiveBoardSize();
+                this.leftoverX = this.interactiveBoardSize() - this.leftoverOffset();
+                this.leftoverY = this.leftoverOffset();
+            } else {
+                this.interactionWidth = this.interactiveBoardSize();
+                this.interactionHeight = this.interactiveBoardSize() + this.leftoverSize();
+                this.leftoverX = this.leftoverOffset();
+                this.leftoverY = this.interactiveBoardSize() - this.leftoverOffset();
             }
         }
+    },
+    created() {
+        window.addEventListener("resize", this.handleResize);
+        this.handleResize();
+    },
+    destroyed() {
+        window.removeEventListener("resize", this.handleResize);
     }
 };
 </script>
 
 <style lang="scss">
-.interactive-board {
-    top: 0;
-    left: 0;
-    max-height: 100%;
-    max-width: 100%;
-    height: 100%;
-}
 </style>
