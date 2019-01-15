@@ -2,12 +2,19 @@ import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
+import VMazeCard from "@/components/VMazeCard.vue";
+import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import GameFactory from "@/model/gameFactory";
 import { loc, extractIdMatrix } from "./testutils.js";
 
 const determineLeftOverId = function(gameContainer) {
     let board = gameContainer.find(InteractiveBoard);
-    return Number.parseInt(board.find({ ref: "leftover" }).element.getAttribute("id"));
+    return Number.parseInt(
+        board
+            .find(LeftoverMazeCard)
+            .find(VMazeCard)
+            .element.getAttribute("id")
+    );
 };
 
 const determineMazeCardIdsWithPlayers = function(gameContainer) {

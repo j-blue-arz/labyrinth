@@ -2,6 +2,8 @@ import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
+import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
+import VMazeCard from "@/components/VMazeCard.vue";
 import { copyObjectStructure } from "./testutils.js";
 import Game from "@/model/game.js";
 import { loc } from "./testutils.js";
@@ -42,11 +44,15 @@ function fromStateWithMoveAction() {
     return game;
 }
 
+function findLeftover(board) {
+    return board.find(LeftoverMazeCard).find(VMazeCard);
+}
+
 describe("InteractiveBoard", () => {
     it("rotates leftover maze card when clicked", () => {
-        let board = shallowFactory(fromStateWithShiftAction());
+        let board = factory(fromStateWithShiftAction());
         const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
-        let leftoverVMazeCard = board.find({ ref: "leftover" });
+        let leftoverVMazeCard = findLeftover(board);
         let oldRotation = leftoverVMazeCard.props().mazeCard.rotation;
         leftoverVMazeCard.trigger("click");
         let newRotation = leftoverVMazeCard.props().mazeCard.rotation;
@@ -55,23 +61,23 @@ describe("InteractiveBoard", () => {
     });
 
     it("does not rotate leftover maze card when next action is move", () => {
-        let board = shallowFactory(fromStateWithMoveAction());
+        let board = factory(fromStateWithMoveAction());
         const rotateOperation = jest.spyOn(board.props("game").leftoverMazeCard, "rotateClockwise");
-        let leftoverVMazeCard = board.find({ ref: "leftover" });
+        let leftoverVMazeCard = findLeftover(board);
         leftoverVMazeCard.trigger("click");
         expect(rotateOperation).toHaveBeenCalledTimes(0);
     });
 
     it("assigns class 'interaction' on leftover maze card if next action is shift.", () => {
-        let board = shallowFactory(fromStateWithShiftAction());
-        let leftoverVMazeCard = board.find({ ref: "leftover" });
-        expect(leftoverVMazeCard.classes()).toContain("interaction");
+        let board = factory(fromStateWithShiftAction());
+        let leftoverVMazeCard = findLeftover(board);
+        expect(leftoverVMazeCard.classes()).toContain("maze-card--interactive");
     });
 
     it("removes class 'interaction' on leftover maze card if next action is move.", () => {
-        let board = shallowFactory(fromStateWithMoveAction());
-        let leftoverVMazeCard = board.find({ ref: "leftover" });
-        expect(leftoverVMazeCard.classes()).not.toContain("interaction");
+        let board = factory(fromStateWithMoveAction());
+        let leftoverVMazeCard = findLeftover(board);
+        expect(leftoverVMazeCard.classes()).not.toContain("maze-card--interactive");
     });
 
     it("sets interaction class on reachable maze cards", () => {

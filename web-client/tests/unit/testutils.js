@@ -1,4 +1,5 @@
 import VMazeCard from "@/components/VMazeCard.vue";
+import VGameBoard from "@/components/VGameBoard.vue";
 
 export function assertConsistentLocation(game, location) {
     expect(game.getMazeCard(location).location).toEqual(location);
@@ -11,6 +12,7 @@ export function loc(row, column) {
 export function extractIdMatrix(gameContainer) {
     var vMazeCards = gameContainer
         .find({ ref: "interactive-board" })
+        .find(VGameBoard)
         .findAll(VMazeCard);
     var htmlCards = [];
     for (let i = 0; i < vMazeCards.length; i++) {
