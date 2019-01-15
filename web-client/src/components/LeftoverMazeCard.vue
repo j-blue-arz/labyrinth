@@ -16,9 +16,9 @@
             :card-size="cardSize"
             :x="30"
             :y="30"
+            :interaction="interaction"
             class="leftover__card"
             ref="leftover"
-            :class="{interaction: interaction}"
         ></v-maze-card>
     </svg>
 </template>

@@ -144,7 +144,7 @@ function fetchInteractiveCardIds(board) {
     let interactiveCardIds = [];
     for (var i = 0; i < mazeCards.length; i++) {
         let card = mazeCards.at(i);
-        if (card.classes("interaction")) {
+        if (card.classes("maze-card--interactive")) {
             interactiveCardIds.push(parseInt(card.attributes("id")));
         }
     }

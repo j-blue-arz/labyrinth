@@ -8,6 +8,8 @@
             :maze-cards="mazeCards"
             :card-size="cardSize"
             :interactive-maze-cards="interactiveMazeCards"
+            :current-player-color="currentPlayerColor"
+            :reachable-cards="reachableMazeCards"
         ></v-game-board>
         <v-move-animation
             v-for="player in players"
@@ -87,11 +89,22 @@ export default {
                 return new Set([]);
             } else {
                 let player = this.game.getPlayer(this.userPlayerId);
-                let pieceLocation = player.mazeCard.location;
-                let graph = new Graph(this.game);
-                let locations = graph.reachableLocations(pieceLocation);
-                return new Set(locations.map(location => this.game.getMazeCard(location)));
+                return this.computeReachableMazeCards(player);
             }
+        },
+        reachableMazeCards: function() {
+            if (this.game.isLoading) {
+                return new Set([]);
+            } else {
+                let player = this.game.getPlayer(this.game.nextAction.playerId);
+                return this.computeReachableMazeCards(player);
+            }
+        },
+        currentPlayerColor: function() {
+            if (this.game.isLoading) {
+                return null;
+            }
+            return this.game.getPlayer(this.game.nextAction.playerId).colorIndex;
         },
         isMyTurnToShift: function() {
             return (
@@ -123,6 +136,12 @@ export default {
                 this.game.nextAction.action === action.MOVE_ACTION &&
                 !this.game.getPlayer(this.userPlayerId).isComputer
             );
+        },
+        computeReachableMazeCards: function(player) {
+            let pieceLocation = player.mazeCard.location;
+            let graph = new Graph(this.game);
+            let locations = graph.reachableLocations(pieceLocation);
+            return new Set(locations.map(location => this.game.getMazeCard(location)));
         },
         onInsertPanelClick: function(insertLocation) {
             let insertEvent = {

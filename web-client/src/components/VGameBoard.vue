@@ -19,7 +19,8 @@
                 :card-size="cardSize"
                 :xPos="xPos(mazeCard.location) + borderWidth"
                 :yPos="yPos(mazeCard.location) + borderWidth"
-                :class="{interaction: isInteractive(mazeCard)}"
+                :interaction="isInteractive(mazeCard)"
+                :reachable-by-player="reachableByPlayer(mazeCard)"
                 class="game-board__maze-card"
             ></v-maze-card>
         </transition-group>
@@ -58,6 +59,14 @@ export default {
         interactiveMazeCards: {
             required: false,
             default: () => new Set([])
+        },
+        reachableCards: {
+            required: false,
+            default: () => new Set([])
+        },
+        currentPlayerColor: {
+            required: false,
+            default: null
         }
     },
     data() {
@@ -74,6 +83,12 @@ export default {
     methods: {
         isInteractive(mazeCard) {
             return this.interactiveMazeCards.has(mazeCard);
+        },
+        reachableByPlayer(mazeCard) {
+            if (this.currentPlayerColor !== null && this.reachableCards.has(mazeCard)) {
+                return this.currentPlayerColor;
+            }
+            return null;
         },
         xPos(location) {
             return this.cardSize * location.column;

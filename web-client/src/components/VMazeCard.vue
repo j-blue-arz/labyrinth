@@ -7,6 +7,7 @@
         :y="yPosAnimated"
         :viewBox="`0 0 ${cardSize} ${cardSize}`"
         class="maze-card"
+        :class="[{'maze-card--interactive': interaction}, reachablePlayerColorIndexClass]"
     >
         <g class="maze-card__group" :style="transformOriginStyle" :class="rotationClass">
             <rect
@@ -61,7 +62,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"></player-piece-group>
+        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"/>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
@@ -101,6 +102,15 @@ export default {
             type: Number,
             required: false,
             default: 0
+        },
+        interaction: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        reachableByPlayer: {
+            required: false,
+            default: null
         }
     },
     data() {
@@ -135,6 +145,12 @@ export default {
                 return "rotate" + this.mazeCard.rotation;
             }
             return this.animatedRotationClass;
+        },
+        reachablePlayerColorIndexClass: function() {
+            if (this.reachableByPlayer !== null) {
+                return "maze-card--reachable-player-" + this.reachableByPlayer;
+            }
+            return "";
         },
         players: function() {
             return this.mazeCard.players;
@@ -186,7 +202,9 @@ export default {
         stroke-opacity: 0.8;
     }
 
-    &.interaction {
+    &--interactive {
+        cursor: pointer;
+
         .maze-card__outline {
             stroke-width: 2px;
             stroke-opacity: 1;
@@ -209,8 +227,32 @@ export default {
         stroke: $color-pathways;
     }
 
-    &.interaction {
-        cursor: pointer;
+    &--reachable-player-0 {
+        .maze-card__pathway {
+            fill: $color-player-0-secondary;
+            stroke: $color-player-0-secondary;
+        }
+    }
+
+    &--reachable-player-1 {
+        .maze-card__pathway {
+            fill: $color-player-1-secondary;
+            stroke: $color-player-1-secondary;
+        }
+    }
+
+    &--reachable-player-2 {
+        .maze-card__pathway {
+            fill: $color-player-2-secondary;
+            stroke: $color-player-2-secondary;
+        }
+    }
+
+    &--reachable-player-3 {
+        .maze-card__pathway {
+            fill: $color-player-3-secondary;
+            stroke: $color-player-3-secondary;
+        }
     }
 }
 
