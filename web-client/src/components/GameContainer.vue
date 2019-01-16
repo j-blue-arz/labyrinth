@@ -9,6 +9,7 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
+        <score-board :players="players" class="game-container__sidebar"/>
         <game-menu
             v-if="isUsingApi"
             :api="api"
@@ -17,7 +18,6 @@
             @called-api-method="startPolling"
             class="game-container__sidebar"
         />
-        <score-board :players="players" class="game-container__sidebar"/>
     </div>
 </template>
 
@@ -190,9 +190,9 @@ export default {
         flex: 1 100%;
     }
 
-    &__sidebar {
+    /* &__sidebar {
         flex: 1 0 0;
-    }
+    } */
 }
 
 @media all and (orientation: landscape) {
