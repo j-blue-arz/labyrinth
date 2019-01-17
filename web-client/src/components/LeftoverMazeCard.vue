@@ -2,7 +2,7 @@
     <svg
     :height="leftoverSize"
     :width="leftoverSize"
-    :viewBox="`0 0 160 160`"
+    viewBox="0 0 160 160"
     class="leftover">
         <path
             d="M 10 80 A 70 70 0 0 1 80 10 M 73 3 L 80 10 L 73 17"

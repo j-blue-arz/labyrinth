@@ -5,7 +5,7 @@
         :id="mazeCard.id"
         :x="xPosAnimated"
         :y="yPosAnimated"
-        :viewBox="`0 0 100 100`"
+        viewBox="0 0 100 100"
         class="maze-card"
         :class="[{'maze-card--interactive': interaction}, reachablePlayerColorIndexClass]"
     >

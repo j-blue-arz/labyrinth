@@ -2,7 +2,7 @@
     <transition name="insert-panel__fade-animation-">
         <svg
             v-if="interaction"
-            :viewBox="`0 0 100 100`"
+            viewBox="0 0 100 100"
             :height="size"
             :width="size"
             class="insert-panel"
