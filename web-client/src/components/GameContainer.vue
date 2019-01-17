@@ -9,14 +9,14 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
-        <score-board :players="players" class="game-container__sidebar"/>
+        <score-board :players="players" class="game-container__score"/>
         <game-menu
             v-if="isUsingApi"
             :api="api"
             :game="game"
             :user-player-id="userPlayerId"
             @called-api-method="startPolling"
-            class="game-container__sidebar"
+            class="game-container__menu"
         />
     </div>
 </template>
@@ -188,22 +188,35 @@ export default {
 
     &__main-content {
         flex: 1 100%;
+        order: 1;
     }
 
-    /* &__sidebar {
-        flex: 1 0 0;
-    } */
+    &__score {
+        order: 2;
+    }
+
+    &__menu {
+        order: 3;
+    }
 }
 
 @media all and (orientation: landscape) {
     .game-container {
         flex-flow: column wrap;
     }
+
+    .game-container__main-content {
+        height: 100%;
+    }
 }
 
 @media all and (orientation: portrait) {
     .game-container {
         flex-flow: row wrap;
+    }
+
+    .game-container__main-content {
+        width: 100%;
     }
 }
 </style>
