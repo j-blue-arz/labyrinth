@@ -5,17 +5,17 @@
         :id="mazeCard.id"
         :x="xPosAnimated"
         :y="yPosAnimated"
-        :viewBox="`0 0 ${cardSize} ${cardSize}`"
+        :viewBox="`0 0 100 100`"
         class="maze-card"
         :class="[{'maze-card--interactive': interaction}, reachablePlayerColorIndexClass]"
     >
-        <g class="maze-card__group" :style="transformOriginStyle" :class="rotationClass">
+        <g class="maze-card__group" :class="rotationClass">
             <rect
+                ry="14"
                 x="0"
                 y="0"
-                :ry="edgeRadius"
-                :height="cardSize"
-                :width="cardSize"
+                height="100"
+                width="100"
                 class="maze-card__wall maze-card__outline"
             ></rect>
             <rect
@@ -37,7 +37,7 @@
             <rect
                 ref="eastDoor"
                 v-if="hasEast"
-                :x="(cardSize - 1) - (remainingSpace + 1)"
+                :x="98 - remainingSpace"
                 :y="remainingSpace"
                 :height="pathWidth"
                 :width="remainingSpace + 1"
@@ -47,7 +47,7 @@
                 ref="southDoor"
                 v-if="hasSouth"
                 :x="remainingSpace"
-                :y="(cardSize - 1) - (remainingSpace + 1)"
+                :y="98 - remainingSpace"
                 :height="remainingSpace + 1"
                 :width="pathWidth"
                 class="maze-card__pathway"
@@ -62,7 +62,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group :players="players" :mid-point="piecesPosition" :max-size="piecesSize"/>
+        <player-piece-group :players="players" mid-point="50" :max-size="piecesSize"/>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>
@@ -72,10 +72,6 @@ import MazeCard from "@/model/mazeCard.js";
 import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
 import { TweenLite, Power3 } from "gsap";
-
-const sizeToPiecesRatio = 3.5;
-const sizeToPathWidthRatio = 2.7;
-const sizeToEdgeRadiusRatio = 7;
 
 export default {
     name: "v-maze-card",
@@ -118,7 +114,9 @@ export default {
             animatedRotationClass: "",
             timer: 0,
             xPosAnimated: 0,
-            yPosAnimated: 0
+            yPosAnimated: 0,
+            pathWidth: 37,
+            piecesSize: 28
         };
     },
     watch: {
@@ -155,18 +153,6 @@ export default {
         players: function() {
             return this.mazeCard.players;
         },
-        pathWidth: function() {
-            return Math.floor(this.cardSize / sizeToPathWidthRatio);
-        },
-        edgeRadius: function() {
-            return Math.floor(this.cardSize / sizeToEdgeRadiusRatio);
-        },
-        piecesSize: function() {
-            return Math.floor(this.cardSize / sizeToPiecesRatio);
-        },
-        piecesPosition: function() {
-            return Math.floor(this.cardSize / 2);
-        },
         remainingSpace: function() {
             return Math.floor((this.cardSize - this.pathWidth) / 2);
         },
@@ -181,10 +167,6 @@ export default {
         },
         hasWest: function() {
             return this.mazeCard.hasWestDoor();
-        },
-        transformOriginStyle() {
-            let mid = this.cardSize / 2;
-            return "transform-origin: " + mid + "px " + mid + "px";
         }
     },
     created: function() {
@@ -226,6 +208,10 @@ export default {
     &__pathway {
         fill: $color-pathways;
         stroke: $color-pathways;
+    }
+
+    &__group {
+        transform-origin: 50px 50px;
     }
 
     &--reachable-player-0 {

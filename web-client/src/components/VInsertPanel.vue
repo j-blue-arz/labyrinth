@@ -2,7 +2,7 @@
     <transition name="insert-panel__fade-animation-">
         <svg
             v-if="interaction"
-            :viewBox="`0 0 ${size} ${size}`"
+            :viewBox="`0 0 100 100`"
             :height="size"
             :width="size"
             class="insert-panel"
@@ -11,8 +11,8 @@
             :y="yPos"
         >
             <rect
-                :height="size"
-                :width="size"
+                :height="100"
+                :width="100"
                 class="insert-panel__click-area"
                 @click="onClick"
             ></rect>
@@ -88,15 +88,11 @@ export default {
             let paths = [[[25, 45], [50, 25], [75, 45]], [[25, 70], [50, 50], [75, 70]]];
             this.rotateAndTranslatePaths(paths);
             return "M" + paths.join("M");
-        },
-        transformOriginStyle() {
-            let mid = this.size / 2;
-            return "transform-origin: " + mid + "px " + mid + "px";
         }
     },
     methods: {
         rotateAndTranslatePaths(paths) {
-            let mid = this.size / 2;
+            let mid = 50;
             let angle = this.angle();
             if (angle !== 0) {
                 for (var path of paths) {

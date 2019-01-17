@@ -62,10 +62,6 @@ export default {
             type: Game,
             required: true
         },
-        cardSize: {
-            type: Number,
-            required: true
-        },
         userPlayerId: {
             type: Number,
             required: true
@@ -77,7 +73,8 @@ export default {
             interactionWidth: 900,
             interactionHeight: 900,
             leftoverX: 0,
-            leftoverY: 0
+            leftoverY: 0,
+            cardSize: 100
         };
     },
     computed: {

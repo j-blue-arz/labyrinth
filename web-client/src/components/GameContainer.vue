@@ -4,7 +4,6 @@
             @move-piece="onMovePlayerPiece"
             @insert-card="onInsertCard"
             :game="game"
-            :card-size="cardSize"
             :user-player-id="userPlayerId"
             ref="interactive-board"
             class="game-container__main-content"
@@ -53,7 +52,6 @@ export default {
     data() {
         return {
             game: new Game(),
-            cardSize: 100,
             userPlayerId: 0,
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
