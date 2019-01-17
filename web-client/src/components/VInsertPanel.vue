@@ -168,23 +168,6 @@ export default {
         }
     }
 }
-$width1: 13;
-$width2: 11;
-@keyframes insert-panel__stroke-width--pulse {
-    0% {
-        stroke-width: $width2;
-    }
-    40% {
-        stroke-width: $width2;
-    }
-    50% {
-        stroke-width: $width1;
-    }
-    60% {
-        stroke-width: $width2;
-    }
-    100% {
-        stroke-width: $width2;
-    }
-}
+
+@include pulsating-stroke-width(insert-panel__stroke-width--pulse, 13, 11);
 </style>

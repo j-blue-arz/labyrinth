@@ -14,27 +14,22 @@
         }
     }
 }
-@mixin glowing($color) {
-    @keyframes glowing {
-        0% { filter: drop-shadow(0 0 0px $color); }
-        50% { filter: drop-shadow(0 0 10px $color); }
-        100% { filter: drop-shadow(0 0 0px $color); }
-    }
-}
-
-@mixin pulsating-opacity($name) {
+@mixin pulsating-stroke-width($name, $width1, $width2) {
     @keyframes #{$name} {
-        0% { opacity: 0 }
-        50% { opacity: 1 }
-        100% { opacity: 0 }
-    }
-}
-
-@mixin pulsating-fill($name, $color1, $color2) {
-    @keyframes #{$name} {
-        0% { fill: $color2 }
-        30% { fill: $color1 }
-        70% { fill: $color1 }
-        100% { fill: $color2 }
+        0% {
+            stroke-width: $width2;
+        }
+        40% {
+            stroke-width: $width2;
+        }
+        50% {
+            stroke-width: $width1;
+        }
+        60% {
+            stroke-width: $width2;
+        }
+        100% {
+            stroke-width: $width2;
+        }
     }
 }

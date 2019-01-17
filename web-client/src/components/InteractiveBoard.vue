@@ -30,6 +30,7 @@
             :x="leftoverX"
             :y="leftoverY"
             :card-size="cardSize"
+            :is-landscape="!isLandscape"
             :maze-card="leftoverMazeCard"
             :interaction="isMyTurnToShift"
         ></leftover-maze-card>
@@ -74,7 +75,8 @@ export default {
             interactionHeight: 900,
             leftoverX: 0,
             leftoverY: 0,
-            cardSize: 100
+            cardSize: 100,
+            isLandscape: true
         };
     },
     computed: {
@@ -155,29 +157,25 @@ export default {
                 this.$emit("move-piece", mazeCard.location);
             }
         },
-        landscape: function() {
-            return window.innerWidth > window.innerHeight;
-        },
         interactiveBoardSize: function() {
             return this.cardSize * (this.mazeSize + 2);
         },
         leftoverSize: function() {
             return this.cardSize;
         },
-        leftoverOffset: function() {
-            return this.cardSize * 0.5;
-        },
         handleResize: function() {
-            if (this.landscape()) {
+            if (window.innerWidth > window.innerHeight) {
                 this.interactionWidth = this.interactiveBoardSize() + this.leftoverSize();
                 this.interactionHeight = this.interactiveBoardSize();
-                this.leftoverX = this.interactiveBoardSize() - this.leftoverOffset();
-                this.leftoverY = this.leftoverOffset();
+                this.leftoverX = this.interactiveBoardSize() - 60;
+                this.leftoverY = 50;
+                this.isLandscape = true;
             } else {
                 this.interactionWidth = this.interactiveBoardSize();
                 this.interactionHeight = this.interactiveBoardSize() + this.leftoverSize();
-                this.leftoverX = this.leftoverOffset();
-                this.leftoverY = this.interactiveBoardSize() - this.leftoverOffset();
+                this.leftoverX = 50;
+                this.leftoverY = this.interactiveBoardSize() - 60;
+                this.isLandscape = false;
             }
         }
     },

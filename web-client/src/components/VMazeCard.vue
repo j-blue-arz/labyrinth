@@ -62,7 +62,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group :players="players" mid-point="50" :max-size="piecesSize"/>
+        <player-piece-group :players="players" :mid-point="50" :max-size="piecesSize"/>
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>

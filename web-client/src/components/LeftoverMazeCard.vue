@@ -1,25 +1,26 @@
 <template>
-    <svg
-    :height="leftoverSize"
-    :width="leftoverSize"
-    viewBox="0 0 160 160"
-    class="leftover">
-        <path
-            d="M 10 80 A 70 70 0 0 1 80 10 M 73 3 L 80 10 L 73 17"
-            class="leftover__interaction-arrow"
-            :class="{'leftover__interaction-arrow--interaction': interaction}"
-        />
+    <svg height="100" width="100" viewBox="0 0 100 100" class="leftover">
         <v-maze-card
             @click.native="onLeftoverClick"
             v-if="hasStarted"
             :maze-card="mazeCard"
             :card-size="cardSize"
-            :x="30"
-            :y="30"
+            x="0"
+            y="0"
             :interaction="interaction"
             class="leftover__card"
             ref="leftover"
         ></v-maze-card>
+        <path
+            v-if="interaction"
+            :d="arrowPath"
+            class="leftover__arrow"
+        ></path>
+        <polygon
+            v-if="interaction"
+            :points="arrowHead"
+            class="leftover__arrow-head"
+        ></polygon>
     </svg>
 </template>
 
@@ -42,6 +43,16 @@ export default {
             type: Number,
             required: true
         },
+        landscape: {
+            type: Boolean,
+            required: false,
+            default: true
+        },
+        isLandscape: {
+            type: Boolean,
+            required: false,
+            default: true
+        },
         interaction: {
             type: Boolean,
             required: false,
@@ -54,6 +65,50 @@ export default {
         },
         leftoverSize: function() {
             return this.cardSize * 1.6;
+        },
+        width: function() {
+            if (this.isLandscape) {
+                return this.cardSize * 1.5;
+            } else {
+                return this.cardSize;
+            }
+        },
+        height: function() {
+            if (this.isLandscape) {
+                return this.cardSize;
+            } else {
+                return this.cardSize * 1.5;
+            }
+        },
+        mazeCardX: function() {
+            if (this.isLandscape) {
+                return this.cardSize;
+            } else {
+                return 0;
+            }
+        },
+        mazeCardY: function() {
+            if (this.isLandscape) {
+                return 0;
+            } else {
+                return this.cardSize;
+            }
+        },
+        arrowPath: function() {
+            let radius = 40;
+            let start = 0.7 * radius;
+            let pathStart = [50 - start, 50 + start];
+            let arc = [radius, radius, 0, 1, 1, 50 + start, 50 + start];
+            return "M" + pathStart + "A" + arc;
+        },
+        arrowHead: function() {
+            let radius = 40;
+            let start = 0.7 * radius;
+            let arrowLength = 20;
+            let point1 = [50 + start - 4, 50 + start + 4];
+            let point2 = [point1[0], point1[1] - arrowLength];
+            let point3 = [point1[0] + arrowLength, point1[1]];
+            return [point1, point2, point3];
         }
     },
     methods: {
@@ -67,26 +122,42 @@ export default {
 </script>
 
 <style lang="scss">
+@mixin arrow {
+    opacity: 1;
+    animation: leftover__interaction-arrow--pulse 3s infinite;
+    cursor: pointer;
+    pointer-events: none;
+}
+
 .leftover {
+    overflow: visible;
+
     &__card {
         overflow: visible;
     }
 
-    &__interaction-arrow {
+    &__arrow {
+        @include arrow;
         fill: none;
         stroke: $interaction-color;
-        stroke-width: 10;
-        stroke-linejoin: round;
-        stroke-linecap: round;
-        transition: stroke 0.3s;
+    }
 
-        &:not(&--interaction) {
-            stroke: $interaction-color-secondary;
+    &__arrow-head {
+        @include arrow;
+        fill: $interaction-color;
+        stroke: none;
+    }
+
+    &:hover {
+        .leftover__arrow {
+            opacity: 0;
         }
 
-        &--interaction {
-            filter: url(#drop-shadow);
+        .leftover__arrow-head {
+            opacity: 0;
         }
     }
 }
+$width: 12;
+@include pulsating-stroke-width(leftover__interaction-arrow--pulse, $width + 1, $width - 1);
 </style>
