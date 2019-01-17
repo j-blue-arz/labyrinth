@@ -1,8 +1,8 @@
-$interaction-color: hsl(103, 50%, 50%);
-$disabled-color: hsl(14, 50%, 50%);
+$interaction-color: #749966;
+$disabled-color: #bf5e40;
 
-$interaction-color-secondary: desaturate($interaction-color, 30%);
-$disabled-color-secondary: desaturate($disabled-color, 30%);
+$interaction-color-secondary: lighten($interaction-color, 10%);
+$disabled-color-secondary: lighten($disabled-color, 10%);
 
 $color-outline: black;
 

@@ -208,7 +208,8 @@ export default {
         .maze-card__outline {
             stroke-width: 2px;
             stroke-opacity: 1;
-            animation: maze-card__outline--pulse 2s infinite;
+            stroke: $interaction-color;
+            animation: maze-card__outline--pulse 3s infinite;
         }
 
         &:hover {
@@ -256,12 +257,6 @@ export default {
     }
 }
 
-@include pulsating-stroke(
-    "maze-card__outline--pulse",
-    $color-outline,
-    $interaction-color-secondary
-);
-
 $degrees: 0 90 180 270;
 @each $rotation in $degrees {
     $to: $rotation;
@@ -280,5 +275,28 @@ $degrees: 0 90 180 270;
     }
 
     @include rotateFromTo($animationName, $from + deg, $to + deg);
+}
+
+$color1: $color-outline;
+$color2: $interaction-color;
+@keyframes maze-card__outline--pulse {
+    0% {
+        stroke: $color1;
+        stroke-width: 3px;
+    }
+    40% {
+        stroke: $color1;
+    }
+    50% {
+        stroke: $color2;
+        stroke-width: 2px;
+    }
+    60% {
+        stroke: $color1;
+    }
+    100% {
+        stroke: $color1;
+        stroke-width: 3px;
+    }
 }
 </style>

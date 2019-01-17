@@ -1,36 +1,35 @@
 <template>
-    <svg
-        :viewBox="`0 0 ${size} ${size}`"
-        :height="size"
-        :width="size"
-        class="insert-panel"
-        :class="insertPanelClass"
-        :x="xPos"
-        :y="yPos">
-        <rect
+    <transition name="insert-panel__fade-animation-">
+        <svg
+            v-if="interaction"
+            :viewBox="`0 0 ${size} ${size}`"
             :height="size"
             :width="size"
-            class="insert-panel__click-area"
-            @click="onClick"
-        />
-        <transition name="insert-panel__fade-animation-">
+            class="insert-panel"
+            :class="insertPanelClass"
+            :x="xPos"
+            :y="yPos"
+        >
+            <rect
+                :height="size"
+                :width="size"
+                class="insert-panel__click-area"
+                @click="onClick"
+            ></rect>
             <path
                 v-if="isDisabled"
                 :d="pathCross"
                 class="insert-panel__symbol insert-panel__cross"
-            />
-        </transition>
-        <transition name="insert-panel__fade-animation-">
+            ></path>
             <path
                 v-if="isEnabled"
                 :id="'panel-path-' + insertPanel.id"
                 @click="onClick"
                 :d="pathArrow"
                 class="insert-panel__symbol insert-panel__arrow"
-            />
-        </transition>
-    </svg>
-
+            ></path>
+        </svg>
+    </transition>
 </template>
 
 <script>
@@ -129,30 +128,14 @@ export default {
 
 <style lang="scss">
 .insert-panel {
-    stroke-linejoin: round;
-    stroke-linecap: round;
     stroke-width: 12;
 
-    &path {
-        transition: all 1s;
-    }
-
-    &:not(&--interaction) {
-        .insert-panel__cross {
-            stroke: $disabled-color-secondary;
-        }
-
-        .insert-panel__arrow {
-            stroke: $interaction-color-secondary;
-        }
-    }
-
-    &--interaction {
+    &:not(&--disabled) {
         filter: none;
 
         .insert-panel__arrow {
             cursor: pointer;
-            filter: url(#drop-shadow);
+            animation: insert-panel__stroke-width--pulse 3s infinite;
         }
 
         .insert-panel__click-area {
@@ -162,7 +145,6 @@ export default {
 
     &__symbol {
         fill: none;
-        transition: stroke 0.3s;
     }
 
     &__cross {
@@ -181,13 +163,32 @@ export default {
     &__fade-animation {
         &--enter-active,
         &--leave-active {
-            transition: opacity 1s;
+            transition: opacity 0.3s;
         }
 
         &--enter,
         &--leave-to {
             opacity: 0;
         }
+    }
+}
+$width1: 13;
+$width2: 11;
+@keyframes insert-panel__stroke-width--pulse {
+    0% {
+        stroke-width: $width2;
+    }
+    40% {
+        stroke-width: $width2;
+    }
+    50% {
+        stroke-width: $width1;
+    }
+    60% {
+        stroke-width: $width2;
+    }
+    100% {
+        stroke-width: $width2;
     }
 }
 </style>
