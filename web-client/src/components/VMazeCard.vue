@@ -196,7 +196,7 @@ export default {
 
         &:hover {
             .maze-card__wall {
-                fill: $interaction-color-secondary;
+                fill: $interaction-color;
             }
         }
     }

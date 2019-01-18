@@ -21,20 +21,5 @@
                 <feMergeNode in="insideLight"/>
             </feMerge>
         </filter>
-        <filter id="drop-shadow" width="150%" height="150%" filterUnits="userSpaceOnUse">
-            <feGaussianBlur result="shadowBlur" in="SourceAlpha" stdDeviation="3"/>
-            <feOffset result="shadow" in="shadowBlur" dx="3" dy="3"/>
-            <feMerge>
-                <feMergeNode in="shadow"/>
-                <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-        </filter>
-        <filter id="grayscale" x="0" y="0" width="150%" height="150%" filterUnits="userSpaceOnUse">
-            <feColorMatrix type="matrix"
-            values="0.5 0.15 0.15 0 0
-                    0.15 0.5 0.15 0 0
-                    0.15 0.15 0.5 0 0
-                    0 0 0 1 0"/>
-        </filter>
     </defs>
 </template>
