@@ -45,7 +45,7 @@ export default class Graph {
     reachableLocations(sourceLocation) {
         this._setReached(sourceLocation, true);
         let nextElements = [sourceLocation];
-        var currentLocation;
+        let currentLocation;
         while ((currentLocation = nextElements.shift()) !== undefined) {
             this._neighborLocations(currentLocation).forEach(neighbor => {
                 if (!this._getReached(neighbor)) {
