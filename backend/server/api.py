@@ -28,7 +28,7 @@ def post_player(game_id):
                             an additional computer player is added if the game ways empty before.
     If 'type' is 'human', a human player is added.
     'random', 'exhaustive-single', and 'minimax' are three types of computer players.
-    Default: alone: 'false' and type: 'human'
+    Default: alone: 'true' and type: 'human'
     """
     request_body = request.get_json(silent=True, force=True)
     player_id = service.add_player(game_id, request_body)

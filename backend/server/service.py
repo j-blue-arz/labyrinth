@@ -21,7 +21,7 @@ def add_player(game_id, player_request_dto):
     player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
     player_id = None
     if player_type is None or player_type == 'human':
-        if not game.players and not alone:
+        if not game.players and alone is True:
             _try(lambda: game.add_player(ComputerPlayer, url_supplier=URLSupplier()))
         player_id = _try(lambda: game.add_player(Player))
     else:
