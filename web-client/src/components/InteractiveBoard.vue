@@ -27,6 +27,7 @@
             :cardSize="cardSize"
         ></insert-panels>
         <leftover-maze-card
+            v-if="game.hasStarted()"
             :x="leftoverX"
             :y="leftoverY"
             :card-size="cardSize"
@@ -84,7 +85,7 @@ export default {
             return this.game.n;
         },
         interactiveMazeCards: function() {
-            if (!this.isMyTurnToMove() || this.game.isLoading) {
+            if (!this.isMyTurnToMove() || !this.game.hasStarted()) {
                 return new Set([]);
             } else {
                 let player = this.game.getPlayer(this.userPlayerId);
@@ -92,7 +93,7 @@ export default {
             }
         },
         reachableMazeCards: function() {
-            if (this.game.isLoading) {
+            if (!this.game.hasStarted()) {
                 return new Set([]);
             } else {
                 let player = this.game.getPlayer(this.game.nextAction.playerId);
@@ -100,10 +101,11 @@ export default {
             }
         },
         currentPlayerColor: function() {
-            if (this.game.isLoading) {
+            if (this.game.hasStarted()) {
+                return this.game.getPlayer(this.game.nextAction.playerId).colorIndex;
+            } else {
                 return null;
             }
-            return this.game.getPlayer(this.game.nextAction.playerId).colorIndex;
         },
         isMyTurnToShift: function() {
             return (
@@ -137,10 +139,14 @@ export default {
             );
         },
         computeReachableMazeCards: function(player) {
-            let pieceLocation = player.mazeCard.location;
-            let graph = new Graph(this.game);
-            let locations = graph.reachableLocations(pieceLocation);
-            return new Set(locations.map(location => this.game.getMazeCard(location)));
+            if (!player.mazeCard.isLeftoverLocation()) {
+                let pieceLocation = player.mazeCard.location;
+                let graph = new Graph(this.game);
+                let locations = graph.reachableLocations(pieceLocation);
+                return new Set(locations.map(location => this.game.getMazeCard(location)));
+            } else {
+                return new Set([]);
+            }
         },
         onInsertPanelClick: function(insertLocation) {
             let insertEvent = {

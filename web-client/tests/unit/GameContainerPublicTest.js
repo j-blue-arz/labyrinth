@@ -1,5 +1,7 @@
 import { mount } from "@vue/test-utils";
 import GameContainer from "@/components/GameContainer.vue";
+import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
+import VMazeCard from "@/components/VMazeCard.vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import flushPromises from "flush-promises";
 import { loc, copyObjectStructure } from "./testutils.js";
@@ -61,9 +63,10 @@ describe("GameContainer as web-client", () => {
         let gameContainer = factory();
         await flushPromises();
         expect(mockFetchState).toHaveBeenCalledTimes(1);
-        var leftOverVMazeCard = gameContainer.find(InteractiveBoard).find({
-            ref: "leftover"
-        });
+        var leftOverVMazeCard = gameContainer
+            .find(InteractiveBoard)
+            .find(LeftoverMazeCard)
+            .find(VMazeCard);
         var rotation = leftOverVMazeCard.props().mazeCard.rotation;
         expect(rotation).toBe(270);
     });

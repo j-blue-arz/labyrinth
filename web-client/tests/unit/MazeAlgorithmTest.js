@@ -6,9 +6,7 @@ describe("Graph", () => {
     describe("reachableLocations", () => {
         it("returns the source location for a component of size 1", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(0, 0));
 
@@ -18,9 +16,7 @@ describe("Graph", () => {
 
         it("finds all locations for a component of size 6 with cycle", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(5, 3));
 
@@ -39,29 +35,19 @@ describe("Graph", () => {
 
         it("finds all locations for a component with outside connections to the north", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(0, 2));
 
             expect(reachable.length).toBe(5);
             expect(reachable).toEqual(
-                expect.arrayContaining([
-                    loc(0, 2),
-                    loc(0, 3),
-                    loc(1, 2),
-                    loc(2, 2),
-                    loc(3, 2)
-                ])
+                expect.arrayContaining([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)])
             );
         });
 
         it("finds all locations for a component with outside connections to the west and south", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(6, 2));
 
@@ -89,9 +75,7 @@ describe("Graph", () => {
     describe("isReachable", () => {
         it("returns true for locations in same component", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
 
             expect(graph.isReachable(loc(0, 4), loc(0, 6))).toEqual(true);
@@ -99,9 +83,7 @@ describe("Graph", () => {
 
         it("returns false for locations in different components", () => {
             let game = new Game();
-            game.createFromApi(
-                JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER)
-            );
+            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
             let graph = new Graph(game);
 
             expect(graph.isReachable(loc(6, 0), loc(0, 6))).toEqual(false);

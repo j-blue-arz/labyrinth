@@ -16,7 +16,12 @@ export default class Game {
         this._players = [];
         this.nextAction = { playerId: 0, action: NO_ACTION };
         this.isLoading = false;
+        this.isShifting = false;
         this.disabledInsertLocation = null;
+    }
+
+    hasStarted() {
+        return !this.isLoading && this.nextAction.action !== NO_ACTION;
     }
 
     mazeCardsAsList() {
@@ -178,6 +183,7 @@ export default class Game {
     }
 
     _shiftAlongLocations(locations) {
+        this.isShifting = true;
         var pushedCard = this.leftoverMazeCard;
         this.leftoverMazeCard = this.getMazeCard(locations[this.n - 1]);
         this.leftoverMazeCard.setLeftoverLocation();
@@ -185,10 +191,11 @@ export default class Game {
             this.setMazeCard(locations[i], this.getMazeCard(locations[i - 1]));
             this.getMazeCard(locations[i]).setLocation(locations[i]);
         }
-        this._transferPlayers(this.leftoverMazeCard, pushedCard);
         var first = locations[0];
         pushedCard.setLocation(first);
         Vue.set(this.mazeCards[first.row], first.column, pushedCard);
+        this.isShifting = false;
+        this._transferPlayers(this.leftoverMazeCard, pushedCard);
     }
 
     _transferPlayers(sourceMazeCard, targetMazeCard) {

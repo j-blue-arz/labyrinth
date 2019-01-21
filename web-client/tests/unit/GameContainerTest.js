@@ -105,17 +105,19 @@ describe("GameContainer", () => {
         expect(playerCardIds[0]).toBe(idMatrix[5][3]);
     });
 
-    it("moves players to opposing side of the board when shifted out", () => {
+    it("moves players to opposing side of the board when shifted out", (done) => {
         var gameContainer = factory([loc(6, 1)]);
 
         var pushedInCardId = determineLeftOverId(gameContainer);
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
         interactiveBoard.vm.$emit("insert-card", shiftEvent(0, 1, 0));
-
-        var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
-        expect(playerCardIds.length).toBe(1);
-        expect(playerCardIds[0]).toBe(pushedInCardId);
+        gameContainer.vm.$nextTick(() => {
+            var playerCardIds = determineMazeCardIdsWithPlayers(gameContainer);
+            expect(playerCardIds.length).toBe(1);
+            expect(playerCardIds[0]).toBe(pushedInCardId);
+            done();
+        });
     });
 
     it("moves players when maze card is clicked", () => {

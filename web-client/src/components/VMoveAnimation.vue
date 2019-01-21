@@ -50,7 +50,7 @@ export default {
             let newMazeCard = this.game.mazeCardById(newMazeCardId);
             let oldMazeCard = this.game.mazeCardById(oldMazeCardId);
             if (newMazeCard && oldMazeCard) {
-                if (!this.isLeftover(newMazeCard)) {
+                if (!this.isLeftover(newMazeCard) && !this.isLeftover(oldMazeCard)) {
                     let sourceLocation = oldMazeCard.location;
                     let targetLocation = newMazeCard.location;
                     let graph = new Graph(this.game);

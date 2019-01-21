@@ -11,19 +11,21 @@ export default class Graph {
     }
 
     path(sourceLocation, targetLocation) {
-        this._setReached(sourceLocation, { parent: sourceLocation });
-        let nextElements = [sourceLocation];
-        var currentLocation;
-        while ((currentLocation = nextElements.shift()) !== undefined) {
-            if (this._locationsEqual(currentLocation, targetLocation)) {
-                return this._reachedToPath(currentLocation);
-            }
-            this._neighborLocations(currentLocation).forEach(neighbor => {
-                if (!this._getReached(neighbor)) {
-                    this._setReached(neighbor, { parent: currentLocation });
-                    nextElements.push(neighbor);
+        if (!this.game.isShifting) {
+            this._setReached(sourceLocation, { parent: sourceLocation });
+            let nextElements = [sourceLocation];
+            var currentLocation;
+            while ((currentLocation = nextElements.shift()) !== undefined) {
+                if (this._locationsEqual(currentLocation, targetLocation)) {
+                    return this._reachedToPath(currentLocation);
                 }
-            });
+                this._neighborLocations(currentLocation).forEach(neighbor => {
+                    if (!this._getReached(neighbor)) {
+                        this._setReached(neighbor, { parent: currentLocation });
+                        nextElements.push(neighbor);
+                    }
+                });
+            }
         }
         return [];
     }
@@ -43,16 +45,18 @@ export default class Graph {
     }
 
     reachableLocations(sourceLocation) {
-        this._setReached(sourceLocation, true);
-        let nextElements = [sourceLocation];
-        let currentLocation;
-        while ((currentLocation = nextElements.shift()) !== undefined) {
-            this._neighborLocations(currentLocation).forEach(neighbor => {
-                if (!this._getReached(neighbor)) {
-                    this._setReached(neighbor, true);
-                    nextElements.push(neighbor);
-                }
-            });
+        if (!this.game.isShifting) {
+            this._setReached(sourceLocation, true);
+            let nextElements = [sourceLocation];
+            let currentLocation;
+            while ((currentLocation = nextElements.shift()) !== undefined) {
+                this._neighborLocations(currentLocation).forEach(neighbor => {
+                    if (!this._getReached(neighbor)) {
+                        this._setReached(neighbor, true);
+                        nextElements.push(neighbor);
+                    }
+                });
+            }
         }
         return this._reachedToArray();
     }

@@ -2,7 +2,7 @@
     <tr class="score-row" :class="colorIndexClass">
         <td class="score-row__current-player">
             <span
-                :v-if="isTurn"
+                v-if="isTurn"
                 class="score-row__current-player--marker"></span>
         </td>
         <td class="score-row__player-piece">
