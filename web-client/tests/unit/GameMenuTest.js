@@ -141,4 +141,28 @@ describe("GameMenu", () => {
             expect(mockReplacePlayer).toHaveBeenCalledWith(7, "minimax");
         });
     });
+
+    describe("entry heuristic", () => {
+        it("closes menu", () => {
+            let gameMenu = factory();
+            let menu = gameMenu.find(".menu");
+            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu
+                .find(VMenu)
+                .find({ ref: "heuristic" })
+                .trigger("click");
+            expect(menu.isVisible()).toBe(false);
+        });
+
+        it("calls replacePlayer() on gameApi with player's ID and 'heuristic'", () => {
+            let gameMenu = factory();
+            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu
+                .find(VMenu)
+                .find({ ref: "heuristic" })
+                .trigger("click");
+            expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
+            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "minimax-heuristic");
+        });
+    });
 });

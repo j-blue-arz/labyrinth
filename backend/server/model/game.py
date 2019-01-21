@@ -406,10 +406,11 @@ class Board:
             return True
         return False
 
-    def opposing_insert_location(self, insert_location):
+    @staticmethod
+    def opposing_insert_location(insert_location):
         """ Returns the insert location directly opposite of the given location """
         row, column = insert_location.row, insert_location.column
-        limit = self.maze.MAZE_SIZE - 1
+        limit = Maze.MAZE_SIZE - 1
         borders = {0, limit}
         if row in borders:
             return BoardLocation(limit - row, column)

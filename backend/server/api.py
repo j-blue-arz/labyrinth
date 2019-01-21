@@ -23,7 +23,7 @@ def post_player(game_id):
         'alone': <boolean>
         'type': <string>,
     },
-    where type can be 'human', 'random', 'exhaustive-single', or 'minimax'.
+    where type can be 'human', 'random', 'exhaustive-single', 'minimax', or 'minimax-heuristic'.
     If 'alone' is true, only the requested player is added. If it is false,
                             an additional computer player is added if the game ways empty before.
     If 'type' is 'human', a human player is added.

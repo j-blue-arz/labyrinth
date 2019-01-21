@@ -21,6 +21,7 @@ from .exceptions import LabyrinthDomainException
 from .factories import maze_to_string
 import server.model.exhaustive_search as exh
 import server.model.minimax as mm
+import server.model.minimax_heuristic as heuristic
 
 
 class ComputerPlayer(Player, Thread):
@@ -39,7 +40,7 @@ class ComputerPlayer(Player, Thread):
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
-        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm, MinimaxAlgorithm]
+        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm, MinimaxAlgorithm, MinimaxHeuristicAlgorithm]
         self.algorithm = ExhaustiveSearchAlgorithm
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
@@ -202,6 +203,34 @@ class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
         pieces = [player_piece, other_piece]
         mm.IterativeDeepening.__init__(self, board, pieces, game.previous_shift_location)
+        Thread.__init__(self)
+
+    @property
+    def shift_action(self):
+        """ Getter for shift_action """
+        return self._shift_action
+
+    @property
+    def move_action(self):
+        """ Getter for move_action """
+        return self._move_action
+
+    def abort_search(self):
+        """ Aborts the search """
+        self.stop_iterating()
+
+    def run(self):
+        self.start_iterating()
+
+
+class MinimaxHeuristicAlgorithm(Thread, heuristic.IterativeDeepening):
+    """ Uses the minimax algorithm to determine an action in a two-player game. """
+    SHORT_NAME = "minimax-heuristic"
+
+    def __init__(self, board, player_piece, game):
+        other_piece = next(piece for piece in board.pieces if piece is not player_piece)
+        pieces = [player_piece, other_piece]
+        heuristic.IterativeDeepening.__init__(self, board, pieces, game.previous_shift_location)
         Thread.__init__(self)
 
     @property

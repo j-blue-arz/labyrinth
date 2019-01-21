@@ -1,11 +1,9 @@
 <template>
     <div @dblclick="onOpenMenu" class="game-menu game-menu__button">
         <v-menu
-            @remove-computers="removeComputers"
-            @replace-by-exhaustive="replaceByExhaustive"
-            @replace-by-minimax="replaceByMinimax"
-            @close-menu="closeMenu"
+            @item-click="onItemClick($event)"
             :visible="menuIsVisible"
+            :menu-items="menuItems"
         />
     </div>
 </template>
@@ -13,6 +11,7 @@
 
 <script>
 import VMenu from "@/components/VMenu.vue";
+import MenuItem from "@/model/menuItem.js";
 
 export default {
     name: "game-menu",
@@ -33,12 +32,32 @@ export default {
     },
     data() {
         return {
-            menuIsVisible: false
+            menuIsVisible: false,
+            menuItems: [
+                new MenuItem("close", "Close menu"),
+                new MenuItem("remove", "Remove computers"),
+                new MenuItem("exhaustive", "Replace by exhaustive search"),
+                new MenuItem("minimax", "Replace by minimax"),
+                new MenuItem("heuristic", "Replace by heuristic")
+            ]
         };
     },
     methods: {
         onOpenMenu: function() {
             this.menuIsVisible = true;
+        },
+        onItemClick: function($event) {
+            if ($event === "close") {
+                this.closeMenu();
+            } else if ($event === "remove") {
+                this.removeComputers();
+            } else if ($event === "exhaustive") {
+                this.replaceByExhaustive();
+            } else if ($event === "minimax") {
+                this.replaceByMinimax();
+            } else if ($event === "heuristic") {
+                this.replaceByHeuristic();
+            }
         },
         removeComputers: function() {
             this.menuIsVisible = false;
@@ -54,6 +73,9 @@ export default {
         },
         replaceByMinimax: function() {
             this.replaceByComputer("minimax");
+        },
+        replaceByHeuristic: function() {
+            this.replaceByComputer("minimax-heuristic");
         },
         replaceByComputer: function(type) {
             this.menuIsVisible = false;

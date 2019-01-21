@@ -1,28 +1,12 @@
 <template>
     <ul class="menu" v-show="visible">
         <li
+            v-for="item in menuItems"
+            :key="item.key"
+            :ref="item.key"
             class="menu__item"
-            ref="close"
-            @click="onCloseClick">
-            close
-        </li>
-        <li
-            class="menu__item"
-            ref="remove"
-             @click="onRemoveComputersClick">
-             remove
-        </li>
-        <li
-            class="menu__item"
-            ref="exhaustive"
-            @click="onReplaceByExhaustiveClick">
-            replace by exhaustive search
-        </li>
-        <li
-            class="menu__item"
-            ref="minimax"
-            @click="onReplaceByMinimaxClick">
-            replace by minimax
+            @click="onItemClick(item)">
+            {{item.name}}
         </li>
     </ul>
 </template>
@@ -34,20 +18,14 @@ export default {
         visible: {
             type: Boolean,
             required: true
+        },
+        menuItems: {
+            required: true
         }
     },
     methods: {
-        onCloseClick() {
-            this.$emit("close-menu");
-        },
-        onRemoveComputersClick() {
-            this.$emit("remove-computers");
-        },
-        onReplaceByExhaustiveClick() {
-            this.$emit("replace-by-exhaustive");
-        },
-        onReplaceByMinimaxClick() {
-            this.$emit("replace-by-minimax");
+        onItemClick(item) {
+            this.$emit("item-click", item.key);
         }
     }
 };
