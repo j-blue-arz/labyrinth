@@ -33,6 +33,7 @@ export default class Player {
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
             this.algorithm = apiPlayer.algorithm;
+            this.isUser = false;
         }
     }
 }

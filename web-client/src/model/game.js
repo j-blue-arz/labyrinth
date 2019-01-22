@@ -245,9 +245,9 @@ export default class Game {
                 player.fillFromApi(apiPlayer);
             } else {
                 player = Player.newFromApi(apiPlayer, remainingColors.pop());
-                if (userId === player.id) {
-                    player.isUser = true;
-                }
+            }
+            if (userId === player.id && !player.isComputer) {
+                player.isUser = true;
             }
             player.mazeCard = playerCard;
             playerCard.addPlayer(player);

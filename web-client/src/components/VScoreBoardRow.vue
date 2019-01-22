@@ -51,6 +51,15 @@ export default {
         isTurn: function() {
             return this.player.hasToMove() || this.player.hasToShift();
         }
+    },
+    algorithmDisplayName(algorithm) {
+        if (algorithm === "exhaustive-single") {
+            return "exhaustive search";
+        } else if (algorithm === "minimax-heuristic") {
+            return "heuristic";
+        } else {
+            return algorithm;
+        }
     }
 };
 </script>
@@ -86,7 +95,7 @@ export default {
     }
 
     &__player-piece {
-        width: 4rem;
+        width: 3rem;
         text-align: center;
     }
 
@@ -96,7 +105,7 @@ export default {
     }
 
     &__player-name {
-        width: 4rem;
+        width: 5rem;
     }
 
     &__score-data {
