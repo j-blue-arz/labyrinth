@@ -1,0 +1,18 @@
+First implementation. There seems to be a bug, because minimax without heuristic differs about some results:
+E.g., in the "cannot-prevent" cases, the value should always be -1
+Test case big-component-d1-shift-req             resulted in actions (((1, 0), 90), (0, 3)), with total value -1645.0: 0.00, 169.00, 4.00, 0.00
+Test case big-component-d2-cannot-prevent        resulted in actions (((0, 5), 0), (5, 3)), with total value -60.0: -1.00, 400.00, -4.00, 0.00
+Test case difficult-d1-shift-req                 resulted in actions (((0, 3), 0), (6, 2)), with total value -815.0: 0.00, 0.00, 1.00, 1.00
+Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0), (4, 2)), with total value 340.0: 0.00, 25.00, -5.00, 1.00
+Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value 34.0: 0.00, 25.00, -6.00, 0.00
+Test case bug-d1                                 resulted in actions (((6, 3), 90), (6, 2)), with total value -830.0: 0.00, -225.00, 0.00, -1.00
+
+Score vs. exhaustive search: ~ 100 to 80
+
+First implementation
+Test case big-component-d1-shift-req             best of 3: 328.28ms
+Test case big-component-d2-cannot-prevent        best of 3: 14930.92ms
+Test case difficult-d1-shift-req                 best of 3: 109.18ms
+Test case difficult-d2-cannot-prevent            best of 3: 6753.60ms
+Test case difficult-d2-can-prevent               best of 3: 17623.00ms
+Test case bug-d1                                 best of 3: 196.33ms

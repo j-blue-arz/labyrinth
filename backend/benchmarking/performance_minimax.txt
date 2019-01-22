@@ -1,3 +1,13 @@
+Results:
+Test case big-component-d1-shift-req             resulted in actions ((((1, 0), 0), (0, 3)), 1)
+Test case big-component-d2-cannot-prevent        resulted in actions ((((0, 1), 0), (1, 0)), -1)
+Test case big-component-d3-reach                 resulted in actions ((((0, 5), 0), (6, 5)), 1)
+Test case difficult-d1-shift-req                 resulted in actions ((((0, 3), 0), (6, 2)), 1)
+Test case difficult-d2-cannot-prevent            resulted in actions ((((0, 1), 0), (5, 2)), -1)
+Test case difficult-d2-can-prevent               resulted in actions ((((1, 6), 90), (5, 2)), 0)
+Test case difficult-d3-reach                     resulted in actions ((((0, 3), 0), (6, 3)), 1)
+Test case bug-d1                                 resulted in actions ((((6, 3), 90), (6, 2)), 1)
+
 First implementation:
 Test case big-component-d1-shift-req             best of 3: 18.67ms
 Test case big-component-d2-cannot-prevent        best of 3: 604.27ms

@@ -1,7 +1,8 @@
 """ Usage:
-bench_exhaustive_search <task> <case>
+bench_minimax <task> <case>
 where task is either 'profile' or 'benchmark'
-and 'case' is one of "d1-direct-path", "d1-shift-req", "d2-two-shifts", "d2-self-push-out", "d3-obj-push-out".
+and 'case' is one of "big-component-d1-shift-req", "big-component-d2-cannot-prevent", "big-component-d3-reach",
+"difficult-d1-shift-req", "difficult-d2-cannot-prevent", "difficult-d2-can-prevent", "difficult-d3-reach", "bug-d1".
 """
 import timeit
 import cProfile
@@ -46,6 +47,8 @@ def _main(argv):
         all_keys = setup.CASES_PARAMS.keys()
         all_keys_lt_3 = [key for key in all_keys if _extract_depth(key) < 3]
         cases = all_keys_lt_3
+    elif case_name == "all!":
+        cases = setup.CASES_PARAMS.keys()
     else:
         cases = [case_name]
     for name in cases:

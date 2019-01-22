@@ -226,7 +226,7 @@ class Minimax:
                                      previous_shift_location=self._previous_shift_location)
         value, values = self._negamax(node=root, depth=self._depth, color=1)
         value = -value
-        return self._best_actions, value
+        return self._best_actions, value, values
 
     def _negamax(self, node, depth, color):
         if depth == 0 or node.is_winning():
@@ -240,7 +240,7 @@ class Minimax:
                 best_value = value
                 if depth == self._depth:
                     self._copy_actions(node)
-                    print("Value: {}, values:{}, actions: {}".format(value, values, self._best_actions))
+                    #print("Value: {}, values:{}, actions: {}".format(value, values, self._best_actions))
             if self._aborted:
                 break
         return best_value, values
