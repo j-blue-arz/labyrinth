@@ -49,10 +49,14 @@ def _is_insert_location(location):
 def _manhattan_distance(one_location, other_location):
     return abs(one_location.row - other_location.row) + abs(one_location.column - other_location.column)
 
-def _distance_to_objective(location, objective_location):
+def _objective_value(location, objective_location):
     distance = -10
     if objective_location:
         distance = _manhattan_distance(location, objective_location)
+        if distance == 1:
+            distance = 2
+        elif distance == 2:
+            distance = 1
         if _is_insert_location(location):
             opposite = Board.opposing_insert_location(location)
             distance = min(distance, _manhattan_distance(opposite, objective_location) + 1)
@@ -127,6 +131,7 @@ class GameTreeNode:
 
     def _determine_reachable_locations(self, source, rotatable_location):
         """ Returns a dictionary, where keys are the rotations, and values are iterables over BoardLocations
+        TODO: if he can reach only return this one location (but all rotations for which he can reach)
         """
         graph = RotatableMazeCardGraph(self.board.maze, rotatable_location)
         reachable, reachable_map = graph.reachable_locations(source)
@@ -166,11 +171,7 @@ class GameTreeNode:
         """ Heuristic zero-sum value, from viewpoint of player 0 """
         win_value = 0
         if self.is_winning():
-            if self.player_index == 0:
-                win_value = 2
-            else:
-                win_value = 1
-            win_value = win_value * _sign(self.player_index)
+             win_value = 1 * _sign(self.player_index)
         graph = Graph(self.board.maze)
         reach = [None, None]
         objective_distance = [None, None]
@@ -180,15 +181,17 @@ class GameTreeNode:
             maze_card = self.board.pieces[player_index].maze_card
             location = self.board.maze.maze_card_location(maze_card)
             reach[player_index] = graph.reachable_locations(source=location)
-            objective_distance[player_index] = _distance_to_objective(location, objective_location)
+            objective_distance[player_index] = _objective_value(location, objective_location)
             if maze_card.doors == MazeCard.T_JUNCT:
                 maze_card_value[player_index] = 1
         reach_value = len(reach[0]) - len(reach[1])
         reach_value = math.copysign(reach_value**2, reach_value)
         distance_value = objective_distance[1] - objective_distance[0]
+        if win_value != 0:
+            distance_value = 0
         maze_card_value = maze_card_value[0] - maze_card_value[1]
 
-        sum_values = win_value * 400 + reach_value * 1 + distance_value * 5 + maze_card_value * 16
+        sum_values = win_value * 1000 + reach_value * 1 + distance_value * 5 + maze_card_value * 16
         return sum_values, (win_value, reach_value, distance_value, maze_card_value)
 
     def is_root(self):
@@ -225,7 +228,6 @@ class Minimax:
         root = GameTreeNode.get_root(self._board, max_depth=self._depth,
                                      previous_shift_location=self._previous_shift_location)
         value, values = self._negamax(node=root, depth=self._depth, color=1)
-        value = -value
         return self._best_actions, value, values
 
     def _negamax(self, node, depth, color):
@@ -233,17 +235,19 @@ class Minimax:
             value, values = node.value()
             return color * value, values
         best_value = -self.INF
+        best_values = None
         for child in node.children():
             value, values = self._negamax(child, depth - 1, -color)
             value = -value
             if value > best_value:
                 best_value = value
+                best_values = values
                 if depth == self._depth:
                     self._copy_actions(node)
-                    #print("Value: {}, values:{}, actions: {}".format(value, values, self._best_actions))
+                    #print("Value: {}, values:{}, actions: {}".format(value, best_values, self._best_actions))
             if self._aborted:
                 break
-        return best_value, values
+        return best_value, best_values
 
     def _copy_actions(self, node):
         shift_location, rotation = node.current_shift_action
@@ -274,11 +278,12 @@ class IterativeDeepening:
     def start_iterating(self):
         """ Starts iterating """
         depth = 0
-        value = 0
-        while depth <= 1 and not self._aborted and abs(value) < 1:
+        win_detected = False
+        while depth <= 1 and not self._aborted and not win_detected:
             depth = depth + 1
             self._current_minimax = Minimax(self._board, self._pieces, self._previous_shift_location, depth)
-            actions, value = self._current_minimax.find_actions()
+            actions, _, values = self._current_minimax.find_actions()
+            win_detected = values[0] == 1
             if not self._aborted:
                 self._shift_action, self._move_action = actions
 

@@ -11,35 +11,7 @@ import copy
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 import server.model.minimax_heuristic as heuristic
-import tests.unit.test_minimax as setup
-
-def _param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
-    return {"maze": create_maze(maze_string),
-            "leftover_card": MazeCard.create_instance(leftover_doors, 0),
-            "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
-            "objective_location": BoardLocation(*objective_tuple)}
-
-
-def _create_board_and_piece(maze, leftover_card, piece_locations, objective_location):
-    maze = copy.deepcopy(maze)
-    board = Board(maze=maze, leftover_card=leftover_card, objective_maze_card=maze[objective_location])
-    board.clear_pieces()
-    for location in piece_locations:
-        piece = Piece(board.maze[location])
-        board.pieces.append(piece)
-    return board
-
-
-def create_optimizer(key, previous_shift_location=None, depth=3):
-    """Creates a test case, instantiates an Optimizer with this case.
-
-    :param key: a key for the test-case
-    :return: an Optimizer instance, the board and the piece of the created test-case
-    """
-    param_dict = _param_tuple_to_param_dict(*(setup.CASES_PARAMS[key]))
-    board = _create_board_and_piece(**param_dict)
-    optimizer = heuristic.Minimax(board, board.pieces, previous_shift_location=previous_shift_location, depth=depth)
-    return optimizer, board, board.pieces
+import tests.unit.test_minimax_heuristic as setup
 
 def _benchmark(name):
     depth = _extract_depth(name)
@@ -47,17 +19,17 @@ def _benchmark(name):
     if depth >= 3:
         repeat = 1
     runs = 1
-    optimizer, _, _ = create_optimizer(name, depth=_extract_depth(name))
+    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     min_time = min(timeit.Timer(optimizer.find_actions).repeat(repeat, runs)) / runs * 1000
     print("Test case {:<30} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
 
 
 def _profile(name):
-    optimizer, _, _ = create_optimizer(name, depth=_extract_depth(name))
+    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     cProfile.runctx("optimizer.find_actions()", globals(), locals(), filename=name)
 
 def _results(name):
-    optimizer, _, _ = create_optimizer(name, depth=_extract_depth(name))
+    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     actions, value, values = optimizer.find_actions()
     print("Test case {:<30} \t resulted in actions {}, with total value {}".format(name, actions, value))
     format_str = ', '.join(['{:0.2f}']*len(values))

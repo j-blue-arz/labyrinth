@@ -5,14 +5,27 @@ Test case big-component-d2-cannot-prevent        resulted in actions (((0, 5), 0
 Test case difficult-d1-shift-req                 resulted in actions (((0, 3), 0), (6, 2)), with total value -815.0: 0.00, 0.00, 1.00, 1.00
 Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0), (4, 2)), with total value 340.0: 0.00, 25.00, -5.00, 1.00
 Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value 34.0: 0.00, 25.00, -6.00, 0.00
-Test case bug-d1                                 resulted in actions (((6, 3), 90), (6, 2)), with total value -830.0: 0.00, -225.00, 0.00, -1.00
 
 Score vs. exhaustive search: ~ 100 to 80
 
-First implementation
 Test case big-component-d1-shift-req             best of 3: 328.28ms
 Test case big-component-d2-cannot-prevent        best of 3: 14930.92ms
 Test case difficult-d1-shift-req                 best of 3: 109.18ms
 Test case difficult-d2-cannot-prevent            best of 3: 6753.60ms
 Test case difficult-d2-can-prevent               best of 3: 17623.00ms
-Test case bug-d1                                 best of 3: 196.33ms
+-> Bug was due to heuristic evaluating win of opponent less than win of self. This is an error, because then the opponent makes suboptimal moves.
+
+Change of heuristic: value of winning same for both players, win = 1000, distance to objective now has malus if too close, and is not counted if player actually reaches the objective.
+Test case big-component-d1-shift-req             resulted in actions (((1, 0), 90), (0, 3)), with total value 1800.0: 1.00, 784.00, 0.00, 1.00
+Test case big-component-d2-cannot-prevent        resulted in actions (((0, 5), 0), (1, 0)), with total value -455.0: -1.00, 529.00, 0.00, 1.00
+Test case difficult-d1-shift-req                 resulted in actions (((0, 3), 0), (6, 2)), with total value 1000.0: 1.00, 0.00, 0.00, 0.00
+Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0), (4, 4)), with total value -920.0: -1.00, 64.00, 0.00, 1.00
+Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value -39.0: 0.00, 1.00, -8.00, 0.00
+
+Score vs. exhaustive search: ~ 109 to 84
+
+Test case big-component-d1-shift-req             best of 3: 367.82ms
+Test case big-component-d2-cannot-prevent        best of 3: 16556.54ms
+Test case difficult-d1-shift-req                 best of 3: 110.21ms
+Test case difficult-d2-cannot-prevent            best of 3: 7404.25ms
+Test case difficult-d2-can-prevent               best of 3: 18947.99ms
