@@ -140,6 +140,13 @@ class GameTreeNode:
             result[rotation] = _union(reachable_map, rotation, reachable)
         return result
 
+    def reset_board(self):
+        """ The children() iterator alters the board state. Call this method to reset the board
+        to its original state if iteration is aborted, e.g. returning from a loop """
+        piece = self.board.pieces[_other(self.player_index)]
+        self._undo_move(piece)
+        self._undo_shift()
+
     def _do_shift(self, insert_location, rotation):
         self.current_shift_action = (insert_location, rotation)
         self.board.shift(insert_location, rotation)
@@ -227,24 +234,28 @@ class Minimax:
         """
         root = GameTreeNode.get_root(self._board, max_depth=self._depth,
                                      previous_shift_location=self._previous_shift_location)
-        value, values = self._negamax(node=root, depth=self._depth, color=1)
+        value, values = self._negamax(node=root, depth=self._depth, alpha=-self.INF, beta=self.INF, color=1)
         return self._best_actions, value, values
 
-    def _negamax(self, node, depth, color):
+    def _negamax(self, node, depth, alpha, beta, color):
         if depth == 0 or node.is_winning():
             value, values = node.value()
             return color * value, values
         best_value = -self.INF
         best_values = None
         for child in node.children():
-            value, values = self._negamax(child, depth - 1, -color)
+            value, values = self._negamax(child, depth - 1, -beta, -alpha, -color)
             value = -value
             if value > best_value:
                 best_value = value
                 best_values = values
+                alpha = max(alpha, value)    
                 if depth == self._depth:
                     self._copy_actions(node)
                     #print("Value: {}, values:{}, actions: {}".format(value, best_values, self._best_actions))
+            if alpha >= beta:
+                node.reset_board()
+                break
             if self._aborted:
                 break
         return best_value, best_values
@@ -279,7 +290,7 @@ class IterativeDeepening:
         """ Starts iterating """
         depth = 0
         win_detected = False
-        while depth <= 1 and not self._aborted and not win_detected:
+        while not self._aborted and not win_detected:
             depth = depth + 1
             self._current_minimax = Minimax(self._board, self._pieces, self._previous_shift_location, depth)
             actions, _, values = self._current_minimax.find_actions()

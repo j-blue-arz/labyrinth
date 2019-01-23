@@ -7,6 +7,7 @@ Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0
 Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value 34.0: 0.00, 25.00, -6.00, 0.00
 
 Score vs. exhaustive search: ~ 100 to 80
+Computer opponent only computing depth 1, no iterative deepening.
 
 Test case big-component-d1-shift-req             best of 3: 328.28ms
 Test case big-component-d2-cannot-prevent        best of 3: 14930.92ms
@@ -22,10 +23,30 @@ Test case difficult-d1-shift-req                 resulted in actions (((0, 3), 0
 Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0), (4, 4)), with total value -920.0: -1.00, 64.00, 0.00, 1.00
 Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value -39.0: 0.00, 1.00, -8.00, 0.00
 
-Score vs. exhaustive search: ~ 109 to 84
+Score vs. exhaustive search: 109 to 84
 
 Test case big-component-d1-shift-req             best of 3: 367.82ms
 Test case big-component-d2-cannot-prevent        best of 3: 16556.54ms
 Test case difficult-d1-shift-req                 best of 3: 110.21ms
 Test case difficult-d2-cannot-prevent            best of 3: 7404.25ms
 Test case difficult-d2-can-prevent               best of 3: 18947.99ms
+
+With alpha-beta cuts. Also activating iterative deepening.
+Test case big-component-d1-shift-req             resulted in actions (((1, 0), 90), (0, 3)), with total value 1800.0: 1.00, 784.00, 0.00, 1.00
+Test case big-component-d2-cannot-prevent        resulted in actions (((0, 5), 0), (1, 0)), with total value -455.0: -1.00, 529.00, 0.00, 1.00
+Test case difficult-d1-shift-req                 resulted in actions (((0, 3), 0), (6, 2)), with total value 1000.0: 1.00, 0.00, 0.00, 0.00
+Test case difficult-d2-cannot-prevent            resulted in actions (((6, 3), 0), (4, 4)), with total value -920.0: -1.00, 64.00, 0.00, 1.00
+Test case difficult-d2-can-prevent               resulted in actions (((1, 6), 270), (5, 3)), with total value -39.0: 0.00, 1.00, -8.00, 0.00
+
+Score vs. exhaustive search: 50 to 37
+
+Test case big-component-d1-shift-req             best of 3: 366.83ms
+Test case big-component-d2-cannot-prevent        best of 3: 5366.03ms
+Test case difficult-d1-shift-req                 best of 3: 107.47ms
+Test case difficult-d2-cannot-prevent            best of 3: 1756.99ms
+Test case difficult-d2-can-prevent               best of 3: 4204.29ms
+-> Same result, but faster.
+Next tries: 
+- only return one location if objective can be reached
+- iterative deepening should return best action if aborted
+- start next iteration with last best move.
