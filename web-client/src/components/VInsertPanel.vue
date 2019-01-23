@@ -1,7 +1,6 @@
 <template>
     <transition name="insert-panel__fade-animation-">
         <svg
-            v-if="interaction"
             viewBox="0 0 100 100"
             :height="size"
             :width="size"
@@ -10,6 +9,12 @@
             :x="xPos"
             :y="yPos"
         >
+            <path
+                v-if="isDisabled"
+                :d="pathCross"
+                class="insert-panel__symbol insert-panel__cross"
+            ></path>
+            <g v-if="interaction">
             <rect
                 :height="100"
                 :width="100"
@@ -17,17 +22,13 @@
                 @click="onClick"
             ></rect>
             <path
-                v-if="isDisabled"
-                :d="pathCross"
-                class="insert-panel__symbol insert-panel__cross"
-            ></path>
-            <path
                 v-if="isEnabled"
                 :id="'panel-path-' + insertPanel.id"
                 @click="onClick"
                 :d="pathArrow"
                 class="insert-panel__symbol insert-panel__arrow"
             ></path>
+            </g>
         </svg>
     </transition>
 </template>
