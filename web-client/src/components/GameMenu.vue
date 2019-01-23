@@ -1,5 +1,5 @@
 <template>
-    <div @dblclick="onOpenMenu" class="game-menu game-menu__button">
+    <div @click="onOpenMenu" class="game-menu game-menu__button">
         <v-menu
             @item-click="onItemClick($event)"
             :visible="menuIsVisible"
@@ -43,8 +43,10 @@ export default {
         };
     },
     methods: {
-        onOpenMenu: function() {
-            this.menuIsVisible = true;
+        onOpenMenu: function(event) {
+            if (event.ctrlKey) {
+                this.menuIsVisible = true;
+            }
         },
         onItemClick: function($event) {
             if ($event === "close") {
@@ -100,8 +102,8 @@ export default {
 <style lang="scss">
 .game-menu__button {
     display: block;
-    height: 100px;
-    width: 100px;
-    background-color: lightblue;
+    height: 50px;
+    width: 50px;
+    background-color: lightgray;
 }
 </style>
