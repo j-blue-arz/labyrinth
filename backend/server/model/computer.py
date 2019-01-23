@@ -34,8 +34,7 @@ class ComputerPlayer(Player, Thread):
     If the player is requested to make its action, it starts a thread for time keeping,
     and a thread for letting the algorithm compute the next shift and move action. """
 
-    _SECONDS_TO_COMPUTE = 2
-    _SECONDS_TO_ANSWER = 2
+    _SECONDS_TO_ANSWER = 1.5
 
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
@@ -64,7 +63,7 @@ class ComputerPlayer(Player, Thread):
         piece = self._find_equal_piece(board)
         algorithm = self.algorithm(board, piece, self._game)
         algorithm.start()
-        time.sleep(self._SECONDS_TO_COMPUTE)
+        time.sleep(algorithm.SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
         shift_action = algorithm.shift_action
         move_action = algorithm.move_action
@@ -135,6 +134,7 @@ class RandomActionsAlgorithm(Thread):
     move action """
 
     SHORT_NAME = "random"
+    SECONDS_TO_COMPUTE = 0.5
 
     def __init__(self, board, piece, game):
         super().__init__()
@@ -172,6 +172,7 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
     """ Uses an exhaustive search to compute best single-player solution to objective.
     abort_search() is already implemented in superclass, exh.Optimizer. """
     SHORT_NAME = "exhaustive-single"
+    SECONDS_TO_COMPUTE = 1.5
 
     def __init__(self, board, piece, game):
         exh.Optimizer.__init__(self, board, piece, game.previous_shift_location)
@@ -198,6 +199,7 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
 class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
     """ Uses the minimax algorithm to determine an action in a two-player game. """
     SHORT_NAME = "minimax"
+    SECONDS_TO_COMPUTE = 2.5
 
     def __init__(self, board, player_piece, game):
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
@@ -226,6 +228,7 @@ class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
 class MinimaxHeuristicAlgorithm(Thread, heuristic.IterativeDeepening):
     """ Uses the minimax algorithm to determine an action in a two-player game. """
     SHORT_NAME = "minimax-heuristic"
+    SECONDS_TO_COMPUTE = 2.5
 
     def __init__(self, board, player_piece, game):
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
