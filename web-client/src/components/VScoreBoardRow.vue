@@ -45,20 +45,22 @@ export default {
             } else if (!this.player.isComputer) {
                 return "";
             } else {
-                return this.player.algorithm;
+                return this.algorithmDisplayName(this.player.algorithm);
             }
         },
         isTurn: function() {
             return this.player.hasToMove() || this.player.hasToShift();
         }
     },
-    algorithmDisplayName(algorithm) {
-        if (algorithm === "exhaustive-single") {
-            return "exhaustive search";
-        } else if (algorithm === "minimax-heuristic") {
-            return "heuristic";
-        } else {
-            return algorithm;
+    methods: {
+        algorithmDisplayName(algorithm) {
+            if (algorithm === "exhaustive-search") {
+                return "exhaustive search";
+            } else if (algorithm === "alpha-beta") {
+                return "alpha-beta";
+            } else {
+                return algorithm;
+            }
         }
     }
 };

@@ -289,17 +289,8 @@ class Minimax:
             return color * value, values
         best_value = -self.INF
         best_values = None
-        sorted_shift_locations = None
-        if depth in range(1, self._depth):
-            if self._shift_locations_per_depth[depth]:
-                sorted_shift_locations = map(
-                    operator.itemgetter(0),
-                    sorted(
-                        self._shift_locations_per_depth[depth].items(),
-                        key=operator.itemgetter(1),
-                        reverse=True))
-            self._shift_locations_per_depth[depth] = {}
-        for child in node.children(sorted_shift_locations):
+        ordered_shift_locations = self._extract_ordered_shifts(depth)
+        for child in node.children(ordered_shift_locations):
             value, values = self._negamax(child, depth - 1, -beta, -alpha, -color)
             value = -value
             self._update_shift_values(depth, node, value)
@@ -315,6 +306,19 @@ class Minimax:
             if self._aborted:
                 break
         return best_value, best_values
+
+    def _extract_ordered_shifts(self, depth):
+        ordered_shift_locations = None
+        if depth in range(1, self._depth):
+            if self._shift_locations_per_depth[depth]:
+                ordered_shift_locations = map(
+                    operator.itemgetter(0),
+                    sorted(
+                        self._shift_locations_per_depth[depth].items(),
+                        key=operator.itemgetter(1),
+                        reverse=True))
+            self._shift_locations_per_depth[depth] = {}
+        return ordered_shift_locations
 
     def _update_shift_values(self, depth, node, value):
         if depth in range(1, self._depth):

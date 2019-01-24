@@ -13,7 +13,7 @@ These types are implemented on two boards.
 """
 import copy
 import pytest
-import server.model.minimax_heuristic as heuristic
+import server.model.alpha_beta as ab
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
@@ -142,7 +142,7 @@ def create_optimizer(key, previous_shift_location=None, depth=3):
     """
     param_dict = _param_tuple_to_param_dict(*(CASES_PARAMS[key]))
     board = _create_board_and_piece(**param_dict)
-    optimizer = heuristic.Minimax(board, board.pieces, previous_shift_location=previous_shift_location, depth=depth)
+    optimizer = ab.Minimax(board, board.pieces, previous_shift_location=previous_shift_location, depth=depth)
     return optimizer, board, board.pieces
 
 def _check_actions(board, piece, actions):

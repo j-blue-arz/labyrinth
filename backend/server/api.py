@@ -23,11 +23,11 @@ def post_player(game_id):
         'alone': <boolean>
         'type': <string>,
     },
-    where type can be 'human', 'random', 'exhaustive-single', 'minimax', or 'minimax-heuristic'.
+    where type can be 'human', 'random', 'exhaustive-search', 'minimax', or 'alpha-beta'.
     If 'alone' is true, only the requested player is added. If it is false,
                             an additional computer player is added if the game ways empty before.
     If 'type' is 'human', a human player is added.
-    'random', 'exhaustive-single', and 'minimax' are three types of computer players.
+    'random', 'exhaustive-search', and 'minimax' are three types of computer players.
     Default: alone: 'true' and type: 'human'
     """
     request_body = request.get_json(silent=True, force=True)

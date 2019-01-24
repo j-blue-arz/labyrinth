@@ -1,5 +1,5 @@
 """ Usage:
-bench_minimax_heuristic <task> <case>
+bench_alpha_beta <task> <case>
 where task is either 'profile' or 'benchmark'
 and 'case' is one of "big-component-d1-shift-req", "big-component-d2-cannot-prevent", "big-component-d3-reach",
 "difficult-d1-shift-req", "difficult-d2-cannot-prevent", "difficult-d2-can-prevent", "difficult-d3-reach", "bug-d1".
@@ -7,11 +7,7 @@ and 'case' is one of "big-component-d1-shift-req", "big-component-d2-cannot-prev
 import timeit
 import cProfile
 import sys
-import copy
-from server.model.factories import create_maze
-from server.model.game import Board, BoardLocation, MazeCard, Piece
-import server.model.minimax_heuristic as heuristic
-import tests.unit.test_minimax_heuristic as setup
+import tests.unit.test_alpha_beta as setup
 
 def _benchmark(name):
     depth = _extract_depth(name)

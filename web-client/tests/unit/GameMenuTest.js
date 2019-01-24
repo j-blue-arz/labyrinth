@@ -51,7 +51,7 @@ describe("GameMenu", () => {
     it("Opens menu when button is double-clicked", () => {
         let gameMenu = factory();
         let menu = gameMenu.find(".menu");
-        gameMenu.find(".game-menu__button").trigger("dblclick");
+        gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
         expect(menu.isVisible()).toBe(true);
     });
 
@@ -59,7 +59,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
                 .find({ ref: "close" })
@@ -72,7 +72,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
                 .find({ ref: "remove" })
@@ -82,7 +82,7 @@ describe("GameMenu", () => {
 
         it("calls removePlayers() on gameApi with computer players' IDs", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
                 .find({ ref: "remove" })
@@ -98,23 +98,23 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
-                .find({ ref: "exhaustive" })
+                .find({ ref: "exhaustive-search" })
                 .trigger("click");
             expect(menu.isVisible()).toBe(false);
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'exhaustive-single'", () => {
+        it("calls replacePlayer() on gameApi with player's ID and 'exhaustive-search'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
-                .find({ ref: "exhaustive" })
+                .find({ ref: "exhaustive-search" })
                 .trigger("click");
             expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "exhaustive-single");
+            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "exhaustive-search");
         });
     });
 
@@ -122,7 +122,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
                 .find({ ref: "minimax" })
@@ -132,7 +132,7 @@ describe("GameMenu", () => {
 
         it("calls replacePlayer() on gameApi with player's ID and 'minimax'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
                 .find({ ref: "minimax" })
@@ -142,27 +142,27 @@ describe("GameMenu", () => {
         });
     });
 
-    describe("entry heuristic", () => {
+    describe("entry alpha-beta", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
-                .find({ ref: "heuristic" })
+                .find({ ref: "alpha-beta" })
                 .trigger("click");
             expect(menu.isVisible()).toBe(false);
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'heuristic'", () => {
+        it("calls replacePlayer() on gameApi with player's ID and 'alpha-beta'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("dblclick");
+            gameMenu.find(".game-menu__button").trigger("click", {"ctrlKey": true});
             gameMenu
                 .find(VMenu)
-                .find({ ref: "heuristic" })
+                .find({ ref: "alpha-beta" })
                 .trigger("click");
             expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "minimax-heuristic");
+            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "alpha-beta");
         });
     });
 });

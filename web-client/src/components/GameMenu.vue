@@ -36,9 +36,9 @@ export default {
             menuItems: [
                 new MenuItem("close", "Close menu"),
                 new MenuItem("remove", "Remove computers"),
-                new MenuItem("exhaustive", "Replace by exhaustive search"),
-                new MenuItem("minimax", "Replace by minimax"),
-                new MenuItem("heuristic", "Replace by heuristic")
+                new MenuItem("exhaustive-search", "Replace by exhaustive search"),
+                new MenuItem("minimax", "Replace by Minimax"),
+                new MenuItem("alpha-beta", "Replace by Alpha-Beta")
             ]
         };
     },
@@ -53,12 +53,12 @@ export default {
                 this.closeMenu();
             } else if ($event === "remove") {
                 this.removeComputers();
-            } else if ($event === "exhaustive") {
-                this.replaceByExhaustive();
+            } else if ($event === "exhaustive-search") {
+                this.replaceByComputer("exhaustive-search");
             } else if ($event === "minimax") {
-                this.replaceByMinimax();
-            } else if ($event === "heuristic") {
-                this.replaceByHeuristic();
+                this.replaceByComputer("minimax");
+            } else if ($event === "alpha-beta") {
+                this.replaceByComputer("alpha-beta");
             }
         },
         removeComputers: function() {
@@ -69,15 +69,6 @@ export default {
                 .removePlayers(computerPlayerIds)
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
-        },
-        replaceByExhaustive: function() {
-            this.replaceByComputer("exhaustive-single");
-        },
-        replaceByMinimax: function() {
-            this.replaceByComputer("minimax");
-        },
-        replaceByHeuristic: function() {
-            this.replaceByComputer("minimax-heuristic");
         },
         replaceByComputer: function(type) {
             this.menuIsVisible = false;
