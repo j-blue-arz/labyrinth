@@ -16,7 +16,7 @@ import pytest
 import server.model.minimax_heuristic as heuristic
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
-from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE
+from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
 
 def test_big_component_d1_shift_req_with_depth_1():
     """ Test-case where one shift action is required to reach objective.
@@ -104,7 +104,17 @@ CASES_PARAMS = {
     "difficult-d1-shift-req": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)), #solution: ((0, 3), x), (6, 2)
     "difficult-d2-cannot-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (0, 0)], (1, 1)),
     "difficult-d2-can-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (2, 6)], (0, 6)), #solution: ((1, 6), x)
-    "difficult-d3-reach": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)) # ((0, 3), 270) , (6, 3)
+    "difficult-d3-reach": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)), # ((0, 3), , (6, 3)
+    "generated-2-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (6, 2)),
+    "generated-2-d3": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (6, 2)),
+    "generated-5-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(6, 6), (6, 6)], (0, 0)),
+    "generated-5-d3": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(6, 6), (6, 6)], (0, 0)),
+    "generated-6-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (5, 6)),
+    "generated-6-d3": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (5, 6)),
+    "generated-7-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(6, 2), (6, 6)], (1, 4)),
+    "generated-8-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(0, 6), (0, 0)], (6, 6)),
+    "big-component-0-d2": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)),
+    "difficult-0-d2": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)),
 }
 
 def _param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
