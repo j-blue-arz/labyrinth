@@ -107,6 +107,10 @@ Test case generated-7-d2                         best of 3: 865.48ms
 Test case generated-8-d2                         best of 3: 287.20ms
 Test case big-component-0-d2                     best of 3: 380.87ms
 Test case difficult-0-d2                         best of 3: 634.62ms
+Test case big-component-d3-reach                 best of 1: 48197.49ms
+Test case generated-6-d3                         best of 1: 10477.94ms
+Test case generated-5-d3                         best of 1: 34180.87ms
+Test case generated-2-d3                         best of 1: 11065.80ms
 
 
 Test case big-component-d1-shift-req             resulted in actions (((1, 0), 90), (0, 3)), with total value 1787.0: 1.00, 784.00, 0.00, 1.00
