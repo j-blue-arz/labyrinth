@@ -2,7 +2,7 @@
 import math
 import operator
 from server.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
-from server.model.game import Board, MazeCard, Maze, BoardLocation
+from server.model.game import Board, MazeCard, BoardLocation
 import server.model.algorithm.util as util
 
 _MAZE_SIZE = 7

@@ -7,7 +7,7 @@ import timeit
 import cProfile
 import sys
 from random import randint
-import server.model.exhaustive_search as exh
+import server.model.algorithm.exhaustive_search as exh
 from server.model.factories import create_maze, create_random_maze_card, create_random_original_maze_and_leftover, \
                                    maze_to_string
 from server.model.game import BoardLocation
@@ -44,7 +44,7 @@ def _generate_and_print_maze_string():
 
 
 def _benchmark(name):
-    repeat = 3
+    repeat = 5
     runs = 1
     optimizer, _, _ = setup.create_optimizer(name)
     min_time = min(timeit.Timer(optimizer.find_optimal_actions).repeat(repeat, runs)) / runs * 1000

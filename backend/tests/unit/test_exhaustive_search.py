@@ -53,7 +53,7 @@ def test_d2_no_pushback_violation():
         shift_location = shift_action[0]
         assert board.opposing_insert_location(shift_location) != prev_shift_location
 
-def test_test_d2_two_shifts_with_previous_shift():
+def test_d2_two_shifts_with_previous_shift():
     """ Test case where there is a solution of depth 2: [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
     The test makes the first shift of this solution a rule violation, and checks
     that the optimizer does not violate no-pushback-rule """
@@ -208,23 +208,23 @@ GENERATED_WITH_LINE_LEFTOVER = """
 """
 
 CASES_PARAMS = {
-    "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (6, 2)),
-    "d1-shift-req": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (0, 3)),
-    "d2-two-shifts": (BIG_COMPONENT_MAZE, "NE", 0, (3, 3), (6, 6)),
-    "d2-self-push-out": (DIFFICULT_MAZE, "NE", 0, (0, 6), (6, 6)),
-    "d2-pushback-violation": (DIFFICULT_MAZE, "NE", 0, (0, 0), (6, 0)),
-    "d2-long-running": (BIG_COMPONENT_MAZE, "NES", 270, (3, 2), (0, 5)),
-    "d3-obj-push-out": (DIFFICULT_MAZE, "NE", 0, (0, 6), (5, 1)),
-    "d3-long-running": (DIFFICULT_MAZE, "NS", 180, (4, 6), (1, 1)),
-    "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (1, 4), (6, 2)),
-    "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 180, (6, 6), (0, 0)),
-    "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", 270, (1, 4), (5, 6))
+    "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", (3, 3), (6, 2)),
+    "d1-shift-req": (BIG_COMPONENT_MAZE, "NE", (3, 3), (0, 3)),
+    "d2-two-shifts": (BIG_COMPONENT_MAZE, "NE", (3, 3), (6, 6)),
+    "d2-self-push-out": (DIFFICULT_MAZE, "NE", (0, 6), (6, 6)),
+    "d2-pushback-violation": (DIFFICULT_MAZE, "NE", (0, 0), (6, 0)),
+    "d2-long-running": (BIG_COMPONENT_MAZE, "NES", (3, 2), (0, 5)),
+    "d3-obj-push-out": (DIFFICULT_MAZE, "NE", (0, 6), (5, 1)),
+    "d3-long-running": (DIFFICULT_MAZE, "NS", (4, 6), (1, 1)),
+    "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (1, 4), (6, 2)),
+    "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (6, 6), (0, 0)),
+    "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (1, 4), (5, 6))
 }
 
 
-def _param_tuple_to_param_dict(maze_string, leftover_doors, leftover_rotation, start_tuple, objective_tuple):
+def _param_tuple_to_param_dict(maze_string, leftover_doors, start_tuple, objective_tuple):
     return {"maze": create_maze(maze_string),
-            "leftover_card": MazeCard.create_instance(leftover_doors, leftover_rotation),
+            "leftover_card": MazeCard.create_instance(leftover_doors, 0),
             "start_location": BoardLocation(*start_tuple),
             "objective_location": BoardLocation(*objective_tuple)}
 
