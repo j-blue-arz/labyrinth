@@ -13,7 +13,7 @@ These types are implemented on two boards.
 """
 import copy
 import pytest
-import server.model.minimax as mm
+import server.model.algorithm.minimax as mm
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE

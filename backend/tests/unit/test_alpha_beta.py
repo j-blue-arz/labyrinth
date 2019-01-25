@@ -13,10 +13,10 @@ These types are implemented on two boards.
 """
 import copy
 import pytest
-import server.model.alpha_beta as ab
+import server.model.algorithm.alpha_beta as ab
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
-from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
+from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
 
 def test_big_component_d1_shift_req_with_depth_1():
     """ Test-case where one shift action is required to reach objective.

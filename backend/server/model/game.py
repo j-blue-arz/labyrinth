@@ -16,7 +16,7 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 """
 from random import choice
 from . import exceptions
-from .maze_algorithm import Graph
+from .reachable import Graph
 
 
 class BoardLocation:

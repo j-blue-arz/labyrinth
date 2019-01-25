@@ -15,13 +15,14 @@ import time
 from threading import Thread
 import requests
 import server.mapper.api
-from .maze_algorithm import Graph
+import server.model.algorithm.exhaustive_search as exh
+import server.model.algorithm.minimax as mm
+import server.model.algorithm.alpha_beta as ab
+from .reachable import Graph
 from .game import Player, Turns
 from .exceptions import LabyrinthDomainException
 from .factories import maze_to_string
-import server.model.exhaustive_search as exh
-import server.model.minimax as mm
-import server.model.alpha_beta as ab
+
 
 
 class ComputerPlayer(Player, Thread):

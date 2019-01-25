@@ -1,62 +1,17 @@
 """ This module contains algorithms performing searches on a game tree. """
 import math
 import operator
-from .maze_algorithm import RotatableMazeCardGraph, Graph
-from .game import Board, Piece, MazeCard, Maze, BoardLocation
-
+from server.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
+from server.model.game import Board, MazeCard, Maze, BoardLocation
+import server.model.algorithm.util as util
 
 _MAZE_SIZE = 7
-
-
-def _other(player):
-    return 1 - player
-
-
-def _sign(player):
-    return 1 - 2*player
-
-
-def _copy_board(board, pieces=None):
-    maze_card_by_id = {}
-    leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
-    maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze(validate_locations=False)
-    for location in board.maze.maze_locations():
-        old_maze_card = board.maze[location]
-        maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
-        maze_card_by_id[maze_card.identifier] = maze_card
-        maze[location] = maze_card
-    objective = maze_card_by_id[board.objective_maze_card.identifier]
-    board_copy = Board(maze, leftover_card, objective)
-    board_copy.validate_moves = False
-    if not pieces:
-        pieces = board.pieces
-    piece_maze_cards = [maze_card_by_id[piece.maze_card.identifier] for piece in pieces]
-    for maze_card in piece_maze_cards:
-        board_copy.pieces.append(Piece(maze_card))
-    return board_copy
-
-
-def _union(dict_of_items, key, items):
-    if key in dict_of_items:
-        return dict_of_items[key].union(items)
-    return items
-
-
-def _average_location(locations):
-    row_sum = sum(location.row for location in locations)
-    column_sum = sum(location.column for location in locations)
-    return {"row": row_sum / len(locations),
-            "column": column_sum / len(locations)}
-
 
 def _is_insert_location(location):
     return location in Board.INSERT_LOCATIONS
 
-
 def _manhattan_distance(one_location, other_location):
     return abs(one_location.row - other_location.row) + abs(one_location.column - other_location.column)
-
 
 def _objective_value(location, objective_location):
     distance = 15
@@ -76,13 +31,6 @@ def _objective_value(location, objective_location):
         else:
             distance = direct_distance
     return -distance
-
-
-def _find_location_by_id(maze, card_id):
-    for location in maze.maze_locations():
-        if maze[location].identifier == card_id:
-            return location
-    return None
 
 
 class GameTreeNode:
@@ -112,7 +60,7 @@ class GameTreeNode:
         """ Returns a root to the tree, with parent = None.
         Also sets up the objective identifier. This is necessary, because the objective in board is moved
         after it has been reached (making it impossible to compare the location of piece and objective) """
-        board_copy = _copy_board(board)
+        board_copy = util.copy_board(board)
         board_copy.validate_moves = False
         root = cls(board=board_copy, previous_shift_location=previous_shift_location)
         root.depth = max_depth
@@ -121,7 +69,7 @@ class GameTreeNode:
 
     def children(self, sorted_insert_locations=None):
         """ Returns iterable over children of this node """
-        piece = self.board.pieces[_other(self.player_index)]
+        piece = self.board.pieces[util.other(self.player_index)]
         for insert_location in self._insert_locations(sorted_insert_locations):
             self._do_shift(insert_location, 0)
             piece_location = self.board.maze.maze_card_location(piece.maze_card)
@@ -160,27 +108,27 @@ class GameTreeNode:
         If objective is reachable, only this one location is returned (but all rotations)
         """
         graph = RotatableMazeCardGraph(self.board.maze, rotatable_location)
-        reachable, reachable_map = graph.reachable_locations(source)
+        certainly_reachable, reachable_by_rotation = graph.reachable_locations(source)
         result = dict()
-        for location in reachable:
+        for location in certainly_reachable:
             if self.board.maze[location].identifier == self.objective_identifier:
                 for rotation in self._rotations(rotatable_location):
                     result[rotation] = [location]
                 return result
-        for rotation, locations in reachable_map.items():
+        for rotation, locations in reachable_by_rotation.items():
             for location in locations:
                 if self.board.maze[location].identifier == self.objective_identifier:
                     result[rotation] = [location]
         if result:
             return result
         for rotation in self._rotations(rotatable_location):
-            result[rotation] = _union(reachable_map, rotation, reachable)
+            result[rotation] = all_reachables(certainly_reachable, reachable_by_rotation, rotation)
         return result
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board
         to its original state if iteration is aborted, e.g. returning from a loop """
-        piece = self.board.pieces[_other(self.player_index)]
+        piece = self.board.pieces[util.other(self.player_index)]
         self._undo_move(piece)
         self._undo_shift()
 
@@ -215,12 +163,12 @@ class GameTreeNode:
         """ Heuristic zero-sum value, from viewpoint of player 0 """
         win_value = 0
         if self.is_winning():
-            win_value = 1 * _sign(self.player_index)
+            win_value = 1 * util.sign(self.player_index)
         graph = Graph(self.board.maze)
         reach = [None, None]
         objective_value = [None, None]
         maze_card_value = [0, 0]
-        objective_location = _find_location_by_id(self.board.maze, self.objective_identifier)
+        objective_location = util.find_location_by_id(self.board.maze, self.objective_identifier)
         for player_index in [0, 1]:
             maze_card = self.board.pieces[player_index].maze_card
             location = self.board.maze.maze_card_location(maze_card)
@@ -262,7 +210,7 @@ class Minimax:
     INF = 100000
 
     def __init__(self, board, pieces, previous_shift_location=None, depth=3):
-        self._board = _copy_board(board, pieces)
+        self._board = util.copy_board(board, pieces)
         self._aborted = False
         self._previous_shift_location = previous_shift_location
         self._depth = depth

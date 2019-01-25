@@ -1,7 +1,7 @@
 """ This module contains algorithms performing searches on a game tree. """
-from .maze_algorithm import Graph
-from .game import Board, Piece, MazeCard, Maze, BoardLocation
-
+from server.model.reachable import Graph
+from server.model.game import BoardLocation
+import server.model.algorithm.util as util
 
 class ReachedMazeCard:
     """ Container type for a maze card reached on the path from the start location to the objective.
@@ -15,23 +15,6 @@ class ReachedMazeCard:
         self.maze_card_id = maze_card_id
         self.location = location
         self.from_reached_maze_card = from_reached_maze_card
-
-def _copy_board(board):
-    maze_card_by_id = {}
-    leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
-    maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze(validate_locations=False)
-    for location in board.maze.maze_locations():
-        old_maze_card = board.maze[location]
-        maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
-        maze_card_by_id[maze_card.identifier] = maze_card
-        maze[location] = maze_card
-    objective = maze_card_by_id[board.objective_maze_card.identifier]
-    board_copy = Board(maze, leftover_card, objective)
-    board_copy.validate_moves = False
-    piece_maze_card = maze_card_by_id[board.pieces[0].maze_card.identifier]
-    board_copy.pieces.append(Piece(piece_maze_card))
-    return board_copy
 
 class GameTreeNode:
     """ Represents a node in the game tree. Each node represents a shift action and all reachable maze cards
@@ -52,7 +35,7 @@ class GameTreeNode:
     def get_root(cls, board):
         """ Returns a root to the tree, with parent = None """
         root = cls()
-        root.board = _copy_board(board)
+        root.board = util.copy_board(board)
         root.board.validate_moves = False
         piece = root.board.pieces[0]
         location = root.board.maze.maze_card_location(piece.maze_card)
@@ -81,7 +64,7 @@ class GameTreeNode:
 
     def _compute(self):
         if not self.board:
-            self.board = _copy_board(self.parent.board)
+            self.board = util.copy_board(self.parent.board)
             shift_location, shift_rotation = self.shift_action
             self.board.shift(shift_location, shift_rotation)
             piece_locations = [self._location_by_id(reached.maze_card_id) for reached in self.parent.reached_maze_cards]

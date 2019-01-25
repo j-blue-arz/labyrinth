@@ -1,7 +1,7 @@
 """ Tests for Graph. A Board instance is created from a string representation of a labyrinth.
 Several validation tests are performed on this instance """
 from server.model.game import BoardLocation
-from server.model.maze_algorithm import Graph
+from server.model.reachable import Graph
 from server.model.factories import create_maze
 
 

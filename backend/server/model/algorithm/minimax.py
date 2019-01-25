@@ -1,37 +1,9 @@
 """ This module contains algorithms performing searches on a game tree. """
-from .maze_algorithm import RotatableMazeCardGraph
-from .game import Board, Piece, MazeCard, Maze, BoardLocation
-
+from server.model.reachable import RotatableMazeCardGraph, all_reachables
+from server.model.game import BoardLocation
+import server.model.algorithm.util as util
 
 _MAZE_SIZE = 7
-
-def _other(player):
-    return 1 - player
-
-def _copy_board(board, pieces=None):
-    maze_card_by_id = {}
-    leftover_card = MazeCard(board.leftover_card.identifier, board.leftover_card.doors, board.leftover_card.rotation)
-    maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = Maze(validate_locations=False)
-    for location in board.maze.maze_locations():
-        old_maze_card = board.maze[location]
-        maze_card = MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
-        maze_card_by_id[maze_card.identifier] = maze_card
-        maze[location] = maze_card
-    objective = maze_card_by_id[board.objective_maze_card.identifier]
-    board_copy = Board(maze, leftover_card, objective)
-    board_copy.validate_moves = False
-    if not pieces:
-        pieces = board.pieces
-    piece_maze_cards = [maze_card_by_id[piece.maze_card.identifier] for piece in pieces]
-    for maze_card in piece_maze_cards:
-        board_copy.pieces.append(Piece(maze_card))
-    return board_copy
-
-def _union(dict_of_items, key, items):
-    if key in dict_of_items:
-        return dict_of_items[key].union(items)
-    return items
 
 class GameTreeNode:
     """ Represents a node in the game tree for two players.
@@ -45,7 +17,7 @@ class GameTreeNode:
         self.parent = parent
         self.current_shift_action = None
         self.current_move_action = None
-        self.previous_shift_location = previous_shift_location
+        self.previous_insert_location = previous_shift_location
         self.pushed_out_rotation = 0
         if parent:
             self.player_index = 1 - parent.player_index
@@ -60,7 +32,7 @@ class GameTreeNode:
         """ Returns a root to the tree, with parent = None.
         Also sets up the objective identifier. This is necessary, because the objective in board is moved
         after it has been reached (making it impossible to compare the location of piece and objective) """
-        board_copy = _copy_board(board)
+        board_copy = util.copy_board(board)
         board_copy.validate_moves = False
         root = cls(board=board_copy, previous_shift_location=previous_shift_location)
         root.depth = max_depth
@@ -69,22 +41,26 @@ class GameTreeNode:
 
     def children(self):
         """ Returns iterable over children of this node """
-        disabled_shift_location = None
-        if self.previous_shift_location:
-            disabled_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
-        piece = self.board.pieces[_other(self.player_index)]
+        piece = self.board.pieces[util.other(self.player_index)]
+        for insert_location in self._insert_locations():
+            self._do_shift(insert_location, 0)
+            piece_location = self.board.maze.maze_card_location(piece.maze_card)
+            rotation_depended_locations = self._determine_reachable_locations(piece_location, insert_location)
+            for rotation in rotation_depended_locations:
+                self._do_rotate(insert_location, rotation)
+                for location in rotation_depended_locations[rotation]:
+                    self._do_move(piece, piece_location, location)
+                    yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
+                    self._undo_move(piece)
+            self._undo_shift()
+
+    def _insert_locations(self):
+        disabled_insert_location = None
+        if self.previous_insert_location:
+            disabled_insert_location = self.board.opposing_insert_location(self.previous_insert_location)
         for insert_location in self.board.INSERT_LOCATIONS:
-            if insert_location != disabled_shift_location:
-                self._do_shift(insert_location, 0)
-                piece_location = self.board.maze.maze_card_location(piece.maze_card)
-                rotation_depended_locations = self._determine_reachable_locations(piece_location, insert_location)
-                for rotation in rotation_depended_locations:
-                    self._do_rotate(insert_location, rotation)
-                    for location in rotation_depended_locations[rotation]:
-                        self._do_move(piece, piece_location, location)
-                        yield GameTreeNode(parent=self, board=self.board, previous_shift_location=insert_location)
-                        self._undo_move(piece)
-                self._undo_shift()
+            if insert_location != disabled_insert_location:
+                yield insert_location
 
     def _rotations(self, location):
         rotations = [0, 90, 180, 270]
@@ -97,42 +73,42 @@ class GameTreeNode:
         """ If the objective can be reached for any rotation, return only that one rotation and location.
         If depth <= 2, this is the last move made by the current player. Return only one (any) location.
         if depth == 1, also return only one rotation
-        Else return all reachable locations. 
+        Else return all reachable locations.
         Returns a dictionary, where keys are the rotations, and values are iterables over BoardLocations
         """
         graph = RotatableMazeCardGraph(self.board.maze, rotatable_location)
-        reachable, reachable_map = graph.reachable_locations(source)
-        for location in reachable:
+        certainly_reachable, reachable_by_rotation = graph.reachable_locations(source)
+        for location in certainly_reachable:
             if self.board.maze[location].identifier == self.objective_identifier:
                 return {0: [location]}
-        for rotation, locations in reachable_map.items():
+        for rotation, locations in reachable_by_rotation.items():
             for location in locations:
                 if self.board.maze[location].identifier == self.objective_identifier:
                     return {rotation: [location]}
         if self.depth >= 3:
             result = dict()
             for rotation in self._rotations(rotatable_location):
-                result[rotation] = _union(reachable_map, rotation, reachable)
+                result[rotation] = all_reachables(certainly_reachable, reachable_by_rotation, rotation)
             return result
         if self.depth == 2:
             result = dict()
             for rotation in self._rotations(rotatable_location):
-                if rotation in reachable_map:
-                    result[rotation] = [next(iter(reachable_map[rotation]))]
+                if rotation in reachable_by_rotation:
+                    result[rotation] = [next(iter(reachable_by_rotation[rotation]))]
                 else:
-                    result[rotation] = [next(iter(reachable))]
+                    result[rotation] = [next(iter(certainly_reachable))]
             return result
         if self.depth == 1:
-            if reachable_map:
-                available_rotation = next(iter(reachable_map))
-                return {available_rotation: [next(iter(reachable_map[available_rotation]))]}
-            return {0: [next(iter(reachable))]}
+            if reachable_by_rotation:
+                available_rotation = next(iter(reachable_by_rotation))
+                return {available_rotation: [next(iter(reachable_by_rotation[available_rotation]))]}
+            return {0: [next(iter(certainly_reachable))]}
 
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board
         to its original state if iteration is aborted, e.g. returning from a loop """
-        piece = self.board.pieces[_other(self.player_index)]
+        piece = self.board.pieces[util.other(self.player_index)]
         self._undo_move(piece)
         self._undo_shift()
 
@@ -190,7 +166,7 @@ class Minimax:
     LOSS = -1
 
     def __init__(self, board, pieces, previous_shift_location=None, depth=3):
-        self._board = _copy_board(board, pieces)
+        self._board = util.copy_board(board, pieces)
         self._aborted = False
         self._previous_shift_location = previous_shift_location
         self._depth = depth

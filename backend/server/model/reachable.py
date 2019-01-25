@@ -218,3 +218,11 @@ class RotatableMazeCardGraph:
         if maze_card.doors == maze_card.STRAIGHT:
             rotations = [0, 90]
         return rotations
+
+def all_reachables(certainly_reached, rotation_map, rotation):
+    """ Given the two return values of RotatableMazeCardGraph.reachable_locations() along with a specific rotation,
+    this method returns all reachable locations for this rotation.
+    It adds the respective entry of the rotation map to the list of certainly reachable maze cards """
+    if rotation in rotation_map:
+        return rotation_map[rotation].union(certainly_reached)
+    return certainly_reached
