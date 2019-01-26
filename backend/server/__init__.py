@@ -5,7 +5,7 @@ import os
 
 from flask import Flask, render_template, send_from_directory
 
-version_info = (0, 0, 15)
+version_info = (0, 1, 0)
 __version__ = '.'.join(map(str, version_info))
 
 
