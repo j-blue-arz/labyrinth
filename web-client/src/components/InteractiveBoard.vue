@@ -171,14 +171,14 @@ export default {
         },
         handleResize: function() {
             if (window.innerWidth > window.innerHeight) {
-                this.interactionWidth = this.interactiveBoardSize() + this.leftoverSize();
+                this.interactionWidth = this.interactiveBoardSize() + this.leftoverSize() - 45;
                 this.interactionHeight = this.interactiveBoardSize();
                 this.leftoverX = this.interactiveBoardSize() - 60;
                 this.leftoverY = 50;
                 this.isLandscape = true;
             } else {
                 this.interactionWidth = this.interactiveBoardSize();
-                this.interactionHeight = this.interactiveBoardSize() + this.leftoverSize();
+                this.interactionHeight = this.interactiveBoardSize() + this.leftoverSize() - 45;
                 this.leftoverX = 50;
                 this.leftoverY = this.interactiveBoardSize() - 60;
                 this.isLandscape = false;

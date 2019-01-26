@@ -35,6 +35,8 @@ export default {
 .menu {
     list-style: none;
     position: absolute;
+    left: -11rem;
+    top: 0.5rem;
 
     &__item {
         display: flex;
@@ -43,10 +45,12 @@ export default {
         align-items: center;
         border-bottom: 1px solid grey;
         font-family: sans-serif;
+        background: $color-menu-background;
+        white-space: nowrap;
 
         &:hover {
-            background: orange;
-            color: white;
+            background: $color-menu-hover;
+            color: $color-menu-background;
         }
 
         &:last-child {

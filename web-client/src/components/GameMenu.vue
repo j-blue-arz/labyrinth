@@ -1,5 +1,8 @@
 <template>
-    <div @click="onOpenMenu" class="game-menu game-menu__button">
+    <div class="game-menu">
+        <div class="game-menu__button">
+            <span @click.self="onOpenMenu" class="game-menu__button-text">Menu</span>
+        </div>
         <v-menu
             @item-click="onItemClick($event)"
             :visible="menuIsVisible"
@@ -43,15 +46,13 @@ export default {
         };
     },
     methods: {
-        onOpenMenu: function(event) {
-            if (event.ctrlKey) {
-                this.menuIsVisible = true;
-            }
+        onOpenMenu: function() {
+            this.menuIsVisible = true;
+            //this.menuIsVisible = true;
         },
         onItemClick: function($event) {
-            if ($event === "close") {
-                this.closeMenu();
-            } else if ($event === "remove") {
+            this.closeMenu();
+            if ($event === "remove") {
                 this.removeComputers();
             } else if ($event === "exhaustive-search") {
                 this.replaceByComputer("exhaustive-search");
@@ -91,10 +92,24 @@ export default {
 </script>
 
 <style lang="scss">
-.game-menu__button {
-    display: block;
-    height: 50px;
-    width: 50px;
-    background-color: lightgray;
+.game-menu {
+    position: relative;
+
+    &__button {
+        text-align: center;
+        display: table;
+        width: 6rem;
+        background-color: $color-menu-button;
+        height: 4rem;
+
+        &:hover {
+            background-color: $color-menu-hover;
+        }
+    }
+
+    &__button-text {
+        display: table-cell;
+        vertical-align: middle;
+    }
 }
 </style>
