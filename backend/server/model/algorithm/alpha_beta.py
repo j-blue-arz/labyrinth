@@ -241,15 +241,15 @@ class AlphaBeta:
         This algorithm only returns the best next action, not the entire path.
         
         :param root: an instance of GameTreeNode, the root of the tree to search
-        :return: the best actions,
-        and -1, 1, or 0, if player 0 is certainly loosing, certainly winning, or none of both, respectively
+        :return: the best actions, the maximin value, and a tuple of components of this value,
+        where the first entry signifies if player 0 is certainly loosing (-1), certainly winning (1), or none of both (0)
         """
 
         self._shift_locations_per_depth = {}
         for depth in range(1, self._depth):
             self._shift_locations_per_depth[depth] = {}
-        _, values = self._negamax(node=root, depth=self._depth, alpha=-self.INF, beta=self.INF, player=0)
-        return self._best_actions, values[0]
+        value, values = self._negamax(node=root, depth=self._depth, alpha=-self.INF, beta=self.INF, player=0)
+        return self._best_actions, value, values
 
     def _negamax(self, node, depth, alpha, beta, player):
         if depth == 0 or node.is_winning(util.other(player)):
@@ -323,7 +323,6 @@ class IterativeDeepening:
         self._current_search = None
         self._shift_action = None
         self._move_action = None
-        self._heuristic = heuristic()
 
     def start_iterating(self, board, pieces, previous_shift_location=None):
         """ Starts iterating """
@@ -334,8 +333,8 @@ class IterativeDeepening:
             self._current_search = AlphaBeta(self._heuristic, depth)
             root = GameTreeNode.get_root(util.copy_board(board, pieces),
                                          previous_shift_location=previous_shift_location)
-            actions, value = self._current_search.find_actions(root)
-            win_detected = abs(value) == 1
+            actions, _, values = self._current_search.find_actions(root)
+            win_detected = abs(values[0]) == 1
             if not self._aborted:
                 self._shift_action, self._move_action = actions
 

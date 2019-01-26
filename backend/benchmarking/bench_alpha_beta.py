@@ -26,8 +26,8 @@ def _profile(name):
 
 def _results(name):
     optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    actions, value, values = optimizer.find_actions(root)
-    print("Test case {:<30} \t resulted in actions {}, with total value {}".format(name, actions, value))
+    actions, values, win_value = optimizer.find_actions(root)
+    print("Test case {:<30} \t resulted in actions {}, with win value {}".format(name, actions, win_value))
     format_str = ', '.join(['{:0.2f}']*len(values))
     print(format_str.format(*values))
 

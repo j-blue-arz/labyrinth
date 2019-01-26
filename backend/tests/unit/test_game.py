@@ -47,7 +47,7 @@ def test_add_and_remove_player_id_unique():
     assert actual == expected
 
 
-@patch("model.computer.ComputerPlayer")
+@patch("server.model.computer.ComputerPlayer")
 def test_change_player_calls_constructor_with_correct_arguments(mock_player_class):
     """ Tests change_player """
     game = Game(identifier=7)
@@ -102,7 +102,7 @@ def test_add_player_start_game_calls_methods_on_turns():
         assert turns.mock_calls[-2:] == expected_turn_calls
 
 
-@patch("model.game.Player")
+@patch("server.model.game.Player")
 def test_add_player_calls_constructor_with_correct_arguments(mock_player_class):
     """ Tests add_player """
     game = Game(identifier=7)
