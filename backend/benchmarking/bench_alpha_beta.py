@@ -1,6 +1,6 @@
 """ Usage:
 bench_alpha_beta <task> <case>
-where task is either 'profile' or 'benchmark'
+where task is either 'profile', 'benchmark' or 'result'
 and 'case' is one of "big-component-d1-shift-req", "big-component-d2-cannot-prevent", "big-component-d3-reach",
 "difficult-d1-shift-req", "difficult-d2-cannot-prevent", "difficult-d2-can-prevent", "difficult-d3-reach", "bug-d1".
 """
@@ -15,21 +15,19 @@ def _benchmark(name):
     if depth >= 3:
         repeat = 1
     runs = 1
-    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    min_time = min(timeit.Timer(optimizer.find_actions).repeat(repeat, runs)) / runs * 1000
+    optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
+    min_time = min(timeit.Timer(lambda: optimizer.find_actions(root)).repeat(repeat, runs)) / runs * 1000
     print("Test case {:<30} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
 
 
 def _profile(name):
-    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    cProfile.runctx("optimizer.find_actions()", globals(), locals(), filename=name)
+    optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
+    cProfile.runctx("optimizer.find_actions(root)", globals(), locals(), filename=name)
 
 def _results(name):
-    optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    actions, value, values = optimizer.find_actions()
+    optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
+    actions, value = optimizer.find_actions(root)
     print("Test case {:<30} \t resulted in actions {}, with total value {}".format(name, actions, value))
-    format_str = ', '.join(['{:0.2f}']*len(values))
-    print(format_str.format(*values))
 
 def _extract_depth(test_case):
     pos = test_case.find("-d") + 2

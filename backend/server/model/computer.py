@@ -232,9 +232,11 @@ class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
     SECONDS_TO_COMPUTE = 2.5
 
     def __init__(self, board, player_piece, game):
+        self._board = board
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
-        pieces = [player_piece, other_piece]
-        ab.IterativeDeepening.__init__(self, board, pieces, game.previous_shift_location)
+        self._pieces = [player_piece, other_piece]
+        self._game = game
+        ab.IterativeDeepening.__init__(self)
         Thread.__init__(self)
 
     @property
@@ -252,4 +254,4 @@ class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
         self.stop_iterating()
 
     def run(self):
-        self.start_iterating()
+        self.start_iterating(self._board, self._pieces, self._game.previous_shift_location)
