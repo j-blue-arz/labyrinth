@@ -9,14 +9,20 @@ _MAZE_SIZE = 7
 
 
 class Heuristic:
-    """ A heuristic is expected to define two functions. The first is the evaluation function,
-    which assigns a board position a value from the viewpoint of player 0.
-    The function should_stop() determines if the iterative deepening should be stopped. """
+    """ A heuristic is expected to define a value function. """
 
     WIN_WEIGHT = 1000
 
     def value(self, node, current_player):
-        """ Heuristic zero-sum value, from viewpoint of player 0 """
+        """ Heuristic zero-sum value, from viewpoint of player 0.
+        
+        :param node: the node to evaluate
+        :param current_player: the player who made the last move
+        :return: a value, and a tuple of value components. The first entry of this tuple should be
+        1, if player 0 reaches the objective,
+        -1, if player 1 reaches the objective, or
+        0, if no player reaches the objective
+        """
         board = node.board
         objective_identifier = node.objective_identifier
         win_value = self._win_value(board, objective_identifier, current_player)
@@ -38,12 +44,8 @@ class Heuristic:
         if win_value != 0:
             distance_value = 0
         maze_card_value = maze_card_value[0] - maze_card_value[1]
-        return win_value * self.WIN_WEIGHT + reach_value * 1 + distance_value * 2 + maze_card_value * 3
-
-    def should_stop(self, value):
-        """ Determines if the iterative deepening can be stopped, based on the minimax value.
-        This method should return True iff the player is certain to win or to lose """
-        return abs(value) >= self.WIN_WEIGHT
+        sum_values = win_value * self.WIN_WEIGHT + reach_value * 1 + distance_value * 2 + maze_card_value * 3
+        return sum_values, (win_value, reach_value, distance_value, maze_card_value)
 
     def _win_value(self, board, objective_identifier, player_index):
         """ returns True iff the current player has reached the objective """
@@ -165,7 +167,7 @@ class GameTreeNode:
     def reset_board(self, player_index):
         """ The children() iterator alters the board state. Call this method to reset the board
         to its original state if iteration is aborted, e.g. returning from a loop """
-        piece = self.board.pieces[util.other(player_index)]
+        piece = self.board.pieces[player_index]
         self._undo_move(piece)
         self._undo_shift()
 
@@ -237,24 +239,33 @@ class AlphaBeta:
     def find_actions(self, root):
         """ Finds an action which maximzes the heuristic value.
         This algorithm only returns the best next action, not the entire path.
+        
+        :param root: an instance of GameTreeNode, the root of the tree to search
+        :return: the best actions,
+        and -1, 1, or 0, if player 0 is certainly loosing, certainly winning, or none of both, respectively
         """
+
         self._shift_locations_per_depth = {}
         for depth in range(1, self._depth):
             self._shift_locations_per_depth[depth] = {}
-        value = self._negamax(node=root, depth=self._depth, alpha=-self.INF, beta=self.INF, player=0)
-        return self._best_actions, value
+        _, values = self._negamax(node=root, depth=self._depth, alpha=-self.INF, beta=self.INF, player=0)
+        return self._best_actions, values[0]
 
     def _negamax(self, node, depth, alpha, beta, player):
         if depth == 0 or node.is_winning(util.other(player)):
-            return util.sign(player) * self._heuristic.value(node, util.other(player))
+            value, values = self._heuristic.value(node, util.other(player))
+            return util.sign(player) * value, values
         best_value = -self.INF
+        best_values = None
         ordered_shift_locations = self._extract_ordered_shifts(depth)
         for child in node.children(player, ordered_shift_locations):
-            value = -self._negamax(child, depth - 1, -beta, -alpha, util.other(player))
+            value, values = self._negamax(child, depth - 1, -beta, -alpha, util.other(player))
+            value = -value
             self._update_shift_values(depth, node, value)
             if value > best_value:
                 best_value = value
-                #alpha = max(alpha, value)
+                best_values = values
+                alpha = max(alpha, value)
                 if depth == self._depth:
                     self._copy_actions(node)
             if alpha >= beta:
@@ -262,7 +273,7 @@ class AlphaBeta:
                 break
             if self._aborted:
                 break
-        return best_value
+        return best_value, best_values
 
     def _extract_ordered_shifts(self, depth):
         ordered_shift_locations = None
@@ -324,7 +335,7 @@ class IterativeDeepening:
             root = GameTreeNode.get_root(util.copy_board(board, pieces),
                                          previous_shift_location=previous_shift_location)
             actions, value = self._current_search.find_actions(root)
-            win_detected = self._heuristic.should_stop(value)
+            win_detected = abs(value) == 1
             if not self._aborted:
                 self._shift_action, self._move_action = actions
 

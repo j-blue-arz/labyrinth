@@ -26,8 +26,10 @@ def _profile(name):
 
 def _results(name):
     optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
-    actions, value = optimizer.find_actions(root)
+    actions, value, values = optimizer.find_actions(root)
     print("Test case {:<30} \t resulted in actions {}, with total value {}".format(name, actions, value))
+    format_str = ', '.join(['{:0.2f}']*len(values))
+    print(format_str.format(*values))
 
 def _extract_depth(test_case):
     pos = test_case.find("-d") + 2

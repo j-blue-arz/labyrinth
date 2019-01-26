@@ -24,8 +24,8 @@ def test_big_component_d1_shift_req_with_depth_1():
     Optimizer is run with depth 1.
     Checks that objective was reached. """
     optimizer, root, board = create_optimizer("big-component-d1-shift-req", depth=1)
-    actions, value = optimizer.find_actions(root)
-    assert value >= ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     was_reached = _check_actions(board, board.pieces[0], actions)
     assert was_reached
 
@@ -35,8 +35,8 @@ def test_big_component_d1_shift_req_with_depth_2():
     Optimizer is run with depth 2.
     Checks that objective was reached """
     optimizer, root, board = create_optimizer("big-component-d1-shift-req", depth=2)
-    actions, value = optimizer.find_actions(root)
-    assert value >= ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     was_reached = _check_actions(board, board.pieces[0], actions)
     assert was_reached
 
@@ -44,8 +44,8 @@ def test_big_component_d1_shift_req_with_depth_2():
 def test_big_component_d2_cannot_prevent():
     """ Test-case where other player reaches objective, check that a valid action was returned """
     optimizer, root, board = create_optimizer("big-component-d2-cannot-prevent", depth=2)
-    actions, value = optimizer.find_actions(root)
-    assert value <= -ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == -1
     _check_actions(board, board.pieces[0], actions)
 
 
@@ -54,7 +54,8 @@ def test_big_component_d3_reach():
     """ Test-case where player reaches objective in his second move, other player cannot prevent this to happen.
     Check specific first actions. """
     optimizer, root, board = create_optimizer("big-component-d3-reach", depth=3)
-    actions, _ = optimizer.find_actions(root)
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     _check_actions(board, board.pieces[0], actions)
 
 
@@ -63,8 +64,8 @@ def test_difficult_d1_shift_req_with_depth_1():
     Optimizer is run with depth 1.
     Checks that objective was reached """
     optimizer, root, board = create_optimizer("difficult-d1-shift-req", depth=1)
-    actions, value = optimizer.find_actions(root)
-    assert value >= ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     was_reached = _check_actions(board, board.pieces[0], actions)
     assert was_reached
 
@@ -74,8 +75,8 @@ def test_difficult_d1_shift_req_with_depth_2():
     Optimizer is run with depth 1.
     Checks that objective was reached """
     optimizer, root, board = create_optimizer("difficult-d1-shift-req", depth=2)
-    actions, value = optimizer.find_actions(root)
-    assert value >= ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     was_reached = _check_actions(board, board.pieces[0], actions)
     assert was_reached
 
@@ -83,8 +84,8 @@ def test_difficult_d1_shift_req_with_depth_2():
 def test_difficult_d2_cannot_prevent():
     """ Test-case where other player reaches objective, check that a valid action was returned """
     optimizer, root, board = create_optimizer("difficult-d2-cannot-prevent", depth=2)
-    actions, value = optimizer.find_actions(root)
-    assert value <= -ab.Heuristic.WIN_WEIGHT
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == -1
     _check_actions(board, board.pieces[0], actions)
 
 
@@ -92,7 +93,8 @@ def test_difficult_d2_can_prevent():
     """ Test-case where noone reaches objective,
     check specific player's first action """
     optimizer, root, board = create_optimizer("difficult-d2-can-prevent", depth=2)
-    actions, _ = optimizer.find_actions(root)
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 0
     _check_actions(board, board.pieces[0], actions)
 
 
@@ -101,14 +103,14 @@ def test_difficult_d3_reach():
     """ Test-case where player reaches objective in his second move, other player cannot prevent this to happen.
     Check specific first actions. """
     optimizer, root, board = create_optimizer("difficult-d3-reach", depth=3)
-    actions, _ = optimizer.find_actions(root)
+    actions, _, values = optimizer.find_actions(root)
+    assert values[0] == 1
     _check_actions(board, board.pieces[0], actions)
 
 
 CASES_PARAMS = {
     "big-component-d1-shift-req": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(3, 3), (6, 6)], (0, 3)),
-    "big-component-d2-cannot-prevent": (MINIMAX_BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)),
-    # solution: ((0, 5), x), (6, 5)
+    "big-component-d2-cannot-prevent": (MINIMAX_BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)), # solution: ((0, 5), x), (6, 5)
     "big-component-d3-reach": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)),
     "difficult-d1-shift-req": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)),  # solution: ((0, 3), x), (6, 2)
     "difficult-d2-cannot-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (0, 0)], (1, 1)),
