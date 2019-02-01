@@ -18,15 +18,11 @@ def add_player(game_id, player_request_dto):
     :return: the id of the added player
     """
     game = _get_or_create_game(game_id)
-    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
-    if alone is None:
-        alone = True
+    player_type = mapper.dto_to_type(player_request_dto)
     if player_type is None:
         player_type = "human"
     player_id = None
     if player_type == "human":
-        if not game.players and not alone:
-            _try(lambda: game.add_player(ComputerPlayer, url_supplier=URLSupplier()))
         player_id = _try(lambda: game.add_player(Player))
     else:
         player_id = _try(lambda: game.add_player(
@@ -56,7 +52,7 @@ def replace_player(game_id, player_id, player_request_dto):
     :param player_request_dto: contains information about the type of player to add.
     Currently the only supported option is to replace a human player by a computer player.
     """
-    player_type, _ = mapper.dto_to_type_and_alone_flag(player_request_dto)
+    player_type = mapper.dto_to_type(player_request_dto)
     if player_type == 'human':
         raise exceptions.INVALID_ARGUMENTS()
     else:

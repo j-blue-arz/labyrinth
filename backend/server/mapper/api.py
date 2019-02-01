@@ -58,13 +58,12 @@ def dto_to_move_action(move_dto):
     return _dto_to_board_location(move_dto[LOCATION])
 
 
-def dto_to_type_and_alone_flag(player_request_dto):
+def dto_to_type(player_request_dto):
     """ Maps a DTO for the add player api method to two values, the type and the flag 'alone' """
     if isinstance(player_request_dto, dict):
         return _value_or_none(
-            player_request_dto, POST_PLAYER_TYPE), _value_or_none(
-                player_request_dto, POST_PLAYER_ALONE)
-    return None, None
+            player_request_dto, POST_PLAYER_TYPE)
+    return None
 
 
 def _value_or_none(dto, key):

@@ -12,7 +12,7 @@ INVALID_ACTION = lambda: ApiException("INVALID_ACTION", "The sent action is inva
 GAME_NOT_FOUND = lambda: ApiException("GAME_NOT_FOUND", "The game does not exist.", 404)
 PLAYER_NOT_IN_GAME = lambda: ApiException("PLAYER_NOT_IN_GAME", "The player does not take part in this game.", 400)
 UNKNOWN_ERROR = lambda: ApiException("UNKNOWN_ERROR", "An unknown error has occurred.", 500)
-INVALID_ARGUMENTS = lambda: ApiException("INVALID_ARGUMENTS", 
+INVALID_ARGUMENTS = lambda: ApiException("INVALID_ARGUMENTS",
                                          "The combination of arguments in this request is not supported.", 400)
 
 class ApiException(Exception):

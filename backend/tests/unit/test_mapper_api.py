@@ -120,35 +120,17 @@ def test_dto_to_move_action():
 
 
 def test_dto_to_type():
-    """ Tests dto_to_type_and_alone_flag """
+    """ Tests dto_to_type """
     player_request_dto = json.loads("""{"type": "normal"}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
+    player_type = mapper.dto_to_type(player_request_dto)
     assert player_type == "normal"
-    assert alone is None
 
 
 def test_dto_to_type_and_alone_with_none():
-    """ Tests dto_to_type_and_alone_flag """
+    """ Tests dto_to_type """
     player_request_dto = None
-    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
+    player_type = mapper.dto_to_type(player_request_dto)
     assert player_type is None
-    assert alone is None
-
-
-def test_dto_to_alone_true():
-    """ Tests dto_to_type_and_alone_flag """
-    player_request_dto = json.loads("""{"alone": true}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
-    assert player_type is None
-    assert alone is True
-
-
-def test_dto_to_alone_false():
-    """ Tests dto_to_type_and_alone_flag """
-    player_request_dto = json.loads("""{"alone": false}""")
-    player_type, alone = mapper.dto_to_type_and_alone_flag(player_request_dto)
-    assert player_type is None
-    assert alone is False
 
 
 def test_shift_action_to_dto():

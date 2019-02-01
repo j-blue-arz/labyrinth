@@ -20,15 +20,12 @@ def post_player(game_id):
     """ Adds a player to an existing game. Creates the game if it does not exist.
     The request can contain a body of the form
     {
-        'alone': <boolean>
         'type': <string>,
     },
     where type can be 'human', 'random', 'exhaustive-search', 'minimax', or 'alpha-beta'.
-    If 'alone' is true, only the requested player is added. If it is false,
-                            an additional computer player is added if the game ways empty before.
     If 'type' is 'human', a human player is added.
-    'random', 'exhaustive-search', and 'minimax' are three types of computer players.
-    Default: alone: 'true' and type: 'human'
+    'random', 'exhaustive-search', 'alpha-beta', and 'minimax' are three types of computer players.
+    Default: 'human'
     """
     request_body = request.get_json(silent=True, force=True)
     player_id = service.add_player(game_id, request_body)
