@@ -15,8 +15,7 @@ export default class GameApi {
     }
 
     doShift(shiftLocation, leftoverRotation) {
-        var postShiftPath =
-            this.apiPath + "/games/0/shift?p_id=" + this.playerId;
+        var postShiftPath = this.apiPath + "/games/0/shift?p_id=" + this.playerId;
         return axios.post(postShiftPath, {
             location: shiftLocation,
             leftoverRotation: leftoverRotation
@@ -49,8 +48,7 @@ export default class GameApi {
     }
 
     fetchState() {
-        var getStatePath =
-            this.apiPath + "/games/0/state?p_id=" + this.playerId;
+        var getStatePath = this.apiPath + "/games/0/state";
         return axios.get(getStatePath, {
             cancelToken: this.fetchSource.token
         });

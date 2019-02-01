@@ -56,7 +56,7 @@ def test_get_state(client):
     """
     player_id1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     player_id2 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    response = _get_state(client, player_id2)
+    response = _get_state(client)
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
@@ -77,7 +77,7 @@ def test_get_state_has_correct_initial_state(client):
     Expects scores to be set to 0.
     """
     player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    response = _get_state(client, player_id)
+    response = _get_state(client)
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
     objective_card_id = state["objectiveMazeCardId"]
@@ -110,21 +110,9 @@ def test_get_state_for_nonexisting_game(client):
     exception body
     """
     player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    response = client.get("/api/games/1/state?p_id={}".format(player_id))
+    response = client.get("/api/games/1/state")
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
-
-
-def test_get_state_for_nonexisting_player(client):
-    """ Tests GET for /api/games/0/state
-
-    for non-existing player. Expects 400 Bad Request with
-    exception body
-    """
-    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    response = _get_state(client, player_id + 1)
-    _assert_error_response(response, user_message="The player does not take part in this game.",
-                           key="PLAYER_NOT_IN_GAME", status=400)
 
 
 def test_get_state_valid_after_error(client):
@@ -140,7 +128,7 @@ def test_get_state_valid_after_error(client):
     player_id = _assert_ok_single_int(response)
     response = _post_player(client, player_type="human", alone=True)
     assert response.status_code == 400
-    response = _get_state(client, player_id)
+    response = _get_state(client)
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
@@ -164,7 +152,7 @@ def test_post_move(client):
     response = _post_move(client, player_id, 0, 1)
     assert response.status_code == 200
     assert response.content_length == 0
-    response = _get_state(client, player_id)
+    response = _get_state(client)
     state = response.get_json()
     maze_card_id = next((player["mazeCardId"]
                          for player in state["players"] if player["id"] == player_id),
@@ -235,7 +223,7 @@ def test_post_shift(client):
     """
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    old_state = _get_state(client, player_id).get_json()
+    old_state = _get_state(client).get_json()
     old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
                              None)
     old_rotation = old_leftover_card["rotation"]
@@ -243,7 +231,7 @@ def test_post_shift(client):
     response = _post_shift(client, player_id, 0, 1, new_rotation)
     assert response.status_code == 200
     assert response.content_length == 0
-    new_state = _get_state(client, player_id).get_json()
+    new_state = _get_state(client).get_json()
     old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
                              None)
     pushed_in_card = next((card for card in new_state["mazeCards"]
@@ -298,23 +286,23 @@ def test_turn_action_progression(client):
     """
     player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
     _post_shift(client, player_id_0, 0, 1, 270)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "MOVE"
     _post_move(client, player_id_0, 0, 0)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
     assert state["nextAction"]["action"] == "SHIFT"
     _post_shift(client, player_id_1, 0, 1, 270)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
     assert state["nextAction"]["action"] == "MOVE"
     _post_move(client, player_id_1, 0, 6)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
 
@@ -337,10 +325,7 @@ def test_delete_player(client):
     player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     _delete_player(client, player_id_1)
-    response = _get_state(client, player_id_1)
-    _assert_error_response(response, user_message="The player does not take part in this game.",
-                           key="PLAYER_NOT_IN_GAME", status=400)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert len(state["players"]) == 1
 
 
@@ -352,7 +337,7 @@ def test_put_player(client):
     player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     _put_player(client, player_id_1, player_type="random", alone=True)
-    state = _get_state(client, player_id_0).get_json()
+    state = _get_state(client).get_json()
     assert len(state["players"]) == 2
     player = state["players"][1]
     assert "isComputerPlayer" in player
@@ -365,12 +350,12 @@ def test_put_player(client):
 def _assert_invalid_action_and_unchanged_state(client, player_id, action_callable):
     """ Sets a game up, performs invalid action on given resource with given data,
     asserts error response and checks that state has not changed """
-    response = _get_state(client, player_id)
+    response = _get_state(client)
     old_data = response.get_data()
     response = action_callable()
     _assert_error_response(response, user_message="The sent action is invalid.",
                            key="INVALID_ACTION", status=400)
-    response = _get_state(client, player_id)
+    response = _get_state(client)
     assert response.status_code == 200
     new_data = response.get_data()
     assert old_data == new_data
@@ -435,8 +420,8 @@ def _put_player(client, player_id, player_type=None, alone=None):
     player_data = _player_data(player_type, alone)
     return client.put("/api/games/0/players/{}".format(player_id), data=player_data, mimetype="application/json")
 
-def _get_state(client, player_id):
-    return client.get("/api/games/0/state?p_id={}".format(player_id))
+def _get_state(client):
+    return client.get("/api/games/0/state")
 
 def _player_data(player_type=None, alone=None):
     data = None

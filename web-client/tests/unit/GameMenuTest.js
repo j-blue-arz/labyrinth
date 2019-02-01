@@ -48,10 +48,10 @@ describe("GameMenu", () => {
         expect(menu.isVisible()).toBe(false);
     });
 
-    it("Opens menu when button is double-clicked", () => {
+    it("Opens menu when button is clicked", () => {
         let gameMenu = factory();
         let menu = gameMenu.find(".menu");
-        gameMenu.find(".game-menu__button").trigger("click");
+        gameMenu.find({ ref: "game-menu-button" }).trigger("click");
         expect(menu.isVisible()).toBe(true);
     });
 
@@ -59,7 +59,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "close" })
@@ -72,7 +72,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "remove" })
@@ -82,7 +82,7 @@ describe("GameMenu", () => {
 
         it("calls removePlayers() on gameApi with computer players' IDs", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "remove" })
@@ -98,7 +98,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "exhaustive-search" })
@@ -108,7 +108,7 @@ describe("GameMenu", () => {
 
         it("calls replacePlayer() on gameApi with player's ID and 'exhaustive-search'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "exhaustive-search" })
@@ -122,7 +122,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "minimax" })
@@ -132,7 +132,7 @@ describe("GameMenu", () => {
 
         it("calls replacePlayer() on gameApi with player's ID and 'minimax'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "minimax" })
@@ -146,7 +146,7 @@ describe("GameMenu", () => {
         it("closes menu", () => {
             let gameMenu = factory();
             let menu = gameMenu.find(".menu");
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "alpha-beta" })
@@ -156,7 +156,7 @@ describe("GameMenu", () => {
 
         it("calls replacePlayer() on gameApi with player's ID and 'alpha-beta'", () => {
             let gameMenu = factory();
-            gameMenu.find(".game-menu__button").trigger("click");
+            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
             gameMenu
                 .find(VMenu)
                 .find({ ref: "alpha-beta" })

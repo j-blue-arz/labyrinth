@@ -72,7 +72,6 @@ paths:
             summary: "Returns current game state"
             parameters:
                 - $ref: "#/components/parameters/gameId"
-                - $ref: "#/components/parameters/playerQueryId"
             responses:
                 200:
                     description: "If no error occurred."

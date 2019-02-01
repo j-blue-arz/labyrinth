@@ -1,7 +1,7 @@
 <template>
     <div class="game-menu">
         <div class="game-menu__button">
-            <span @click.self="onOpenMenu" class="game-menu__button-text">Menu</span>
+            <span @click.self="onOpenMenu" ref="game-menu-button" class="game-menu__button-text">Menu</span>
         </div>
         <v-menu
             @item-click="onItemClick($event)"

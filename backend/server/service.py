@@ -62,10 +62,9 @@ def replace_player(game_id, player_id, player_request_dto):
         database.update_game(game_id, game)
 
 
-def get_game_state(game_id, player_id):
-    """ Returns the game state. The querying player has to take part in this game. """
+def get_game_state(game_id):
+    """ Returns the game state """
     game = _load_game_or_throw(game_id)
-    _try(lambda: game.get_player(player_id))
     return mapper.player_state_to_dto(game)
 
 

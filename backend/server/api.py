@@ -47,10 +47,8 @@ def replace_player(game_id, player_id):
 
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):
-    """ Returns the state of the game for a player.
-    The player id has to be given as a path parameter 'p_id'"""
-    player_id = int(request.args["p_id"])
-    return json.jsonify(service.get_game_state(game_id, player_id))
+    """ Returns the state of the game """
+    return json.jsonify(service.get_game_state(game_id))
 
 
 @API.route('/games/<int:game_id>/shift', methods=["POST"])
