@@ -1,0 +1,625 @@
+openapi: 3.0.0
+info:
+    description: "This is the API of the Labyrinth application. You can find the project's github page at <https://github.com/j-blue-arz/labyrinth/>"
+    version: "0.1.0"
+    title: "Labyrinth API"
+    license:
+        name: "GNU AGPLv3"
+        url: "https://www.gnu.org/licenses/agpl.html"
+paths:
+    /games/{game_id}/players:
+        post:
+            tags:
+                - "players"
+            summary: "Add a new player to a game"
+            description: "Adds a player to an existing game. Creates the game if it does not exist. Returns identifier of the added player."
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+            requestBody:
+                description: "An optional request body specifies the type of player. 
+                    The type is required if the added player should be a computer player. By default, a human player is added."
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/playerObject'
+            responses:
+                200:
+                    description: "If no error occurred, the body contains the identifier of the added player.
+                    This identifier can then be used as the path parameter `player_id` or the query parameter `p_id`."
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/players/{player_id}:
+        put:
+            tags:
+                - "players"
+            summary: "Replaces a player with a computer opponent."
+            operationId: "replaceUser"
+            description: ""
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerPathId"
+            requestBody:
+                description: "An optional request body specifies the type of computer opponent. Default is exhaustive search.
+                Currently, it is not possible to replace a computer player with a human player."
+                required: false
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/playerObject'
+            responses:
+                200:
+                    description: "If no error occurred."
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+                    
+        delete:
+            tags:
+                - "players"
+            summary: "Removes a player from the game"
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerPathId"
+            responses:
+                200:
+                    description: "If no error occurred."
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/state:
+        get:
+            tags:
+                - "games"
+            summary: "Returns current game state"
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerQueryId"
+            responses:
+                200:
+                    description: "If no error occurred."
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/gameState"
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/shift:
+        post:
+            tags:
+                - "actions"
+            summary: "Performs a shift action"
+            operationId: "shift"
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerQueryId"
+            requestBody:
+                description: "Request body specifies the shift action, i.e. new location of inserted leftover, and its rotation"
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/shiftObject'
+            responses:
+                200:
+                    description: "OK"
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/move:
+        post:
+            tags:
+                - "actions"
+            summary: "Performs a move action"
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerQueryId"
+            requestBody:
+                description: "Request body specifies the move location"
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/moveObject'                
+            responses:
+                200:
+                    description: "OK"
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+components:
+    schemas:
+        playerObject:
+            type: "object"
+            properties:
+                type:
+                    type: "string"
+                    description: "Type of player. 'human' signifies a human player. All other values represent different computer player algorithms."
+                    enum:
+                        - "human"
+                        - "random"
+                        - "exhaustive-search"
+                        - "minimax"
+                        - "alpha-beta"
+        errorObject:
+            type: "object"
+            properties:
+                key:
+                    type: "string"
+                    description: "A key for the occurred error."
+                    enum:
+                        - "GAME_FULL"
+                        - "INVALID_ACTION"
+                        - "GAME_NOT_FOUND"
+                        - "PLAYER_NOT_IN_GAME"
+                        - "UNKNOWN_ERROR"
+                        - "INVALID_ARGUMENTS"
+                userMessage:
+                    type: "string"
+                    description: "A human-readable english message explaining the error. This string is subject to change. Clients should not rely on its value."
+        gameState:
+            type: "object"
+            properties:
+                enabledShiftLocations:
+                    type: "array"
+                    description: "An array of locations on the board which is accepted by the next shift action. 
+                    All locations in this array `enabledShiftLocations` field can be used for the `location` field in the request body of `POST /games/{game_id}/shift`"
+                    items:
+                        $ref: "#/components/schemas/boardLocation"
+                mazeCards:
+                    type: "array"
+                    description: "The current layout of the maze, described as an array of maze cards. The leftover maze card is included in this array and has location null. 
+                    Currently, only board size 7 is possible, hence there are always 50 maze cards. "
+                    items:
+                        $ref: "#/components/schemas/mazeCard"
+                    minItems: 50
+                    maxItems: 50
+                nextAction:
+                    type: "object"
+                    description: "The player whose turn it is, and the action he has to take."
+                    properties:
+                        action:
+                            type: "string"
+                            enum:
+                                - "SHIFT"
+                                - "MOVE"
+                        playerId:
+                            type: "integer"
+                objectiveMazeCardId:
+                    type: "integer"
+                    description: "One of the identifiers of the elements of `mazeCards`, specifying the current location of the objective."
+                players:
+                    type: "array"
+                    description: "The players currently playing in this game."
+                    items:
+                        $ref: "#/components/schemas/player"
+            example:
+                enabledShiftLocations:
+                    - column: 1
+                      row: 0
+                    - column: 3
+                      row: 0
+                    - column: 5
+                      row: 0
+                    - column: 0
+                      row: 1
+                    - column: 6
+                      row: 1
+                    - column: 0
+                      row: 3
+                    - column: 6
+                      row: 3
+                    - column: 0
+                      row: 5
+                    - column: 6
+                      row: 5
+                    - column: 1
+                      row: 6
+                    - column: 3
+                      row: 6
+                    - column: 5
+                      row: 6
+                mazeCards:
+                    - doors: NE
+                      id: 11
+                      location: 
+                      rotation: 0
+                    - doors: NE
+                      id: 34
+                      location:
+                        column: 0
+                        row: 0
+                      rotation: 90
+                    - doors: NS
+                      id: 33
+                      location:
+                        column: 1
+                        row: 0
+                      rotation: 0
+                    - doors: NES
+                      id: 35
+                      location:
+                        column: 2
+                        row: 0
+                      rotation: 90
+                    - doors: NE
+                      id: 2
+                      location:
+                        column: 3
+                        row: 0
+                      rotation: 90
+                    - doors: NES
+                      id: 36
+                      location:
+                        column: 4
+                        row: 0
+                      rotation: 90
+                    - doors: NS
+                      id: 25
+                      location:
+                        column: 5
+                        row: 0
+                      rotation: 0
+                    - doors: NE
+                      id: 37
+                      location:
+                        column: 6
+                        row: 0
+                      rotation: 180
+                    - doors: NS
+                      id: 26
+                      location:
+                        column: 0
+                        row: 1
+                      rotation: 270
+                    - doors: NE
+                      id: 14
+                      location:
+                        column: 1
+                        row: 1
+                      rotation: 0
+                    - doors: NS
+                      id: 31
+                      location:
+                        column: 2
+                        row: 1
+                      rotation: 270
+                    - doors: NES
+                      id: 20
+                      location:
+                        column: 3
+                        row: 1
+                      rotation: 90
+                    - doors: NE
+                      id: 13
+                      location:
+                        column: 4
+                        row: 1
+                      rotation: 270
+                    - doors: NE
+                      id: 5
+                      location:
+                        column: 5
+                        row: 1
+                      rotation: 0
+                    - doors: NS
+                      id: 30
+                      location:
+                        column: 6
+                        row: 1
+                      rotation: 180
+                    - doors: NES
+                      id: 38
+                      location:
+                        column: 0
+                        row: 2
+                      rotation: 0
+                    - doors: NES
+                      id: 18
+                      location:
+                        column: 1
+                        row: 2
+                      rotation: 0
+                    - doors: NES
+                      id: 39
+                      location:
+                        column: 2
+                        row: 2
+                      rotation: 0
+                    - doors: NE
+                      id: 10
+                      location:
+                        column: 3
+                        row: 2
+                      rotation: 180
+                    - doors: NES
+                      id: 40
+                      location:
+                        column: 4
+                        row: 2
+                      rotation: 90
+                    - doors: NS
+                      id: 21
+                      location:
+                        column: 5
+                        row: 2
+                      rotation: 90
+                    - doors: NES
+                      id: 41
+                      location:
+                        column: 6
+                        row: 2
+                      rotation: 180
+                    - doors: NES
+                      id: 19
+                      location:
+                        column: 0
+                        row: 3
+                      rotation: 180
+                    - doors: NE
+                      id: 0
+                      location:
+                        column: 1
+                        row: 3
+                      rotation: 0
+                    - doors: NS
+                      id: 27
+                      location:
+                        column: 2
+                        row: 3
+                      rotation: 270
+                    - doors: NE
+                      id: 12
+                      location:
+                        column: 3
+                        row: 3
+                      rotation: 180
+                    - doors: NE
+                      id: 7
+                      location:
+                        column: 4
+                        row: 3
+                      rotation: 180
+                    - doors: NES
+                      id: 17
+                      location:
+                        column: 5
+                        row: 3
+                      rotation: 180
+                    - doors: NS
+                      id: 32
+                      location:
+                        column: 6
+                        row: 3
+                      rotation: 180
+                    - doors: NES
+                      id: 42
+                      location:
+                        column: 0
+                        row: 4
+                      rotation: 0
+                    - doors: NES
+                      id: 16
+                      location:
+                        column: 1
+                        row: 4
+                      rotation: 180
+                    - doors: NES
+                      id: 43
+                      location:
+                        column: 2
+                        row: 4
+                      rotation: 270
+                    - doors: NE
+                      id: 6
+                      location:
+                        column: 3
+                        row: 4
+                      rotation: 90
+                    - doors: NES
+                      id: 44
+                      location:
+                        column: 4
+                        row: 4
+                      rotation: 180
+                    - doors: NES
+                      id: 15
+                      location:
+                        column: 5
+                        row: 4
+                      rotation: 180
+                    - doors: NES
+                      id: 45
+                      location:
+                        column: 6
+                        row: 4
+                      rotation: 180
+                    - doors: NS
+                      id: 24
+                      location:
+                        column: 0
+                        row: 5
+                      rotation: 270
+                    - doors: NE
+                      id: 9
+                      location:
+                        column: 1
+                        row: 5
+                      rotation: 0
+                    - doors: NE
+                      id: 4
+                      location:
+                        column: 2
+                        row: 5
+                      rotation: 270
+                    - doors: NS
+                      id: 23
+                      location:
+                        column: 3
+                        row: 5
+                      rotation: 270
+                    - doors: NS
+                      id: 22
+                      location:
+                        column: 4
+                        row: 5
+                      rotation: 270
+                    - doors: NS
+                      id: 29
+                      location:
+                        column: 5
+                        row: 5
+                      rotation: 90
+                    - doors: NE
+                      id: 8
+                      location:
+                        column: 6
+                        row: 5
+                      rotation: 180
+                    - doors: NE
+                      id: 46
+                      location:
+                        column: 0
+                        row: 6
+                      rotation: 0
+                    - doors: NS
+                      id: 28
+                      location:
+                        column: 1
+                        row: 6
+                      rotation: 90
+                    - doors: NES
+                      id: 47
+                      location:
+                        column: 2
+                        row: 6
+                      rotation: 270
+                    - doors: NE
+                      id: 3
+                      location:
+                        column: 3
+                        row: 6
+                      rotation: 90
+                    - doors: NES
+                      id: 48
+                      location:
+                        column: 4
+                        row: 6
+                      rotation: 270
+                    - doors: NE
+                      id: 1
+                      location:
+                        column: 5
+                        row: 6
+                      rotation: 180
+                    - doors: NE
+                      id: 49
+                      location:
+                        column: 6
+                        row: 6
+                      rotation: 270
+                nextAction:
+                    action: SHIFT
+                    playerId: 1
+                objectiveMazeCardId: 48
+                players:
+                    - id: 1
+                      isComputerPlayer: false
+                      mazeCardId: 34
+                      score: 0
+        boardLocation:
+            type: "object"
+            description: "Specifies a location on the board. Row 0 is in the north-most row, column 0 in the west-most column of the board."
+            properties:
+                row:
+                    type: "integer"
+                    minimum: 0
+                column:
+                    type: "integer"
+                    minimum: 0
+            example:
+                row: 0
+                column: 1
+        mazeCard:
+            type: "object"
+            description: "Each maze card is identified with a unique identifier. Its location is null if it is the leftover card."
+            properties:
+                doors:
+                    type: string
+                    description: "specifies the type of the maze card by listing its outgoing paths.
+                    The string is a subsequence of 'NESW' of length at least two. Each latter stands for one
+                    of the directions north, east, south, and west, respectively.
+                    Currently, all maze cards are either straights ('NS'), corners ('NE') or t-junctions ('NES')."
+                    enum:
+                        - "NE"
+                        - "NES"
+                        - "NS"
+                id:
+                    type: integer
+                    description: "identifier of the maze card"
+                location:
+                    $ref: "#/components/schemas/boardLocation"
+                rotation:
+                    $ref: "#/components/schemas/rotationType"
+        rotationType:
+            type: integer
+            description: "the rotation of a maze card"
+            minimum: 0
+            maximum: 270
+            multipleOf: 90
+        player:
+            type: "object"
+            description: "Specifies a player, his type, his piece's current location and his score."
+            properties:
+                id:
+                    type: "integer"
+                isComputerPlayer:
+                    type: "boolean"
+                algorithm:
+                    type: "string"
+                    description: "Only present if `isComputerPlayer` is true."
+                    enum:
+                        - "random"
+                        - "exhaustive-search"
+                        - "minimax"
+                        - "alpha-beta"
+                mazeCardId:
+                    type: "integer"
+                    description: "Current location of the player's piece, as an identifier of a maze card."
+                score:
+                    type: "integer"
+                    description: "Number of reached objectives for this player in this game."
+        shiftObject:
+            type: "object"
+            properties:
+                location:
+                    $ref: "#/components/schemas/boardLocation"
+                rotation:
+                    $ref: "#/components/schemas/rotationType"
+        moveObject:
+            type: "object"
+            properties:
+                location:
+                    $ref: "#/components/schemas/boardLocation"
+    parameters:
+        playerQueryId:
+            name: "p_id"
+            in: "query"
+            required: true
+            description: "identifier of the requesting player"
+            schema:
+                type: integer
+        playerPathId:
+            name: "player_id"
+            in: "path"
+            required: true
+            description: "identifier of the player resource to alter"
+            schema:
+                type: integer
+        gameId:
+            name: "game_id"
+            in: "path"
+            required: true
+            description: "identifier of a game"
+            schema:
+                type: integer
+    responses:
+        errorResponse:
+            description: "Error response. If an error occurred, a code >= 400 is returned. 
+            Clients should check the `key` field in the response object, or directly display `userMessage` field to the user."
