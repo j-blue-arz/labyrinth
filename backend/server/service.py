@@ -27,7 +27,8 @@ def add_player(game_id, player_request_dto):
     else:
         player_id = _try(lambda: game.add_player(
             ComputerPlayer, algorithm_name=player_type, url_supplier=URLSupplier()))
-    _try(game.start_game)
+    if len(game.players) == 1:
+        _try(game.start_game)
     database.update_game(game_id, game)
     return player_id
 
