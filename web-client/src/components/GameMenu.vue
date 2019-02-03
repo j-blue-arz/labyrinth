@@ -1,20 +1,25 @@
 <template>
     <div class="game-menu">
         <div class="game-menu__button">
-            <span @click.self="onOpenMenu" ref="game-menu-button" class="game-menu__button-text">Menu</span>
+            <span
+                @click.self="onToggleMenu"
+                ref="game-menu-button"
+                class="game-menu__button-text"
+            >Menu</span>
         </div>
-        <v-menu
-            @item-click="onItemClick($event)"
-            :visible="menuIsVisible"
-            :menu-items="menuItems"
-        />
+        <v-menu @item-click="onItemClick($event)" :visible="menuIsVisible" :menu-items="menuItems"/>
     </div>
 </template>
 
 
 <script>
+import Vue from "vue";
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
+
+const NOT_PARTICIPATING = -1;
+const REMOVE_PREFIX = "remove-";
+const ADD_PREFIX = "add-";
 
 export default {
     name: "game-menu",
@@ -33,53 +38,81 @@ export default {
     components: {
         VMenu
     },
+    watch: {
+        computerPlayers: function() {
+            this.updateRemoveMenuItems();
+        },
+        userPlayerId: function() {
+            this.updateLeaveEnterMenuItem();
+        }
+    },
     data() {
         return {
             menuIsVisible: false,
             menuItems: [
-                new MenuItem("close", "Close menu"),
-                new MenuItem("remove", "Remove computers"),
-                new MenuItem("exhaustive-search", "Replace by exhaustive search"),
-                new MenuItem("minimax", "Replace by Minimax"),
-                new MenuItem("alpha-beta", "Replace by Alpha-Beta")
+                new MenuItem("leave", "Leave game"),
+                new MenuItem("add", "Add computer..", [
+                    new MenuItem(ADD_PREFIX + "exhaustive-search", "Exhaustive Search"),
+                    new MenuItem(ADD_PREFIX + "minimax", "Minimax"),
+                    new MenuItem(ADD_PREFIX + "alpha-beta", "Alpha-Beta")
+                ]),
+                new MenuItem("remove", "Remove computer..", [])
             ]
         };
     },
+    computed: {
+        computerPlayers: function() {
+            return this.game.getComputerPlayers();
+        }
+    },
     methods: {
-        onOpenMenu: function() {
-            this.menuIsVisible = true;
-            //this.menuIsVisible = true;
+        updateRemoveMenuItems: function() {
+            var menuItemRemove = this.menuItems.find(item => item.key === "remove");
+            menuItemRemove.submenu = [];
+            for (var player of this.computerPlayers) {
+                let key = REMOVE_PREFIX + player.id;
+                let text = "" + player.colorIndex + " - " + player.algorithmDisplayName();
+                menuItemRemove.submenu.push(new MenuItem(key, text));
+            }
+        },
+        updateLeaveEnterMenuItem: function() {
+            if (this.userPlayerId === NOT_PARTICIPATING) {
+                Vue.set(this.menuItems, 0, new MenuItem("enter", "Enter game"));
+            } else {
+                Vue.set(this.menuItems, 0, new MenuItem("leave", "Leave game"));
+            }
+        },
+        onToggleMenu: function() {
+            this.menuIsVisible = !this.menuIsVisible;
         },
         onItemClick: function($event) {
             this.closeMenu();
-            if ($event === "remove") {
-                this.removeComputers();
-            } else if ($event === "exhaustive-search") {
-                this.replaceByComputer("exhaustive-search");
-            } else if ($event === "minimax") {
-                this.replaceByComputer("minimax");
-            } else if ($event === "alpha-beta") {
-                this.replaceByComputer("alpha-beta");
+            if ($event === "leave") {
+                this.$emit("leave-game");
+            } else if ($event === "enter") {
+                this.$emit("enter-game");
+            } else if ($event.startsWith(ADD_PREFIX)) {
+                let algorithm = $event.substr(ADD_PREFIX.length);
+                this.addComputer(algorithm);
+            } else if ($event.startsWith(REMOVE_PREFIX)) {
+                let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
+                this.removeComputer(playerId);
             }
-        },
-        removeComputers: function() {
-            this.menuIsVisible = false;
-            let computerPlayers = this.game.getComputerPlayers();
-            let computerPlayerIds = computerPlayers.map(player => player.id);
-            this.api
-                .removePlayers(computerPlayerIds)
-                .catch(this.handleError)
-                .then(this.calledApiMethod);
-        },
-        replaceByComputer: function(type) {
-            this.menuIsVisible = false;
-            this.api
-                .replacePlayer(this.userPlayerId, type)
-                .catch(this.handleError)
-                .then(this.calledApiMethod);
         },
         closeMenu: function() {
             this.menuIsVisible = false;
+        },
+        addComputer: function(algorithm) {
+            this.api
+                .doAddComputerPlayer(algorithm)
+                .catch(this.handleError)
+                .then(this.calledApiMethod);
+        },
+        removeComputer: function(playerId) {
+            this.api
+                .removePlayer(playerId)
+                .catch(this.handleError)
+                .then(this.calledApiMethod);
         },
         handleError: function(error) {
             console.error(error);
@@ -87,6 +120,10 @@ export default {
         calledApiMethod: function() {
             this.$emit("called-api-method");
         }
+    },
+    mounted() {
+        this.updateRemoveMenuItems();
+        this.updateLeaveEnterMenuItem();
     }
 };
 </script>

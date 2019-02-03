@@ -14,6 +14,8 @@
             :api="api"
             :game="game"
             :user-player-id="userPlayerId"
+            @enter-game="enterGame"
+            @leave-game="leaveGame"
             @called-api-method="startPolling"
             class="game-container__menu"
         />
@@ -29,6 +31,8 @@ import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
 import { setInterval, clearInterval } from "timers";
+
+const NOT_PARTICIPATING = -1;
 
 export default {
     name: "game-container",
@@ -52,7 +56,7 @@ export default {
     data() {
         return {
             game: new Game(),
-            userPlayerId: 0,
+            userPlayerId: NOT_PARTICIPATING,
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
         };
@@ -122,6 +126,20 @@ export default {
         createGameFromApi: function(apiResponse) {
             this.game.createFromApi(apiResponse.data, this.userPlayerId);
         },
+        enterGame: function() {
+            this.api
+                .doAddPlayer()
+                .then(this.addPlayer)
+                .catch(this.handleError)
+                .then(this.startPolling);
+        },
+        leaveGame: function() {
+            this.api
+                .removePlayer(this.userPlayerId)
+                .catch(this.handleError)
+                .then(this.startPolling);
+            this.userPlayerId = NOT_PARTICIPATING;
+        },
         addPlayer: function(apiResponse) {
             this.userPlayerId = parseInt(apiResponse.data);
             this.api.playerId = this.userPlayerId;
@@ -143,27 +161,21 @@ export default {
                 gameFactory = new GameFactory();
             }
             this.game = gameFactory.createGame();
+            this.userPlayerId = this.game.getPlayers()[0].id;
         } else {
             if (this.useStorage() && sessionStorage.playerId) {
                 this.userPlayerId = parseInt(sessionStorage.playerId);
                 this.api.playerId = this.userPlayerId;
                 this.api
                     .fetchState()
+                    .then(this.startPolling)
                     .catch(error => {
                         if (error.response.data.key === "PLAYER_NOT_IN_GAME") {
-                            this.api
-                                .doAddPlayer()
-                                .then(this.addPlayer)
-                                .catch(this.handleError);
+                            this.enterGame();
                         }
-                    })
-                    .then(this.startPolling);
+                    });
             } else {
-                this.api
-                    .doAddPlayer()
-                    .then(this.addPlayer)
-                    .catch(this.handleError)
-                    .then(this.startPolling);
+                this.enterGame();
             }
         }
     },

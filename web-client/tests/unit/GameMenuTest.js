@@ -3,166 +3,162 @@ import GameMenu from "@/components/GameMenu.vue";
 import VMenu from "@/components/VMenu.vue";
 import GameApi from "@/api/gameApi.js";
 import Player from "@/model/player.js";
+import Vue from "vue";
 
-var mockRemovePlayers = jest.fn();
-var mockReplacePlayer = jest.fn();
+var mockAddComputerPlayer = jest.fn();
+var mockRemovePlayer = jest.fn();
 jest.mock("@/api/gameApi.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
-            removePlayers: mockRemovePlayers,
-            replacePlayer: mockReplacePlayer
+            doAddComputerPlayer: mockAddComputerPlayer,
+            removePlayer: mockRemovePlayer
         };
     });
 });
-mockRemovePlayers.mockImplementation(() => Promise.resolve());
-mockReplacePlayer.mockImplementation(() => Promise.resolve());
+mockAddComputerPlayer.mockImplementation(() => Promise.resolve());
+mockRemovePlayer.mockImplementation(() => Promise.resolve());
 
 var mockGetComputerPlayers = jest.fn();
 var mockGame = {
     getComputerPlayers: mockGetComputerPlayers
 };
-mockGetComputerPlayers.mockImplementation(() => [new Player(4, 44, 444), new Player(1, 11, 111)]);
+mockGetComputerPlayers.mockImplementation(() => [new Player(4, 44), new Player(1, 11)]);
 
-const factory = function() {
+const factory = function(userPlayerId = 7) {
     return mount(GameMenu, {
         propsData: {
             api: new GameApi("foo"),
             game: mockGame,
-            userPlayerId: 7
+            userPlayerId: userPlayerId
         }
     });
+};
+
+const toggleMenu = function(gameMenu) {
+    gameMenu.find({ ref: "game-menu-button" }).trigger("click");
+};
+
+const clickInMenu = function(gameMenu, ref) {
+    gameMenu
+        .find(VMenu)
+        .find({ ref: ref })
+        .trigger("click");
 };
 
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
     GameApi.mockClear();
-    mockRemovePlayers.mockClear();
-    mockReplacePlayer.mockClear();
+    mockAddComputerPlayer.mockClear();
+    mockRemovePlayer.mockClear();
     mockGetComputerPlayers.mockClear();
 });
 
 describe("GameMenu", () => {
     it("menu is initially closed", () => {
         let gameMenu = factory();
-        let menu = gameMenu.find(".menu");
-        expect(menu.isVisible()).toBe(false);
+        expect(gameMenu.find(".menu").isVisible()).toBe(false);
     });
 
     it("Opens menu when button is clicked", () => {
         let gameMenu = factory();
-        let menu = gameMenu.find(".menu");
-        gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-        expect(menu.isVisible()).toBe(true);
+        toggleMenu(gameMenu);
+        expect(gameMenu.find(".menu").isVisible()).toBe(true);
     });
 
-    describe("entry close", () => {
-        it("closes menu", () => {
-            let gameMenu = factory();
-            let menu = gameMenu.find(".menu");
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "close" })
-                .trigger("click");
-            expect(menu.isVisible()).toBe(false);
+    it("Closes menu when button is clicked twice", done => {
+        let gameMenu = factory();
+        toggleMenu(gameMenu);
+        toggleMenu(gameMenu);
+        Vue.nextTick(() => {
+            expect(gameMenu.find(".menu").isVisible()).toBe(false);
+            done();
         });
     });
 
-    describe("entry remove", () => {
-        it("closes menu", () => {
+    describe("entry leave game", () => {
+        it("emits 'leave-game' event", () => {
             let gameMenu = factory();
-            let menu = gameMenu.find(".menu");
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "remove" })
-                .trigger("click");
-            expect(menu.isVisible()).toBe(false);
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "leave");
+            expect(gameMenu.emitted("leave-game")).toBeTruthy();
         });
 
-        it("calls removePlayers() on gameApi with computer players' IDs", () => {
-            let gameMenu = factory();
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "remove" })
-                .trigger("click");
-            expect(mockRemovePlayers).toHaveBeenCalledTimes(1);
-            let argument = mockRemovePlayers.mock.calls[0][0];
-            expect(argument).toEqual(expect.arrayContaining([1, 4]));
-            expect(argument.length).toBe(2);
+        it("is not visible if user is not participating", () => {
+            let gameMenu = factory(-1);
+            toggleMenu(gameMenu);
+            let entry = gameMenu.find(VMenu).find({ ref: "leave" });
+            expect(entry.exists()).toBe(false);
         });
     });
 
-    describe("entry exhaustive", () => {
-        it("closes menu", () => {
-            let gameMenu = factory();
-            let menu = gameMenu.find(".menu");
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "exhaustive-search" })
-                .trigger("click");
-            expect(menu.isVisible()).toBe(false);
+    describe("entry enter game", () => {
+        it("closes menu", done => {
+            let gameMenu = factory(-1);
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "enter");
+            Vue.nextTick(() => {
+                expect(gameMenu.find(".menu").isVisible()).toBe(false);
+                done();
+            });
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'exhaustive-search'", () => {
-            let gameMenu = factory();
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "exhaustive-search" })
-                .trigger("click");
-            expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "exhaustive-search");
-        });
-    });
-
-    describe("entry minimax", () => {
-        it("closes menu", () => {
-            let gameMenu = factory();
-            let menu = gameMenu.find(".menu");
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "minimax" })
-                .trigger("click");
-            expect(menu.isVisible()).toBe(false);
+        it("emits 'enter-game' event", () => {
+            let gameMenu = factory(-1);
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "enter");
+            expect(gameMenu.emitted("enter-game")).toBeTruthy();
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'minimax'", () => {
+        it("is not visible if user participating", () => {
             let gameMenu = factory();
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "minimax" })
-                .trigger("click");
-            expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "minimax");
+            toggleMenu(gameMenu);
+            let entry = gameMenu.find(VMenu).find({ ref: "enter-game" });
+            expect(entry.exists()).toBe(false);
         });
     });
 
-    describe("entry alpha-beta", () => {
-        it("closes menu", () => {
+    describe.each([["exhaustive-search", "minimax", "alpha-beta"]])("entry %s", entry => {
+        it("closes menu", done => {
             let gameMenu = factory();
-            let menu = gameMenu.find(".menu");
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "alpha-beta" })
-                .trigger("click");
-            expect(menu.isVisible()).toBe(false);
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "add");
+            clickInMenu(gameMenu, "add-" + entry);
+            Vue.nextTick(() => {
+                expect(gameMenu.find(".menu").isVisible()).toBe(false);
+                done();
+            });
         });
 
-        it("calls replacePlayer() on gameApi with player's ID and 'alpha-beta'", () => {
+        it("calls doAddComputerPlayer() on gameApi with argument '" + entry + "'", () => {
             let gameMenu = factory();
-            gameMenu.find({ ref: "game-menu-button" }).trigger("click");
-            gameMenu
-                .find(VMenu)
-                .find({ ref: "alpha-beta" })
-                .trigger("click");
-            expect(mockReplacePlayer).toHaveBeenCalledTimes(1);
-            expect(mockReplacePlayer).toHaveBeenCalledWith(7, "alpha-beta");
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "add");
+            clickInMenu(gameMenu, "add-" + entry);
+            expect(mockAddComputerPlayer).toHaveBeenCalledTimes(1);
+            expect(mockAddComputerPlayer).toHaveBeenCalledWith(entry);
+        });
+    });
+
+    describe("entry remove computer player", () => {
+        it("offers all computer players for removal", () => {
+            let gameMenu = factory();
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "remove");
+            let menu = gameMenu.find(VMenu);
+            expect(gameMenu.find(".menu").isVisible()).toBe(true);
+            let entries = menu.findAll("li");
+            expect(entries.length).toBe(3); // first entry is header
+            expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(1);
+            expect(entries.filter(entry => entry.element.textContent.includes("11")).length).toBe(1);
+        });
+
+        it("calls removePlayer() on gameApi with correct player ID", () => {
+            let gameMenu = factory();
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "remove");
+            clickInMenu(gameMenu, "remove-4");
+            expect(mockRemovePlayer).toHaveBeenCalledTimes(1);
+            expect(mockRemovePlayer).toHaveBeenCalledWith(4);
         });
     });
 });

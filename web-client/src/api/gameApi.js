@@ -23,28 +23,20 @@ export default class GameApi {
     }
 
     doAddPlayer() {
-        var addPlayerPath = this.apiPath + "/games/0/players";
+        let addPlayerPath = this.apiPath + "/games/0/players";
         return axios.post(addPlayerPath);
+    }
+
+    doAddComputerPlayer(algorithm) {
+        let addPlayerPath = this.apiPath + "/games/0/players";
+        return axios.post(addPlayerPath, {
+            type: algorithm
+        });
     }
 
     removePlayer(playerId) {
         let deletePlayerPath = this.apiPath + "/games/0/players/" + playerId;
         return axios.delete(deletePlayerPath);
-    }
-
-    removePlayers(playerIdList) {
-        let promises = [];
-        playerIdList.forEach(playerId => {
-            promises.push(this.removePlayer(playerId));
-        });
-        return axios.all(promises);
-    }
-
-    replacePlayer(playerId, algorithm) {
-        let replacePlayerPath = this.apiPath + "/games/0/players/" + playerId;
-        return axios.put(replacePlayerPath, {
-            type: algorithm
-        });
     }
 
     fetchState() {

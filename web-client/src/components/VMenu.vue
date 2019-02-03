@@ -1,12 +1,12 @@
 <template>
     <ul class="menu" v-show="visible">
         <li
-            v-for="item in menuItems"
+            v-for="item in visibleMenuItems"
             :key="item.key"
             :ref="item.key"
             class="menu__item"
             @click="onItemClick(item)">
-            {{item.name}}
+            {{item.text}}
         </li>
     </ul>
 </template>
@@ -23,9 +23,32 @@ export default {
             required: true
         }
     },
+    watch: {
+        visible: function(newValue, oldValue) {
+            if (!oldValue && newValue) {
+                this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
+                for (var item of this.menuItems) {
+                    this.visibleMenuItems.push(item);
+                }
+            }
+        }
+    },
+    data() {
+        return {
+            visibleMenuItems: []
+        };
+    },
     methods: {
         onItemClick(item) {
-            this.$emit("item-click", item.key);
+            if (item.hasSubmenu()) {
+                this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
+                this.visibleMenuItems.push(item);
+                for (var subItem of item.submenu) {
+                    this.visibleMenuItems.push(subItem);
+                }
+            } else {
+                this.$emit("item-click", item.key);
+            }
         }
     }
 };

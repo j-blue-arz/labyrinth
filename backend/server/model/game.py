@@ -713,7 +713,8 @@ class Game:
         self.start_game()
 
     def start_game(self):
-        """ starts the turn progression """
+        """ Initializes and starts turn progression.
+        """
         self._turns.init(self.players)
         self._turns.start()
 

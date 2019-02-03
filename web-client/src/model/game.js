@@ -140,7 +140,7 @@ export default class Game {
                 position = index;
             }
         }
-        if (position > 0) {
+        if (position >= 0) {
             this._players.splice(position, 1);
         }
     }
@@ -241,7 +241,7 @@ export default class Game {
             let player;
             if (this.hasPlayer(apiPlayer.id)) {
                 player = this.getPlayer(apiPlayer.id);
-                player.colorIndex = remainingColors.pop();
+                remainingColors.splice(remainingColors.indexOf(player.colorIndex), 1);
                 player.fillFromApi(apiPlayer);
             } else {
                 player = Player.newFromApi(apiPlayer, remainingColors.pop());

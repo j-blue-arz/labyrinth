@@ -36,4 +36,16 @@ export default class Player {
             this.isUser = false;
         }
     }
+
+    algorithmDisplayName() {
+        if (this.algorithm === "exhaustive-search") {
+            return "Exhaustive Search";
+        } else if (this.algorithm === "alpha-beta") {
+            return "Alpha-Beta";
+        } else if (this.algorithm === "minimax") {
+            return "Minimax";
+        } else {
+            return this.algorithm;
+        }
+    }
 }
