@@ -8,7 +8,7 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
-        <score-board :players="players" class="game-container__score"/>
+        <score-board :players="players" class="game-container__score" />
         <game-menu
             v-if="isUsingApi"
             :api="api"
@@ -21,7 +21,6 @@
         />
     </div>
 </template>
-
 
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";

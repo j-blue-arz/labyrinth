@@ -2,35 +2,33 @@
     <svg
         ref="playerPiece"
         class="player-piece"
-        :class="[{'player-piece__user': isUser,
-                'player-piece__user--to-move': isUser && interaction},
-                colorIndexClass]"
+        :class="[
+            { 'player-piece__user': isUser, 'player-piece__user--to-move': isUser && interaction },
+            colorIndexClass
+        ]"
         :viewBox="`0 0 ${svgSize} ${svgSize}`"
         :height="`${svgSize}px`"
         :width="`${svgSize}px`"
     >
-        <circle
-            :cx="xCenterPos"
-            :cy="yCenterPos"
-            :r="maxSize/2"
-            class="player-piece__shape"
-        />
+        <circle :cx="xCenterPos" :cy="yCenterPos" :r="maxSize / 2" class="player-piece__shape" />
         <circle
             v-if="interaction && isUser"
             :cx="xCenterPos"
             :cy="yCenterPos"
-            :r="maxSize/2 + 2"
+            :r="maxSize / 2 + 2"
             class="player-piece__halo"
         ></circle>
         <text
             :x="xCenterPos"
             :y="yCenterPos"
-            :textLength="maxSize/2"
-            :font-size="maxSize-3"
+            :textLength="maxSize / 2"
+            :font-size="maxSize - 3"
             class="player-piece__text"
             dominant-baseline="central"
             text-anchor="middle"
-        >{{ playerId }}</text>
+        >
+            {{ playerId }}
+        </text>
     </svg>
 </template>
 

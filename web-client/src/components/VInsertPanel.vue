@@ -15,19 +15,19 @@
                 class="insert-panel__symbol insert-panel__cross"
             ></path>
             <g v-if="interaction">
-            <rect
-                :height="100"
-                :width="100"
-                class="insert-panel__click-area"
-                @click="onClick"
-            ></rect>
-            <path
-                v-if="isEnabled"
-                :id="'panel-path-' + insertPanel.id"
-                @click="onClick"
-                :d="pathArrow"
-                class="insert-panel__symbol insert-panel__arrow"
-            ></path>
+                <rect
+                    :height="100"
+                    :width="100"
+                    class="insert-panel__click-area"
+                    @click="onClick"
+                ></rect>
+                <path
+                    v-if="isEnabled"
+                    :id="'panel-path-' + insertPanel.id"
+                    @click="onClick"
+                    :d="pathArrow"
+                    class="insert-panel__symbol insert-panel__arrow"
+                ></path>
             </g>
         </svg>
     </transition>

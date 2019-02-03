@@ -11,16 +11,8 @@
             class="leftover__card"
             ref="leftover"
         ></v-maze-card>
-        <path
-            v-if="interaction"
-            :d="arrowPath"
-            class="leftover__arrow"
-        ></path>
-        <polygon
-            v-if="interaction"
-            :points="arrowHead"
-            class="leftover__arrow-head"
-        ></polygon>
+        <path v-if="interaction" :d="arrowPath" class="leftover__arrow"></path>
+        <polygon v-if="interaction" :points="arrowHead" class="leftover__arrow-head"></polygon>
     </svg>
 </template>
 

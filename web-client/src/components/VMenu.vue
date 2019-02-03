@@ -5,8 +5,9 @@
             :key="item.key"
             :ref="item.key"
             class="menu__item"
-            @click="onItemClick(item)">
-            {{item.text}}
+            @click="onItemClick(item)"
+        >
+            {{ item.text }}
         </li>
     </ul>
 </template>

@@ -1,7 +1,12 @@
 <template>
     <svg :height="cardSize" :width="cardSize" viewBox="-50 -50 100 100">
         <g class="objective">
-            <line :x1="svgFlagLine.x" :y1="-svgFlagLine.y" :x2="svgFlagLine.x" :y2="svgFlagLine.y"/>
+            <line
+                :x1="svgFlagLine.x"
+                :y1="-svgFlagLine.y"
+                :x2="svgFlagLine.x"
+                :y2="svgFlagLine.y"
+            />
             <polygon :points="svgFlagPolygon"></polygon>
         </g>
     </svg>

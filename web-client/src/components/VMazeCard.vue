@@ -7,7 +7,7 @@
         :y="yPosAnimated"
         viewBox="0 0 100 100"
         class="maze-card"
-        :class="[{'maze-card--interactive': interaction}, reachablePlayerColorIndexClass]"
+        :class="[{ 'maze-card--interactive': interaction }, reachablePlayerColorIndexClass]"
     >
         <g class="maze-card__group" :class="rotationClass">
             <rect
@@ -62,7 +62,7 @@
                 class="maze-card__pathway"
             ></rect>
         </g>
-        <player-piece-group :players="players" :mid-point="50" :max-size="piecesSize"/>
+        <player-piece-group :players="players" :mid-point="50" :max-size="piecesSize" />
         <v-objective v-if="mazeCard.hasObject"></v-objective>
     </svg>
 </template>

@@ -1,16 +1,17 @@
 <template>
     <div class="game-menu">
         <div class="game-menu__button">
-            <span
-                @click.self="onToggleMenu"
-                ref="game-menu-button"
-                class="game-menu__button-text"
-            >Menu</span>
+            <span @click.self="onToggleMenu" ref="game-menu-button" class="game-menu__button-text"
+                >Menu</span
+            >
         </div>
-        <v-menu @item-click="onItemClick($event)" :visible="menuIsVisible" :menu-items="menuItems"/>
+        <v-menu
+            @item-click="onItemClick($event)"
+            :visible="menuIsVisible"
+            :menu-items="menuItems"
+        />
     </div>
 </template>
-
 
 <script>
 import Vue from "vue";

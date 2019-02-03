@@ -2,12 +2,12 @@
     <svg
         :x="boardOffset - borderWidth"
         :y="boardOffset - borderWidth"
-        :width="boardSize + 2*borderWidth"
-        :height="boardSize + 2*borderWidth"
+        :width="boardSize + 2 * borderWidth"
+        :height="boardSize + 2 * borderWidth"
     >
         <rect
-            :width="boardSize + 2*borderWidth"
-            :height="boardSize + 2*borderWidth"
+            :width="boardSize + 2 * borderWidth"
+            :height="boardSize + 2 * borderWidth"
             class="game-board__background"
         ></rect>
         <transition-group name="game-board__maze-card-" tag="g">

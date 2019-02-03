@@ -1,9 +1,7 @@
 <template>
     <tr class="score-row" :class="colorIndexClass">
         <td class="score-row__current-player">
-            <span
-                v-if="isTurn"
-                class="score-row__current-player--marker"></span>
+            <span v-if="isTurn" class="score-row__current-player--marker"></span>
         </td>
         <td class="score-row__player-piece">
             <v-player-piece
@@ -15,8 +13,8 @@
                 class="score-row__piece-symbol"
             />
         </td>
-        <td class="score-row__player-name">{{playerName}}</td>
-        <td class="score-row__score-data">{{player.score}}</td>
+        <td class="score-row__player-name">{{ playerName }}</td>
+        <td class="score-row__score-data">{{ player.score }}</td>
     </tr>
 </template>
 
