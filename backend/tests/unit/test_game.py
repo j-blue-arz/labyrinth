@@ -1,7 +1,7 @@
 """ Tests for Game of game.py """
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, patch, call, PropertyMock
 import pytest
-from server.model.game import Game, BoardLocation, Player, PlayerAction, Board
+from server.model.game import Game, BoardLocation, Player, PlayerAction, Board, Maze, MazeCard
 from server.model.exceptions import PlayerNotFoundException, GameFullException
 
 
@@ -173,14 +173,14 @@ def test_get_enabled_shift_locations_without_previous_shift():
     board = Board()
     game = Game(identifier=0, board=board)
     enabled_shift_locations = game.get_enabled_shift_locations()
-    assert set(enabled_shift_locations) == set(board.INSERT_LOCATIONS)
+    assert set(enabled_shift_locations) == set(board.insert_locations)
 
 def test_get_enabled_shift_locations_with_previous_shift():
     """ Tests get_enabled_shift_locations where the previous shift is (3, 0) """
     board = Board()
     game = Game(identifier=0, board=board)
     game.previous_shift_location = BoardLocation(3, 0)
-    expected_disabled = BoardLocation(3, board.maze.MAZE_SIZE - 1)
+    expected_disabled = BoardLocation(3, board.maze.maze_size - 1)
     enabled_shift_locations = game.get_enabled_shift_locations()
     assert expected_disabled not in enabled_shift_locations
 
@@ -195,3 +195,30 @@ def test_player_reaches_objective_increase_score():
     old_score = game.get_player(player_id).score
     game.move(player_id, BoardLocation(0, 1))
     assert game.get_player(player_id).score == old_score + 1
+
+def test_replace_board():
+    """ Tests replace_board. Asserts that score and all player locations are reset,
+    and that it is the first player's turn
+    """
+    turns = Mock()
+    game = Game(identifier=0, turns=turns)
+    player_ids = [game.add_player(Player), game.add_player(Player)]
+    players = list(map(game.get_player, player_ids))
+    players[0].score = 11
+    players[1].score = 22
+    players[0].piece.maze_card = game.board.maze[BoardLocation(1, 1)]
+    players[1].piece.maze_card = game.board.maze[BoardLocation(2, 2)]
+    pieces = list(map(lambda player: player.piece, players))
+
+    board = Mock()
+    type(board).pieces = PropertyMock(return_value=pieces)
+    turns.reset_mock()
+    game.replace_board(board)
+
+    board.create_piece.assert_has_calls([call(), call()])
+    turns.start.assert_called_once()
+    assert players[0].score == 0
+    assert players[1].score == 0
+
+
+

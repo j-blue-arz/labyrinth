@@ -1,7 +1,7 @@
 """ All methods and constants which are shared in persistence and dto """
 
 from server.model.game import MazeCard, BoardLocation
-from .constants import ROW, COLUMN, ID, DOORS, ROTATION, LOCATION
+from .constants import ROW, COLUMN, ID, DOORS, ROTATION, LOCATION, MAZE_SIZE, MAZE_CARDS
 
 def _objective_to_dto(maze_card: MazeCard):
     """ Maps a player's objective to a DTO
@@ -61,7 +61,19 @@ def _maze_cards_to_dto(board):
     """
     dto = []
     dto.append(_maze_card_to_dto(board.leftover_card, None))
-    for location in board.maze.maze_locations():
+    for location in board.maze.maze_locations:
         maze_card = board.maze[location]
         dto.append(_maze_card_to_dto(maze_card, location))
+    return dto
+
+
+def _board_to_dto(board):
+    """ Maps the maze layout and the leftover card to a DTO.
+
+    :param board: an instance of model.Board
+    :return: a dictionary of the maze size and a list of maze card DTOs
+    """
+    dto = dict()
+    dto[MAZE_SIZE] = board.maze.maze_size
+    dto[MAZE_CARDS] = _maze_cards_to_dto(board)
     return dto

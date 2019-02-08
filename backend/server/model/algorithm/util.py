@@ -19,8 +19,8 @@ def copy_board(board, pieces=None):
     existing_leftover = board.leftover_card
     leftover_card = game.MazeCard(existing_leftover.identifier, existing_leftover.doors, existing_leftover.rotation)
     maze_card_by_id[leftover_card.identifier] = leftover_card
-    maze = game.Maze(validate_locations=False)
-    for location in board.maze.maze_locations():
+    maze = game.Maze(validate_locations=False, maze_size=board.maze.maze_size)
+    for location in board.maze.maze_locations:
         old_maze_card = board.maze[location]
         maze_card = game.MazeCard(old_maze_card.identifier, old_maze_card.doors, old_maze_card.rotation)
         maze_card_by_id[maze_card.identifier] = maze_card
@@ -36,7 +36,7 @@ def copy_board(board, pieces=None):
     return board_copy
 
 def find_location_by_id(maze, card_id):
-    for location in maze.maze_locations():
+    for location in maze.maze_locations:
         if maze[location].identifier == card_id:
             return location
     return None

@@ -217,6 +217,8 @@ class RotatableMazeCardGraph:
         rotations = [0, 90, 180, 270]
         if maze_card.doors == maze_card.STRAIGHT:
             rotations = [0, 90]
+        if maze_card.doors == maze_card.CROSS:
+            rotations = [0]
         return rotations
 
 def all_reachables(certainly_reached, rotation_map, rotation):

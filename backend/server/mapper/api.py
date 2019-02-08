@@ -6,11 +6,11 @@ which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Turns, Player
 import server.model.computer
-from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
+from .shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from .constants import *
 
 
-def player_state_to_dto(game: Game):
+def game_state_to_dto(game: Game):
     """Maps the game state, as served by the GET state request, to a DTO.
     Player ID is no longer a parameter, because with the change that all players have the same objective,
     every player has full information about the game.
@@ -19,9 +19,10 @@ def player_state_to_dto(game: Game):
     :return: a structure whose JSON representation is valid for the API
     """
     game_dto = dict()
+    game_dto[ID] = game.identifier
     game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
-    game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
+    game_dto[MAZE] = _board_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_player_action_dto(game.turns)
     game_dto[ENABLED_SHIFT_LOCATIONS] = _enabled_shift_locations_to_dto(game)
     return game_dto
@@ -65,6 +66,9 @@ def dto_to_type(player_request_dto):
             player_request_dto, POST_PLAYER_TYPE)
     return None
 
+def dto_to_maze_size(game_options_dto):
+    """ Maps a DTO for the change game api method to a value for the size of the new maze """
+    return game_options_dto[MAZE_SIZE]
 
 def _value_or_none(dto, key):
     if key in dto:

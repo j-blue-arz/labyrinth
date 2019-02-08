@@ -3,8 +3,6 @@ from server.model.reachable import RotatableMazeCardGraph, all_reachables
 from server.model.game import BoardLocation
 import server.model.algorithm.util as util
 
-_MAZE_SIZE = 7
-
 class GameTreeNode:
     """ Represents a node in the game tree for two players.
     Each node represents a shift action and a subsequent move action
@@ -58,7 +56,7 @@ class GameTreeNode:
         disabled_insert_location = None
         if self.previous_insert_location:
             disabled_insert_location = self.board.opposing_insert_location(self.previous_insert_location)
-        for insert_location in self.board.INSERT_LOCATIONS:
+        for insert_location in self.board.insert_locations:
             if insert_location != disabled_insert_location:
                 yield insert_location
 
@@ -67,6 +65,8 @@ class GameTreeNode:
         maze_card = self.board.maze[location]
         if maze_card.doors == maze_card.STRAIGHT:
             rotations = [0, 90]
+        if maze_card.doors == maze_card.CROSS:
+            rotations = [0]
         return rotations
 
     def _determine_reachable_locations(self, source, rotatable_location):

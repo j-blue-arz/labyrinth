@@ -5,9 +5,6 @@ from server.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
 from server.model.game import Board, MazeCard, BoardLocation
 import server.model.algorithm.util as util
 
-_MAZE_SIZE = 7
-
-
 class Heuristic:
     """ A heuristic is expected to define a value function. """
 
@@ -35,7 +32,7 @@ class Heuristic:
             maze_card = board.pieces[player_index].maze_card
             location = board.maze.maze_card_location(maze_card)
             reach[player_index] = graph.reachable_locations(source=location)
-            objective_value[player_index] = self._objective_value(location, objective_location)
+            objective_value[player_index] = self._objective_value(board, location, objective_location)
             if maze_card.doors == MazeCard.T_JUNCT:
                 maze_card_value[player_index] = 1
         reach_value = len(reach[0]) - len(reach[1])
@@ -53,12 +50,12 @@ class Heuristic:
             return 1 * util.sign(player_index)
         return 0
 
-    def _objective_value(self, location, objective_location):
+    def _objective_value(self, board, location, objective_location):
         distance = 15
         if objective_location:
             direct_distance = self._manhattan_distance(location, objective_location)
-            if self._is_insert_location(location):
-                opposite = Board.opposing_insert_location(location)
+            if location in board.insert_locations:
+                opposite = board.opposing_insert_location(location)
                 push_out_distance = self._manhattan_distance(opposite, objective_location)
                 if push_out_distance < direct_distance:
                     return -(push_out_distance + 1)
@@ -71,9 +68,6 @@ class Heuristic:
             else:
                 distance = direct_distance
         return -distance
-
-    def _is_insert_location(self, location):
-        return location in Board.INSERT_LOCATIONS
 
     def _manhattan_distance(self, one_location, other_location):
         return abs(one_location.row - other_location.row) + abs(one_location.column - other_location.column)
@@ -130,7 +124,7 @@ class GameTreeNode:
         for insert_location in predefined_order:
             if insert_location != disabled_shift_location:
                 yield insert_location
-        for insert_location in self.board.INSERT_LOCATIONS:
+        for insert_location in self.board.insert_locations:
             if insert_location not in predefined_order and \
                     insert_location != disabled_shift_location:
                 yield insert_location
@@ -140,6 +134,8 @@ class GameTreeNode:
         maze_card = self.board.maze[location]
         if maze_card.doors == maze_card.STRAIGHT:
             rotations = [0, 90]
+        if maze_card.doors == maze_card.CROSS:
+            rotations = [0]
         return rotations
 
     def _determine_reachable_locations(self, source, rotatable_location):

@@ -55,7 +55,7 @@ class GameTreeNode:
         if self.current_shift_action:
             previous_shift_location, _ = self.current_shift_action
             disabled_insert_location = self.board.opposing_insert_location(previous_shift_location)
-        for insert_location in self.board.INSERT_LOCATIONS:
+        for insert_location in self.board.insert_locations:
             if insert_location != disabled_insert_location:
                 yield insert_location
 
@@ -64,6 +64,8 @@ class GameTreeNode:
         leftover_card = self.board.leftover_card
         if leftover_card.doors == leftover_card.STRAIGHT:
             rotations = [0, 90]
+        if leftover_card.doors == leftover_card.CROSS:
+            rotations = [0]
         return rotations
 
     def _compute(self):
@@ -76,7 +78,7 @@ class GameTreeNode:
             self.reached_maze_cards = list(map(self._reached_maze_card_from_reached_location, reachable_locations))
 
     def _location_by_id(self, maze_card_id):
-        for location in self.board.maze.maze_locations():
+        for location in self.board.maze.maze_locations:
             if self.board.maze[location].identifier == maze_card_id:
                 return BoardLocation.copy(location)
         if self.board.leftover_card.identifier == maze_card_id:

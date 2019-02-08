@@ -5,7 +5,7 @@ which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
 import server.model.computer
-from .shared import _objective_to_dto, _maze_cards_to_dto, _dto_to_board_location, _board_location_to_dto
+from .shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from .constants import *
 
 
@@ -16,8 +16,9 @@ def game_to_dto(game: Game):
     :return: a structure which can be encoded into JSON and decoded into a Game
     """
     game_dto = dict()
+    game_dto[ID] = game.identifier
     game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
-    game_dto[MAZE_CARDS] = _maze_cards_to_dto(game.board)
+    game_dto[MAZE] = _board_to_dto(game.board)
     game_dto[NEXT_ACTION] = _turns_to_next_action_dto(game.turns)
     game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
     game_dto[PREVIOUS_SHIFT_LOCATION] = _board_location_to_dto(game.previous_shift_location)
@@ -32,26 +33,27 @@ def dto_to_game(game_dto):
     created by game_to_dto
     :return: a Game instance whose state is equal to the DTO
     """
-    maze, leftover_card, maze_card_by_id = _dto_to_maze_cards_and_dictionary(game_dto[MAZE_CARDS])
+    maze, leftover_card, maze_card_by_id = _dto_to_maze_cards_and_dictionary(game_dto[MAZE])
     objective_maze_card = maze_card_by_id[game_dto[OBJECTIVE]]
     board = Board(maze, leftover_card, objective_maze_card=objective_maze_card)
     players = [_dto_to_player(player_dto, None, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
     turns = _dto_to_turns(game_dto[NEXT_ACTION], players)
-    game = Game(0, board=board, players=players, turns=turns)
+    identifier = game_dto[ID]
+    game = Game(identifier, board=board, players=players, turns=turns)
     for player in players:
         player._game = game
     game.previous_shift_location = _dto_to_board_location(game_dto[PREVIOUS_SHIFT_LOCATION])
     return game
 
 
-def _dto_to_maze_cards_and_dictionary(maze_cards_dto):
-    maze = Maze()
+def _dto_to_maze_cards_and_dictionary(maze_dto):
     leftover_card = None
     maze_card_by_id = {}
-    maze = Maze()
-    for maze_card_dto in maze_cards_dto:
+    maze_size = maze_dto[MAZE_SIZE]
+    maze = Maze(maze_size=maze_size)
+    for maze_card_dto in maze_dto[MAZE_CARDS]:
         maze_card, board_location = _dto_to_maze_card(maze_card_dto)
         if board_location is None:
             leftover_card = maze_card

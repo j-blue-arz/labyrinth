@@ -11,8 +11,8 @@ from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
 def _create_test_game(with_computer=False):
     """ Creates a Game instance by hand """
     board = Board(leftover_card=MazeCard(0, MazeCard.T_JUNCT, 0))
-    for row in range(board.maze.MAZE_SIZE):
-        for column in range(board.maze.MAZE_SIZE):
+    for row in range(board.maze.maze_size):
+        for column in range(board.maze.maze_size):
             if row == 0 and column == 0:
                 board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.STRAIGHT, 0)
             elif row == 1 and column == 1:
@@ -74,13 +74,13 @@ def test_mapping_for_leftover():
     game = mapper.dto_to_game(game_dto)
     assert _compare_maze_cards(*map(lambda g: g.board.leftover_card, [created_game, game]))
 
-
 def test_mapping_for_maze():
     """ Tests correct mapping of current maze state """
     created_game, _ = _create_test_game()
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
-    for location in game.board.maze.maze_locations():
+    assert game.board.maze.maze_size == created_game.board.maze.maze_size
+    for location in game.board.maze.maze_locations:
         assert _compare_maze_cards(*map(lambda g: g.board.maze[location], [created_game, game]))
     assert _compare_maze_cards(*map(lambda g: g.board.leftover_card, [created_game, game]))
 
@@ -124,6 +124,14 @@ def test_mapping_score():
     game = mapper.dto_to_game(game_dto)
     for player_id in player_ids:
         _assert_games_using_function(created_game, game, lambda g: g.get_player(player_id).score)
+
+
+def test_mapping_identifier():
+    """ Tests correct mapping of game id """
+    created_game, _ = _create_test_game()
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    assert game.identifier == created_game.identifier
 
 
 def _compare_maze_cards(maze_card1, maze_card2):

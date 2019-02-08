@@ -45,6 +45,18 @@ def replace_player(game_id, player_id):
     service.replace_player(game_id, player_id, request_body)
     return ""
 
+@API.route('/games/<int:game_id>', methods=["PUT"])
+def change_game(game_id):
+    """ Changes game setup. The request has to contain a body of the form
+    {
+        'size': <number>
+    },
+    where size is the new size of the maze.
+    """
+    request_body = request.get_json(force=True)
+    service.change_game(game_id, request_body)
+    return ""
+
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):
     """ Returns the state of the game """

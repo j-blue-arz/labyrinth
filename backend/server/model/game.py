@@ -18,6 +18,8 @@ from random import choice
 from . import exceptions
 from .reachable import Graph
 
+_HASH_MAX = 31
+
 
 class BoardLocation:
     """ A board location, defined by the row and the column.
@@ -46,7 +48,7 @@ class BoardLocation:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return self.row*7 + self.column
+        return self.row*_HASH_MAX + self.column
 
     def __str__(self):
         return "({}, {})".format(self.row, self.column)
@@ -72,7 +74,7 @@ def _generate_out_path_dict():
                 yield direction
 
     out_path_dict = dict()
-    for doors in ["NS", "NE", "NES"]:
+    for doors in ["NS", "NE", "NES", "NESW"]:
         for rotation in [0, 90, 180, 270]:
             out_paths = _out_paths(doors, rotation)
             out_path_dict[(doors, rotation)] = set(out_paths)
@@ -92,6 +94,8 @@ class MazeCard:
     STRAIGHT = "NS"
     CORNER = "NE"
     T_JUNCT = "NES"
+    CROSS = "NESW"
+
     next_id = 0
     _OUT_PATHS_DICT = _generate_out_path_dict()
 
@@ -180,12 +184,22 @@ class Maze:
     """ Represent the state of the maze.
     The state is maintained in a 2-d array of MazeCard instances.
     """
-    MAZE_SIZE = 7
-    MAZE_LOCATIONS = [BoardLocation(row, column) for row in range(7) for column in range(7)]
 
-    def __init__(self, validate_locations=True):
-        self._maze_cards = [[None for _ in range(self.MAZE_SIZE)] for _ in range(self.MAZE_SIZE)]
+    def __init__(self, maze_size=7, validate_locations=True):
+        self._maze_size = maze_size
+        self._maze_locations = [BoardLocation(row, column) for row in range(maze_size) for column in range(maze_size)]
+        self._maze_cards = [[None for _ in range(maze_size)] for _ in range(maze_size)]
         self._validation = validate_locations
+
+    @property
+    def maze_size(self):
+        """ Getter for maze_size """
+        return self._maze_size
+
+    @property
+    def maze_locations(self):
+        """ Returns all BoardLocations of this maze """
+        return self._maze_locations
 
     def __getitem__(self, location):
         """ Retrieves the maze card at a given location
@@ -212,7 +226,7 @@ class Maze:
     def maze_card_location(self, maze_card):
         """ Returns the BoardLocation of the given MazeCard,
         or None if the card is not in the maze """
-        for location in self.maze_locations():
+        for location in self.maze_locations:
             if self[location] == maze_card:
                 return location
         return None
@@ -231,7 +245,7 @@ class Maze:
         current_location = insert_location
         while current_location is not None:
             shift_line_locations.append(current_location)
-            current_location = Maze._neighbor(current_location, direction)
+            current_location = self._neighbor(current_location, direction)
         pushed_out = self[shift_line_locations[-1]]
         self._shift_all(shift_line_locations)
         self[shift_line_locations[0]] = inserted_maze_card
@@ -242,27 +256,25 @@ class Maze:
         for source, target in reversed(list(zip(shift_locations, shift_locations[1:]))):
             self[target] = self[source]
 
-    @classmethod
-    def _determine_shift_direction(cls, shift_location):
+    def _determine_shift_direction(self, shift_location):
         """ Returns the direction to shift to for a given location
 
         :param shift_location: the location of the pushed in maze card
         :raises InvalidShiftLocationException: if the location is not on the border
         :return: the direction as a tuple
         """
-        if shift_location.row == cls.MAZE_SIZE - 1:
+        if shift_location.row == self._maze_size - 1:
             return (-1, 0)
         if shift_location.row == 0:
             return (1, 0)
-        if shift_location.column == cls.MAZE_SIZE - 1:
+        if shift_location.column == self._maze_size - 1:
             return (0, -1)
         if shift_location.column == 0:
             return (0, 1)
         raise exceptions.InvalidShiftLocationException(
             "Location {} is not shiftable (not on border)".format(str(shift_location)))
 
-    @classmethod
-    def _neighbor(cls, location, direction):
+    def _neighbor(self, location, direction):
         """ Determines the neighbor of a location, if possible.
 
         :param location: the location the neighbor is requested for
@@ -272,26 +284,19 @@ class Maze:
         or None, if the location is outside of the maze's extent
         """
         new_location = location.add(*direction)
-        if not cls.is_inside(new_location):
+        if not self.is_inside(new_location):
             new_location = None
         return new_location
 
-    @classmethod
-    def is_inside(cls, location):
+    def is_inside(self, location):
         """ Determines if the given location is inside the maze """
         return location.row >= 0 and \
             location.column >= 0 and \
-            location.row < cls.MAZE_SIZE and \
-            location.column < cls.MAZE_SIZE
+            location.row < self._maze_size and \
+            location.column < self._maze_size
 
-    @classmethod
-    def maze_locations(cls):
-        """ Returns an iterator of all BoardLocations """
-        return cls.MAZE_LOCATIONS
-
-    @classmethod
-    def _validate_location(cls, location):
-        if not cls.is_inside(location):
+    def _validate_location(self, location):
+        if not self.is_inside(location):
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
     def _validate_insert_location(self, insert_location):
@@ -299,21 +304,10 @@ class Maze:
             self._validate_location(insert_location)
 
 
-def _generate_insert_locations():
-    insert_locations = []
-    for position in range(1, Maze.MAZE_SIZE, 2):
-        insert_locations.append(BoardLocation(0, position))
-        insert_locations.append(BoardLocation(position, 0))
-        insert_locations.append(BoardLocation(Maze.MAZE_SIZE - 1, position))
-        insert_locations.append(BoardLocation(position, Maze.MAZE_SIZE - 1))
-    return frozenset(insert_locations)
-
-
 class Board:
     """
-    The board state of a game of labyrinth.
+    The board state of a game of labyrinth, including the maze, the pieces, and the objective
     """
-    INSERT_LOCATIONS = _generate_insert_locations()
     START_LOCATIONS = None
     OBJECTIVE_LOCATION = None
 
@@ -322,6 +316,7 @@ class Board:
         if not maze:
             maze = Maze()
         self._maze = maze
+        self._insert_locations = self._generate_insert_locations()
         if not leftover_card:
             leftover_card = MazeCard()
         self._leftover_card = leftover_card
@@ -350,6 +345,11 @@ class Board:
         """ Getter for pieces """
         return self._pieces
 
+    @property
+    def insert_locations(self):
+        """ Getter for insert_locations """
+        return self._insert_locations
+
     def clear_pieces(self):
         """ Removes all pieces currently on the board """
         self._pieces.clear()
@@ -359,10 +359,11 @@ class Board:
         Generates new objective, because the old one could be the same as the new piece's starting location. """
 
         if not self.START_LOCATIONS:
+            maze_size = self.maze.maze_size
             start_locations = [BoardLocation(0, 0),
-                               BoardLocation(0, Maze.MAZE_SIZE - 1),
-                               BoardLocation(Maze.MAZE_SIZE - 1, Maze.MAZE_SIZE - 1),
-                               BoardLocation(Maze.MAZE_SIZE - 1, 0)]
+                               BoardLocation(0, maze_size - 1),
+                               BoardLocation(maze_size - 1, maze_size - 1),
+                               BoardLocation(maze_size - 1, 0)]
         else:
             start_locations = self.START_LOCATIONS
 
@@ -406,11 +407,10 @@ class Board:
             return True
         return False
 
-    @staticmethod
-    def opposing_insert_location(insert_location):
+    def opposing_insert_location(self, insert_location):
         """ Returns the insert location directly opposite of the given location """
         row, column = insert_location.row, insert_location.column
-        limit = Maze.MAZE_SIZE - 1
+        limit = self.maze.maze_size - 1
         borders = {0, limit}
         if row in borders:
             return BoardLocation(limit - row, column)
@@ -425,9 +425,19 @@ class Board:
                     piece_location, target_location))
 
     def _validate_insert_location(self, insert_location):
-        if insert_location not in self.INSERT_LOCATIONS:
+        if insert_location not in self._insert_locations:
             raise exceptions.InvalidShiftLocationException(
                 "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
+
+    def _generate_insert_locations(self):
+        maze_size = self.maze.maze_size
+        insert_locations = []
+        for position in range(1, maze_size, 2):
+            insert_locations.append(BoardLocation(0, position))
+            insert_locations.append(BoardLocation(position, 0))
+            insert_locations.append(BoardLocation(maze_size - 1, position))
+            insert_locations.append(BoardLocation(position, maze_size - 1))
+        return frozenset(insert_locations)
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
@@ -440,7 +450,7 @@ class Board:
         """ Finds a random maze card not occupied by a player's piece """
         if not self.OBJECTIVE_LOCATION:
             maze_cards = set([self._maze[location]
-                              for location in self._maze.maze_locations()] + [self._leftover_card])
+                              for location in self._maze.maze_locations] + [self._leftover_card])
             for piece in self._pieces:
                 maze_cards.discard(piece.maze_card)
             return choice(tuple(maze_cards))
@@ -718,6 +728,17 @@ class Game:
         self._turns.init(self.players)
         self._turns.start()
 
+    def replace_board(self, board):
+        """ Replaces the current board with a new one and resets the game.
+        For all players, new pieces are created on the board """
+        board.pieces.clear()
+        for player in self._players:
+            player.score = 0
+            player.set_board(board)
+        self.previous_shift_location = None
+        self._board = board
+        self._turns.start()
+
     def shift(self, player_id, new_leftover_location, leftover_rotation):
         """ Performs a shifting action
 
@@ -753,7 +774,7 @@ class Game:
         opposing_shift_location = None
         if self.previous_shift_location:
             opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
-        return self.board.INSERT_LOCATIONS.difference({opposing_shift_location})
+        return self.board.insert_locations.difference({opposing_shift_location})
 
     def _validate_pushback_rule(self, shift_location):
         """ Checks if the requested shift location is different to the shift location of the previous turn

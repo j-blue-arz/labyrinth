@@ -62,11 +62,23 @@ def replace_player(game_id, player_id, player_request_dto):
                            ComputerPlayer, algorithm_name=player_type, url_supplier=URLSupplier())
         database.update_game(game_id, game)
 
+def change_game(game_id, game_request_dto):
+    """ Changes game setup.
+
+    Currently, the only option is to change the maze size.
+    This will restart the game.
+    :param game_id: specifies the game. Has to exist.
+    :param game_request_dto: contains the new maze size."""
+    new_size = mapper.dto_to_maze_size(game_request_dto)
+    game = _load_game_or_throw(game_id)
+    new_board = _try(lambda: factory.create_board(maze_size=new_size))
+    _try(lambda: game.replace_board(new_board))
+    database.update_game(game_id, game)
 
 def get_game_state(game_id):
     """ Returns the game state """
     game = _load_game_or_throw(game_id)
-    return mapper.player_state_to_dto(game)
+    return mapper.game_state_to_dto(game)
 
 
 def perform_shift(game_id, player_id, shift_dto):
@@ -93,7 +105,7 @@ def _get_or_create_game(game_id):
 
 
 def _create_game(game_id):
-    game = factory.create_game(original=True)
+    game = factory.create_game(game_id=game_id)
     database.create_game(game, game_id)
     return game
 

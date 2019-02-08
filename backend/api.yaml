@@ -12,7 +12,8 @@ paths:
             tags:
                 - "players"
             summary: "Add a new player to a game"
-            description: "Adds a player to an existing game. Creates the game if it does not exist. Returns identifier of the added player."
+            description: "Adds a player to an existing game. Creates the game if it does not exist. Returns identifier of the added player.
+            The automatically created game has a maze of size 7."
             parameters:
                 - $ref: "#/components/parameters/gameId"
             requestBody:
@@ -88,6 +89,23 @@ paths:
                                 $ref: "#/components/schemas/gameState"
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
+    /games/{game_id}:
+        put:
+            tags:
+                - "games"
+            summary: "Alters game setup"
+            description: "Altering the game setup will effectively restart the game. 
+            The players will stay in the game, but the scores and the pieces will be reset, 
+            and a new objective will be generated."
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+            requestBody:
+                description: "Currently, the only option is to change the size of the maze."
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/gameSetupObject'
     /games/{game_id}/shift:
         post:
             tags:
@@ -98,7 +116,7 @@ paths:
                 - $ref: "#/components/parameters/gameId"
                 - $ref: "#/components/parameters/playerQueryId"
             requestBody:
-                description: "Request body specifies the shift action, i.e. new location of inserted leftover, and its rotation"
+                description: "Specifies the shift action, i.e. new location of inserted leftover, and its rotation"
                 required: true
                 content:
                     application/json:
@@ -221,305 +239,307 @@ components:
                       row: 6
                     - column: 5
                       row: 6
-                mazeCards:
-                    - doors: NE
-                      id: 11
-                      location: 
-                      rotation: 0
-                    - doors: NE
-                      id: 34
-                      location:
-                        column: 0
-                        row: 0
-                      rotation: 90
-                    - doors: NS
-                      id: 33
-                      location:
-                        column: 1
-                        row: 0
-                      rotation: 0
-                    - doors: NES
-                      id: 35
-                      location:
-                        column: 2
-                        row: 0
-                      rotation: 90
-                    - doors: NE
-                      id: 2
-                      location:
-                        column: 3
-                        row: 0
-                      rotation: 90
-                    - doors: NES
-                      id: 36
-                      location:
-                        column: 4
-                        row: 0
-                      rotation: 90
-                    - doors: NS
-                      id: 25
-                      location:
-                        column: 5
-                        row: 0
-                      rotation: 0
-                    - doors: NE
-                      id: 37
-                      location:
-                        column: 6
-                        row: 0
-                      rotation: 180
-                    - doors: NS
-                      id: 26
-                      location:
-                        column: 0
-                        row: 1
-                      rotation: 270
-                    - doors: NE
-                      id: 14
-                      location:
-                        column: 1
-                        row: 1
-                      rotation: 0
-                    - doors: NS
-                      id: 31
-                      location:
-                        column: 2
-                        row: 1
-                      rotation: 270
-                    - doors: NES
-                      id: 20
-                      location:
-                        column: 3
-                        row: 1
-                      rotation: 90
-                    - doors: NE
-                      id: 13
-                      location:
-                        column: 4
-                        row: 1
-                      rotation: 270
-                    - doors: NE
-                      id: 5
-                      location:
-                        column: 5
-                        row: 1
-                      rotation: 0
-                    - doors: NS
-                      id: 30
-                      location:
-                        column: 6
-                        row: 1
-                      rotation: 180
-                    - doors: NES
-                      id: 38
-                      location:
-                        column: 0
-                        row: 2
-                      rotation: 0
-                    - doors: NES
-                      id: 18
-                      location:
-                        column: 1
-                        row: 2
-                      rotation: 0
-                    - doors: NES
-                      id: 39
-                      location:
-                        column: 2
-                        row: 2
-                      rotation: 0
-                    - doors: NE
-                      id: 10
-                      location:
-                        column: 3
-                        row: 2
-                      rotation: 180
-                    - doors: NES
-                      id: 40
-                      location:
-                        column: 4
-                        row: 2
-                      rotation: 90
-                    - doors: NS
-                      id: 21
-                      location:
-                        column: 5
-                        row: 2
-                      rotation: 90
-                    - doors: NES
-                      id: 41
-                      location:
-                        column: 6
-                        row: 2
-                      rotation: 180
-                    - doors: NES
-                      id: 19
-                      location:
-                        column: 0
-                        row: 3
-                      rotation: 180
-                    - doors: NE
-                      id: 0
-                      location:
-                        column: 1
-                        row: 3
-                      rotation: 0
-                    - doors: NS
-                      id: 27
-                      location:
-                        column: 2
-                        row: 3
-                      rotation: 270
-                    - doors: NE
-                      id: 12
-                      location:
-                        column: 3
-                        row: 3
-                      rotation: 180
-                    - doors: NE
-                      id: 7
-                      location:
-                        column: 4
-                        row: 3
-                      rotation: 180
-                    - doors: NES
-                      id: 17
-                      location:
-                        column: 5
-                        row: 3
-                      rotation: 180
-                    - doors: NS
-                      id: 32
-                      location:
-                        column: 6
-                        row: 3
-                      rotation: 180
-                    - doors: NES
-                      id: 42
-                      location:
-                        column: 0
-                        row: 4
-                      rotation: 0
-                    - doors: NES
-                      id: 16
-                      location:
-                        column: 1
-                        row: 4
-                      rotation: 180
-                    - doors: NES
-                      id: 43
-                      location:
-                        column: 2
-                        row: 4
-                      rotation: 270
-                    - doors: NE
-                      id: 6
-                      location:
-                        column: 3
-                        row: 4
-                      rotation: 90
-                    - doors: NES
-                      id: 44
-                      location:
-                        column: 4
-                        row: 4
-                      rotation: 180
-                    - doors: NES
-                      id: 15
-                      location:
-                        column: 5
-                        row: 4
-                      rotation: 180
-                    - doors: NES
-                      id: 45
-                      location:
-                        column: 6
-                        row: 4
-                      rotation: 180
-                    - doors: NS
-                      id: 24
-                      location:
-                        column: 0
-                        row: 5
-                      rotation: 270
-                    - doors: NE
-                      id: 9
-                      location:
-                        column: 1
-                        row: 5
-                      rotation: 0
-                    - doors: NE
-                      id: 4
-                      location:
-                        column: 2
-                        row: 5
-                      rotation: 270
-                    - doors: NS
-                      id: 23
-                      location:
-                        column: 3
-                        row: 5
-                      rotation: 270
-                    - doors: NS
-                      id: 22
-                      location:
-                        column: 4
-                        row: 5
-                      rotation: 270
-                    - doors: NS
-                      id: 29
-                      location:
-                        column: 5
-                        row: 5
-                      rotation: 90
-                    - doors: NE
-                      id: 8
-                      location:
-                        column: 6
-                        row: 5
-                      rotation: 180
-                    - doors: NE
-                      id: 46
-                      location:
-                        column: 0
-                        row: 6
-                      rotation: 0
-                    - doors: NS
-                      id: 28
-                      location:
-                        column: 1
-                        row: 6
-                      rotation: 90
-                    - doors: NES
-                      id: 47
-                      location:
-                        column: 2
-                        row: 6
-                      rotation: 270
-                    - doors: NE
-                      id: 3
-                      location:
-                        column: 3
-                        row: 6
-                      rotation: 90
-                    - doors: NES
-                      id: 48
-                      location:
-                        column: 4
-                        row: 6
-                      rotation: 270
-                    - doors: NE
-                      id: 1
-                      location:
-                        column: 5
-                        row: 6
-                      rotation: 180
-                    - doors: NE
-                      id: 49
-                      location:
-                        column: 6
-                        row: 6
-                      rotation: 270
+                maze:
+                    mazeSize: 11
+                    mazeCards:
+                        - doors: NE
+                          id: 11
+                          location: 
+                          rotation: 0
+                        - doors: NE
+                          id: 34
+                          location:
+                            column: 0
+                            row: 0
+                          rotation: 90
+                        - doors: NS
+                          id: 33
+                          location:
+                            column: 1
+                            row: 0
+                          rotation: 0
+                        - doors: NES
+                          id: 35
+                          location:
+                            column: 2
+                            row: 0
+                          rotation: 90
+                        - doors: NE
+                          id: 2
+                          location:
+                            column: 3
+                            row: 0
+                          rotation: 90
+                        - doors: NES
+                          id: 36
+                          location:
+                            column: 4
+                            row: 0
+                          rotation: 90
+                        - doors: NS
+                          id: 25
+                          location:
+                            column: 5
+                            row: 0
+                          rotation: 0
+                        - doors: NE
+                          id: 37
+                          location:
+                            column: 6
+                            row: 0
+                          rotation: 180
+                        - doors: NS
+                          id: 26
+                          location:
+                            column: 0
+                            row: 1
+                          rotation: 270
+                        - doors: NE
+                          id: 14
+                          location:
+                            column: 1
+                            row: 1
+                          rotation: 0
+                        - doors: NS
+                          id: 31
+                          location:
+                            column: 2
+                            row: 1
+                          rotation: 270
+                        - doors: NES
+                          id: 20
+                          location:
+                            column: 3
+                            row: 1
+                          rotation: 90
+                        - doors: NE
+                          id: 13
+                          location:
+                            column: 4
+                            row: 1
+                          rotation: 270
+                        - doors: NE
+                          id: 5
+                          location:
+                            column: 5
+                            row: 1
+                          rotation: 0
+                        - doors: NS
+                          id: 30
+                          location:
+                            column: 6
+                            row: 1
+                          rotation: 180
+                        - doors: NES
+                          id: 38
+                          location:
+                            column: 0
+                            row: 2
+                          rotation: 0
+                        - doors: NES
+                          id: 18
+                          location:
+                            column: 1
+                            row: 2
+                          rotation: 0
+                        - doors: NES
+                          id: 39
+                          location:
+                            column: 2
+                            row: 2
+                          rotation: 0
+                        - doors: NE
+                          id: 10
+                          location:
+                            column: 3
+                            row: 2
+                          rotation: 180
+                        - doors: NES
+                          id: 40
+                          location:
+                            column: 4
+                            row: 2
+                          rotation: 90
+                        - doors: NS
+                          id: 21
+                          location:
+                            column: 5
+                            row: 2
+                          rotation: 90
+                        - doors: NES
+                          id: 41
+                          location:
+                            column: 6
+                            row: 2
+                          rotation: 180
+                        - doors: NES
+                          id: 19
+                          location:
+                            column: 0
+                            row: 3
+                          rotation: 180
+                        - doors: NE
+                          id: 0
+                          location:
+                            column: 1
+                            row: 3
+                          rotation: 0
+                        - doors: NS
+                          id: 27
+                          location:
+                            column: 2
+                            row: 3
+                          rotation: 270
+                        - doors: NE
+                          id: 12
+                          location:
+                            column: 3
+                            row: 3
+                          rotation: 180
+                        - doors: NE
+                          id: 7
+                          location:
+                            column: 4
+                            row: 3
+                          rotation: 180
+                        - doors: NES
+                          id: 17
+                          location:
+                            column: 5
+                            row: 3
+                          rotation: 180
+                        - doors: NS
+                          id: 32
+                          location:
+                            column: 6
+                            row: 3
+                          rotation: 180
+                        - doors: NES
+                          id: 42
+                          location:
+                            column: 0
+                            row: 4
+                          rotation: 0
+                        - doors: NES
+                          id: 16
+                          location:
+                            column: 1
+                            row: 4
+                          rotation: 180
+                        - doors: NES
+                          id: 43
+                          location:
+                            column: 2
+                            row: 4
+                          rotation: 270
+                        - doors: NE
+                          id: 6
+                          location:
+                            column: 3
+                            row: 4
+                          rotation: 90
+                        - doors: NES
+                          id: 44
+                          location:
+                            column: 4
+                            row: 4
+                          rotation: 180
+                        - doors: NES
+                          id: 15
+                          location:
+                            column: 5
+                            row: 4
+                          rotation: 180
+                        - doors: NES
+                          id: 45
+                          location:
+                            column: 6
+                            row: 4
+                          rotation: 180
+                        - doors: NS
+                          id: 24
+                          location:
+                            column: 0
+                            row: 5
+                          rotation: 270
+                        - doors: NE
+                          id: 9
+                          location:
+                            column: 1
+                            row: 5
+                          rotation: 0
+                        - doors: NE
+                          id: 4
+                          location:
+                            column: 2
+                            row: 5
+                          rotation: 270
+                        - doors: NS
+                          id: 23
+                          location:
+                            column: 3
+                            row: 5
+                          rotation: 270
+                        - doors: NS
+                          id: 22
+                          location:
+                            column: 4
+                            row: 5
+                          rotation: 270
+                        - doors: NS
+                          id: 29
+                          location:
+                            column: 5
+                            row: 5
+                          rotation: 90
+                        - doors: NE
+                          id: 8
+                          location:
+                            column: 6
+                            row: 5
+                          rotation: 180
+                        - doors: NE
+                          id: 46
+                          location:
+                            column: 0
+                            row: 6
+                          rotation: 0
+                        - doors: NS
+                          id: 28
+                          location:
+                            column: 1
+                            row: 6
+                          rotation: 90
+                        - doors: NES
+                          id: 47
+                          location:
+                            column: 2
+                            row: 6
+                          rotation: 270
+                        - doors: NE
+                          id: 3
+                          location:
+                            column: 3
+                            row: 6
+                          rotation: 90
+                        - doors: NES
+                          id: 48
+                          location:
+                            column: 4
+                            row: 6
+                          rotation: 270
+                        - doors: NE
+                          id: 1
+                          location:
+                            column: 5
+                            row: 6
+                          rotation: 180
+                        - doors: NE
+                          id: 49
+                          location:
+                            column: 6
+                            row: 6
+                          rotation: 270
                 nextAction:
                     action: SHIFT
                     playerId: 1
@@ -603,6 +623,17 @@ components:
             properties:
                 location:
                     $ref: "#/components/schemas/boardLocation"
+        gameSetupObject:
+            type: "object"
+            properties:
+                mazeSize:
+                    type: integer
+                    description: "The number of rows/columns in the maze. Has to be odd."
+                    required: true
+                    minimum: 3
+                    maximum: 31
+                    example: 9
+
     parameters:
         playerQueryId:
             name: "p_id"

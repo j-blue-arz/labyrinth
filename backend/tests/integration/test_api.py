@@ -60,12 +60,27 @@ def test_get_state(client):
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
-    assert "mazeCards" in state
-    assert len(state["mazeCards"]) == 50
+    assert "maze" in state
+    assert "mazeSize" in state["maze"]
+    assert state["maze"]["mazeSize"] == 7
+    assert "mazeCards" in state["maze"]
+    assert len(state["maze"]["mazeCards"]) == 50
     assert "players" in state
     assert len(state["players"]) == 2
     player_ids = {state["players"][0]["id"], state["players"][1]["id"]}
     assert player_ids == {player_id1, player_id2}
+
+
+def test_post_player_creates_game_with_correct_identifier(client):
+    """ Tests POST for /api/games/3/players
+
+    Expects an OK response with a single int in the body.
+    Expects a game to be created with identifier 3
+    """
+    _post_player(client, game_id=3)
+    response = _get_state(client, game_id=3)
+    state = response.get_json()
+    assert state["id"] == 3
 
 
 def test_get_state_has_correct_initial_state(client):
@@ -76,14 +91,14 @@ def test_get_state_has_correct_initial_state(client):
     Expects an objective to be set for the player.
     Expects scores to be set to 0.
     """
-    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     response = _get_state(client)
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
     objective_card_id = state["objectiveMazeCardId"]
     player_maze_card = None
     objective_maze_card = None
-    for maze_card in state["mazeCards"]:
+    for maze_card in state["maze"]["mazeCards"]:
         if maze_card["id"] == player_card_id:
             player_maze_card = maze_card
         if maze_card["id"] == objective_card_id:
@@ -94,7 +109,7 @@ def test_get_state_has_correct_initial_state(client):
     assert player_maze_card["doors"] == "NE"
     assert player_maze_card["rotation"] == 90
     assert objective_maze_card
-    leftover_cards = [maze_card for maze_card in state["mazeCards"] if maze_card["location"] is None]
+    leftover_cards = [maze_card for maze_card in state["maze"]["mazeCards"] if maze_card["location"] is None]
     assert len(leftover_cards) == 1
     leftover_card = leftover_cards[0]
     assert not "W" in leftover_card["doors"]
@@ -109,7 +124,7 @@ def test_get_state_for_nonexisting_game(client):
     for non-existing game. Expects 404 Not Found with
     exception body
     """
-    player_id = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     response = client.get("/api/games/1/state")
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
@@ -132,8 +147,44 @@ def test_get_state_valid_after_error(client):
     assert response.status_code == 200
     assert response.content_type == "application/json"
     state = response.get_json()
-    assert "mazeCards" in state
-    assert len(state["mazeCards"]) == 50
+    assert "mazeCards" in state["maze"]
+    assert len(state["maze"]["mazeCards"]) == 50
+
+
+def test_change_maze_size(client):
+    """ Tests PUT for /api/games/0
+
+    Creates a game, then increases maze size.
+    Checks number of maze cards.
+    """
+    _post_player(client, game_id=5)
+    _post_player(client, game_id=5)
+    response = _put_game(client, game_id=5, size=11)
+    assert response.status_code == 200
+    response = _get_state(client, game_id=5)
+    state = response.get_json()
+    assert state["maze"]["mazeSize"] == 11
+    assert len(state["maze"]["mazeCards"]) == 11*11 + 1
+
+def test_change_maze_size_with_missing_body(client):
+    """ Tests PUT for /api/games/0
+
+    With missing body, the expectation is an exception.
+    """   
+    _post_player(client, game_id=5)
+    response = _put_game(client, game_id=5, size=11)
+    _assert_error_response(response, user_message="The combination of arguments in this request is not supported.",
+                           key="INVALID_ARGUMENTS", status=400)
+
+def test_change_maze_size_with_even_size(client):
+    """ Tests PUT for /api/games/0
+
+    With even size, the expectation is an exception.
+    """   
+    _post_player(client, game_id=5)
+    response = _put_game(client, game_id=5, size=12)
+    _assert_error_response(response, user_message="The combination of arguments in this request is not supported.",
+                           key="INVALID_ARGUMENTS", status=400)
 
 
 def test_post_move(client):
@@ -157,7 +208,7 @@ def test_post_move(client):
     maze_card_id = next((player["mazeCardId"]
                          for player in state["players"] if player["id"] == player_id),
                         None)
-    location = next((card["location"] for card in state["mazeCards"] if card["id"] == maze_card_id),
+    location = next((card["location"] for card in state["maze"]["mazeCards"] if card["id"] == maze_card_id),
                     None)
     assert location["row"] == 0
     assert location["column"] == 1
@@ -192,7 +243,7 @@ def test_post_move_invalid_move(client):
     """
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_move(client, player_id, 7, 0))
+    _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 7, 0))
 
 
 def test_post_move_nonexisting_game(client):
@@ -224,7 +275,7 @@ def test_post_shift(client):
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
     old_state = _get_state(client).get_json()
-    old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
+    old_leftover_card = next((card for card in old_state["maze"]["mazeCards"] if card["location"] is None),
                              None)
     old_rotation = old_leftover_card["rotation"]
     new_rotation = (old_rotation + 180) % 360
@@ -232,9 +283,9 @@ def test_post_shift(client):
     assert response.status_code == 200
     assert response.content_length == 0
     new_state = _get_state(client).get_json()
-    old_leftover_card = next((card for card in old_state["mazeCards"] if card["location"] is None),
+    old_leftover_card = next((card for card in old_state["maze"]["mazeCards"] if card["location"] is None),
                              None)
-    pushed_in_card = next((card for card in new_state["mazeCards"]
+    pushed_in_card = next((card for card in new_state["maze"]["mazeCards"]
                            if card["id"] == old_leftover_card["id"]),
                           None)
     assert old_leftover_card["doors"] == pushed_in_card["doors"]
@@ -252,7 +303,7 @@ def test_post_shift_with_invalid_rotation(client):
     """
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_shift(client, player_id, 0, 1, 66))
+    _assert_invalid_argument_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 1, 66))
 
 
 def test_post_shift_with_invalid_location(client):
@@ -264,7 +315,7 @@ def test_post_shift_with_invalid_location(client):
     """
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_shift(client, player_id, 0, 0, 90))
+    _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 0, 90))
 
 
 def test_post_move_with_invalid_turn_action(client):
@@ -276,7 +327,7 @@ def test_post_move_with_invalid_turn_action(client):
     """
     response = _post_player(client, player_type="human", alone=True)
     player_id = _assert_ok_single_int(response)
-    _assert_invalid_action_and_unchanged_state(client, player_id, lambda: _post_move(client, player_id, 0, 0))
+    _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 0, 0))
 
 
 def test_turn_action_progression(client):
@@ -306,6 +357,7 @@ def test_turn_action_progression(client):
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
 
+
 def test_no_pushback_rule(client):
     """ Tests POST for /api/games/0/shift
 
@@ -315,7 +367,8 @@ def test_no_pushback_rule(client):
     player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     _post_shift(client, player_id_0, 0, 1, 270)
     _post_move(client, player_id_0, 0, 0)
-    _assert_invalid_action_and_unchanged_state(client, player_id_1, lambda: _post_shift(client, player_id_1, 6, 1, 270))
+    _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id_1, 6, 1, 270))
+
 
 def test_delete_player(client):
     """ Tests GET for /api/games/0/state and delete for /api/games/0/players/<player_id>
@@ -346,15 +399,24 @@ def test_put_player(client):
     assert player["id"] == player_id_1
 
 
+def _assert_invalid_argument_and_unchanged_state(client, action_callable):
+    _assert_error_response_and_unchanged_state(
+        client, action_callable, expected_user_message="The combination of arguments in this request is not supported.", expected_key="INVALID_ARGUMENTS")
 
-def _assert_invalid_action_and_unchanged_state(client, player_id, action_callable):
+
+def _assert_invalid_action_and_unchanged_state(client, action_callable):
+    _assert_error_response_and_unchanged_state(
+        client, action_callable, expected_user_message="The sent action is invalid.", expected_key="INVALID_ACTION")
+
+
+def _assert_error_response_and_unchanged_state(client, action_callable, expected_user_message, expected_key):
     """ Sets a game up, performs invalid action on given resource with given data,
     asserts error response and checks that state has not changed """
     response = _get_state(client)
     old_data = response.get_data()
     response = action_callable()
-    _assert_error_response(response, user_message="The sent action is invalid.",
-                           key="INVALID_ACTION", status=400)
+    _assert_error_response(response, user_message=expected_user_message,
+                           key=expected_key, status=400)
     response = _get_state(client)
     assert response.status_code == 200
     new_data = response.get_data()
@@ -409,19 +471,28 @@ def _post_move(client, player_id, row, column):
     return client.post("/api/games/0/move?p_id={}".format(player_id), data=data, mimetype="application/json")
 
 
-def _post_player(client, player_type=None, alone=None):
+def _post_player(client, player_type=None, alone=None, game_id=0):
     player_data = _player_data(player_type, alone)
-    return client.post("/api/games/0/players", data=player_data, mimetype="application/json")
+    return client.post("/api/games/{}/players".format(game_id), data=player_data, mimetype="application/json")
+
 
 def _delete_player(client, player_id):
     return client.delete("/api/games/0/players/{}".format(player_id))
+
 
 def _put_player(client, player_id, player_type=None, alone=None):
     player_data = _player_data(player_type, alone)
     return client.put("/api/games/0/players/{}".format(player_id), data=player_data, mimetype="application/json")
 
-def _get_state(client):
-    return client.get("/api/games/0/state")
+
+def _put_game(client, game_id=0, size=7):
+    game_data = json.dumps({"mazeSize": size})
+    return client.put("/api/games/{}".format(game_id), data=game_data, mimetype="application/json")
+
+
+def _get_state(client, game_id=0):
+    return client.get("/api/games/{}/state".format(game_id))
+
 
 def _player_data(player_type=None, alone=None):
     data = None

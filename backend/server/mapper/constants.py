@@ -2,6 +2,7 @@
 
 PLAYERS = "players"
 MAZE_CARDS = "mazeCards"
+MAZE = "maze"
 ID = "id"
 MAZE_CARD_ID = "mazeCardId"
 DOORS = "doors"
@@ -24,3 +25,4 @@ POST_PLAYER_TYPE = "type"
 PREVIOUS_SHIFT_LOCATION = "previousShiftLocation"
 ENABLED_SHIFT_LOCATIONS = "enabledShiftLocations"
 SCORE = "score"
+MAZE_SIZE = "mazeSize"

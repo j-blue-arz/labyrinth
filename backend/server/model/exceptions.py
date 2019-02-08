@@ -60,3 +60,7 @@ class TurnActionViolationException(RuleViolationException):
 class InvalidRotationException(LabyrinthDomainException, ValueError):
     """ If a given rotation parameter is not divisible by 90 """
     pass
+
+class InvalidSizeException(LabyrinthDomainException, ValueError):
+    """ If a requested maze size is not admissible """
+    pass

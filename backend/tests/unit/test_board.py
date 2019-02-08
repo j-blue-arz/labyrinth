@@ -1,7 +1,8 @@
 """ Tests for Game of game.py """
 import pytest
+from tests.unit.factories import create_random_maze, create_random_maze_card
 from server.model.game import Board, BoardLocation
-from server.model.factories import create_maze, create_random_maze, create_random_maze_card
+from server.model.factories import create_maze
 from server.model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
     MoveUnreachableException, InvalidLocationException
 
@@ -11,7 +12,7 @@ def test_create_piece_sets_all_pieces_on_corners():
     board = Board(create_random_maze())
 
     def is_corner(location):
-        return (location.row in [0, board.maze.MAZE_SIZE - 1]) and (location.column in [0, board.maze.MAZE_SIZE - 1])
+        return (location.row in [0, board.maze.maze_size - 1]) and (location.column in [0, board.maze.maze_size - 1])
 
     for _ in range(8):
         piece = board.create_piece()
@@ -90,7 +91,7 @@ def test_shift_updates_old_leftover_rotation():
 def test_shift_updates_new_leftover():
     """ Tests shift """
     board = Board()
-    pushed_out = board.maze[BoardLocation(board.maze.MAZE_SIZE - 1, 1)]
+    pushed_out = board.maze[BoardLocation(board.maze.maze_size - 1, 1)]
     board.shift(BoardLocation(0, 1), 270)
     assert pushed_out == board.leftover_card
 
@@ -101,7 +102,7 @@ def test_shift_updates_pieces_on_pushed_out_card():
     piece = board.create_piece()
     pushed_card = board.leftover_card
     piece.maze_card = board.maze[BoardLocation(0, 3)]
-    board.shift(BoardLocation(board.maze.MAZE_SIZE-1, 3), 90)
+    board.shift(BoardLocation(board.maze.maze_size-1, 3), 90)
     assert piece.maze_card == pushed_card
 
 
@@ -151,20 +152,20 @@ def test_move_raises_error_on_invalid_location():
 def test_opposing_insert_location_for_east_location():
     """ Tests opposing_insert_location """
     board = Board()
-    size = board.maze.MAZE_SIZE
+    size = board.maze.maze_size
     assert board.opposing_insert_location(BoardLocation(5, size-1)) == BoardLocation(5, 0)
 
 
 def test_opposing_insert_location_for_south_location():
     """ Tests opposing_insert_location """
     board = Board()
-    size = board.maze.MAZE_SIZE
+    size = board.maze.maze_size
     assert board.opposing_insert_location(BoardLocation(size-1, 3)) == BoardLocation(0, 3)
 
 def test_opposing_insert_location_for_west_location():
     """ Tests opposing_insert_location """
     board = Board()
-    size = board.maze.MAZE_SIZE
+    size = board.maze.maze_size
     assert board.opposing_insert_location(BoardLocation(1, 0)) == BoardLocation(1, size-1)
 
 
