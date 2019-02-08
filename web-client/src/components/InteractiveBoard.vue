@@ -24,7 +24,8 @@
             @insert-panel-clicked="onInsertPanelClick"
             :disabledInsertLocation="disabledInsertLocation"
             :interaction="isMyTurnToShift"
-            :cardSize="cardSize"
+            :card-size="cardSize"
+            :n="mazeSize"
         ></insert-panels>
         <leftover-maze-card
             v-if="game.hasStarted()"
@@ -79,6 +80,11 @@ export default {
             cardSize: 100,
             isLandscape: true
         };
+    },
+    watch: {
+        mazeSize: function() {
+            this.handleResize();
+        }
     },
     computed: {
         mazeSize: function() {

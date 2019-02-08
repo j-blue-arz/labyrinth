@@ -208,19 +208,23 @@ export default class Game {
 
     createFromApi(apiState, userId = 0) {
         this.isLoading = true;
-        var apiMazeCards = apiState.mazeCards;
+        var maze = apiState.maze;
+        var apiMazeCards = maze.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
         if (this.leftoverMazeCard.id != apiMazeCards[0].id) {
             this.leftoverMazeCard = MazeCard.createFromApi(apiMazeCards[0]);
         }
 
+        this.n = maze.mazeSize;
         this._mazeCardsFromSortedApi(apiMazeCards);
         this._playersFromApi(apiState, userId);
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
 
-        this.setNextAction(apiState.nextAction.playerId, apiState.nextAction.action);
+        if (apiState.nextAction !== null) {
+            this.setNextAction(apiState.nextAction.playerId, apiState.nextAction.action);
+        }
 
         this.disabledInsertLocation = this._findMissingInsertLocation(
             apiState.enabledShiftLocations
@@ -320,7 +324,7 @@ export default class Game {
     }
 
     _mazeCardsFromSortedApi(sortedApiMazeCards) {
-        this.mazeCards.splice(0, this.n);
+        this.mazeCards.splice(0, this.mazeCards.length);
         var index = 1;
         for (var row = 0; row < this.n; row++) {
             this.mazeCards.push([]);

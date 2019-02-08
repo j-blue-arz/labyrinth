@@ -42,20 +42,32 @@ export default {
             required: false,
             default: 100
         },
-        mazeSize: {
+        n: {
             type: Number,
             required: false,
             default: 7
         }
     },
-    data() {
-        return {
-            insertPanels: []
-        };
-    },
-    watch: {
-        disabledInsertLocation: function() {
-            this.updateEnabledPanels();
+    computed: {
+        insertPanels: function() {
+            let result = [];
+            let id = 0;
+            let n = this.n;
+            let border = n - 1;
+            for (var position = 1; position < border; position += 2) {
+                result.push(new InsertPanel(id++, -1, position, n));
+                result.push(new InsertPanel(id++, position, -1, n));
+                result.push(new InsertPanel(id++, n, position, n));
+                result.push(new InsertPanel(id++, position, n, n));
+            }
+            for (var insertPanel of result) {
+                if (this.locationsEqual(insertPanel.insertLocation, this.disabledInsertLocation)) {
+                    insertPanel.enabled = false;
+                } else {
+                    insertPanel.enabled = true;
+                }
+            }
+            return result;
         }
     },
     methods: {
@@ -68,30 +80,11 @@ export default {
         locationsEqual(locA, locB) {
             return locA && locB && locA.row === locB.row && locA.column === locB.column;
         },
-        updateEnabledPanels: function() {
-            for (var insertPanel of this.insertPanels) {
-                if (this.locationsEqual(insertPanel.insertLocation, this.disabledInsertLocation)) {
-                    insertPanel.enabled = false;
-                } else {
-                    insertPanel.enabled = true;
-                }
-            }
-        },
         onClick: function(event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {
                 this.$emit("insert-panel-clicked", insertPanel.insertLocation);
             }
         }
-    },
-    created: function() {
-        let id = 0;
-        for (var position of [1, 3, 5]) {
-            this.insertPanels.push(new InsertPanel(id++, -1, position));
-            this.insertPanels.push(new InsertPanel(id++, position, -1));
-            this.insertPanels.push(new InsertPanel(id++, this.mazeSize, position));
-            this.insertPanels.push(new InsertPanel(id++, position, this.mazeSize));
-        }
-        this.updateEnabledPanels();
     }
 };
 </script>

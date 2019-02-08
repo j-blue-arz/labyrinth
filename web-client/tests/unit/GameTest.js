@@ -213,9 +213,15 @@ describe("Game", () => {
     });
 
     describe(".createFromApi()", () => {
+        it("sets maze size correctly", () => {
+            let game = new Game();
+            game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
+
+            expect(game.n).toEqual(3);
+        });
+
         it("results in a game with two players.", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             expect(game.getPlayer(42)).not.toBeNull();
@@ -224,7 +230,6 @@ describe("Game", () => {
 
         it("places players on correct location.", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             _assertPlayerLocation(game, 42, loc(2, 2), 16);
@@ -233,7 +238,6 @@ describe("Game", () => {
 
         it("creates maze card locations consistently.", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             for (let row = 0; row < game.n; row++) {
@@ -246,7 +250,6 @@ describe("Game", () => {
         it("creates at least one maze card correctly", () => {
             /* { "doors": "NE", "id": 7,  "location": { "column": 0, "row": 1 }, "rotation": 180 } */
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let mazeCard = game.getMazeCard(loc(1, 0));
@@ -258,7 +261,6 @@ describe("Game", () => {
         it("creates leftover maze card correctly", () => {
             /* { "doors": "NES", "id": 49,  "location": null, "rotation": 0 } */
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let mazeCard = game.leftoverMazeCard;
@@ -269,7 +271,6 @@ describe("Game", () => {
 
         it("maps player's objective to a flag on the correct maze card", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let objectiveMazeCard = game.mazeCardById(8);
@@ -278,7 +279,6 @@ describe("Game", () => {
 
         it("only sets one maze card's objective flag to true", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let count = 0;
@@ -296,7 +296,6 @@ describe("Game", () => {
             let apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
             apiState.objectiveMazeCardId = 0;
             let game = new Game();
-            game.n = 3;
             game.createFromApi(apiState);
 
             let objectiveMazeCard = game.mazeCardById(0);
@@ -305,7 +304,6 @@ describe("Game", () => {
 
         it("assigns each player an ascending index, starting from 0", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
             let colorIndexList = [game.getPlayer(42).colorIndex, game.getPlayer(17).colorIndex];
             expect(colorIndexList).toContain(0);
@@ -314,7 +312,6 @@ describe("Game", () => {
 
         it("sets attributes for computer players", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
             let computerPlayer = game.getPlayer(42);
             expect(computerPlayer.isComputer).toBe(true);
@@ -325,14 +322,12 @@ describe("Game", () => {
 
         it("disables insert location, if enabled locations is missing one", () => {
             let game = new Game();
-            game.n = 3;
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
             expect(game.disabledInsertLocation).toEqual({ column: 1, row: 2 });
         });
 
         it("sets disabled insert location to null if all locations are enabled", () => {
             let game = new Game();
-            game.n = 3;
             let apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
             apiState.enabledShiftLocations.push({ column: 1, row: 2 });
             game.createFromApi(apiState);
@@ -391,84 +386,87 @@ function _maxId(objs) {
 }
 
 let GET_STATE_RESULT_FOR_N_3 = `{
-  "mazeCards": [{
-    "doors": "NES",
-    "id": 49,
-    "location": null,
-    "rotation": 0
-  }, {
-    "doors": "NES",
-    "id": 0,
-    "location": {
-      "column": 0,
-      "row": 0
-    },
-    "rotation": 180
-  }, {
-    "doors": "NE",
-    "id": 1,
-    "location": {
-      "column": 1,
-      "row": 0
-    },
-    "rotation": 180
-  }, {
-    "doors": "NS",
-    "id": 2,
-    "location": {
-      "column": 2,
-      "row": 0
-    },
-    "rotation": 90
-  }, {
-    "doors": "NE",
-    "id": 7,
-    "location": {
-      "column": 0,
-      "row": 1
-    },
-    "rotation": 180
-  }, {
-    "doors": "NE",
-    "id": 8,
-    "location": {
-      "column": 1,
-      "row": 1
-    },
-    "rotation": 270
-  }, {
-    "doors": "NS",
-    "id": 9,
-    "location": {
-      "column": 2,
-      "row": 1
-    },
-    "rotation": 0
-  }, {
-    "doors": "NS",
-    "id": 14,
-    "location": {
-      "column": 0,
-      "row": 2
-    },
-    "rotation": 180
-  }, {
-    "doors": "NES",
-    "id": 15,
-    "location": {
-      "column": 1,
-      "row": 2
-    },
-    "rotation": 180
-  }, {
-    "doors": "NE",
-    "id": 16,
-    "location": {
-      "column": 2,
-      "row": 2
-    },
-    "rotation": 0
-  }],
+  "maze": {
+    "mazeSize": 3,
+    "mazeCards": [{
+        "doors": "NES",
+        "id": 49,
+        "location": null,
+        "rotation": 0
+    }, {
+        "doors": "NES",
+        "id": 0,
+        "location": {
+        "column": 0,
+        "row": 0
+        },
+        "rotation": 180
+    }, {
+        "doors": "NE",
+        "id": 1,
+        "location": {
+        "column": 1,
+        "row": 0
+        },
+        "rotation": 180
+    }, {
+        "doors": "NS",
+        "id": 2,
+        "location": {
+        "column": 2,
+        "row": 0
+        },
+        "rotation": 90
+    }, {
+        "doors": "NE",
+        "id": 7,
+        "location": {
+        "column": 0,
+        "row": 1
+        },
+        "rotation": 180
+    }, {
+        "doors": "NE",
+        "id": 8,
+        "location": {
+        "column": 1,
+        "row": 1
+        },
+        "rotation": 270
+    }, {
+        "doors": "NS",
+        "id": 9,
+        "location": {
+        "column": 2,
+        "row": 1
+        },
+        "rotation": 0
+    }, {
+        "doors": "NS",
+        "id": 14,
+        "location": {
+        "column": 0,
+        "row": 2
+        },
+        "rotation": 180
+    }, {
+        "doors": "NES",
+        "id": 15,
+        "location": {
+        "column": 1,
+        "row": 2
+        },
+        "rotation": 180
+    }, {
+        "doors": "NE",
+        "id": 16,
+        "location": {
+        "column": 2,
+        "row": 2
+        },
+        "rotation": 0
+    }]
+  },
   "players": [{
     "id": 42,
     "mazeCardId": 16,
