@@ -22,14 +22,15 @@ export default class Player {
         return new this(id, null);
     }
 
-    static newFromApi(apiPlayer, colorIndex) {
-        let player = new this(apiPlayer.id, colorIndex);
-        player.fillFromApi(apiPlayer, colorIndex);
+    static newFromApi(apiPlayer) {
+        let player = new this(apiPlayer.id);
+        player.fillFromApi(apiPlayer);
         return player;
     }
 
     fillFromApi(apiPlayer) {
         this.score = apiPlayer.score;
+        this.colorIndex = apiPlayer.pieceIndex;
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
             this.algorithm = apiPlayer.algorithm;

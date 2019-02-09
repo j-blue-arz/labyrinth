@@ -232,7 +232,6 @@ export default class Game {
     }
 
     _playersFromApi(apiState, userId) {
-        let remainingColors = [3, 2, 1, 0];
         let toRemove = new Set(this._players.map(player => player.id));
         apiState.players.sort(function(p1, p2) {
             return p1.id - p2.id;
@@ -243,10 +242,9 @@ export default class Game {
             let player;
             if (this.hasPlayer(apiPlayer.id)) {
                 player = this.getPlayer(apiPlayer.id);
-                remainingColors.splice(remainingColors.indexOf(player.colorIndex), 1);
                 player.fillFromApi(apiPlayer);
             } else {
-                player = Player.newFromApi(apiPlayer, remainingColors.pop());
+                player = Player.newFromApi(apiPlayer);
             }
             if (userId === player.id && !player.isComputer) {
                 player.isUser = true;

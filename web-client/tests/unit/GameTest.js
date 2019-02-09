@@ -302,12 +302,11 @@ describe("Game", () => {
             expect(objectiveMazeCard.hasObject).toBeTruthy();
         });
 
-        it("assigns each player an ascending index, starting from 0", () => {
+        it("assigns to each player the pieceIndex as colorIndex", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
-            let colorIndexList = [game.getPlayer(42).colorIndex, game.getPlayer(17).colorIndex];
-            expect(colorIndexList).toContain(0);
-            expect(colorIndexList).toContain(1);
+            expect(game.getPlayer(42).colorIndex).toEqual(0);
+            expect(game.getPlayer(17).colorIndex).toEqual(1);
         });
 
         it("sets attributes for computer players", () => {
@@ -470,10 +469,12 @@ let GET_STATE_RESULT_FOR_N_3 = `{
   "players": [{
     "id": 42,
     "mazeCardId": 16,
+    "pieceIndex": 0,
     "isComputerPlayer": true,
     "algorithm": "random"
   },{
     "id": 17,
+    "pieceIndex": 1,
     "mazeCardId": 15
   }],
   "objectiveMazeCardId": 8,
