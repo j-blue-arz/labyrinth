@@ -138,6 +138,9 @@ export default {
                 .catch(this.handleError)
                 .then(this.startPolling);
             this.userPlayerId = NOT_PARTICIPATING;
+            if (this.useStorage()) {
+                sessionStorage.playerId = this.userPlayerId;
+            }
         },
         addPlayer: function(apiResponse) {
             this.userPlayerId = parseInt(apiResponse.data);

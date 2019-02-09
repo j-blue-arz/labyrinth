@@ -39,6 +39,13 @@ export default class GameApi {
         return axios.delete(deletePlayerPath);
     }
 
+    changeGame(size) {
+        let putGamePath = this.apiPath + "/games/0";
+        return axios.put(putGamePath, {
+            mazeSize: size
+        });
+    }
+
     fetchState() {
         var getStatePath = this.apiPath + "/games/0/state";
         return axios.get(getStatePath, {

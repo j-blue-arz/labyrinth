@@ -222,9 +222,7 @@ export default class Game {
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
 
-        if (apiState.nextAction !== null) {
-            this.setNextAction(apiState.nextAction.playerId, apiState.nextAction.action);
-        }
+        this.setNextAction(apiState.nextAction);
 
         this.disabledInsertLocation = this._findMissingInsertLocation(
             apiState.enabledShiftLocations
@@ -293,13 +291,17 @@ export default class Game {
         locationsMap.set(location.row * this.n + location.column, location);
     }
 
-    setNextAction(playerId, action) {
+    setNextAction(nextAction) {
         for (let player of this._players) {
             player.turnAction = NO_ACTION;
         }
-        this.nextAction.playerId = playerId;
-        this.nextAction.action = action;
-        this.getPlayer(playerId).turnAction = action;
+
+        if (nextAction !== null) {
+            this.nextAction = nextAction;
+            this.getPlayer(nextAction.playerId).turnAction = nextAction.action;
+        } else {
+            this.nextAction = {playerId: 0, action: NO_ACTION}
+        }
     }
 
     _sortApiMazeCards(apiMazeCards) {

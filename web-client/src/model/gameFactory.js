@@ -36,7 +36,7 @@ export default class GameFactory {
 
         game.getMazeCard(this._randomLocation(game.n)).hasObject = true;
 
-        game.setNextAction(0, this.nextAction);
+        game.setNextAction({ playerId: 0, action: this.nextAction });
 
         game.leftoverMazeCard = MazeCard.createNewRandom(id, -1, -1);
         return game;

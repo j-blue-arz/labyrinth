@@ -21,6 +21,7 @@ import MenuItem from "@/model/menuItem.js";
 const NOT_PARTICIPATING = -1;
 const REMOVE_PREFIX = "remove-";
 const ADD_PREFIX = "add-";
+const RESTART_PREFIX = "restart-"
 
 export default {
     name: "game-menu",
@@ -57,7 +58,12 @@ export default {
                     new MenuItem(ADD_PREFIX + "minimax", "Minimax"),
                     new MenuItem(ADD_PREFIX + "alpha-beta", "Alpha-Beta")
                 ]),
-                new MenuItem("remove", "Remove computer..", [])
+                new MenuItem("remove", "Remove computer..", []),
+                new MenuItem("restart", "Restart with..", [
+                    new MenuItem(RESTART_PREFIX + "7", "original size (7)"),
+                    new MenuItem(RESTART_PREFIX + "9", "large size (9)"),
+                    new MenuItem(RESTART_PREFIX + "13", "huge size (13)")
+                ]),
             ]
         };
     },
@@ -98,6 +104,9 @@ export default {
             } else if ($event.startsWith(REMOVE_PREFIX)) {
                 let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
                 this.removeComputer(playerId);
+            } else if ($event.startsWith(RESTART_PREFIX)) {
+                let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
+                this.restartWithSize(size);
             }
         },
         closeMenu: function() {
@@ -112,6 +121,12 @@ export default {
         removeComputer: function(playerId) {
             this.api
                 .removePlayer(playerId)
+                .catch(this.handleError)
+                .then(this.calledApiMethod);
+        },
+        restartWithSize: function(size) {
+            this.api
+                .changeGame(size)
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },

@@ -14,8 +14,6 @@ Also, it is only possible to reach an objective while making a move. Reaching an
     npm run test:unit
     npm run build
 
-I am aware that running the tests currently logs warnings to the console, but the tests pass nevertheless.      
-
     cd ../backend
 
 Now is a good time to create and activate a virtual environment, e.g. on Linux:
@@ -43,10 +41,6 @@ If you want the server to be visible in your local network:
 
 ## Computer opponents
 Use the game menu to set up a match containing computer players.
-
-Currently, there is no option to add computer players. You can replace yourself by a computer player instead. So if you want to play against the computer,
-or you want to let computer players play against each other, open the application in an additional tab (which adds another player) and replace yourself by an
-algorithm of your choice.
 
 ## Benchmarks
     python -m benchmarking.bench_alpha_beta benchmark all
