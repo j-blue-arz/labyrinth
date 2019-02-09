@@ -233,7 +233,7 @@ def _create_board_and_piece(maze, leftover_card, start_location, objective_locat
     maze = copy.deepcopy(maze)
     board = Board(maze=maze, leftover_card=leftover_card, objective_maze_card=maze[objective_location])
     board.clear_pieces()
-    piece = Piece(board.maze[start_location])
+    piece = Piece(0, board.maze[start_location])
     board.pieces.append(piece)
     return board, piece
 

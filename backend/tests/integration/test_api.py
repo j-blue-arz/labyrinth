@@ -166,15 +166,6 @@ def test_change_maze_size(client):
     assert state["maze"]["mazeSize"] == 11
     assert len(state["maze"]["mazeCards"]) == 11*11 + 1
 
-def test_change_maze_size_with_missing_body(client):
-    """ Tests PUT for /api/games/0
-
-    With missing body, the expectation is an exception.
-    """   
-    _post_player(client, game_id=5)
-    response = _put_game(client, game_id=5, size=11)
-    _assert_error_response(response, user_message="The combination of arguments in this request is not supported.",
-                           key="INVALID_ARGUMENTS", status=400)
 
 def test_change_maze_size_with_even_size(client):
     """ Tests PUT for /api/games/0
@@ -486,7 +477,9 @@ def _put_player(client, player_id, player_type=None, alone=None):
 
 
 def _put_game(client, game_id=0, size=7):
-    game_data = json.dumps({"mazeSize": size})
+    game_data = None
+    if size:
+        game_data = json.dumps({"mazeSize": size})
     return client.put("/api/games/{}".format(game_id), data=game_data, mimetype="application/json")
 
 

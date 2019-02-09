@@ -66,9 +66,11 @@ def dto_to_type(player_request_dto):
             player_request_dto, POST_PLAYER_TYPE)
     return None
 
+
 def dto_to_maze_size(game_options_dto):
     """ Maps a DTO for the change game api method to a value for the size of the new maze """
     return game_options_dto[MAZE_SIZE]
+
 
 def _value_or_none(dto, key):
     if key in dto:
@@ -104,7 +106,8 @@ def _player_to_dto(player: Player):
     """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
-                  SCORE: player.score}
+                  SCORE: player.score,
+                  PIECE_INDEX: player.piece.piece_index}
     if type(player) is server.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME

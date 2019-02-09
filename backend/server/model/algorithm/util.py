@@ -31,8 +31,8 @@ def copy_board(board, pieces=None):
     if not pieces:
         pieces = board.pieces
     piece_maze_cards = [maze_card_by_id[piece.maze_card.identifier] for piece in pieces]
-    for maze_card in piece_maze_cards:
-        board_copy.pieces.append(game.Piece(maze_card))
+    for index, maze_card in enumerate(piece_maze_cards):
+        board_copy.pieces.append(game.Piece(index, maze_card))
     return board_copy
 
 def find_location_by_id(maze, card_id):

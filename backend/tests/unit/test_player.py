@@ -7,7 +7,7 @@ from server.model.factories import create_random_maze_card
 def test_set_board():
     """ Tests that set_board asks the board for a piece """
     board = MagicMock()
-    piece = Piece(create_random_maze_card)
+    piece = Piece(0, create_random_maze_card)
     board.create_piece.return_value = piece
     player = Player(1, 0)
     player.set_board(board)

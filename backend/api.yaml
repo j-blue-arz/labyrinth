@@ -595,6 +595,7 @@ components:
             properties:
                 id:
                     type: "integer"
+                    description: "A player's identifier, unique in the application. This identifier is used as path parameter `player_id` or the query parameter `p_id`."
                 isComputerPlayer:
                     type: "boolean"
                 algorithm:
@@ -611,6 +612,11 @@ components:
                 score:
                     type: "integer"
                     description: "Number of reached objectives for this player in this game."
+                pieceIndex:
+                    type: "integer"
+                    minimum: 0
+                    description: "Each piece on the board is assigned an index, unique to the respective game. This index should be used e.g. for coloring the pieces, as it is guaranteed to be
+                    consecutive even if players are removed and added."
         shiftObject:
             type: "object"
             properties:

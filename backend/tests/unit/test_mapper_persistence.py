@@ -31,6 +31,8 @@ def _create_test_game(with_computer=False):
         player.set_board(board)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]
     players[1].piece.maze_card = board.maze[BoardLocation(5, 5)]
+    players[0].piece.piece_index = 1
+    players[1].piece.piece_index = 0
     players[0].score = 7
     players[1].score = 8
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
@@ -132,6 +134,14 @@ def test_mapping_identifier():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert game.identifier == created_game.identifier
+
+def test_mapping_piece_index():
+    """ Tests correct mapping of player piece's index """
+    created_game, player_ids = _create_test_game()
+    game_dto = mapper.game_to_dto(created_game)
+    game = mapper.dto_to_game(game_dto)
+    for player_id in player_ids:
+        _assert_games_using_function(created_game, game, lambda g: g.get_player(player_id).piece.piece_index)
 
 
 def _compare_maze_cards(maze_card1, maze_card2):

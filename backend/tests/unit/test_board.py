@@ -46,6 +46,19 @@ def test_after_series_of_creates_and_removes_no_corners_empty():
         piece_cards.add(piece.maze_card)
     assert len(piece_cards) == 4
 
+def test_create_piece_assigns_pieces_consecutive_unique_indices():
+    """ Tests create_piece. Adds four pieces, removes first two, adds one, removes third, adds two,
+    and checks that all pieces have consecutive unique index """
+    board = Board(create_random_maze())
+    pieces = [board.create_piece(), board.create_piece(), board.create_piece(), board.create_piece()]
+    board.remove_piece(pieces[0])
+    board.remove_piece(pieces[1])
+    pieces[0] = board.create_piece()
+    board.remove_piece(pieces[3])
+    pieces[1] = board.create_piece()
+    pieces[3] = board.create_piece()
+    assert set([0, 1, 2, 3]) == set(map(lambda piece: piece.piece_index, pieces))
+
 
 def test_clear_pieces_after_creations_empties_pieces():
     """ Tests clear_pieces. """

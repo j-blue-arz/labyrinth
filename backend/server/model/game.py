@@ -14,6 +14,7 @@ A Piece represents a player, with a unique ID,
 a reference to a maze card the piece is currently positioned on and an objective.
 BoardLocation is a wrapper for a row and a column. If both are positive, the position is in the maze.
 """
+import itertools
 from random import choice
 from . import exceptions
 from .reachable import Graph
@@ -176,7 +177,8 @@ class Piece:
     Each piece has a reference to a MazeCard instance as its position.
     """
 
-    def __init__(self, maze_card: MazeCard):
+    def __init__(self, piece_index, maze_card: MazeCard):
+        self.piece_index = piece_index
         self.maze_card = maze_card
 
 
@@ -357,7 +359,15 @@ class Board:
     def create_piece(self):
         """ Creates and places a piece on the board.
         Generates new objective, because the old one could be the same as the new piece's starting location. """
+        next_index = self._next_free_piece_index()
+        start_locations = self._start_locations()
+        next_location = start_locations[next_index % len(start_locations)]
+        piece = Piece(next_index, self._maze[next_location])
+        self._pieces.append(piece)
+        self._objective_maze_card = self._find_new_objective_maze_card()
+        return piece
 
+    def _start_locations(self):
         if not self.START_LOCATIONS:
             maze_size = self.maze.maze_size
             start_locations = [BoardLocation(0, 0),
@@ -366,22 +376,16 @@ class Board:
                                BoardLocation(maze_size - 1, 0)]
         else:
             start_locations = self.START_LOCATIONS
+        return start_locations
 
-        def next_least_pieces_start_location():
-            least_pieces = 1000
-            least_pieces_location = None
-            for location in start_locations:
-                num_pieces = len([piece for piece in self.pieces if piece.maze_card is self.maze[location]])
-                if num_pieces < least_pieces:
-                    least_pieces_location = location
-                    least_pieces = num_pieces
-            return least_pieces_location
-
-        next_location = next_least_pieces_start_location()
-        piece = Piece(self._maze[next_location])
-        self._pieces.append(piece)
-        self._objective_maze_card = self._find_new_objective_maze_card()
-        return piece
+    def _next_free_piece_index(self):
+        current_piece_indices = set(map(lambda piece: piece.piece_index, self._pieces))
+        next_index = 0
+        for try_index in itertools.count():
+            if not try_index in current_piece_indices:
+                next_index = try_index
+                break
+        return next_index
 
     def remove_piece(self, piece):
         """ Removes a piece from the board """

@@ -37,6 +37,7 @@ def test_mapping_players():
         assert mapper.OBJECTIVE not in player_dto
         assert mapper.SCORE in player_dto
         assert player_dto[mapper.SCORE] == player_game.score
+        assert player_dto[mapper.PIECE_INDEX] == player_game.piece.piece_index
 
 
 def test_mapping_computer_player():

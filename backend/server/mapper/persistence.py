@@ -71,7 +71,8 @@ def _player_to_dto(player: Player):
     """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
-                  SCORE: player.score}
+                  SCORE: player.score,
+                  PIECE_INDEX: player.piece.piece_index}
     if type(player) is server.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
@@ -100,7 +101,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     :raises KeyError: if maze_card_dict does not contain the maze card or objective id in player_dto
     :return: a Player instance
     """
-    piece = Piece(maze_card_dict[player_dto[MAZE_CARD_ID]])
+    piece = Piece(player_dto[PIECE_INDEX], maze_card_dict[player_dto[MAZE_CARD_ID]])
     player = None
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
         player = server.model.computer.ComputerPlayer(
