@@ -21,6 +21,8 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+*.vs
+CMakeSettings.json
 
 # python
 **/__pycache__/
