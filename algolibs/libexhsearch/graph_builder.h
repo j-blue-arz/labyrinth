@@ -12,11 +12,11 @@ extern std::vector<std::string> big_component_maze_9;
 
 class GraphBuilder {
 public:
-	static StaticGraph buildGraphFromText(std::vector<std::string> lines);
+    static StaticGraph buildGraphFromText(std::vector<std::string> lines);
 private:
-	static size_t first(size_t maze_index) { return maze_index * 4; }
-	static size_t second(size_t maze_index) { return maze_index * 4 + 1; }
-	static size_t third(size_t maze_index) { return maze_index * 4 + 2; }
+    static size_t first(size_t maze_index) { return maze_index * 4; }
+    static size_t second(size_t maze_index) { return maze_index * 4 + 1; }
+    static size_t third(size_t maze_index) { return maze_index * 4 + 2; }
 };
 
 }
