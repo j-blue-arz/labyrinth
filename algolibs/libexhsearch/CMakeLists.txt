@@ -1,6 +1,15 @@
 set(
     SOURCES 
-        "hello.cpp"
+		"graph_builder.h"
+		"graph_builder.cpp"
+		"graph_algorithms.h"
+		"graph_algorithms.cpp"
+		"location.h"
+		"location.cpp"
+		"static_graph.h"
+		"static_graph.cpp"
 )
 
-add_executable(hello ${SOURCES})
+add_library(REACHABLE OBJECT ${SOURCES})
+
+add_executable(main "main.cpp" ${SOURCES})
