@@ -22,7 +22,9 @@ public:
 
     std::vector<Location> neighbors(const Location & location) const;
 
-    size_t getNumberOfNodes() const;
+    size_t getNumberOfNodes() const noexcept;
+
+    size_t getExtent() const noexcept;
 
 private:
     using OffsetType = Location::OffsetType;
@@ -30,19 +32,19 @@ private:
 
     struct Node {
         std::string out_paths{ "" };
-        NodeId node_id;
+        NodeId node_id{0};
     };
 
     const Node & getNode(const Location & location) const;
     Node & getNode(const Location & location);
 
-    bool hasOutPath(const Node & node, const OutPathType & out_path) const;
+    bool hasOutPath(const Node & node, const OutPathType & out_path) const noexcept;
 
-    bool isInRange(const Location & location) const;
+    bool isInRange(const Location & location) const noexcept;
 
-    static OutPathType mirrorOutPath(OutPathType out_path);
+    static OutPathType mirrorOutPath(OutPathType out_path) noexcept;
 
-    static OffsetType offsetFromOutPath(OutPathType out_path);
+    static OffsetType offsetFromOutPath(OutPathType out_path) noexcept;
 
     size_t extent_;
     std::vector<std::vector<Node>> node_matrix_;

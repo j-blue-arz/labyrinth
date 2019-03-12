@@ -1,0 +1,20 @@
+Benchmarking isReachable() for snake graph with extent 7,
+running 1000 queries, 3 times.
+Best run took 519us per query.
+Benchmarking isReachable() for snake graph with extent 14,
+running 1000 queries, 3 times.
+Best run took 2152us per query.
+Benchmarking isReachable() for snake graph with extent 28,
+running 1000 queries, 3 times.
+Best run took 8812us per query.
+
+After adding some noexcept specifiers:
+Benchmarking isReachable() for snake graph with extent 7,
+running 1000 queries, 3 times.
+Best run took 498us per query.
+Benchmarking isReachable() for snake graph with extent 14,
+running 1000 queries, 3 times.
+Best run took 2068us per query.
+Benchmarking isReachable() for snake graph with extent 28,
+running 1000 queries, 3 times.
+Best run took 8433us per query.
