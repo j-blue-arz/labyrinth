@@ -28,7 +28,7 @@ std::vector<Location> StaticGraph::neighbors(const Location & location) const {
     for (auto out_path_iterator = node.out_paths.cbegin(); out_path_iterator != node.out_paths.cend(); out_path_iterator++) {
         auto out_path = *out_path_iterator;
         const auto potential_location = location + offsetFromOutPath(out_path);
-        if (isInRange(potential_location) && hasOutPath(getNode(potential_location), mirrorOutPath(out_path))) {
+        if (isInside(potential_location) && hasOutPath(getNode(potential_location), mirrorOutPath(out_path))) {
             result.push_back(potential_location);
         }
     }
@@ -55,7 +55,7 @@ bool StaticGraph::hasOutPath(const Node & node, const OutPathType & out_path) co
     return node.out_paths.find(out_path) != std::string::npos;
 }
 
-bool StaticGraph::isInRange(const Location & location) const noexcept {
+bool StaticGraph::isInside(const Location & location) const noexcept {
     return (location.getRow() >= 0) &&
         (location.getColumn() >= 0) &&
         (location.getRow() < extent_) &&

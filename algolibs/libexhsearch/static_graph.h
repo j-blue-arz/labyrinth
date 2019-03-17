@@ -40,7 +40,7 @@ private:
 
     bool hasOutPath(const Node & node, const OutPathType & out_path) const noexcept;
 
-    bool isInRange(const Location & location) const noexcept;
+    bool isInside(const Location & location) const noexcept;
 
     static OutPathType mirrorOutPath(OutPathType out_path) noexcept;
 
