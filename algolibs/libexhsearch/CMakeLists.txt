@@ -13,3 +13,5 @@ set(
 add_library(REACHABLE OBJECT ${SOURCES})
 
 add_executable(benchmark "benchmark.cpp" ${SOURCES})
+
+add_executable(run "run.cpp" ${SOURCES})
