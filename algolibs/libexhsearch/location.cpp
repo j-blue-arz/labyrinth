@@ -29,14 +29,6 @@ bool Location::operator<(const Location & rhs) const noexcept {
     return column_ < rhs.column_;
 }
 
-int Location::getRow() const noexcept {
-    return row_;
-}
-
-int Location::getColumn() const noexcept {
-    return column_;
-}
-
 } // namespace graph
 
 namespace std {

@@ -20,8 +20,14 @@ public:
     bool operator!=(const Location & rhs) const noexcept;
     bool operator<(const Location & rhs) const noexcept;
 
-    int getRow() const noexcept;
-    int getColumn() const noexcept;
+    int getRow() const noexcept {
+        return row_;
+    }
+
+    int getColumn() const noexcept {
+        return column_;
+    }
+
 private:
     int row_{ 0 };
     int column_{ 0 };

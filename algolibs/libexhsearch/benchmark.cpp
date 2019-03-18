@@ -31,9 +31,9 @@ std::vector<std::pair<Location, Location>> createSnakeGraphQueries(int extent, s
     return queries;
 }
 
-void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000) {
-    for (auto extent : { 7, 14, 28 }) {
-        std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", " << std::endl
+void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = { 7, 14, 28 }) {
+    for (auto extent : extents) {
+        std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", " 
             << "running " << number << " queries, " << runs << " times." << std::endl;
         const StaticGraph & graph = GraphBuilder::buildSnakeGraph(extent);
         // warmup
@@ -59,7 +59,7 @@ void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000) {
 
 
 int main(int argc, char* argv[]) {
-    benchmarkSnakeGraph(10, 2000);
+    benchmarkSnakeGraph(10, 2000, {28});
     std::cout << "Enter to exit." << std::endl;
     std::cin.ignore();
 }

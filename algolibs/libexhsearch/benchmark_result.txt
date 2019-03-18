@@ -1,25 +1,25 @@
 All times measured with x64-Release build.
 New baseline:
-Benchmarking isReachable() for snake graph with extent 7,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 7, running 2000 queries, 10 times.
 Best run took 11us per query.
-Benchmarking isReachable() for snake graph with extent 14,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 14, running 2000 queries, 10 times.
 Best run took 43us per query.
-Benchmarking isReachable() for snake graph with extent 28,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 28, running 2000 queries, 10 times.
 Best run took 172us per query.
-Enter to exit.
+
 
 Implementing neighbors as a range (iterator pair) of Locations, 
 instead of creating and filling a vector:
-Benchmarking isReachable() for snake graph with extent 7,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 7, running 2000 queries, 10 times.
 Best run took 8us per query.
-Benchmarking isReachable() for snake graph with extent 14,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 14, running 2000 queries, 10 times.
 Best run took 32us per query.
-Benchmarking isReachable() for snake graph with extent 28,
-running 2000 queries, 10 times.
+Benchmarking isReachable() for snake graph with extent 28, running 2000 queries, 10 times.
 Best run took 125us per query.
-Enter to exit.
+Next steps: inlining. refactor. end iterator should not call moveToNextNeighbor. padding around graph to get rid of the bound check.
+Scaling is linear -> only measure for extent 28.
+
+Inlining Location::getColumn() and ::getRow()
+Benchmarking isReachable() for snake graph with extent 28, running 2000 queries, 10 times.
+Best run took 83us per query.
+
