@@ -1,43 +1,25 @@
+All times measured with x64-Release build.
+New baseline:
 Benchmarking isReachable() for snake graph with extent 7,
-running 1000 queries, 3 times.
-Best run took 519us per query.
+running 2000 queries, 10 times.
+Best run took 11us per query.
 Benchmarking isReachable() for snake graph with extent 14,
-running 1000 queries, 3 times.
-Best run took 2152us per query.
+running 2000 queries, 10 times.
+Best run took 43us per query.
 Benchmarking isReachable() for snake graph with extent 28,
-running 1000 queries, 3 times.
-Best run took 8812us per query.
-
-After adding some noexcept specifiers:
-Benchmarking isReachable() for snake graph with extent 7,
-running 1000 queries, 3 times.
-Best run took 498us per query.
-Benchmarking isReachable() for snake graph with extent 14,
-running 1000 queries, 3 times.
-Best run took 2068us per query.
-Benchmarking isReachable() for snake graph with extent 28,
-running 1000 queries, 3 times.
-Best run took 8433us per query.
+running 2000 queries, 10 times.
+Best run took 172us per query.
+Enter to exit.
 
 Implementing neighbors as a range (iterator pair) of Locations, 
 instead of creating and filling a vector:
 Benchmarking isReachable() for snake graph with extent 7,
-running 1000 queries, 3 times.
-Best run took 240us per query.
+running 2000 queries, 10 times.
+Best run took 8us per query.
 Benchmarking isReachable() for snake graph with extent 14,
-running 1000 queries, 3 times.
-Best run took 875us per query.
+running 2000 queries, 10 times.
+Best run took 32us per query.
 Benchmarking isReachable() for snake graph with extent 28,
-running 1000 queries, 3 times.
-Best run took 3553us per query.
-
-With release-build:
-Benchmarking isReachable() for snake graph with extent 7,
-running 1000 queries, 3 times.
-Best run took 7us per query.
-Benchmarking isReachable() for snake graph with extent 14,
-running 1000 queries, 3 times.
-Best run took 36us per query.
-Benchmarking isReachable() for snake graph with extent 28,
-running 1000 queries, 3 times.
-Best run took 116us per query.
+running 2000 queries, 10 times.
+Best run took 125us per query.
+Enter to exit.
