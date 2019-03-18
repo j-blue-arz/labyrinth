@@ -18,3 +18,26 @@ Best run took 2068us per query.
 Benchmarking isReachable() for snake graph with extent 28,
 running 1000 queries, 3 times.
 Best run took 8433us per query.
+
+Implementing neighbors as a range (iterator pair) of Locations, 
+instead of creating and filling a vector:
+Benchmarking isReachable() for snake graph with extent 7,
+running 1000 queries, 3 times.
+Best run took 240us per query.
+Benchmarking isReachable() for snake graph with extent 14,
+running 1000 queries, 3 times.
+Best run took 875us per query.
+Benchmarking isReachable() for snake graph with extent 28,
+running 1000 queries, 3 times.
+Best run took 3553us per query.
+
+With release-build:
+Benchmarking isReachable() for snake graph with extent 7,
+running 1000 queries, 3 times.
+Best run took 7us per query.
+Benchmarking isReachable() for snake graph with extent 14,
+running 1000 queries, 3 times.
+Best run took 36us per query.
+Benchmarking isReachable() for snake graph with extent 28,
+running 1000 queries, 3 times.
+Best run took 116us per query.

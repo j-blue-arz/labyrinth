@@ -62,20 +62,20 @@ TEST_F(StaticGraphTest, NodeIdsAreConsecutiveStartingWith0) {
 TEST_F(StaticGraphTest, NeighborsForCornerWithOneNeighbor) {
     auto neighbors = graph_.neighbors(Location(0, 2));
     std::set<Location> neighbor_set(neighbors.begin(), neighbors.end());
-    EXPECT_TRUE(neighbor_set.size() == 1);
+    EXPECT_EQ(neighbor_set.size(), 1);
     EXPECT_EQ(neighbor_set, std::set<Location>{Location(0, 1)}) << "(0, 2) should have only one neighbor, (0, 1).";
 }
 
 TEST_F(StaticGraphTest, NeighborsForCornerWithNoNeighbor) {
     auto neighbors = graph_.neighbors(Location(2, 2));
     std::set<Location> neighbor_set(neighbors.begin(), neighbors.end());
-    EXPECT_TRUE(neighbor_set.size() == 0) << "(2, 2) should not have any neighbors.";
+    EXPECT_EQ(neighbor_set.size(), 0) << "(2, 2) should not have any neighbors.";
 }
 
 TEST_F(StaticGraphTest, NeighborsForInnerNodeWithTwoNeighbors) {
     auto neighbors = graph_.neighbors(Location(1, 1));
     std::set<Location> neighbor_set(neighbors.begin(), neighbors.end());
-    EXPECT_TRUE(neighbor_set.size() == 2);
+    EXPECT_EQ(neighbor_set.size(), 2);
     auto expected = std::set<Location>{ Location(1, 0), Location(1, 2) };
     EXPECT_EQ(neighbor_set, expected) << "(1, 1) should have two neighbors, (1, 0) and (1, 2).";
 }
@@ -83,7 +83,20 @@ TEST_F(StaticGraphTest, NeighborsForInnerNodeWithTwoNeighbors) {
 TEST_F(StaticGraphTest, NeighborsForBorderNodeWithThreeNeighbors) {
     auto neighbors = graph_.neighbors(Location(1, 0));
     std::set<Location> neighbor_set(neighbors.begin(), neighbors.end());
-    EXPECT_TRUE(neighbor_set.size() == 3);
+    EXPECT_EQ(neighbor_set.size(), 3);
+    auto expected = std::set<Location>{ Location(0, 0), Location(1, 1), Location(2, 0) };
+    EXPECT_EQ(neighbor_set, expected) <<
+        "(1, 1) should have three neighbors, (0, 0), (1, 1), and (2, 0).";
+}
+
+TEST_F(StaticGraphTest, NeighborsForBorderNodeWithThreeNeighbors_Iter) {
+    auto neighbors = graph_.neighbors(Location(1, 0));
+    std::set<Location> neighbor_set;
+    for (auto iter = neighbors.begin(); iter != neighbors.end(); iter++) {
+        Location location = *iter;
+        neighbor_set.insert(location);
+    }
+    EXPECT_EQ(neighbor_set.size(), 3);
     auto expected = std::set<Location>{ Location(0, 0), Location(1, 1), Location(2, 0) };
     EXPECT_EQ(neighbor_set, expected) <<
         "(1, 1) should have three neighbors, (0, 0), (1, 1), and (2, 0).";

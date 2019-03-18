@@ -9,7 +9,7 @@ using namespace graph;
 
 int main(int argc, char* argv[])
 {
-    const StaticGraph graph = GraphBuilder::buildSnakeGraph(28);
+    const StaticGraph graph = GraphBuilder::buildSnakeGraph(42);
     bool reachable = algorithm::isReachable(graph, Location(0, 0), Location(27, 0));
     std::cout << (reachable ? "is reachable" : "not reachable") << std::endl;
     std::cout << "Enter to exit." << std::endl;
