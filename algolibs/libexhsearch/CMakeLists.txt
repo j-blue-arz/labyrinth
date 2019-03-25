@@ -8,6 +8,8 @@ set(
 		"location.cpp"
 		"static_graph.h"
 		"static_graph.cpp"
+		"tree_graph_builder.h"
+		"tree_graph_builder.cpp"
 )
 
 add_library(REACHABLE OBJECT ${SOURCES})

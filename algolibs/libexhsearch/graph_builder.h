@@ -1,5 +1,6 @@
 #pragma once
 #include "static_graph.h"
+#include "location.h"
 
 #include <string>
 #include <vector>

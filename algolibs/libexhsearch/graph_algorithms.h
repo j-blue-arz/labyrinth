@@ -9,6 +9,8 @@ namespace algorithm {
 
 bool isReachable(const StaticGraph & graph, const Location & source, const Location & target);
 
+std::vector<Location> reachableLocations(const StaticGraph & graph, const Location & source);
+
 }
 
 }

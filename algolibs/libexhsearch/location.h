@@ -9,6 +9,7 @@ public:
         explicit OffsetType(int row, int column) noexcept : rowOffset(row), columnOffset(column) {}
         int rowOffset{ 0 };
         int columnOffset{ 0 };
+        const OffsetType operator*(int scalar) { return OffsetType(rowOffset * scalar, columnOffset * scalar); }
     };
 
     explicit Location(int row, int column) noexcept;

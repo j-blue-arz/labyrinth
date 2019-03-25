@@ -45,10 +45,19 @@ std::string locationsToString(std::set<Location> locations) {
     if (actual == expected) {
         return ::testing::AssertionSuccess();
     }
-    
-
-
     return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
+}
+
+::testing::AssertionResult numberOfNeighbors(const StaticGraph & graph, const Location & source, size_t expected) {
+    size_t actual{ 0 };
+    auto neighbors = graph.neighbors(source);
+    for (auto neighbor : neighbors) {
+        actual++;
+    }
+    if (actual == expected) {
+        return ::testing::AssertionSuccess();
+    }
+    return ::testing::AssertionFailure() << "Expected neighbors: " << expected << ", actual: " << actual;
 }
 
 
@@ -85,13 +94,11 @@ TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_0) {
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_1) {
-    auto neighbors = graph_.neighbors(Location(2, 1));
-    EXPECT_EQ(neighbors.size(), 0);
+    EXPECT_TRUE(numberOfNeighbors(graph_, Location(2, 1), 0));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_2) {
-    auto neighbors = graph_.neighbors(Location(2, 2));
-    EXPECT_EQ(neighbors.size(), 0);
+    EXPECT_TRUE(numberOfNeighbors(graph_, Location(2, 2), 0));
 }
 
 TEST(GraphBuilderSnakeTest, OneNodeForExtentOfOne) {
@@ -127,21 +134,21 @@ TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfThree) {
 
 TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
     const size_t extent = 30;
-    GraphBuilder builder{};
+    GraphBuilder builder;
     StaticGraph graph = builder.buildSnakeGraph(extent);
     EXPECT_EQ(graph.getNumberOfNodes(), 900);
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (row == 0 && column == 0) {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 1) 
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
                     << "Top left corner does not have exactly one neighbor";
             }
             else if (row == extent - 1 && column == 0) {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 1)
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
                     << "Bottom left corner does not have exactly one neighbor";
             }
             else {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 2) 
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 2))
                     << "Node at position " << Location(row, column) << " does not have exactly two neighbors";
             }
         }
@@ -156,15 +163,15 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirtyOne) {
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (row == 0 && column == 0) {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 1)
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
                     << "Top left corner does not have exactly one neighbor";
             }
             else if (row == extent - 1 && column == extent - 1) {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 1)
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
                     << "Bottom right corner does not have exactly one neighbor";
             }
             else {
-                EXPECT_EQ(graph.neighbors(Location(row, column)).size(), 2)
+                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 2))
                     << "Node at position " << Location(row, column) << " does not have exactly two neighbors";
             }
         }
