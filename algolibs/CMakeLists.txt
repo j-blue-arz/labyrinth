@@ -5,6 +5,8 @@ project (algolibs VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(libexhsearch)
+add_subdirectory(graphbuilder)
+add_subdirectory(benchmark)
 
 # Copied from https://github.com/google/googletest/tree/master/googletest
 # Download and unpack googletest at configure time 

@@ -1,0 +1,41 @@
+#pragma once
+#include "libexhsearch/static_graph.h"
+#include "libexhsearch/location.h"
+
+#include "graph_builder.h"
+
+#include <string>
+#include <vector>
+
+namespace graph {
+
+class SnakeGraphBuilder : public GraphBuilder {
+public:
+
+    /// Builds a StaticGraph which represents a long path without any branches, e.g.
+    /// ###|###|###|
+    /// ...|...|..#|
+    /// ###|###|#.#|
+    /// ------------
+    /// ###|###|#.#|
+    /// #..|...|..#|
+    /// #.#|###|###|
+    /// ------------
+    /// #.#|###|###|
+    /// #..|...|...|
+    /// ###|###|###|
+    /// ------------
+    /// parameter extent controls the height and width of the graph. The path has a length of
+    /// extent * extent, i.e. the number of nodes in the graph.
+    StaticGraph buildGraph() override;
+
+    SnakeGraphBuilder & setExtent(size_t extent);
+private:
+    static bool even(size_t x) { return x % 2 == 0; }
+    static bool odd(size_t x) { return x % 2 == 1; }
+    void setInnerColumns();
+    void setFirstColumn();
+    void setLastColumn();
+};
+
+}

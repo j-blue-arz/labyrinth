@@ -5,14 +5,20 @@ namespace graph {
 
 class Location {
 public:
+    using IndexType = int16_t;
     struct OffsetType {
         explicit OffsetType(int row, int column) noexcept : rowOffset(row), columnOffset(column) {}
         int rowOffset{ 0 };
         int columnOffset{ 0 };
-        const OffsetType operator*(int scalar) { return OffsetType(rowOffset * scalar, columnOffset * scalar); }
+
+        template <typename T>
+        const OffsetType operator*(T scalar) { 
+            return OffsetType(static_cast<int>(rowOffset * scalar), static_cast<int>(columnOffset * scalar)); 
+        }
     };
 
-    explicit Location(int row, int column) noexcept;
+    template <typename T, typename U>
+    explicit Location(T row, U column) noexcept : row_(static_cast<IndexType>(row)), column_(static_cast<IndexType>(column)) {}
 
     const Location operator+(const OffsetType & offset) const noexcept;
     const Location & operator+=(const OffsetType & offset) noexcept;
@@ -21,17 +27,17 @@ public:
     bool operator!=(const Location & rhs) const noexcept;
     bool operator<(const Location & rhs) const noexcept;
 
-    int getRow() const noexcept {
+    IndexType getRow() const noexcept {
         return row_;
     }
 
-    int getColumn() const noexcept {
+    IndexType getColumn() const noexcept {
         return column_;
     }
 
 private:
-    int row_{ 0 };
-    int column_{ 0 };
+    IndexType row_{ 0 };
+    IndexType column_{ 0 };
 };
 
 } // namespace graph

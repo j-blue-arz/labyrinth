@@ -1,27 +1,26 @@
 
 add_executable(location_test EXCLUDE_FROM_ALL location_test.cpp)
 add_executable(static_graph_test EXCLUDE_FROM_ALL static_graph_test.cpp)
+add_executable(graph_algorithms_test EXCLUDE_FROM_ALL graph_algorithms_test.cpp)
 add_executable(graph_builder_test EXCLUDE_FROM_ALL graph_builder_test.cpp)
 add_executable(tree_graph_builder_test EXCLUDE_FROM_ALL tree_graph_builder_test.cpp)
-add_executable(graph_algorithms_test EXCLUDE_FROM_ALL graph_algorithms_test.cpp)
-
 
 target_include_directories(location_test PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(static_graph_test PUBLIC ${PROJECT_SOURCE_DIR})
+target_include_directories(graph_algorithms_test PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(graph_builder_test PUBLIC ${PROJECT_SOURCE_DIR})
 target_include_directories(tree_graph_builder_test PUBLIC ${PROJECT_SOURCE_DIR})
-target_include_directories(graph_algorithms_test PUBLIC ${PROJECT_SOURCE_DIR})
-
 
 target_link_libraries(location_test gtest_main REACHABLE)
 target_link_libraries(static_graph_test gtest_main REACHABLE)
-target_link_libraries(graph_builder_test gtest_main REACHABLE)
-target_link_libraries(tree_graph_builder_test gtest_main REACHABLE)
-target_link_libraries(graph_algorithms_test gtest_main REACHABLE)
+target_link_libraries(graph_algorithms_test gtest_main REACHABLE BUILDER)
+target_link_libraries(graph_builder_test gtest_main REACHABLE BUILDER)
+target_link_libraries(tree_graph_builder_test gtest_main REACHABLE BUILDER)
+
 
 add_test(location-test location_test)
 add_test(static_graph-test static_graph_test)
+add_test(graph_algorithms-test graph_algorithms_test)
 add_test(graph_builder-test graph_builder_test)
 add_test(tree_graph_builder-test tree_graph_builder_test)
-add_test(graph_algorithms-test graph_algorithms_test)
-add_test(tree_graph_algorithms-test tree_graph_algorithms_test)
+

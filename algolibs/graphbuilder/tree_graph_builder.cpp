@@ -1,15 +1,21 @@
 #include "tree_graph_builder.h"
-#include "static_graph.h"
+
+#include "libexhsearch/static_graph.h"
 
 #include <string>
 
 namespace graph {
 
-StaticGraph TreeGraphBuilder::buildGraph(size_t extent) {
+TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
     out_paths_.resize(extent);
     for (auto & row : out_paths_) {
         row.resize(extent);
     }
+    return *this;
+}
+
+StaticGraph TreeGraphBuilder::buildGraph() {
+    auto extent = out_paths_.size();
     addPath(Location(extent - 1, 0), extent, OutPath::East);
     addPath(Location(0, extent - 1), extent, OutPath::South);
     recursivelyBuildTree(Location(0, extent - 1), extent, 0);
@@ -31,7 +37,7 @@ void TreeGraphBuilder::recursivelyBuildTree(const Location & root, size_t size, 
         Location::OffsetType toEast = offsetFromOutPath(rotateOutPath(OutPath::East, rotation));
 
         // corners of the current square
-        size_t offset = size - 1;
+        auto offset = size - 1;
         Location north_east_corner = root;
         Location south_east_corner = north_east_corner + (toSouth * offset);
         Location south_west_corner = south_east_corner + (toWest * offset);
@@ -66,34 +72,6 @@ Location TreeGraphBuilder::setNeighbor(const Location & location, OutPath out_pa
     Location neighborLocation = location + offsetFromOutPath(out_path);
     addOutPath(neighborLocation, mirrorOutPath(out_path));
     return neighborLocation;
-}
-
-void TreeGraphBuilder::addOutPath(const Location & location, OutPath out_path) {
-    out_paths_[location.getRow()][location.getColumn()].set(static_cast<size_t>(out_path));
-}
-
-StaticGraph TreeGraphBuilder::constructGraph() {
-    size_t extent = out_paths_.size();
-    StaticGraph graph(extent);
-    for (int row = 0; row < extent; ++row) {
-        for (int column = 0; column < extent; ++column) {
-            std::string graph_out_paths;
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::North))) {
-                graph_out_paths.append("N");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::East))) {
-                graph_out_paths.append("E");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::South))) {
-                graph_out_paths.append("S");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::West))) {
-                graph_out_paths.append("W");
-            }
-            graph.setOutPaths(Location(row, column), graph_out_paths);
-        }
-    }
-    return graph;
 }
 
 TreeGraphBuilder::OutPath TreeGraphBuilder::mirrorOutPath(OutPath out_path) noexcept {

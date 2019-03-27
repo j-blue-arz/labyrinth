@@ -1,4 +1,4 @@
-#include "libexhsearch/tree_graph_builder.h"
+#include "graphbuilder/tree_graph_builder.h"
 #include "libexhsearch/graph_algorithms.h"
 
 #include "gtest/gtest.h"
@@ -42,7 +42,7 @@ size_t countEdges(const StaticGraph & graph) {
 
 TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.buildGraph(2);
+    StaticGraph graph = builder.setExtent(2).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(1, 1) }));
@@ -52,7 +52,7 @@ TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.buildGraph(4);
+    StaticGraph graph = builder.setExtent(4).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 16);
     EXPECT_EQ(countEdges(graph), 15);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
@@ -61,7 +61,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.buildGraph(8);
+    StaticGraph graph = builder.setExtent(8).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 64);
     EXPECT_EQ(countEdges(graph), 63);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
@@ -70,7 +70,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfSixteen) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.buildGraph(16);
+    StaticGraph graph = builder.setExtent(16).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 256);
     EXPECT_EQ(countEdges(graph), 255);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));

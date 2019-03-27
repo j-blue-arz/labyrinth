@@ -1,4 +1,5 @@
-#include "libexhsearch/graph_builder.h"
+#include "graphbuilder/text_graph_builder.h"
+#include "graphbuilder/snake_graph_builder.h"
 
 #include "gtest/gtest.h"
 #include <set>
@@ -9,7 +10,7 @@ class GraphBuilderFromTextTest : public ::testing::Test {
 protected:
 
     void SetUp() override {
-        GraphBuilder builder{};
+        TextGraphBuilder builder{};
         const std::vector<std::string> maze{
             "###|###|#.#|",
             "#..|...|..#|",
@@ -24,7 +25,8 @@ protected:
             "###|#.#|#.#|",
             "------------"
         };
-        graph_ = builder.buildGraphFromText(maze);
+        builder.setMaze(maze);
+        graph_ = builder.buildGraph();
     }
 
     StaticGraph graph_{ 0 };
@@ -102,7 +104,7 @@ TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_2) {
 }
 
 TEST(GraphBuilderSnakeTest, OneNodeForExtentOfOne) {
-    GraphBuilder builder{};
+    SnakeGraphBuilder builder{};
     StaticGraph graph = builder.buildSnakeGraph(1);
     EXPECT_EQ(graph.getNumberOfNodes(), 1);
 }

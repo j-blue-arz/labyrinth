@@ -2,9 +2,6 @@
 
 namespace graph {
 
-Location::Location(int row, int column) noexcept : row_(row), column_(column) {
-}
-
 const Location Location::operator+(const OffsetType & offset) const noexcept {
     return Location(row_ + offset.rowOffset, column_ + offset.columnOffset);
 }

@@ -1,7 +1,8 @@
-#include "graph_builder.h"
-#include "graph_algorithms.h"
-#include "location.h"
-#include "static_graph.h"
+#include "graphbuilder/snake_graph_builder.h"
+
+#include "libexhsearch/graph_algorithms.h"
+#include "libexhsearch/location.h"
+#include "libexhsearch/static_graph.h"
 
 #include <iostream>
 #include <chrono>
@@ -17,7 +18,7 @@ void runQueries(const StaticGraph & graph, std::vector<std::pair<Location, Locat
     }
 }
 
-std::vector<std::pair<Location, Location>> createSnakeGraphQueries(int extent, size_t number)
+std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent, size_t number)
 {
     std::default_random_engine rng;
     std::uniform_int_distribution<int> dist(0, extent - 1);
@@ -35,7 +36,9 @@ void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initi
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", " 
             << "running " << number << " queries, " << runs << " times." << std::endl;
-        const StaticGraph & graph = GraphBuilder::buildSnakeGraph(extent);
+        SnakeGraphBuilder builder;
+        
+        const StaticGraph & graph = builder.setExtent(extent).buildGraph();
         // warmup
         std::vector<std::pair<Location, Location>> queries = createSnakeGraphQueries(extent, number);
         runQueries(graph, queries);

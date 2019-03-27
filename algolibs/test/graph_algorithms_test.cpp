@@ -1,4 +1,4 @@
-#include "libexhsearch/graph_builder.h"
+#include "graphbuilder/text_graph_builder.h"
 #include "libexhsearch/graph_algorithms.h"
 
 #include "gtest/gtest.h"
@@ -9,7 +9,7 @@ class GraphAlgorithmsTest : public ::testing::Test {
 protected:
 
     void SetUp() override {
-        GraphBuilder builder{};
+        TextGraphBuilder builder{};
         const std::vector<std::string> maze{
             "###|###|#.#|",
             "#..|...|..#|",
@@ -24,7 +24,8 @@ protected:
             "###|#.#|#.#|",
             "------------"
         };
-        graph_ = builder.buildGraphFromText(maze);
+        builder.setMaze(maze);
+        graph_ = builder.buildGraph();
     }
 
     StaticGraph graph_{ 0 };
