@@ -18,6 +18,10 @@ void StaticGraph::setOutPaths(const Location & location, const std::string & out
     getNode(location).out_paths = out_paths;
 }
 
+bool StaticGraph::hasOutPath(const Location & location, const OutPathType & out_path) const noexcept {
+    return hasOutPath(getNode(location), out_path);
+}
+
 StaticGraph::NodeId StaticGraph::getNodeId(const Location & location) const {
     return getNode(location).node_id;
 }
@@ -143,6 +147,38 @@ StaticGraph::NeighborIterator StaticGraph::Neighbors::begin() {
 
 StaticGraph::NeighborIterator StaticGraph::Neighbors::end() {
     return StaticGraph::NeighborIterator::end(graph_, location_, node_);
+}
+
+std::ostream& operator<<(std::ostream & os, const StaticGraph & graph) {
+    auto extent = graph.getExtent();
+    std::string row_delimiter(extent * 4, '-');
+    for (auto row = 0; row < extent; row++) {
+        std::string lines[3] = { std::string(extent * 4, '#'), std::string(extent * 4, '#'), std::string(extent * 4, '#') };
+        for (auto column = 0; column < extent; column++) {
+            if (graph.hasOutPath(Location(row, column), 'N')) {
+                lines[0][column * 4 + 1] = '.';
+            }
+            if (graph.hasOutPath(Location(row, column), 'E')) {
+                lines[1][column * 4 + 2] = '.';
+            }
+            if (graph.hasOutPath(Location(row, column), 'S')) {
+                lines[2][column * 4 + 1] = '.';
+            }
+            if (graph.hasOutPath(Location(row, column), 'W')) {
+                lines[1][column * 4 + 0] = '.';
+            }
+            lines[1][column * 4 + 1] = '.';
+            for (auto & line : lines) {
+                line[column * 4 + 3] = '|';
+            }
+        }
+        for (const auto & line : lines) {
+            os << line << "\n";
+        }
+        os << row_delimiter << "\n";
+    }
+    os << std::endl;
+    return os;
 }
 
 } // namespace graph

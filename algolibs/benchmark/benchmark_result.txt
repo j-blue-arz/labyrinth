@@ -23,3 +23,9 @@ Inlining Location::getColumn() and ::getRow()
 Benchmarking isReachable() for snake graph with extent 28, running 2000 queries, 10 times.
 Best run took 82us per query.
 
+New benchmark instance: tree graph. Measuring both instances for extent of 32:
+Benchmarking isReachable() for snake graph with extent 32, running 2000 queries, 10 times.
+Best run took 106us per query.
+Benchmarking isReachable() for tree graph with extent 32, running 2000 queries, 10 times.
+Best run took 96us per query.
+

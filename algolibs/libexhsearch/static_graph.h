@@ -15,10 +15,14 @@ private:
 public:
     using NodeId = unsigned int;
 
+    using OutPathType = std::string::value_type;
+
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
     explicit StaticGraph(size_t extent);
 
     void setOutPaths(const Location & location, const std::string & out_paths);
+
+    bool hasOutPath(const Location & location, const OutPathType & out_path) const noexcept;
 
     NodeId getNodeId(const Location & location) const;
 
@@ -34,7 +38,6 @@ public:
 
 private:
     using OffsetType = Location::OffsetType;
-    using OutPathType = std::string::value_type;
 
     struct Node {
         std::string out_paths{ "" };
@@ -103,4 +106,7 @@ private:
     size_t extent_;
     std::vector<std::vector<Node>> node_matrix_;
 };
+
+std::ostream& operator<<(std::ostream & os, const StaticGraph & graph);
+
 } // namespace graph
