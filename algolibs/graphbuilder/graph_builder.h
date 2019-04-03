@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libexhsearch/static_graph.h"
+#include "libexhsearch/maze_graph.h"
 
 #include <bitset>
 
@@ -9,7 +9,7 @@ namespace graph {
 class GraphBuilder {
 public:
     virtual ~GraphBuilder() {};
-    virtual StaticGraph buildGraph() = 0;
+    virtual MazeGraph buildGraph() = 0;
 protected:
     using OutPathIntegerType = uint8_t;
     enum class OutPath : OutPathIntegerType {
@@ -19,7 +19,7 @@ protected:
         West = 3
     };
 
-    StaticGraph constructGraph();
+    MazeGraph constructGraph();
     void addOutPath(const Location & location, OutPath);
     void addOutPaths(const Location & location, std::initializer_list<OutPath> out_paths);
     

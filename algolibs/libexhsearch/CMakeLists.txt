@@ -4,8 +4,8 @@ set(
 		"graph_algorithms.cpp"
 		"location.h"
 		"location.cpp"
-		"static_graph.h"
-		"static_graph.cpp"
+		"maze_graph.h"
+		"maze_graph.cpp"
 )
 
 add_library(REACHABLE OBJECT ${SOURCES})

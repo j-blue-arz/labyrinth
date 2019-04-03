@@ -2,7 +2,7 @@
 
 #include "graph_builder.h"
 
-#include "libexhsearch/static_graph.h"
+#include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
 
 #include <string>
@@ -13,7 +13,7 @@ namespace graph {
 class TreeGraphBuilder : public GraphBuilder {
 public:
     TreeGraphBuilder & setExtent(size_t extent);
-    StaticGraph buildGraph() override;
+    MazeGraph buildGraph() override;
 private:
     using RotationDegreeType = int16_t;
     void recursivelyBuildTree(const Location & root, size_t size, RotationDegreeType rotation);

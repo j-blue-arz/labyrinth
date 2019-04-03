@@ -42,8 +42,12 @@ std::vector<std::string> big_component_maze_9 = {
     "------------------------------------" };
 }
 
-StaticGraph TextGraphBuilder::buildGraph() {
+MazeGraph TextGraphBuilder::buildGraph() {
     size_t extent{ lines_.size() / lines_per_node };
+    out_paths_.resize(extent);
+    for(auto & row : out_paths_) {
+        row.resize(extent);
+    }
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (lines_[first(row)][second(column)] == '.') {

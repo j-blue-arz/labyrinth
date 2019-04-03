@@ -1,9 +1,9 @@
-#include "static_graph.h"
+#include "maze_graph.h"
 #include <algorithm>
 
 namespace graph {
 
-StaticGraph::StaticGraph(size_t extent) : extent_(extent) {
+MazeGraph::MazeGraph(size_t extent) : extent_(extent) {
     NodeId current = 0;
     node_matrix_.resize(extent);
     for (auto row = 0; row < extent; row++) {
@@ -14,50 +14,50 @@ StaticGraph::StaticGraph(size_t extent) : extent_(extent) {
     }
 }
 
-void StaticGraph::setOutPaths(const Location & location, const std::string & out_paths) {
+void MazeGraph::setOutPaths(const Location & location, const std::string & out_paths) {
     getNode(location).out_paths = out_paths;
 }
 
-bool StaticGraph::hasOutPath(const Location & location, const OutPathType & out_path) const noexcept {
+bool MazeGraph::hasOutPath(const Location & location, const OutPathType & out_path) const noexcept {
     return hasOutPath(getNode(location), out_path);
 }
 
-StaticGraph::NodeId StaticGraph::getNodeId(const Location & location) const {
+MazeGraph::NodeId MazeGraph::getNodeId(const Location & location) const {
     return getNode(location).node_id;
 }
 
-StaticGraph::Neighbors StaticGraph::neighbors(const Location & location) const {
-    return StaticGraph::Neighbors(*this, location, getNode(location));
+MazeGraph::Neighbors MazeGraph::neighbors(const Location & location) const {
+    return MazeGraph::Neighbors(*this, location, getNode(location));
 }
 
-size_t StaticGraph::getNumberOfNodes() const noexcept {
+size_t MazeGraph::getNumberOfNodes() const noexcept {
     return extent_ * extent_;
 }
 
-size_t StaticGraph::getExtent() const noexcept {
+size_t MazeGraph::getExtent() const noexcept {
     return extent_;
 }
 
-const StaticGraph::Node & StaticGraph::getNode(const Location & location) const {
+const MazeGraph::Node & MazeGraph::getNode(const Location & location) const {
     return node_matrix_[location.getRow()][location.getColumn()];
 }
 
-StaticGraph::Node & StaticGraph::getNode(const Location & location) {
+MazeGraph::Node & MazeGraph::getNode(const Location & location) {
     return node_matrix_[location.getRow()][location.getColumn()];
 }
 
-bool StaticGraph::hasOutPath(const Node & node, const OutPathType & out_path) const noexcept {
+bool MazeGraph::hasOutPath(const Node & node, const OutPathType & out_path) const noexcept {
     return node.out_paths.find(out_path) != std::string::npos;
 }
 
-bool StaticGraph::isInside(const Location & location) const noexcept {
+bool MazeGraph::isInside(const Location & location) const noexcept {
     return (location.getRow() >= 0) &&
         (location.getColumn() >= 0) &&
         (location.getRow() < extent_) &&
         (location.getColumn() < extent_);
 }
 
-StaticGraph::OutPathType StaticGraph::mirrorOutPath(OutPathType out_path) noexcept {
+MazeGraph::OutPathType MazeGraph::mirrorOutPath(OutPathType out_path) noexcept {
     switch (out_path)
     {
     case 'N':
@@ -73,7 +73,7 @@ StaticGraph::OutPathType StaticGraph::mirrorOutPath(OutPathType out_path) noexce
     }
 }
 
-Location::OffsetType StaticGraph::offsetFromOutPath(OutPathType out_path) noexcept {
+Location::OffsetType MazeGraph::offsetFromOutPath(OutPathType out_path) noexcept {
     switch (out_path)
     {
     case 'N':
@@ -89,40 +89,40 @@ Location::OffsetType StaticGraph::offsetFromOutPath(OutPathType out_path) noexce
     }
 }
 
-StaticGraph::NeighborIterator StaticGraph::NeighborIterator::begin(const StaticGraph & graph, const Location & location, const Node & node) {
-    return StaticGraph::NeighborIterator(0, graph, location, node);
+MazeGraph::NeighborIterator MazeGraph::NeighborIterator::begin(const MazeGraph & graph, const Location & location, const Node & node) {
+    return MazeGraph::NeighborIterator(0, graph, location, node);
 }
 
-StaticGraph::NeighborIterator StaticGraph::NeighborIterator::end(const StaticGraph & graph, const Location & location, const Node & node) {
-    return StaticGraph::NeighborIterator(5, graph, location, node);
+MazeGraph::NeighborIterator MazeGraph::NeighborIterator::end(const MazeGraph & graph, const Location & location, const Node & node) {
+    return MazeGraph::NeighborIterator(5, graph, location, node);
 }
 
-bool StaticGraph::NeighborIterator::operator==(const NeighborIterator & other) const noexcept {
+bool MazeGraph::NeighborIterator::operator==(const NeighborIterator & other) const noexcept {
     return index_ == other.index_;
 }
 
-bool StaticGraph::NeighborIterator::operator!=(const NeighborIterator & other) const noexcept {
+bool MazeGraph::NeighborIterator::operator!=(const NeighborIterator & other) const noexcept {
     return !(*this == other);
 }
 
-StaticGraph::NeighborIterator::reference StaticGraph::NeighborIterator::operator*() const {
+MazeGraph::NeighborIterator::reference MazeGraph::NeighborIterator::operator*() const {
     auto out_path = node_.out_paths[index_];
     return location_ + offsetFromOutPath(out_path);
 }
 
-StaticGraph::NeighborIterator & StaticGraph::NeighborIterator::operator++() {
+MazeGraph::NeighborIterator & MazeGraph::NeighborIterator::operator++() {
     index_++;
     moveToNextNeighbor();
     return *this;
 }
 
-StaticGraph::NeighborIterator StaticGraph::NeighborIterator::operator++(int) {
+MazeGraph::NeighborIterator MazeGraph::NeighborIterator::operator++(int) {
     auto result = NeighborIterator(*this);
     ++(*this);
     return result;
 }
 
-void StaticGraph::NeighborIterator::moveToNextNeighbor() {
+void MazeGraph::NeighborIterator::moveToNextNeighbor() {
     
     while (index_ < node_.out_paths.size()) {
         auto out_path = node_.out_paths[index_];
@@ -137,19 +137,19 @@ void StaticGraph::NeighborIterator::moveToNextNeighbor() {
     }
 }
 
-StaticGraph::Neighbors::Neighbors(const StaticGraph & graph, const Location & location, const Node & node) :
+MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) :
     graph_(graph), location_(location), node_(node) {
 }
 
-StaticGraph::NeighborIterator StaticGraph::Neighbors::begin() {
-    return StaticGraph::NeighborIterator::begin(graph_, location_, node_);
+MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() {
+    return MazeGraph::NeighborIterator::begin(graph_, location_, node_);
 }
 
-StaticGraph::NeighborIterator StaticGraph::Neighbors::end() {
-    return StaticGraph::NeighborIterator::end(graph_, location_, node_);
+MazeGraph::NeighborIterator MazeGraph::Neighbors::end() {
+    return MazeGraph::NeighborIterator::end(graph_, location_, node_);
 }
 
-std::ostream& operator<<(std::ostream & os, const StaticGraph & graph) {
+std::ostream& operator<<(std::ostream & os, const MazeGraph & graph) {
     auto extent = graph.getExtent();
     std::string row_delimiter(extent * 4, '-');
     for (auto row = 0; row < extent; row++) {

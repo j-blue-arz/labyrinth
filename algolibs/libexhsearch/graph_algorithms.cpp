@@ -1,12 +1,12 @@
 #include "graph_algorithms.h"
 
-#include "static_graph.h"
+#include "maze_graph.h"
 #include <queue>
 
 namespace graph {
 namespace algorithm {
 
-bool isReachable(const StaticGraph & graph, const Location & source, const Location & target) {
+bool isReachable(const MazeGraph & graph, const Location & source, const Location & target) {
     std::queue<Location> q;
     std::vector<bool> visited(graph.getNumberOfNodes(), false);
     q.push(source);
@@ -26,7 +26,7 @@ bool isReachable(const StaticGraph & graph, const Location & source, const Locat
     return false;
 }
 
-std::vector<Location> reachableLocations(const StaticGraph & graph, const Location & source) {
+std::vector<Location> reachableLocations(const MazeGraph & graph, const Location & source) {
     std::vector<Location> result;
     std::queue<Location> q;
     std::vector<bool> visited(graph.getNumberOfNodes(), false);

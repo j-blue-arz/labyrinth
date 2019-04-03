@@ -7,9 +7,9 @@
 
 namespace graph {
 /// This class models a graph which represents a maze.
-/// To construct such a graph, first construct an empty StaticGraph with a fixed size.
+/// To construct such a graph, first construct an empty Graph with a fixed size.
 /// Then set the maze cell at each location. A maze cell is defined by a String over the alphabet {N,S,E,W}.
-class StaticGraph {
+class MazeGraph {
 private:
     class Neighbors;
 public:
@@ -18,7 +18,7 @@ public:
     using OutPathType = std::string::value_type;
 
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
-    explicit StaticGraph(size_t extent);
+    explicit MazeGraph(size_t extent);
 
     void setOutPaths(const Location & location, const std::string & out_paths);
 
@@ -52,8 +52,8 @@ private:
         using reference = Location;
         using pointer = void;
 
-        static NeighborIterator begin(const StaticGraph & graph, const Location & location, const Node & node);
-        static NeighborIterator end(const StaticGraph & graph, const Location & location, const Node & node);
+        static NeighborIterator begin(const MazeGraph & graph, const Location & location, const Node & node);
+        static NeighborIterator end(const MazeGraph & graph, const Location & location, const Node & node);
 
         bool operator==(const NeighborIterator & other) const noexcept;
         bool operator!=(const NeighborIterator & other) const noexcept;
@@ -65,7 +65,7 @@ private:
         NeighborIterator operator++(int);
     private:
         using NeighborIndex = unsigned int;
-        NeighborIterator(NeighborIndex index, const StaticGraph & graph, const Location & location, const Node & node) :
+        NeighborIterator(NeighborIndex index, const MazeGraph & graph, const Location & location, const Node & node) :
             index_(index), graph_(graph), location_(location), node_(node) {
             moveToNextNeighbor();
         };
@@ -73,21 +73,21 @@ private:
         void moveToNextNeighbor();
 
         NeighborIndex index_;
-        const StaticGraph & graph_;
+        const MazeGraph & graph_;
         const Location & location_;
         const Node & node_;
     };
 
     class Neighbors {
     public:
-        explicit Neighbors(const StaticGraph & graph, const Location & location, const Node & node);
+        explicit Neighbors(const MazeGraph & graph, const Location & location, const Node & node);
 
         NeighborIterator begin();
         NeighborIterator end();
 
     private:
         
-        const StaticGraph & graph_;
+        const MazeGraph & graph_;
         const Location & location_;
         const Node & node_;
     };
@@ -107,6 +107,6 @@ private:
     std::vector<std::vector<Node>> node_matrix_;
 };
 
-std::ostream& operator<<(std::ostream & os, const StaticGraph & graph);
+std::ostream& operator<<(std::ostream & os, const MazeGraph & graph);
 
 } // namespace graph

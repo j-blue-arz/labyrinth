@@ -3,7 +3,7 @@
 
 #include "libexhsearch/graph_algorithms.h"
 #include "libexhsearch/location.h"
-#include "libexhsearch/static_graph.h"
+#include "libexhsearch/maze_graph.h"
 
 #include <iostream>
 #include <chrono>
@@ -15,7 +15,7 @@ using namespace std::chrono;
 
 using QuerySupplier = std::function<std::vector<std::pair<Location, Location>>()>;
 
-void runQueries(const StaticGraph & graph, std::vector<std::pair<Location, Location>> & queries) {
+void runQueries(const MazeGraph & graph, std::vector<std::pair<Location, Location>> & queries) {
     volatile bool reachable;
     for (const auto & pair : queries) {
         reachable &= algorithm::isReachable(graph, pair.first, pair.second);
@@ -23,7 +23,7 @@ void runQueries(const StaticGraph & graph, std::vector<std::pair<Location, Locat
 }
 
 
-void runBenchmark(const StaticGraph & graph, size_t runs, QuerySupplier query_supplier) {
+void runBenchmark(const MazeGraph & graph, size_t runs, QuerySupplier query_supplier) {
     // warmup
     std::vector<std::pair<Location, Location>> queries = query_supplier();
     size_t number = queries.size();
@@ -75,7 +75,7 @@ void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initi
         std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;
         SnakeGraphBuilder builder;
-        const StaticGraph & graph = builder.setExtent(extent).buildGraph();
+        const MazeGraph & graph = builder.setExtent(extent).buildGraph();
         runBenchmark(graph, runs, [extent, number]() {return createSnakeGraphQueries(extent, number); });
     }
 }
@@ -85,7 +85,7 @@ void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initia
         std::cout << "Benchmarking isReachable() for tree graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;
         TreeGraphBuilder builder;
-        const StaticGraph & graph = builder.setExtent(extent).buildGraph();
+        const MazeGraph & graph = builder.setExtent(extent).buildGraph();
         runBenchmark(graph, runs, [extent, number]() {return createTreeGraphQueries(extent, number); });
     }
 }

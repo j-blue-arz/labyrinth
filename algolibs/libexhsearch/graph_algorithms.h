@@ -1,15 +1,15 @@
 #pragma once
 
-#include "static_graph.h"
+#include "maze_graph.h"
 #include "location.h"
 
 namespace graph {
 
 namespace algorithm {
 
-bool isReachable(const StaticGraph & graph, const Location & source, const Location & target);
+bool isReachable(const MazeGraph & graph, const Location & source, const Location & target);
 
-std::vector<Location> reachableLocations(const StaticGraph & graph, const Location & source);
+std::vector<Location> reachableLocations(const MazeGraph & graph, const Location & source);
 
 }
 

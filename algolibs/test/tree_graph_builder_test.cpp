@@ -14,7 +14,7 @@ std::string locationsToString(std::set<Location> locations) {
     return stream.str();
 }
 
-::testing::AssertionResult hasNeighbors(const StaticGraph & graph, const Location & source, std::initializer_list<Location> targets) {
+::testing::AssertionResult hasNeighbors(const MazeGraph & graph, const Location & source, std::initializer_list<Location> targets) {
     std::set<Location> expected{ targets };
     auto neighbors = graph.neighbors(source);
     std::set<Location> actual{ neighbors.begin(), neighbors.end() };
@@ -24,13 +24,13 @@ std::string locationsToString(std::set<Location> locations) {
     return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
 }
 
-size_t numNeighbors(const StaticGraph & graph, const Location & source) {
+size_t numNeighbors(const MazeGraph & graph, const Location & source) {
     auto neighbors = graph.neighbors(source);
     std::set<Location> actual{ neighbors.begin(), neighbors.end() };
     return actual.size();
 }
 
-size_t countEdges(const StaticGraph & graph) {
+size_t countEdges(const MazeGraph & graph) {
     size_t count = 0;
     for (auto row = 0; row < graph.getExtent(); row++) {
         for (auto column = 0; column < graph.getExtent(); column++) {
@@ -42,7 +42,7 @@ size_t countEdges(const StaticGraph & graph) {
 
 TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.setExtent(2).buildGraph();
+    MazeGraph graph = builder.setExtent(2).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(1, 1) }));
@@ -52,7 +52,7 @@ TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.setExtent(4).buildGraph();
+    MazeGraph graph = builder.setExtent(4).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 16);
     EXPECT_EQ(countEdges(graph), 15);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
@@ -61,7 +61,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.setExtent(8).buildGraph();
+    MazeGraph graph = builder.setExtent(8).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 64);
     EXPECT_EQ(countEdges(graph), 63);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
@@ -70,7 +70,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfSixteen) {
     TreeGraphBuilder builder{};
-    StaticGraph graph = builder.setExtent(16).buildGraph();
+    MazeGraph graph = builder.setExtent(16).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 256);
     EXPECT_EQ(countEdges(graph), 255);
     auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));

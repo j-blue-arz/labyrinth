@@ -12,9 +12,9 @@ void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<
     }
 }
 
-StaticGraph GraphBuilder::constructGraph() {
+MazeGraph GraphBuilder::constructGraph() {
     size_t extent = out_paths_.size();
-    StaticGraph graph(extent);
+    MazeGraph graph(extent);
     for (int row = 0; row < extent; ++row) {
         for (int column = 0; column < extent; ++column) {
             std::string graph_out_paths;

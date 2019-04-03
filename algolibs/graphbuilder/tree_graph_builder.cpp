@@ -1,6 +1,6 @@
 #include "tree_graph_builder.h"
 
-#include "libexhsearch/static_graph.h"
+#include "libexhsearch/maze_graph.h"
 
 #include <string>
 
@@ -14,7 +14,7 @@ TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
     return *this;
 }
 
-StaticGraph TreeGraphBuilder::buildGraph() {
+MazeGraph TreeGraphBuilder::buildGraph() {
     auto extent = out_paths_.size();
     addPath(Location(extent - 1, 0), extent, OutPath::East);
     addPath(Location(0, extent - 1), extent, OutPath::South);

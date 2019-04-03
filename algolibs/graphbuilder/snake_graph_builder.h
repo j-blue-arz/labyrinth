@@ -1,5 +1,5 @@
 #pragma once
-#include "libexhsearch/static_graph.h"
+#include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
 
 #include "graph_builder.h"
@@ -27,7 +27,7 @@ public:
     /// ------------
     /// parameter extent controls the height and width of the graph. The path has a length of
     /// extent * extent, i.e. the number of nodes in the graph.
-    StaticGraph buildGraph() override;
+    MazeGraph buildGraph() override;
 
     SnakeGraphBuilder & setExtent(size_t extent);
 private:

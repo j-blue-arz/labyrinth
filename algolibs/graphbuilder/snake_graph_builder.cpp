@@ -10,7 +10,7 @@ SnakeGraphBuilder & SnakeGraphBuilder::setExtent(size_t extent) {
     return *this;
 }
 
-StaticGraph SnakeGraphBuilder::buildGraph() {
+MazeGraph SnakeGraphBuilder::buildGraph() {
     const auto extent = out_paths_.size();
     setInnerColumns();
     setFirstColumn();

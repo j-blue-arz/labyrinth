@@ -29,7 +29,7 @@ protected:
         graph_ = builder.buildGraph();
     }
 
-    StaticGraph graph_{ 0 };
+    MazeGraph graph_{ 0 };
 };
 
 std::string locationsToString(std::set<Location> locations) {
@@ -40,7 +40,7 @@ std::string locationsToString(std::set<Location> locations) {
     return stream.str();
 }
 
-::testing::AssertionResult hasNeighbors(const StaticGraph & graph, const Location & source, std::initializer_list<Location> targets) {
+::testing::AssertionResult hasNeighbors(const MazeGraph & graph, const Location & source, std::initializer_list<Location> targets) {
     std::set<Location> expected{ targets };
     auto neighbors = graph.neighbors(source);
     std::set<Location> actual{ neighbors.begin(), neighbors.end() };
@@ -50,7 +50,7 @@ std::string locationsToString(std::set<Location> locations) {
     return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
 }
 
-::testing::AssertionResult numberOfNeighbors(const StaticGraph & graph, const Location & source, size_t expected) {
+::testing::AssertionResult numberOfNeighbors(const MazeGraph & graph, const Location & source, size_t expected) {
     size_t actual{ 0 };
     auto neighbors = graph.neighbors(source);
     for (auto neighbor : neighbors) {
@@ -105,13 +105,15 @@ TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_2) {
 
 TEST(GraphBuilderSnakeTest, OneNodeForExtentOfOne) {
     SnakeGraphBuilder builder{};
-    StaticGraph graph = builder.buildSnakeGraph(1);
+    builder.setExtent(1);
+    MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 1);
 }
 
 TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfTwo) {
-    GraphBuilder builder{};
-    StaticGraph graph = builder.buildSnakeGraph(2);
+    SnakeGraphBuilder builder{};
+    builder.setExtent(2);
+    MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(1, 1) }));
@@ -120,8 +122,9 @@ TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfTwo) {
 }
 
 TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfThree) {
-    GraphBuilder builder{};
-    StaticGraph graph = builder.buildSnakeGraph(3);
+    SnakeGraphBuilder builder{};
+    builder.setExtent(3);
+    MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 9);
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
     EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(0, 2) }));
@@ -135,9 +138,10 @@ TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfThree) {
 }
 
 TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
-    const size_t extent = 30;
-    GraphBuilder builder;
-    StaticGraph graph = builder.buildSnakeGraph(extent);
+    SnakeGraphBuilder builder{};
+    size_t extent = 30;
+    builder.setExtent(extent);
+    MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 900);
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
@@ -158,9 +162,10 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
 }
 
 TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirtyOne) {
-    const size_t extent = 31;
-    GraphBuilder builder{};
-    StaticGraph graph = builder.buildSnakeGraph(extent);
+    SnakeGraphBuilder builder{};
+    size_t extent = 31;
+    builder.setExtent(extent);
+    MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 961);
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
