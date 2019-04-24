@@ -32,3 +32,4 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 enable_testing()
 add_subdirectory(test)
+

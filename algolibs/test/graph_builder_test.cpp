@@ -1,6 +1,8 @@
 #include "graphbuilder/text_graph_builder.h"
 #include "graphbuilder/snake_graph_builder.h"
 
+#include "util.h"
+
 #include "gtest/gtest.h"
 #include <set>
 
@@ -12,7 +14,7 @@ protected:
     void SetUp() override {
         TextGraphBuilder builder{};
         const std::vector<std::string> maze{
-            "###|###|#.#|",
+            "###|#.#|#.#|",
             "#..|...|..#|",
             "#.#|#.#|###|",
             "------------",
@@ -20,8 +22,8 @@ protected:
             "#..|...|...|",
             "#.#|###|###|",
             "------------",
-            "#.#|###|###|",
-            "#..|#..|#..|",
+            "#.#|#.#|###|",
+            "#..|#.#|..#|",
             "###|#.#|#.#|",
             "------------"
         };
@@ -31,37 +33,6 @@ protected:
 
     MazeGraph graph_{ 0 };
 };
-
-std::string locationsToString(std::set<Location> locations) {
-    std::stringstream stream;
-    for (auto location : locations) {
-        stream << location << ", ";
-    }
-    return stream.str();
-}
-
-::testing::AssertionResult hasNeighbors(const MazeGraph & graph, const Location & source, std::initializer_list<Location> targets) {
-    std::set<Location> expected{ targets };
-    auto neighbors = graph.neighbors(source);
-    std::set<Location> actual{ neighbors.begin(), neighbors.end() };
-    if (actual == expected) {
-        return ::testing::AssertionSuccess();
-    }
-    return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
-}
-
-::testing::AssertionResult numberOfNeighbors(const MazeGraph & graph, const Location & source, size_t expected) {
-    size_t actual{ 0 };
-    auto neighbors = graph.neighbors(source);
-    for (auto neighbor : neighbors) {
-        actual++;
-    }
-    if (actual == expected) {
-        return ::testing::AssertionSuccess();
-    }
-    return ::testing::AssertionFailure() << "Expected neighbors: " << expected << ", actual: " << actual;
-}
-
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectExtent) {
     EXPECT_EQ(graph_.getNumberOfNodes(), 9);
@@ -96,11 +67,11 @@ TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_0) {
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_1) {
-    EXPECT_TRUE(numberOfNeighbors(graph_, Location(2, 1), 0));
+    EXPECT_TRUE(assertNumNeighbors(graph_, Location(2, 1), 0));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_2) {
-    EXPECT_TRUE(numberOfNeighbors(graph_, Location(2, 2), 0));
+    EXPECT_TRUE(assertNumNeighbors(graph_, Location(2, 2), 0));
 }
 
 TEST(GraphBuilderSnakeTest, OneNodeForExtentOfOne) {
@@ -146,15 +117,15 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (row == 0 && column == 0) {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 1))
                     << "Top left corner does not have exactly one neighbor";
             }
             else if (row == extent - 1 && column == 0) {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 1))
                     << "Bottom left corner does not have exactly one neighbor";
             }
             else {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 2))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 2))
                     << "Node at position " << Location(row, column) << " does not have exactly two neighbors";
             }
         }
@@ -170,15 +141,15 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirtyOne) {
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (row == 0 && column == 0) {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 1))
                     << "Top left corner does not have exactly one neighbor";
             }
             else if (row == extent - 1 && column == extent - 1) {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 1))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 1))
                     << "Bottom right corner does not have exactly one neighbor";
             }
             else {
-                EXPECT_TRUE(numberOfNeighbors(graph, Location(row, column), 2))
+                EXPECT_TRUE(assertNumNeighbors(graph, Location(row, column), 2))
                     << "Node at position " << Location(row, column) << " does not have exactly two neighbors";
             }
         }

@@ -1,44 +1,12 @@
 #include "graphbuilder/tree_graph_builder.h"
 #include "libexhsearch/graph_algorithms.h"
 
+#include "util.h"
+
 #include "gtest/gtest.h"
 #include <set>
 
 using namespace graph;
-
-std::string locationsToString(std::set<Location> locations) {
-    std::stringstream stream;
-    for (auto location : locations) {
-        stream << location << ", ";
-    }
-    return stream.str();
-}
-
-::testing::AssertionResult hasNeighbors(const MazeGraph & graph, const Location & source, std::initializer_list<Location> targets) {
-    std::set<Location> expected{ targets };
-    auto neighbors = graph.neighbors(source);
-    std::set<Location> actual{ neighbors.begin(), neighbors.end() };
-    if (actual == expected) {
-        return ::testing::AssertionSuccess();
-    }
-    return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
-}
-
-size_t numNeighbors(const MazeGraph & graph, const Location & source) {
-    auto neighbors = graph.neighbors(source);
-    std::set<Location> actual{ neighbors.begin(), neighbors.end() };
-    return actual.size();
-}
-
-size_t countEdges(const MazeGraph & graph) {
-    size_t count = 0;
-    for (auto row = 0; row < graph.getExtent(); row++) {
-        for (auto column = 0; column < graph.getExtent(); column++) {
-            count += numNeighbors(graph, Location(row, column));
-        }
-    }
-    return count / 2;
-}
 
 TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     TreeGraphBuilder builder{};

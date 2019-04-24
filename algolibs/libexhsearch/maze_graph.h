@@ -2,8 +2,10 @@
 
 #include "location.h"
 
-#include <vector>
 #include <string>
+#include <unordered_set>
+#include <vector>
+
 
 namespace graph {
 /// This class models a graph which represents a maze.
@@ -12,19 +14,32 @@ namespace graph {
 class MazeGraph {
 private:
     class Neighbors;
+    class ShiftLocation;
 public:
     using NodeId = unsigned int;
-
     using OutPathType = std::string::value_type;
+    using RotationDegreeType = int16_t;
 
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
     explicit MazeGraph(size_t extent);
 
     void setOutPaths(const Location & location, const std::string & out_paths);
 
+    void addShiftLocation(const Location & location);
+
+    void setLeftoverOutPaths(const std::string & out_paths);
+
+    const std::unordered_set<ShiftLocation, std::hash<graph::Location>> & getShiftLocations() noexcept { return shift_locations_; };
+
     bool hasOutPath(const Location & location, const OutPathType & out_path) const noexcept;
 
     NodeId getNodeId(const Location & location) const;
+
+    NodeId getLeftoverNodeId() const noexcept;
+
+    /// Returns the location of a given node identifier.
+    /// If the location cannot be found in the maze, the second parameter is returned.
+    Location getLocation(NodeId node_id, const Location & leftover_location) const;
 
     /// returns a range over neighboring locations. 
     /// The returned object which has two member functions begin() and end(), so 
@@ -74,7 +89,7 @@ private:
 
         NeighborIndex index_;
         const MazeGraph & graph_;
-        const Location & location_;
+        const Location location_;
         const Node & node_;
     };
 
@@ -86,11 +101,22 @@ private:
         NeighborIterator end();
 
     private:
-        
         const MazeGraph & graph_;
         const Location & location_;
         const Node & node_;
     };
+
+    class ShiftLocation : public Location {
+    public:
+        explicit ShiftLocation(const Location & location, MazeGraph & graph) : Location(location), graph_(graph) {}
+        void shift(RotationDegreeType rotation) const {
+            graph_.shift(*this, rotation);
+        };
+    private:
+        MazeGraph & graph_;
+    };
+
+    void shift(const Location & location, RotationDegreeType leftoverRotation);
 
     const Node & getNode(const Location & location) const;
     Node & getNode(const Location & location);
@@ -104,9 +130,19 @@ private:
     static OffsetType offsetFromOutPath(OutPathType out_path) noexcept;
 
     size_t extent_;
+    Node leftover_;
     std::vector<std::vector<Node>> node_matrix_;
+    std::unordered_set<ShiftLocation, std::hash<graph::Location>> shift_locations_;
 };
 
-std::ostream& operator<<(std::ostream & os, const MazeGraph & graph);
+/// Validates arguments. Performs a shift, if the location is a valid shift location.
+/// Returns true iff the location is a valid.
+/// This method runs in time linear in the number of shift locations.
+bool shift(MazeGraph & graph, const Location & location, MazeGraph::RotationDegreeType rotation) noexcept;
 
 } // namespace graph
+
+namespace std {
+std::ostream& operator<<(std::ostream & os, const graph::MazeGraph & graph);
+}
+

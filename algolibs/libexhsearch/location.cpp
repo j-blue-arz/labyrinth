@@ -3,30 +3,18 @@
 namespace graph {
 
 const Location Location::operator+(const OffsetType & offset) const noexcept {
-    return Location(row_ + offset.rowOffset, column_ + offset.columnOffset);
+    return Location(row_ + offset.row_offset, column_ + offset.column_offset);
 }
 
 const Location & Location::operator+=(const OffsetType & offset) noexcept {
-    row_ += offset.rowOffset;
-    column_ += offset.columnOffset;
+    row_ += offset.row_offset;
+    column_ += offset.column_offset;
     return *this;
 }
 
-bool Location::operator==(const Location & rhs) const noexcept {
-    return row_ == rhs.row_ && column_ == rhs.column_;
-}
-
-bool Location::operator!=(const Location & rhs) const noexcept {
-    return !(*this == rhs);
-}
-
-bool Location::operator<(const Location & rhs) const noexcept {
-    if (row_ < rhs.row_) return true;
-    if (row_ > rhs.row_) return false;
-    return column_ < rhs.column_;
-}
-
 } // namespace graph
+
+
 
 namespace std {
 std::ostream & operator<<(std::ostream & stream, const graph::Location & location) {
