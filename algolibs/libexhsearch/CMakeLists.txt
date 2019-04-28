@@ -6,6 +6,8 @@ set(
 		"location.cpp"
 		"maze_graph.h"
 		"maze_graph.cpp"
+		"exhsearch.h"
+		"exhsearch.cpp"
 )
 
 add_library(REACHABLE OBJECT ${SOURCES})
