@@ -29,7 +29,9 @@ public:
 
     void setLeftoverOutPaths(const std::string & out_paths);
 
-    const std::unordered_set<ShiftLocation, std::hash<graph::Location>> & getShiftLocations() noexcept { return shift_locations_; };
+    const std::vector<Location> & getShiftLocations() const noexcept { return shift_locations_; };
+
+    void shift(const Location & location, RotationDegreeType leftoverRotation);
 
     bool hasOutPath(const Location & location, const OutPathType & out_path) const noexcept;
 
@@ -106,18 +108,6 @@ private:
         const Node & node_;
     };
 
-    class ShiftLocation : public Location {
-    public:
-        explicit ShiftLocation(const Location & location, MazeGraph & graph) : Location(location), graph_(graph) {}
-        void shift(RotationDegreeType rotation) const {
-            graph_.shift(*this, rotation);
-        };
-    private:
-        MazeGraph & graph_;
-    };
-
-    void shift(const Location & location, RotationDegreeType leftoverRotation);
-
     const Node & getNode(const Location & location) const;
     Node & getNode(const Location & location);
 
@@ -132,13 +122,8 @@ private:
     size_t extent_;
     Node leftover_;
     std::vector<std::vector<Node>> node_matrix_;
-    std::unordered_set<ShiftLocation, std::hash<graph::Location>> shift_locations_;
+    std::vector<Location> shift_locations_;
 };
-
-/// Validates arguments. Performs a shift, if the location is a valid shift location.
-/// Returns true iff the location is a valid.
-/// This method runs in time linear in the number of shift locations.
-bool shift(MazeGraph & graph, const Location & location, MazeGraph::RotationDegreeType rotation) noexcept;
 
 } // namespace graph
 

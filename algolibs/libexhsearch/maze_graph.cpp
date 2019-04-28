@@ -21,7 +21,9 @@ void MazeGraph::setOutPaths(const Location & location, const std::string & out_p
 }
 
 void MazeGraph::addShiftLocation(const Location & location) {
-    shift_locations_.emplace(location, *this);
+    if(std::find(shift_locations_.begin(), shift_locations_.end(), location) == shift_locations_.end()) {
+        shift_locations_.push_back(location);
+    }
 }
 
 void MazeGraph::setLeftoverOutPaths(const std::string & out_paths) {
@@ -202,16 +204,6 @@ MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() {
 
 MazeGraph::NeighborIterator MazeGraph::Neighbors::end() {
     return MazeGraph::NeighborIterator::end(graph_, location_, node_);
-}
-
-bool shift(MazeGraph & graph, const Location & location, MazeGraph::RotationDegreeType rotation) noexcept {
-    for(auto shift_location : graph.getShiftLocations()) {
-        if(shift_location == location) {
-            shift_location.shift(rotation);
-            return true;
-        }
-    }
-    return false;
 }
 
 } // namespace graph

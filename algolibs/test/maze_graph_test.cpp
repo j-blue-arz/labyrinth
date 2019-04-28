@@ -134,21 +134,17 @@ TEST_F(MazeGraphTest, ShiftLocationComparesUnequalToLocation) {
 }
 
 TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectNodeIds) {
-    graph_.addShiftLocation(Location(0, 1));
     MazeGraph::NodeId old_column_ids[] = {graph_.getNodeId(Location(0, 1)), graph_.getNodeId(Location(1, 1)), graph_.getNodeId(Location(2, 1))};
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(0, 1), 0);
 
     EXPECT_EQ(old_column_ids[0], graph_.getNodeId(Location(1, 1)));
     EXPECT_EQ(old_column_ids[1], graph_.getNodeId(Location(2, 1)));
 }
 
 TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectPaths) {
-    graph_.addShiftLocation(Location(0, 1));
-
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    
+    graph_.shift(Location(0, 1), 0);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location(1, 1), {Location(1, 0), Location(1, 2)}));
     EXPECT_TRUE(hasNeighbors(graph_, Location(2, 1), {Location(2, 0), Location(2, 2)}));
@@ -156,42 +152,34 @@ TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectPaths) {
 
 TEST_F(MazeGraphTest, ShiftAlongColumnInsertsLeftover) {
     graph_.setLeftoverOutPaths("ES");
-    graph_.addShiftLocation(Location(0, 1));
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(0, 1), 0);
 
     EXPECT_EQ(old_leftover_id, graph_.getNodeId(Location(0, 1)));
     EXPECT_TRUE(hasNeighbors(graph_, Location(0, 1), {Location(1, 1), Location(0, 2)}));
 }
 
 TEST_F(MazeGraphTest, ShiftAlongColumnUpdatesLeftover) {
-    graph_.addShiftLocation(Location(0, 1));
     auto pushed_out_id = graph_.getNodeId(Location(2, 1));
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(0, 1), 0);
 
     EXPECT_EQ(pushed_out_id, graph_.getLeftoverNodeId());
 }
 
 TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectNodeIds) {
-    graph_.addShiftLocation(Location(1, 2));
     MazeGraph::NodeId old_row_ids[] = {graph_.getNodeId(Location(1, 0)), graph_.getNodeId(Location(1, 1)), graph_.getNodeId(Location(1, 2))};
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(1, 2), 0);
 
     EXPECT_EQ(old_row_ids[1], graph_.getNodeId(Location(1, 0)));
     EXPECT_EQ(old_row_ids[2], graph_.getNodeId(Location(1, 1)));
 }
 
 TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectPaths) {
-    graph_.addShiftLocation(Location(1, 2));
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(1, 2), 0);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location(1, 1), {Location(1, 0)}));
     EXPECT_TRUE(hasNeighbors(graph_, Location(1, 0), {Location(1, 1)}));
@@ -199,11 +187,9 @@ TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectPaths) {
 
 TEST_F(MazeGraphTest, ShiftAlongRowInsertsLeftover) {
     graph_.setLeftoverOutPaths("NEW");
-    graph_.addShiftLocation(Location(1, 2));
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(1, 2), 0);
 
     EXPECT_EQ(old_leftover_id, graph_.getNodeId(Location(1, 2)));
     EXPECT_TRUE(hasNeighbors(graph_, Location(1, 2), {Location(1, 1)}));
@@ -214,8 +200,8 @@ TEST_F(MazeGraphTest, TwoShiftsResultInCorrectPathAroundPushedOutAndPushedInNode
     graph_.addShiftLocation(Location(1, 2));
     auto pushed_out_id = graph_.getNodeId(Location(1, 0));
 
-    shift(graph_, Location(1, 2), 0);
-    shift(graph_, Location(2, 1), 0);
+    graph_.shift(Location(1, 2), 0);
+    graph_.shift(Location(2, 1), 0);
 
     EXPECT_EQ(pushed_out_id, graph_.getNodeId(Location(2, 1)));
     EXPECT_TRUE(hasNeighbors(graph_, Location(2, 1), {Location(1, 1), Location(2, 2)}));
@@ -231,12 +217,10 @@ TEST_F(MazeGraphTest, LocationOfNode_WithInnerNode_ReturnsCorrectLocation) {
 
 TEST_F(MazeGraphTest, LocationOfNode_WithInnerNodeAfterShift_ReturnsCorrectLocation) {
     auto node_id = graph_.getNodeId(Location(1, 1));
-    graph_.addShiftLocation(Location(0, 1));
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+
+    graph_.shift(Location(0, 1), 0);
 
     Location location = graph_.getLocation(node_id, Location(1, 1));
-
     EXPECT_EQ(location, Location(2, 1));
 }
 
@@ -246,11 +230,9 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeId_ReturnsGivenLocation) {
 }
 
 TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInsertedLocation) {
-    graph_.addShiftLocation(Location(1, 2));
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
-    auto shift_locations = graph_.getShiftLocations();
-    shift_locations.begin()->shift(0);
+    graph_.shift(Location(1, 2), 0);
 
     Location location = graph_.getLocation(old_leftover_id, Location(1, 1));
     EXPECT_EQ(location, Location(1, 2));
