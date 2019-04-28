@@ -224,7 +224,7 @@ TEST_F(MazeGraphTest, TwoShiftsResultInCorrectPathAroundPushedOutAndPushedInNode
 TEST_F(MazeGraphTest, LocationOfNode_WithInnerNode_ReturnsCorrectLocation) {
     auto node_id = graph_.getNodeId(Location(1, 1));
 
-    Location location = graph_.getLocation(node_id);
+    Location location = graph_.getLocation(node_id, Location(-1, -1));
 
     EXPECT_EQ(location, Location(1, 1));
 }

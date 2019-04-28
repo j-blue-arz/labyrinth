@@ -7,11 +7,9 @@
 namespace graph {
 
 class GraphBuilder {
-public:
-    virtual ~GraphBuilder() {};
-    virtual MazeGraph buildGraph() = 0;
 protected:
     using OutPathIntegerType = uint8_t;
+public:
     enum class OutPath : OutPathIntegerType {
         North = 0,
         East = 1,
@@ -19,12 +17,21 @@ protected:
         West = 3
     };
 
+    virtual ~GraphBuilder() {};
+    virtual MazeGraph buildGraph() = 0;
+
+    GraphBuilder & withStandardShiftLocations();
+    GraphBuilder & withLeftoverOutPaths(std::initializer_list<OutPath> out_paths);
+protected:
+    using OutPaths = std::bitset<4>;
     MazeGraph constructGraph();
-    void addOutPath(const Location & location, OutPath);
+    void addOutPath(OutPaths & out_paths, OutPath out_path);
+    void addOutPath(const Location & location, OutPath out_path);
     void addOutPaths(const Location & location, std::initializer_list<OutPath> out_paths);
     
-
-    std::vector<std::vector<std::bitset<4>>> out_paths_;
+    std::bitset<4> leftover_out_paths;
+    bool standard_shift_locations_{false};
+    std::vector<std::vector<OutPaths>> out_paths_;
 };
 
 }
