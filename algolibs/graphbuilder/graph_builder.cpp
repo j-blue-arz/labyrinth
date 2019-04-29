@@ -23,7 +23,7 @@ GraphBuilder & GraphBuilder::withStandardShiftLocations() {
 
 GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath> out_paths) {
     for(auto out_path : out_paths) {
-        addOutPath(leftover_out_paths, out_path);
+        addOutPath(leftover_out_paths_, out_path);
     }
     return *this;
 }
@@ -33,22 +33,12 @@ MazeGraph GraphBuilder::constructGraph() {
     MazeGraph graph(extent);
     for (auto row = 0; row < extent; ++row) {
         for (auto column = 0; column < extent; ++column) {
-            std::string graph_out_paths;
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::North))) {
-                graph_out_paths.append("N");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::East))) {
-                graph_out_paths.append("E");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::South))) {
-                graph_out_paths.append("S");
-            }
-            if (out_paths_[row][column].test(static_cast<size_t>(OutPath::West))) {
-                graph_out_paths.append("W");
-            }
+            auto graph_out_paths = outPathsToString(out_paths_[row][column]);
             graph.setOutPaths(Location(row, column), graph_out_paths);
         }
     }
+    auto leftover_out_paths = outPathsToString(leftover_out_paths_);
+    graph.setLeftoverOutPaths(leftover_out_paths);
     if(standard_shift_locations_) {
         for(auto pos = 1; pos < extent; pos += 2) {
             graph.addShiftLocation(Location(0, pos));
@@ -58,6 +48,23 @@ MazeGraph GraphBuilder::constructGraph() {
         }
     }
     return graph;
+}
+
+std::string GraphBuilder::outPathsToString(GraphBuilder::OutPaths out_paths) {
+    std::string graph_out_paths;
+    if(out_paths.test(static_cast<size_t>(OutPath::North))) {
+        graph_out_paths.append("N");
+    }
+    if(out_paths.test(static_cast<size_t>(OutPath::East))) {
+        graph_out_paths.append("E");
+    }
+    if(out_paths.test(static_cast<size_t>(OutPath::South))) {
+        graph_out_paths.append("S");
+    }
+    if(out_paths.test(static_cast<size_t>(OutPath::West))) {
+        graph_out_paths.append("W");
+    }
+    return graph_out_paths;
 }
 
 }

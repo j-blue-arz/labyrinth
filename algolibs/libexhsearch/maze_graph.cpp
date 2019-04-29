@@ -92,6 +92,7 @@ void MazeGraph::shift(const Location & location, RotationDegreeType leftoverRota
     for(auto to = line.rbegin(), from = std::next(to); from != line.rend(); ++to, ++from) {
         getNode(*to) = getNode(*from);
     }
+    leftover_.rotation = leftoverRotation;
     getNode(line.front()) = leftover_;
     leftover_ = updated_leftover;
 }
@@ -105,7 +106,8 @@ MazeGraph::Node & MazeGraph::getNode(const Location & location) {
 }
 
 bool MazeGraph::hasOutPath(const Node & node, const OutPathType & out_path) const noexcept {
-    return node.out_paths.find(out_path) != std::string::npos;
+    auto out_path_to_check = rotateOutPath(out_path, -node.rotation);
+    return node.out_paths.find(out_path_to_check) != std::string::npos;
 }
 
 bool MazeGraph::isInside(const Location & location) const noexcept {
@@ -113,6 +115,12 @@ bool MazeGraph::isInside(const Location & location) const noexcept {
         (location.getColumn() >= 0) &&
         (location.getRow() < extent_) &&
         (location.getColumn() < extent_);
+}
+
+MazeGraph::OutPathType MazeGraph::rotateOutPath(OutPathType out_path, RotationDegreeType rotation) {
+    static const std::string out_path_rotation{"NESW"};
+    auto rotations = rotation / 90;
+    return out_path_rotation[(out_path_rotation.find(out_path) + rotations + 4) % 4];
 }
 
 MazeGraph::OutPathType MazeGraph::mirrorOutPath(OutPathType out_path) noexcept {
@@ -165,6 +173,7 @@ bool MazeGraph::NeighborIterator::operator!=(const NeighborIterator & other) con
 
 MazeGraph::NeighborIterator::reference MazeGraph::NeighborIterator::operator*() const {
     auto out_path = node_.out_paths[index_];
+    out_path = rotateOutPath(out_path, node_.rotation);
     return location_ + offsetFromOutPath(out_path);
 }
 
@@ -183,6 +192,7 @@ MazeGraph::NeighborIterator MazeGraph::NeighborIterator::operator++(int) {
 void MazeGraph::NeighborIterator::moveToNextNeighbor() {
     while (index_ < node_.out_paths.size()) {
         auto out_path = node_.out_paths[index_];
+        out_path = rotateOutPath(out_path, node_.rotation);
         const auto potential_location = location_ + offsetFromOutPath(out_path);
         if (graph_.isInside(potential_location) && graph_.hasOutPath(graph_.getNode(potential_location), mirrorOutPath(out_path))) {
             break;

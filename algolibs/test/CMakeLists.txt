@@ -18,7 +18,7 @@ target_link_libraries(maze_graph_test gmock_main REACHABLE)
 target_link_libraries(graph_algorithms_test gtest_main REACHABLE BUILDER)
 target_link_libraries(graph_builder_test gtest_main REACHABLE BUILDER)
 target_link_libraries(tree_graph_builder_test gtest_main REACHABLE BUILDER)
-target_link_libraries(exhsearch_test gtest_main REACHABLE BUILDER)
+target_link_libraries(exhsearch_test gmock_main REACHABLE BUILDER)
 
 add_test(location-test location_test)
 add_test(maze_graph-test maze_graph_test)

@@ -24,7 +24,7 @@ protected:
             "###|#.#|#.#|",
             "------------"
         };
-        builder.setMaze(maze);
+        builder.setMaze(maze).withLeftoverOutPaths({GraphBuilder::OutPath::North});
         graph_ = builder.buildGraph();
     }
 
@@ -49,4 +49,9 @@ TEST_F(GraphAlgorithmsTest, IsReachableForUnconnectedCorners) {
 
 TEST_F(GraphAlgorithmsTest, IsReachableForUnconnectedNeighbors) {
     EXPECT_FALSE(algorithm::isReachable(graph_, Location(2, 1), Location(1, 1)));
+}
+
+TEST_F(GraphAlgorithmsTest, IsReachable_AfterOneShift_FindsInsertedNode) {
+    graph_.shift(Location{1, 0}, 0);
+    EXPECT_TRUE(algorithm::isReachable(graph_, Location(0, 0), Location(1, 0)));
 }

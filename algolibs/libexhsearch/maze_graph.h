@@ -58,6 +58,7 @@ private:
 
     struct Node {
         std::string out_paths{ "" };
+        RotationDegreeType rotation{ 0 };
         NodeId node_id{ 0 };
     };
 
@@ -114,6 +115,8 @@ private:
     bool hasOutPath(const Node & node, const OutPathType & out_path) const noexcept;
 
     bool isInside(const Location & location) const noexcept;
+
+    static OutPathType rotateOutPath(OutPathType out_path, RotationDegreeType rotation);
 
     static OutPathType mirrorOutPath(OutPathType out_path) noexcept;
 

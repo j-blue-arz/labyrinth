@@ -15,6 +15,20 @@ protected:
 
     MazeGraphTest() : graph_(extent) {}
 
+    /*
+    "###|#.#|#.#|"
+    "#..|...|..#|"
+    "#.#|#.#|###|"
+    "------------"
+    "#.#|###|###|"
+    "#..|...|...|"
+    "#.#|###|###|"
+    "------------"
+    "#.#|#.#|###|"
+    "#..|#.#|..#|"
+    "###|#.#|#.#|"
+    "------------"*/
+
     void SetUp() override {
         graph_.setOutPaths(Location(0, 0), "ES");
         graph_.setOutPaths(Location(0, 1), "NESW");
@@ -205,6 +219,22 @@ TEST_F(MazeGraphTest, TwoShiftsResultInCorrectPathAroundPushedOutAndPushedInNode
 
     EXPECT_EQ(pushed_out_id, graph_.getNodeId(Location(2, 1)));
     EXPECT_TRUE(hasNeighbors(graph_, Location(2, 1), {Location(1, 1), Location(2, 2)}));
+}
+
+TEST_F(MazeGraphTest, shift_tJunctWithRotation_resultsInCorrectNeighbors) {
+    graph_.setLeftoverOutPaths("NES");
+
+    graph_.shift(Location(2, 1), 90);
+
+    EXPECT_TRUE(hasNeighbors(graph_, Location(2, 1), {Location(2, 0), Location(2, 2)}));
+}
+
+TEST_F(MazeGraphTest, shift_cornerWithRotation_resultsInCorrectNeighbors) {
+    graph_.setLeftoverOutPaths("NE");
+
+    graph_.shift(Location(2, 1), 270);
+
+    EXPECT_TRUE(hasNeighbors(graph_, Location(2, 1), {Location(2, 0), Location(1, 1)}));
 }
 
 TEST_F(MazeGraphTest, LocationOfNode_WithInnerNode_ReturnsCorrectLocation) {

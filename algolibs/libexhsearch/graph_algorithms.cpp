@@ -7,7 +7,7 @@ namespace algorithm {
 
 bool isReachable(const MazeGraph & graph, const Location & source, const Location & target) {
     std::queue<Location> q;
-    std::vector<bool> visited(graph.getNumberOfNodes(), false);
+    std::vector<bool> visited(graph.getNumberOfNodes() + 1, false);
     q.push(source);
     while (!q.empty()) {
         auto location = q.front();
@@ -27,7 +27,7 @@ bool isReachable(const MazeGraph & graph, const Location & source, const Locatio
 
 std::vector<Location> reachableLocations(const MazeGraph & graph, const Location & source) {
     std::queue<Location> q;
-    std::vector<bool> visited(graph.getNumberOfNodes(), false);
+    std::vector<bool> visited(graph.getNumberOfNodes() + 1, false);
     q.push(source);
     visited[graph.getNodeId(source)] = true;
     std::vector<Location> result;
@@ -47,7 +47,7 @@ std::vector<Location> reachableLocations(const MazeGraph & graph, const Location
 
 std::vector<Location> reachableLocations(const MazeGraph & graph, const std::vector<Location> & sources) {
     std::queue<Location> q;
-    std::vector<bool> visited(graph.getNumberOfNodes(), false);
+    std::vector<bool> visited(graph.getNumberOfNodes() + 1, false);
     for(auto source : sources) {
         q.push(source);
         visited[graph.getNodeId(source)] = true;
