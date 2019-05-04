@@ -6,8 +6,6 @@
 #include "location.h"
 
 #include <algorithm>
-#include <queue>
-
 
 namespace graph {
 
@@ -15,47 +13,34 @@ namespace algorithm {
 
 std::vector<ExhaustiveSearch::PlayerAction> ExhaustiveSearch::findBestActions(const Location & player_location, MazeGraph::NodeId objective_id) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
-    std::queue<std::shared_ptr<GameStateNode>> game_states;
-    auto player_location_id = graph_.getNodeId(player_location);
-    std::shared_ptr<GameStateNode> root = std::make_shared<GameStateNode>();
-    root->reached_nodes.emplace_back(0, player_location_id);
-    game_states.push(root);
-    while(!game_states.empty()) {
-        auto current_state = game_states.front();
-        game_states.pop();
+	QueueType state_queue;
+    StatePtr root = std::make_shared<GameStateNode>();
+    root->reached_nodes.emplace_back(0, graph_.getNodeId(player_location));
+    state_queue.push(root);
+    while(!state_queue.empty()) {
+        auto current_state = state_queue.front();
+        state_queue.pop();
         MazeGraph graph = createGraphFromState(graph_, current_state);
-        // try all shifts
         auto shift_locations = graph.getShiftLocations();
         for(auto shift_location : shift_locations) {
             for(MazeGraph::RotationDegreeType rotation : {0, 90, 180, 270}) {
-                MazeGraph graph_copy{graph};
-                graph_copy.shift(shift_location, rotation);
-                std::vector<Location> updated_player_locations;
-                updated_player_locations.resize(current_state->reached_nodes.size());
-                std::transform(current_state->reached_nodes.begin(), current_state->reached_nodes.end(), updated_player_locations.begin(),
-                    [&graph_copy, &shift_location](reachable::ReachableNode reached_node) { return graph_copy.getLocation(reached_node.reached_id, shift_location); });
-                auto updated_objective_location = graph_copy.getLocation(objective_id, Location(-1, -1));
-                std::shared_ptr<GameStateNode> new_state = std::make_shared<GameStateNode>();
-                new_state->parent = current_state;
-                new_state->shift = ShiftAction{shift_location, rotation};
-                // find reachable locations
-                new_state->reached_nodes = reachable::multiSourceReachableLocations(graph_copy, updated_player_locations);
-                // check for objective in reachable locations
+				auto new_state = createNewState(graph, ShiftAction{ shift_location, rotation }, current_state);
 				auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
 					[objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
 				if (found_objective != new_state->reached_nodes.end()) {
 					size_t reachable_index = found_objective - new_state->reached_nodes.begin();
-					return reconstructActions(graph, new_state, reachable_index);
+					return reconstructActions(new_state, reachable_index);
 				}
-                // not found -> push state to Q
-                game_states.push(new_state);
+				else {
+					state_queue.push(new_state);
+				}
             }
         }
     }
 	return std::vector<ExhaustiveSearch::PlayerAction>{};
 }
 
-MazeGraph ExhaustiveSearch::createGraphFromState(const MazeGraph & base_graph, const std::shared_ptr<ExhaustiveSearch::GameStateNode> current_state) {
+MazeGraph ExhaustiveSearch::createGraphFromState(const MazeGraph & base_graph, StatePtr current_state) {
     MazeGraph graph{base_graph};
     std::vector<ShiftAction> shifts;
     auto cur = current_state;
@@ -69,9 +54,20 @@ MazeGraph ExhaustiveSearch::createGraphFromState(const MazeGraph & base_graph, c
     return graph;
 }
 
-std::vector<graph::algorithm::ExhaustiveSearch::PlayerAction> ExhaustiveSearch::reconstructActions(const MazeGraph & graph, 
-	std::shared_ptr<GameStateNode> state, size_t reachable_index) {
-	auto cur = state;
+ExhaustiveSearch::StatePtr ExhaustiveSearch::createNewState(const MazeGraph& graph, const ShiftAction& shift, StatePtr current_state)
+{
+	MazeGraph graph_copy{ graph };
+	graph_copy.shift(shift.location, shift.rotation);
+	auto updated_player_locations = determineReachedLocations(current_state, graph_copy, shift.location);
+	StatePtr new_state = std::make_shared<GameStateNode>(
+		current_state,
+		shift,
+		reachable::multiSourceReachableLocations(graph_copy, updated_player_locations));
+	return new_state;
+}
+
+std::vector<graph::algorithm::ExhaustiveSearch::PlayerAction> ExhaustiveSearch::reconstructActions(StatePtr new_state, size_t reachable_index) {
+	auto cur = new_state;
 	auto index = reachable_index;
 	std::vector<std::pair<ShiftAction, MazeGraph::NodeId>> id_actions;
 	while (!cur->isRoot()) {
@@ -88,6 +84,14 @@ std::vector<graph::algorithm::ExhaustiveSearch::PlayerAction> ExhaustiveSearch::
 		actions.push_back(PlayerAction{ shift, move_location });
 	}
 	return actions;
+}
+
+std::vector<Location> ExhaustiveSearch::determineReachedLocations(StatePtr current_state, const MazeGraph & graph, Location shift_location) {
+	std::vector<Location> updated_player_locations;
+	updated_player_locations.resize(current_state->reached_nodes.size());
+	std::transform(current_state->reached_nodes.begin(), current_state->reached_nodes.end(), updated_player_locations.begin(),
+		[&graph, &shift_location](reachable::ReachableNode reached_node) { return graph.getLocation(reached_node.reached_id, shift_location); });
+	return updated_player_locations;
 }
 
 } // namespace algorithm
