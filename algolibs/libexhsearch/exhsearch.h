@@ -23,6 +23,7 @@ public:
     explicit ExhaustiveSearch(const MazeGraph & graph) : graph_(graph) {}
 
     std::vector<PlayerAction> findBestActions(const Location & source, MazeGraph::NodeId objective_id);
+
 private:
     // The algorithm searches for a path reaching the objective in a tree of game states.
     // For each analyzed succession of shift actions, it keeps track of all reachable locations.
@@ -43,6 +44,8 @@ private:
     };
 
     MazeGraph createGraphFromState(const MazeGraph & base_graph, std::shared_ptr<GameStateNode> current_state);
+
+	std::vector<PlayerAction> reconstructActions(const MazeGraph& graph, std::shared_ptr<GameStateNode> new_state, size_t reachable_index);
 
 
 

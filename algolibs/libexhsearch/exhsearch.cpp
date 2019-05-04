@@ -5,7 +5,9 @@
 #include "maze_graph.h"
 #include "location.h"
 
+#include <algorithm>
 #include <queue>
+
 
 namespace graph {
 
@@ -39,36 +41,18 @@ std::vector<ExhaustiveSearch::PlayerAction> ExhaustiveSearch::findBestActions(co
                 // find reachable locations
                 new_state->reached_nodes = reachable::multiSourceReachableLocations(graph_copy, updated_player_locations);
                 // check for objective in reachable locations
-                bool found = false;
-                for(size_t reachable_index = 0; reachable_index < new_state->reached_nodes.size(); ++reachable_index) {
-                    if(new_state->reached_nodes[reachable_index].reached_id == objective_id) {
-                        // found -> build path and return
-                        auto cur = new_state;
-                        auto index = reachable_index;
-                        std::vector<std::pair<ShiftAction, MazeGraph::NodeId>> id_actions;
-                        while(!cur->isRoot()) {
-                            id_actions.push_back(std::make_pair(cur->shift, cur->reached_nodes[index].reached_id));
-                            index = cur->reached_nodes[index].parent_source_index;
-                            cur = cur->parent;
-                        }
-                        std::vector<PlayerAction> actions;
-                        MazeGraph reconstruction_graph{graph_};
-                        for(auto id_based_action = id_actions.rbegin(); id_based_action != id_actions.rend(); ++id_based_action) {
-                            ShiftAction shift = id_based_action->first;
-                            reconstruction_graph.shift(shift.location, shift.rotation);
-                            Location move_location = reconstruction_graph.getLocation(id_based_action->second, Location(-1, -1));
-                            actions.push_back(PlayerAction{shift, move_location});
-                        }
-                        return actions;
-                    }
-                }
+				auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
+					[objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
+				if (found_objective != new_state->reached_nodes.end()) {
+					size_t reachable_index = found_objective - new_state->reached_nodes.begin();
+					return reconstructActions(graph, new_state, reachable_index);
+				}
                 // not found -> push state to Q
                 game_states.push(new_state);
             }
         }
     }
-    std::vector<ExhaustiveSearch::PlayerAction> result;
-    return result;
+	return std::vector<ExhaustiveSearch::PlayerAction>{};
 }
 
 MazeGraph ExhaustiveSearch::createGraphFromState(const MazeGraph & base_graph, const std::shared_ptr<ExhaustiveSearch::GameStateNode> current_state) {
@@ -83,6 +67,27 @@ MazeGraph ExhaustiveSearch::createGraphFromState(const MazeGraph & base_graph, c
         graph.shift(shift->location, shift->rotation);
     }
     return graph;
+}
+
+std::vector<graph::algorithm::ExhaustiveSearch::PlayerAction> ExhaustiveSearch::reconstructActions(const MazeGraph & graph, 
+	std::shared_ptr<GameStateNode> state, size_t reachable_index) {
+	auto cur = state;
+	auto index = reachable_index;
+	std::vector<std::pair<ShiftAction, MazeGraph::NodeId>> id_actions;
+	while (!cur->isRoot()) {
+		id_actions.push_back(std::make_pair(cur->shift, cur->reached_nodes[index].reached_id));
+		index = cur->reached_nodes[index].parent_source_index;
+		cur = cur->parent;
+	}
+	std::vector<PlayerAction> actions;
+	MazeGraph reconstruction_graph{ graph_ };
+	for (auto id_based_action = id_actions.rbegin(); id_based_action != id_actions.rend(); ++id_based_action) {
+		ShiftAction shift = id_based_action->first;
+		reconstruction_graph.shift(shift.location, shift.rotation);
+		Location move_location = reconstruction_graph.getLocation(id_based_action->second, Location(-1, -1));
+		actions.push_back(PlayerAction{ shift, move_location });
+	}
+	return actions;
 }
 
 } // namespace algorithm
