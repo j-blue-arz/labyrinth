@@ -3,20 +3,22 @@
 
 namespace graph {
 
-class Location {
-public:
-    using IndexType = int16_t;
-    struct OffsetType {
-        using OffsetValueType = int;
-        explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept : row_offset(row), column_offset(column) {}
-        OffsetValueType row_offset{ 0 };
-        OffsetValueType column_offset{ 0 };
+    class Location {
+    public:
+        using IndexType = int16_t;
+        struct OffsetType {
+            using OffsetValueType = int;
+            explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept : row_offset(row), column_offset(column) {}
+            OffsetValueType row_offset{0};
+            OffsetValueType column_offset{0};
 
-        template <typename T>
-        const OffsetType operator*(T scalar) { 
-            return OffsetType(static_cast<int>(row_offset * scalar), static_cast<int>(column_offset * scalar)); 
-        }
-    };
+            template <typename T>
+            const OffsetType operator*(T scalar) {
+                return OffsetType(static_cast<int>(row_offset * scalar), static_cast<int>(column_offset * scalar));
+            }
+        };
+
+    Location() noexcept : row_(-1), column_(-1) {}
 
     template <typename T, typename U>
     explicit Location(T row, U column) noexcept : row_(static_cast<IndexType>(row)), column_(static_cast<IndexType>(column)) {}
