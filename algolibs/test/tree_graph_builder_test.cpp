@@ -23,7 +23,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
     MazeGraph graph = builder.setExtent(4).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 16);
     EXPECT_EQ(countEdges(graph), 15);
-    auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
+    auto reachable_from_corner = reachable::reachableLocations(graph, Location(0, 0));
     EXPECT_EQ(reachable_from_corner.size(), 16);
 }
 
@@ -32,7 +32,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
     MazeGraph graph = builder.setExtent(8).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 64);
     EXPECT_EQ(countEdges(graph), 63);
-    auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
+    auto reachable_from_corner = reachable::reachableLocations(graph, Location(0, 0));
     EXPECT_EQ(reachable_from_corner.size(), 64);
 }
 
@@ -41,6 +41,6 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfSixteen) {
     MazeGraph graph = builder.setExtent(16).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 256);
     EXPECT_EQ(countEdges(graph), 255);
-    auto reachable_from_corner = algorithm::reachableLocations(graph, Location(0, 0));
+    auto reachable_from_corner = reachable::reachableLocations(graph, Location(0, 0));
     EXPECT_EQ(reachable_from_corner.size(), 256);
 }

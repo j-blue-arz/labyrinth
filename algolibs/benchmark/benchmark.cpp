@@ -16,9 +16,9 @@ using namespace std::chrono;
 using QuerySupplier = std::function<std::vector<std::pair<Location, Location>>()>;
 
 void runQueries(const MazeGraph & graph, std::vector<std::pair<Location, Location>> & queries) {
-    volatile bool reachable;
+    volatile bool is_reachable = true;
     for (const auto & pair : queries) {
-        reachable &= algorithm::isReachable(graph, pair.first, pair.second);
+		is_reachable &= reachable::isReachable(graph, pair.first, pair.second);
     }
 }
 

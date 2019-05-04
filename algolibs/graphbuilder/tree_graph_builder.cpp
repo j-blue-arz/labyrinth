@@ -82,9 +82,8 @@ TreeGraphBuilder::OutPath TreeGraphBuilder::mirrorOutPath(OutPath out_path) noex
         return OutPath::West;
     case OutPath::South:
         return OutPath::North;
-    case OutPath::West:
-        return OutPath::East;
     }
+	return OutPath::East;
 }
 
 Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPath out_path) noexcept {
@@ -95,9 +94,8 @@ Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPath out_path) noexc
         return Location::OffsetType{ 0, 1 };
     case OutPath::South:
         return Location::OffsetType{ 1, 0 };
-    case OutPath::West:
-        return Location::OffsetType{ 0, -1 };
     }
+	return Location::OffsetType{ 0, -1 };
 }
 
 TreeGraphBuilder::OutPath TreeGraphBuilder::rotateOutPath(OutPath out_path, RotationDegreeType degree) {
