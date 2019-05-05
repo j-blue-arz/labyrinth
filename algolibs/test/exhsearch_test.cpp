@@ -95,8 +95,9 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
     "---------------------------*"
 };
 
-::testing::AssertionResult isCorrectPlayerActionSequence(const graph::MazeGraph & original_graph, 
-    const Location & player_location, const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions) {
+::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
+	const graph::MazeGraph & original_graph,
+    const Location & player_location) {
     std::set<graph::MazeGraph::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
     graph::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
@@ -118,8 +119,44 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
     return ::testing::AssertionSuccess();
 }
 
-::testing::AssertionResult playerActionsReachObjective(graph::MazeGraph & original_graph,
-    const Location & player_location, graph::MazeGraph::NodeId objective_id, const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions) {
+bool isOpposing(const Location & location1, const Location & location2, size_t extent) {
+	auto border = static_cast<Location::IndexType>(extent - 1);
+	auto isOpposingIndex = [border](Location::IndexType index1, Location::IndexType index2) {
+		return std::set<Location::IndexType>{index1, index2} == std::set<Location::IndexType>{0, border};
+	};
+	if (location1.getColumn() == location2.getColumn()) {
+		return isOpposingIndex(location1.getRow(), location2.getRow());
+	}
+	else if (location1.getRow() == location2.getRow()) {
+		return isOpposingIndex(location1.getColumn(), location2.getColumn());
+	}
+	return false;
+}
+
+::testing::AssertionResult respectPushbackRule(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
+	size_t extent,
+	const Location & previous_shift_location) {
+	std::vector<Location> shift_locations;
+	shift_locations.push_back(previous_shift_location);
+	std::transform(actions.begin(), actions.end(), std::back_inserter(shift_locations), [](auto action){ return action.shift.location; });
+	auto adjacent_opposing_locations = std::adjacent_find(shift_locations.begin(), shift_locations.end(),
+		[extent](auto loc1, auto loc2) {
+			return isOpposing(loc1, loc2, extent);
+		});
+	if (adjacent_opposing_locations != shift_locations.end()) {
+		return ::testing::AssertionFailure() 
+			<< "Shift locations " << *adjacent_opposing_locations << " and " << *(adjacent_opposing_locations + 1) << " violate no-pushback rule.";
+	}
+	return ::testing::AssertionSuccess();
+
+
+}
+
+::testing::AssertionResult playerActionsReachObjective(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
+	graph::MazeGraph & original_graph,
+    const Location & player_location, 
+	graph::MazeGraph::NodeId objective_id) {
+
     graph::MazeGraph graph{original_graph};
     auto player_location_id = graph.getNodeId(player_location);
     for(auto action : actions) {
@@ -137,14 +174,20 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
     }
 }
 
-void performTest(MazeGraph & graph, const Location & player_location, MazeGraph::NodeId objective_id, size_t expected_depth) {
+void performTest(MazeGraph & graph, 
+	const Location & player_location,
+	MazeGraph::NodeId objective_id,
+	size_t expected_depth,
+	const Location & previous_shift = Location(-1, -1)) {
+
     algorithm::ExhaustiveSearch search(graph);
 
-    auto actions = search.findBestActions(player_location, objective_id);
+    auto actions = search.findBestActions(player_location, objective_id, previous_shift);
 
     ASSERT_THAT(actions, testing::SizeIs(testing::Ge(1)));
-    EXPECT_TRUE(isCorrectPlayerActionSequence(graph, player_location, actions));
-    EXPECT_TRUE(playerActionsReachObjective(graph, player_location, objective_id, actions));
+    EXPECT_TRUE(isCorrectPlayerActionSequence(actions, graph, player_location));
+    EXPECT_TRUE(playerActionsReachObjective(actions, graph, player_location, objective_id));
+	EXPECT_TRUE(respectPushbackRule(actions, graph.getExtent(), previous_shift));
     EXPECT_THAT(actions, testing::SizeIs(expected_depth));
 }
 
@@ -158,7 +201,7 @@ TEST_F(ExhaustiveSearchTest, d1_direct_path) {
 TEST_F(ExhaustiveSearchTest, withObjectiveLeftover_shouldReturnOneCorrectMove) {
     SCOPED_TRACE("withObjectiveLeftover_shouldReturnOneCorrectMove");
     auto objective_id = graph_.getLeftoverNodeId();
-    Location player_location{0, 0};
+    Location player_location{6, 2};
     performTest(graph_, player_location, objective_id, 1);
 }
 
@@ -211,4 +254,23 @@ TEST_F(ExhaustiveSearchTest, d3_long_running) {
     Location player_location{4, 6};
 
     performTest(graph_, player_location, objective_id, 3);
+}
+
+TEST_F(ExhaustiveSearchTest, withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves) {
+	SCOPED_TRACE("withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves");
+	buildGraph(difficult_maze, { GraphBuilder::OutPath::North, GraphBuilder::OutPath::South });
+	auto objective_id = graph_.getNodeId(Location(6, 6));
+	Location player_location{ 0, 4 };
+
+	performTest(graph_, player_location, objective_id, 3);
+}
+
+TEST_F(ExhaustiveSearchTest, withResultOfLengthOneViolatingGivenPreviousShift_shouldReturnTwoMoves) {
+	SCOPED_TRACE("withResultOfLengthOneViolatingGivenPreviousShift_shouldReturnTwoMoves");
+	buildGraph(difficult_maze, { GraphBuilder::OutPath::North, GraphBuilder::OutPath::South });
+	auto objective_id = graph_.getLeftoverNodeId();
+	Location player_location{ 6, 2 };
+
+	performTest(graph_, player_location, objective_id, 1);
+	performTest(graph_, player_location, objective_id, 2, Location{ 0, 3 });
 }

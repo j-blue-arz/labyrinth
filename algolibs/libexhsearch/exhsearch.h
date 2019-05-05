@@ -23,9 +23,12 @@ public:
 		Location move_location;
 	};
 
-	explicit ExhaustiveSearch(const MazeGraph& graph) : graph_(graph) {}
+	explicit ExhaustiveSearch(const MazeGraph & graph) : graph_(graph) {}
 
-	std::vector<PlayerAction> findBestActions(const Location& source, MazeGraph::NodeId objective_id);
+	std::vector<PlayerAction> findBestActions(
+		const Location & source,
+		MazeGraph::NodeId objective_id,
+		const Location & previous_shift_location = Location(-1, -1));
 
 private:
 	// The algorithm searches for a path reaching the objective in a tree of game states.
@@ -42,7 +45,7 @@ private:
 	using StatePtr = std::shared_ptr<GameStateNode>;
 
 	struct GameStateNode {
-		explicit GameStateNode(StatePtr parent, const ShiftAction& shift, std::vector<reachable::ReachableNode>& reached_nodes)
+		explicit GameStateNode(StatePtr parent, const ShiftAction & shift, std::vector<reachable::ReachableNode> & reached_nodes)
 			: parent(parent), shift(shift), reached_nodes(reached_nodes) {}
 		explicit GameStateNode() : parent(nullptr) {}
 
@@ -56,16 +59,15 @@ private:
 
 	using QueueType = std::queue<std::shared_ptr<GameStateNode>>;
 
-	MazeGraph createGraphFromState(const MazeGraph& base_graph, StatePtr current_state);
-
-	StatePtr createNewState(const MazeGraph& graph, const ShiftAction& shift, StatePtr current_state);
-
+	MazeGraph createGraphFromState(const MazeGraph & base_graph, StatePtr current_state);
+	StatePtr createNewState(const MazeGraph & graph, const ShiftAction & shift, StatePtr current_state);
 	std::vector<PlayerAction> reconstructActions(StatePtr new_state, size_t reachable_index);
+	std::vector<Location> determineReachedLocations(StatePtr current_state, const MazeGraph & graph, Location shift_location);
+	Location opposingShiftLocation(const Location & location);
 
-	std::vector<Location> determineReachedLocations(StatePtr current_state, const MazeGraph& graph, Location shift_location);
 
+	const MazeGraph & graph_;
 
-	const MazeGraph& graph_;
 };
 
 } // namespace algorithm
