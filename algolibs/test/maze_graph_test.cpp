@@ -77,7 +77,7 @@ TEST_F(MazeGraphTest, NodeIdsAreConsecutiveStartingWith0) {
 TEST_F(MazeGraphTest, NodeIdOfLeftoverIs49forExtent7) {
     MazeGraph graph(7);
     auto leftover_id = graph.getLeftoverNodeId();
-    EXPECT_EQ(leftover_id, 49);
+    EXPECT_EQ(leftover_id, 49u);
 
 }
 

@@ -7,14 +7,14 @@ namespace graph {
     public:
         using IndexType = int16_t;
         struct OffsetType {
-            using OffsetValueType = int;
+            using OffsetValueType = int16_t;
             explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept : row_offset(row), column_offset(column) {}
             OffsetValueType row_offset{0};
             OffsetValueType column_offset{0};
 
             template <typename T>
             const OffsetType operator*(T scalar) {
-                return OffsetType(static_cast<int>(row_offset * scalar), static_cast<int>(column_offset * scalar));
+                return OffsetType(static_cast<OffsetValueType>(row_offset * scalar), static_cast<OffsetValueType>(column_offset * scalar));
             }
         };
 

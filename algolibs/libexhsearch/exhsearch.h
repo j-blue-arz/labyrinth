@@ -45,7 +45,7 @@ private:
 	using StatePtr = std::shared_ptr<GameStateNode>;
 
 	struct GameStateNode {
-		explicit GameStateNode(StatePtr parent, const ShiftAction & shift, std::vector<reachable::ReachableNode> & reached_nodes)
+		explicit GameStateNode(StatePtr parent, const ShiftAction & shift, const std::vector<reachable::ReachableNode> & reached_nodes)
 			: parent(parent), shift(shift), reached_nodes(reached_nodes) {}
 		explicit GameStateNode() : parent(nullptr) {}
 

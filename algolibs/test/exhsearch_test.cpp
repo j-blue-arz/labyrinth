@@ -97,11 +97,11 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
 
 ::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
 	const graph::MazeGraph & original_graph,
-    const Location & player_location) {
+    const Location & player_start_location) {
     std::set<graph::MazeGraph::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
     graph::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
-    auto player_location_id = graph.getNodeId(player_location);
+    auto player_location_id = graph.getNodeId(player_start_location);
     for(auto action : actions) {
         if(std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
             return ::testing::AssertionFailure() << "Invalid shift location: " << action.shift.location;
@@ -154,11 +154,11 @@ bool isOpposing(const Location & location1, const Location & location2, size_t e
 
 ::testing::AssertionResult playerActionsReachObjective(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
 	graph::MazeGraph & original_graph,
-    const Location & player_location, 
+    const Location & player_start_location, 
 	graph::MazeGraph::NodeId objective_id) {
 
     graph::MazeGraph graph{original_graph};
-    auto player_location_id = graph.getNodeId(player_location);
+    auto player_location_id = graph.getNodeId(player_start_location);
     for(auto action : actions) {
         graph.shift(action.shift.location, action.shift.rotation);
         auto player_location = graph.getLocation(player_location_id, action.shift.location);

@@ -92,7 +92,7 @@ void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initia
 
 
 
-int main(int argc, char* argv[]) {
+int main() {
     benchmarkSnakeGraph(10, 2000, { 28 });
     benchmarkTreeGraph(10, 2000, { 32 });
     std::cout << "Enter to exit." << std::endl;

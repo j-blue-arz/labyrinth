@@ -29,7 +29,7 @@ std::vector<ExhaustiveSearch::PlayerAction> ExhaustiveSearch::findBestActions(
 			if (shift_location == invalid_shift_location) {
 				continue;
 			}
-			for (MazeGraph::RotationDegreeType rotation : {0, 90, 180, 270}) {
+			for (MazeGraph::RotationDegreeType rotation : std::initializer_list<MazeGraph::RotationDegreeType>{0, 90, 180, 270}) {
 				auto new_state = createNewState(graph, ShiftAction{ shift_location, rotation }, current_state);
 				auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
 					[objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
