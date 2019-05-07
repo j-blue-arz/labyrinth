@@ -50,23 +50,23 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph
     constexpr size_t no_parent = std::numeric_limits<size_t>::max();
     std::queue<Location> q;
     std::vector<size_t> parent_index(graph.getNumberOfNodes() + 1, no_parent);
-    for(size_t i = 0; i < sources.size(); ++i) {
+    for (size_t i = 0; i < sources.size(); ++i) {
         q.push(sources[i]);
         parent_index[graph.getNodeId(sources[i])] = i;
     }
-    while(!q.empty()) {
+    while (!q.empty()) {
         auto location = q.front();
         q.pop();
-        for(auto neighbor_location : graph.neighbors(location)) {
-            if(no_parent == parent_index[graph.getNodeId(neighbor_location)]) {
+        for (auto neighbor_location : graph.neighbors(location)) {
+            if (no_parent == parent_index[graph.getNodeId(neighbor_location)]) {
                 parent_index[graph.getNodeId(neighbor_location)] = parent_index[graph.getNodeId(location)];
                 q.push(neighbor_location);
             }
         }
     }
     std::vector<ReachableNode> result;
-    for(MazeGraph::NodeId node_id = 0; node_id < parent_index.size(); ++node_id) {
-        if(no_parent != parent_index[node_id]) {
+    for (MazeGraph::NodeId node_id = 0; node_id < parent_index.size(); ++node_id) {
+        if (no_parent != parent_index[node_id]) {
             result.emplace_back(parent_index[node_id], node_id);
         }
     }

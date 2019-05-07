@@ -25,7 +25,7 @@ private:
     static OutPath rotateOutPath(OutPath out_path, RotationDegreeType degree);
     static RotationDegreeType addRotations(RotationDegreeType rotation1, RotationDegreeType rotation2);
 
-    
+
 };
 
 }

@@ -57,9 +57,9 @@ private:
     using OffsetType = Location::OffsetType;
 
     struct Node {
-        std::string out_paths{ "" };
-        RotationDegreeType rotation{ 0 };
-        NodeId node_id{ 0 };
+        std::string out_paths{""};
+        RotationDegreeType rotation{0};
+        NodeId node_id{0};
     };
 
     class NeighborIterator {
@@ -79,7 +79,7 @@ private:
         reference operator*() const;
         pointer operator->() = delete;
 
-        NeighborIterator& operator++();
+        NeighborIterator & operator++();
         NeighborIterator operator++(int);
     private:
         using NeighborIndex = unsigned int;
@@ -131,6 +131,6 @@ private:
 } // namespace graph
 
 namespace std {
-std::ostream& operator<<(std::ostream & os, const graph::MazeGraph & graph);
+std::ostream & operator<<(std::ostream & os, const graph::MazeGraph & graph);
 }
 

@@ -28,7 +28,7 @@ protected:
         graph_ = builder.buildGraph();
     }
 
-    MazeGraph graph_{ 0 };
+    MazeGraph graph_{0};
 };
 
 TEST_F(GraphAlgorithmsTest, IsReachableForNeighbor) {

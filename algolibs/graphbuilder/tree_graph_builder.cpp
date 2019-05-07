@@ -19,7 +19,7 @@ MazeGraph TreeGraphBuilder::buildGraph() {
     addPath(Location(extent - 1, 0), extent, OutPath::East);
     addPath(Location(0, extent - 1), extent, OutPath::South);
     recursivelyBuildTree(Location(0, extent - 1), extent, 0);
-    
+
     return constructGraph();
 }
 
@@ -83,19 +83,19 @@ TreeGraphBuilder::OutPath TreeGraphBuilder::mirrorOutPath(OutPath out_path) noex
     case OutPath::South:
         return OutPath::North;
     }
-	return OutPath::East;
+    return OutPath::East;
 }
 
 Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPath out_path) noexcept {
     switch (out_path) {
     case OutPath::North:
-        return Location::OffsetType{ -1, 0 };
+        return Location::OffsetType{-1, 0};
     case OutPath::East:
-        return Location::OffsetType{ 0, 1 };
+        return Location::OffsetType{0, 1};
     case OutPath::South:
-        return Location::OffsetType{ 1, 0 };
+        return Location::OffsetType{1, 0};
     }
-	return Location::OffsetType{ 0, -1 };
+    return Location::OffsetType{0, -1};
 }
 
 TreeGraphBuilder::OutPath TreeGraphBuilder::rotateOutPath(OutPath out_path, RotationDegreeType degree) {

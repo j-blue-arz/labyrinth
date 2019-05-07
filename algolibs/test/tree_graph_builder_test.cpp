@@ -12,10 +12,10 @@ TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     TreeGraphBuilder builder{};
     MazeGraph graph = builder.setExtent(2).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(1, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), { Location(1, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), { Location(0, 1), Location(1, 0) }));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), {Location(0, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), {Location(0, 0), Location(1, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), {Location(1, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), {Location(0, 1), Location(1, 0)}));
 }
 
 TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {

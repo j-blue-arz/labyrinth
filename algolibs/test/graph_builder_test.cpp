@@ -31,7 +31,7 @@ protected:
         graph_ = builder.buildGraph();
     }
 
-    MazeGraph graph_{ 0 };
+    MazeGraph graph_{0};
 };
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectExtent) {
@@ -39,31 +39,31 @@ TEST_F(GraphBuilderFromTextTest, HasCorrectExtent) {
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt0_0) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 0), { Location(0, 1), Location(1, 0) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 0), {Location(0, 1), Location(1, 0)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt0_1) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 1), { Location(0, 0), Location(0, 2) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 1), {Location(0, 0), Location(0, 2)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt0_2) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 2), { Location(0, 1) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(0, 2), {Location(0, 1)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt1_0) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 0), { Location(0, 0), Location(1, 1), Location(2, 0) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 0), {Location(0, 0), Location(1, 1), Location(2, 0)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt1_1) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 1), { Location(1, 0), Location(1, 2) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 1), {Location(1, 0), Location(1, 2)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt1_2) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 2), { Location(1, 1) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(1, 2), {Location(1, 1)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_0) {
-    EXPECT_TRUE(hasNeighbors(graph_, Location(2, 0), { Location(1, 0) }));
+    EXPECT_TRUE(hasNeighbors(graph_, Location(2, 0), {Location(1, 0)}));
 }
 
 TEST_F(GraphBuilderFromTextTest, HasCorrectNodeAt2_1) {
@@ -86,10 +86,10 @@ TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfTwo) {
     builder.setExtent(2);
     MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(1, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), { Location(1, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), { Location(0, 1), Location(1, 0) }));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), {Location(0, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), {Location(0, 0), Location(1, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), {Location(1, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), {Location(0, 1), Location(1, 0)}));
 }
 
 TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfThree) {
@@ -97,15 +97,15 @@ TEST(GraphBuilderSnakeTest, CorrectNeighborsForExtentOfThree) {
     builder.setExtent(3);
     MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 9);
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), { Location(0, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), { Location(0, 0), Location(0, 2) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(0, 2), { Location(0, 1), Location(1, 2) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 2), { Location(0, 2), Location(1, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), { Location(1, 2), Location(1, 0) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), { Location(1, 1), Location(2, 0) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(2, 0), { Location(1, 0), Location(2, 1) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(2, 1), { Location(2, 0), Location(2, 2) }));
-    EXPECT_TRUE(hasNeighbors(graph, Location(2, 2), { Location(2, 1) }));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 0), {Location(0, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 1), {Location(0, 0), Location(0, 2)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(0, 2), {Location(0, 1), Location(1, 2)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 2), {Location(0, 2), Location(1, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 1), {Location(1, 2), Location(1, 0)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(1, 0), {Location(1, 1), Location(2, 0)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(2, 0), {Location(1, 0), Location(2, 1)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(2, 1), {Location(2, 0), Location(2, 2)}));
+    EXPECT_TRUE(hasNeighbors(graph, Location(2, 2), {Location(2, 1)}));
 }
 
 TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {

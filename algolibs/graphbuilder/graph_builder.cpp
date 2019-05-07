@@ -22,7 +22,7 @@ GraphBuilder & GraphBuilder::withStandardShiftLocations() {
 }
 
 GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath> out_paths) {
-    for(auto out_path : out_paths) {
+    for (auto out_path : out_paths) {
         addOutPath(leftover_out_paths_, out_path);
     }
     return *this;
@@ -39,8 +39,8 @@ MazeGraph GraphBuilder::constructGraph() {
     }
     auto leftover_out_paths = outPathsToString(leftover_out_paths_);
     graph.setLeftoverOutPaths(leftover_out_paths);
-    if(standard_shift_locations_) {
-        for(auto pos = 1; pos < extent; pos += 2) {
+    if (standard_shift_locations_) {
+        for (auto pos = 1; pos < extent; pos += 2) {
             graph.addShiftLocation(Location(0, pos));
             graph.addShiftLocation(Location(extent - 1, pos));
             graph.addShiftLocation(Location(pos, 0));
@@ -52,16 +52,16 @@ MazeGraph GraphBuilder::constructGraph() {
 
 std::string GraphBuilder::outPathsToString(GraphBuilder::OutPaths out_paths) {
     std::string graph_out_paths;
-    if(out_paths.test(static_cast<size_t>(OutPath::North))) {
+    if (out_paths.test(static_cast<size_t>(OutPath::North))) {
         graph_out_paths.append("N");
     }
-    if(out_paths.test(static_cast<size_t>(OutPath::East))) {
+    if (out_paths.test(static_cast<size_t>(OutPath::East))) {
         graph_out_paths.append("E");
     }
-    if(out_paths.test(static_cast<size_t>(OutPath::South))) {
+    if (out_paths.test(static_cast<size_t>(OutPath::South))) {
         graph_out_paths.append("S");
     }
-    if(out_paths.test(static_cast<size_t>(OutPath::West))) {
+    if (out_paths.test(static_cast<size_t>(OutPath::West))) {
         graph_out_paths.append("W");
     }
     return graph_out_paths;

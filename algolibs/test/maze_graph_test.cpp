@@ -54,8 +54,8 @@ TEST_F(MazeGraphTest, NumberOfNodesIsCorrect) {
 
 TEST_F(MazeGraphTest, AllNodesHaveUniqueIds) {
     std::set<MazeGraph::NodeId> ids;
-    for(auto row = 0; row < MazeGraphTest::extent; row++) {
-        for(auto column = 0; column < MazeGraphTest::extent; column++) {
+    for (auto row = 0; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0; column < MazeGraphTest::extent; column++) {
             ids.insert(graph_.getNodeId(Location(row, column)));
         }
     }
@@ -64,12 +64,12 @@ TEST_F(MazeGraphTest, AllNodesHaveUniqueIds) {
 
 TEST_F(MazeGraphTest, NodeIdsAreConsecutiveStartingWith0) {
     std::set<MazeGraph::NodeId> ids;
-    for(auto row = 0; row < MazeGraphTest::extent; row++) {
-        for(auto column = 0; column < MazeGraphTest::extent; column++) {
+    for (auto row = 0; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0; column < MazeGraphTest::extent; column++) {
             ids.insert(graph_.getNodeId(Location(row, column)));
         }
     }
-    for(MazeGraph::NodeId id = 0; id < ids.size(); id++) {
+    for (MazeGraph::NodeId id = 0; id < ids.size(); id++) {
         EXPECT_TRUE(ids.find(id) != ids.end()) << "Node id " << id << " is not contained in the graph.";
     }
 }
@@ -104,7 +104,7 @@ TEST_F(MazeGraphTest, NeighborsForBorderNodeWithThreeNeighbors) {
 TEST_F(MazeGraphTest, NeighborsForBorderNodeWithThreeNeighbors_Iter) {
     auto neighbors = graph_.neighbors(Location(1, 0));
     std::set<Location> neighbor_set;
-    for(auto iter = neighbors.begin(); iter != neighbors.end(); iter++) {
+    for (auto iter = neighbors.begin(); iter != neighbors.end(); iter++) {
         Location location = *iter;
         neighbor_set.insert(location);
     }
@@ -157,7 +157,7 @@ TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectNodeIds) {
 }
 
 TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectPaths) {
-    
+
     graph_.shift(Location(0, 1), 0);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location(1, 1), {Location(1, 0), Location(1, 2)}));

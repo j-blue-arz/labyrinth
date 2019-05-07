@@ -18,7 +18,7 @@ using QuerySupplier = std::function<std::vector<std::pair<Location, Location>>()
 void runQueries(const MazeGraph & graph, std::vector<std::pair<Location, Location>> & queries) {
     volatile bool is_reachable = true;
     for (const auto & pair : queries) {
-		is_reachable &= reachable::isReachable(graph, pair.first, pair.second);
+        is_reachable &= reachable::isReachable(graph, pair.first, pair.second);
     }
 }
 
@@ -43,8 +43,7 @@ void runBenchmark(const MazeGraph & graph, size_t runs, QuerySupplier query_supp
     std::cout << "Best run took " << perQuery.count() << "us per query." << std::endl;
 }
 
-std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent, size_t number)
-{
+std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent, size_t number) {
     std::default_random_engine rng;
     std::uniform_int_distribution<int> dist(0, static_cast<int>(extent - 1));
     std::vector<std::pair<Location, Location>> queries;
@@ -70,7 +69,7 @@ std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent,
     return queries;
 }
 
-void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = { 7, 14, 28 }) {
+void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = {7, 14, 28}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;
@@ -80,7 +79,7 @@ void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initi
     }
 }
 
-void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = { 8, 16, 32 }) {
+void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = {8, 16, 32}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for tree graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;
@@ -93,8 +92,8 @@ void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initia
 
 
 int main() {
-    benchmarkSnakeGraph(10, 2000, { 28 });
-    benchmarkTreeGraph(10, 2000, { 32 });
+    benchmarkSnakeGraph(10, 2000, {28});
+    benchmarkTreeGraph(10, 2000, {32});
     std::cout << "Enter to exit." << std::endl;
     std::cin.ignore();
 }
