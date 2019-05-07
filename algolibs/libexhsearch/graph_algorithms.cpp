@@ -47,7 +47,7 @@ std::vector<Location> reachableLocations(const MazeGraph & graph, const Location
 }
 
 std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph, const std::vector<Location> & sources) {
-    const size_t no_parent = std::numeric_limits<size_t>::max();
+    constexpr size_t no_parent = std::numeric_limits<size_t>::max();
     std::queue<Location> q;
     std::vector<size_t> parent_index(graph.getNumberOfNodes() + 1, no_parent);
     for(size_t i = 0; i < sources.size(); ++i) {
