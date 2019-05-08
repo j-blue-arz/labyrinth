@@ -3,7 +3,7 @@
 namespace graph {
 
 const Location Location::operator+(const OffsetType & offset) const noexcept {
-    return Location(row_ + offset.row_offset, column_ + offset.column_offset);
+    return Location{row_ + offset.row_offset, column_ + offset.column_offset};
 }
 
 const Location & Location::operator+=(const OffsetType & offset) noexcept {

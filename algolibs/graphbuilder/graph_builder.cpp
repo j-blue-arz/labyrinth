@@ -30,21 +30,21 @@ GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath>
 
 MazeGraph GraphBuilder::constructGraph() {
     auto extent = out_paths_.size();
-    MazeGraph graph(extent);
+    MazeGraph graph{extent};
     for (auto row = 0; row < extent; ++row) {
         for (auto column = 0; column < extent; ++column) {
             auto graph_out_paths = outPathsToString(out_paths_[row][column]);
-            graph.setOutPaths(Location(row, column), graph_out_paths);
+            graph.setOutPaths(Location{row, column}, graph_out_paths);
         }
     }
     auto leftover_out_paths = outPathsToString(leftover_out_paths_);
     graph.setLeftoverOutPaths(leftover_out_paths);
     if (standard_shift_locations_) {
         for (auto pos = 1; pos < extent; pos += 2) {
-            graph.addShiftLocation(Location(0, pos));
-            graph.addShiftLocation(Location(extent - 1, pos));
-            graph.addShiftLocation(Location(pos, 0));
-            graph.addShiftLocation(Location(pos, extent - 1));
+            graph.addShiftLocation(Location{0, pos});
+            graph.addShiftLocation(Location{extent - 1, pos});
+            graph.addShiftLocation(Location{pos, 0});
+            graph.addShiftLocation(Location{pos, extent - 1});
         }
     }
     return graph;

@@ -51,16 +51,16 @@ MazeGraph TextGraphBuilder::buildGraph() {
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             if (lines_[first(row)][second(column)] == '.') {
-                addOutPath(Location(row, column), OutPath::North);
+                addOutPath(Location{row, column}, OutPath::North);
             }
             if (lines_[second(row)][third(column)] == '.') {
-                addOutPath(Location(row, column), OutPath::East);
+                addOutPath(Location{row, column}, OutPath::East);
             }
             if (lines_[third(row)][second(column)] == '.') {
-                addOutPath(Location(row, column), OutPath::South);
+                addOutPath(Location{row, column}, OutPath::South);
             }
             if (lines_[second(row)][first(column)] == '.') {
-                addOutPath(Location(row, column), OutPath::West);
+                addOutPath(Location{row, column}, OutPath::West);
             }
         }
     }

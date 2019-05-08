@@ -4,13 +4,13 @@
 
 namespace graph {
 
-MazeGraph::MazeGraph(size_t extent) : extent_(extent) {
+MazeGraph::MazeGraph(size_t extent) : extent_{extent} {
     NodeId current = 0;
     node_matrix_.resize(extent);
     for (auto row = 0; row < extent; row++) {
         node_matrix_[row].resize(extent);
         for (auto column = 0; column < extent; column++) {
-            getNode(Location(row, column)).node_id = current++;
+            getNode(Location{row, column}).node_id = current++;
         }
     }
     leftover_.node_id = current;
@@ -47,7 +47,7 @@ Location MazeGraph::getLocation(MazeGraph::NodeId node_id, const Location & left
     for (Location::IndexType row = 0; row < extent_; ++row) {
         for (Location::IndexType column = 0; column < extent_; ++column) {
             if (node_matrix_[row][column].node_id == node_id) {
-                return Location(row, column);
+                return Location{row, column};
             }
         }
     }
@@ -154,11 +154,11 @@ Location::OffsetType MazeGraph::offsetFromOutPath(OutPathType out_path) noexcept
 }
 
 MazeGraph::NeighborIterator MazeGraph::NeighborIterator::begin(const MazeGraph & graph, const Location & location, const Node & node) {
-    return MazeGraph::NeighborIterator(0, graph, location, node);
+    return MazeGraph::NeighborIterator{0, graph, location, node};
 }
 
 MazeGraph::NeighborIterator MazeGraph::NeighborIterator::end(const MazeGraph & graph, const Location & location, const Node & node) {
-    return MazeGraph::NeighborIterator(5, graph, location, node);
+    return MazeGraph::NeighborIterator{5, graph, location, node};
 }
 
 bool MazeGraph::NeighborIterator::operator==(const NeighborIterator & other) const noexcept {
@@ -203,7 +203,7 @@ void MazeGraph::NeighborIterator::moveToNextNeighbor() {
 }
 
 MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) :
-    graph_(graph), location_(location), node_(node) {}
+    graph_{graph}, location_{location}, node_{node} {}
 
 MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() {
     return MazeGraph::NeighborIterator::begin(graph_, location_, node_);

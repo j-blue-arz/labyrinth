@@ -23,12 +23,12 @@ public:
         Location move_location;
     };
 
-    explicit ExhaustiveSearch(const MazeGraph & graph) : graph_(graph) {}
+    explicit ExhaustiveSearch(const MazeGraph & graph) : graph_{graph} {}
 
     std::vector<PlayerAction> findBestActions(
         const Location & source,
         MazeGraph::NodeId objective_id,
-        const Location & previous_shift_location = Location(-1, -1));
+        const Location & previous_shift_location = Location{-1, -1});
 
 private:
     // The algorithm searches for a path reaching the objective in a tree of game states.
@@ -46,8 +46,8 @@ private:
 
     struct GameStateNode {
         explicit GameStateNode(StatePtr parent, const ShiftAction & shift, const std::vector<reachable::ReachableNode> & reached_nodes)
-            : parent(parent), shift(shift), reached_nodes(reached_nodes) {}
-        explicit GameStateNode() : parent(nullptr) {}
+            : parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
+        explicit GameStateNode() : parent{nullptr} {}
 
         StatePtr parent{nullptr};
         ShiftAction shift{};

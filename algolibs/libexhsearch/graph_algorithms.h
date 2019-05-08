@@ -13,7 +13,7 @@ namespace reachable {
 
 struct ReachableNode {
     explicit ReachableNode(size_t parent_source_index, MazeGraph::NodeId reached_id) :
-        parent_source_index(parent_source_index), reached_id(reached_id) {}
+        parent_source_index{parent_source_index}, reached_id{reached_id} {}
     size_t parent_source_index;
     MazeGraph::NodeId reached_id;
 };

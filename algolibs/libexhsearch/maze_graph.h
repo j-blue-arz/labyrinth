@@ -84,7 +84,7 @@ private:
     private:
         using NeighborIndex = unsigned int;
         NeighborIterator(NeighborIndex index, const MazeGraph & graph, const Location & location, const Node & node) :
-            index_(index), graph_(graph), location_(location), node_(node) {
+            index_{index}, graph_{graph}, location_{location}, node_{node} {
             moveToNextNeighbor();
         };
 

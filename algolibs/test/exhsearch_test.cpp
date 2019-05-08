@@ -120,7 +120,7 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
 }
 
 bool isOpposing(const Location & location1, const Location & location2, size_t extent) {
-    auto border = static_cast<Location::IndexType>(extent - 1);
+    auto border{static_cast<Location::IndexType>(extent - 1)};
     auto isOpposingIndex = [border](Location::IndexType index1, Location::IndexType index2) {
         return std::set<Location::IndexType>{index1, index2} == std::set<Location::IndexType>{0, border};
     };
@@ -178,7 +178,7 @@ void performTest(MazeGraph & graph,
                  const Location & player_location,
                  MazeGraph::NodeId objective_id,
                  size_t expected_depth,
-                 const Location & previous_shift = Location(-1, -1)) {
+                 const Location & previous_shift = Location{-1, -1}) {
 
     algorithm::ExhaustiveSearch search(graph);
 
@@ -215,7 +215,7 @@ TEST_F(ExhaustiveSearchTest, requiresRotatingLeftover_shouldReturnOneCorrectMove
 
 TEST_F(ExhaustiveSearchTest, d2_two_shifts) {
     SCOPED_TRACE("d2_two_shifts");
-    auto objective_id = graph_.getNodeId(Location(6, 6));
+    auto objective_id = graph_.getNodeId(Location{6, 6});
     Location player_location{3, 3};
     performTest(graph_, player_location, objective_id, 2);
 }
@@ -223,7 +223,7 @@ TEST_F(ExhaustiveSearchTest, d2_two_shifts) {
 TEST_F(ExhaustiveSearchTest, d2_long_running) {
     SCOPED_TRACE("d2_long_running");
     graph_.setLeftoverOutPaths("NES");
-    auto objective_id = graph_.getNodeId(Location(3, 2));
+    auto objective_id = graph_.getNodeId(Location{3, 2});
     Location player_location{0, 5};
 
     performTest(graph_, player_location, objective_id, 2);
@@ -232,7 +232,7 @@ TEST_F(ExhaustiveSearchTest, d2_long_running) {
 TEST_F(ExhaustiveSearchTest, d2_self_push_out) {
     SCOPED_TRACE("d2_self_push_out");
     buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
-    auto objective_id = graph_.getNodeId(Location(6, 6));
+    auto objective_id = graph_.getNodeId(Location{6, 6});
     Location player_location{0, 6};
 
     performTest(graph_, player_location, objective_id, 2);
@@ -241,7 +241,7 @@ TEST_F(ExhaustiveSearchTest, d2_self_push_out) {
 TEST_F(ExhaustiveSearchTest, d3_obj_push_out) {
     SCOPED_TRACE("d3_obj_push_out");
     buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
-    auto objective_id = graph_.getNodeId(Location(5, 1));
+    auto objective_id = graph_.getNodeId(Location{5, 1});
     Location player_location{0, 6};
 
     performTest(graph_, player_location, objective_id, 3);
@@ -250,7 +250,7 @@ TEST_F(ExhaustiveSearchTest, d3_obj_push_out) {
 TEST_F(ExhaustiveSearchTest, d3_long_running) {
     SCOPED_TRACE("d3_long_running");
     buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
-    auto objective_id = graph_.getNodeId(Location(1, 1));
+    auto objective_id = graph_.getNodeId(Location{1, 1});
     Location player_location{4, 6};
 
     performTest(graph_, player_location, objective_id, 3);
@@ -259,7 +259,7 @@ TEST_F(ExhaustiveSearchTest, d3_long_running) {
 TEST_F(ExhaustiveSearchTest, withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves) {
     SCOPED_TRACE("withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves");
     buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
-    auto objective_id = graph_.getNodeId(Location(6, 6));
+    auto objective_id = graph_.getNodeId(Location{6, 6});
     Location player_location{0, 4};
 
     performTest(graph_, player_location, objective_id, 3);

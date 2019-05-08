@@ -47,7 +47,7 @@ size_t countEdges(const graph::MazeGraph & g) {
     size_t count = 0;
     for (auto row = 0; row < g.getExtent(); row++) {
         for (auto column = 0; column < g.getExtent(); column++) {
-            count += numNeighbors(g, graph::Location(row, column));
+            count += numNeighbors(g, graph::Location{row, column});
         }
     }
     return count / 2;

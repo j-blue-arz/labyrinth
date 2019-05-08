@@ -8,20 +8,20 @@ public:
     using IndexType = int16_t;
     struct OffsetType {
         using OffsetValueType = int16_t;
-        explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept : row_offset(row), column_offset(column) {}
+        explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept : row_offset{row}, column_offset{column} {}
         OffsetValueType row_offset{0};
         OffsetValueType column_offset{0};
 
         template <typename T>
         const OffsetType operator*(T scalar) {
-            return OffsetType(static_cast<OffsetValueType>(row_offset * scalar), static_cast<OffsetValueType>(column_offset * scalar));
+            return OffsetType{static_cast<OffsetValueType>(row_offset * scalar), static_cast<OffsetValueType>(column_offset * scalar)};
         }
     };
 
-    Location() noexcept : row_(-1), column_(-1) {}
+    Location() noexcept : row_{-1}, column_{-1} {}
 
     template <typename T, typename U>
-    explicit Location(T row, U column) noexcept : row_(static_cast<IndexType>(row)), column_(static_cast<IndexType>(column)) {}
+    explicit Location(T row, U column) noexcept : row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
     virtual ~Location() = default;
     Location(const Location &) = default;
     Location & operator=(const Location &) = default;

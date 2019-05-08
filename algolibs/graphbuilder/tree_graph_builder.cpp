@@ -16,9 +16,9 @@ TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
 
 MazeGraph TreeGraphBuilder::buildGraph() {
     auto extent = out_paths_.size();
-    addPath(Location(extent - 1, 0), extent, OutPath::East);
-    addPath(Location(0, extent - 1), extent, OutPath::South);
-    recursivelyBuildTree(Location(0, extent - 1), extent, 0);
+    addPath(Location{extent - 1, 0}, extent, OutPath::East);
+    addPath(Location{0, extent - 1}, extent, OutPath::South);
+    recursivelyBuildTree(Location{0, extent - 1}, extent, 0);
 
     return constructGraph();
 }

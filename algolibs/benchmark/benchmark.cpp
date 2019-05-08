@@ -49,8 +49,8 @@ std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent
     std::vector<std::pair<Location, Location>> queries;
     queries.reserve(number);
     for (auto i = 0; i < number / 2; i++) {
-        queries.push_back(std::make_pair(Location(0, dist(rng)), Location(extent - 1, dist(rng))));
-        queries.push_back(std::make_pair(Location(extent - 1, dist(rng)), Location(0, dist(rng))));
+        queries.push_back(std::make_pair(Location{0, dist(rng)}, Location{extent - 1, dist(rng)}));
+        queries.push_back(std::make_pair(Location{extent - 1, dist(rng)}, Location{0, dist(rng)}));
     }
     std::random_shuffle(queries.begin(), queries.end());
     return queries;
@@ -59,11 +59,11 @@ std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent
 std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent, size_t number) {
     std::vector<std::pair<Location, Location>> queries;
     std::default_random_engine rng;
-    std::uniform_int_distribution<int> dist(0, static_cast<int>(extent - 2));
+    std::uniform_int_distribution<int> dist{0, static_cast<int>(extent - 2)};
     queries.reserve(number);
     for (auto i = 0; i < number / 2; i++) {
-        queries.push_back(std::make_pair(Location(extent - 1, dist(rng)), Location(dist(rng), 0)));
-        queries.push_back(std::make_pair(Location(dist(rng), 0), Location(extent - 1, dist(rng))));
+        queries.push_back(std::make_pair(Location{extent - 1, dist(rng)}, Location{dist(rng), 0}));
+        queries.push_back(std::make_pair(Location{dist(rng), 0}, Location{extent - 1, dist(rng)}));
     }
     std::random_shuffle(queries.begin(), queries.end());
     return queries;
