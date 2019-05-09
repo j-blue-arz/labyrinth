@@ -1,6 +1,6 @@
 #include "location.h"
 
-namespace graph {
+namespace labyrinth {
 
 const Location Location::operator+(const OffsetType & offset) const noexcept {
     return Location{row_ + offset.row_offset, column_ + offset.column_offset};
@@ -17,7 +17,7 @@ const Location & Location::operator+=(const OffsetType & offset) noexcept {
 
 
 namespace std {
-std::ostream & operator<<(std::ostream & stream, const graph::Location & location) {
+std::ostream & operator<<(std::ostream & stream, const labyrinth::Location & location) {
     stream << "(" << location.getRow() << ", " << location.getColumn() << ")";
     return stream;
 }

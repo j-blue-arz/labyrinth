@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace graph {
+namespace labyrinth {
 
 class SnakeGraphBuilder : public GraphBuilder {
 public:

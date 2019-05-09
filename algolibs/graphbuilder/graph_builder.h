@@ -4,7 +4,7 @@
 
 #include <bitset>
 
-namespace graph {
+namespace labyrinth {
 
 class GraphBuilder {
 protected:
@@ -20,7 +20,7 @@ public:
     virtual ~GraphBuilder() {};
     virtual MazeGraph buildGraph() = 0;
 
-    GraphBuilder & withStandardShiftLocations();
+    GraphBuilder & withStandardShiftLocations() noexcept;
     GraphBuilder & withLeftoverOutPaths(std::initializer_list<OutPath> out_paths);
 protected:
     using OutPaths = std::bitset<4>;

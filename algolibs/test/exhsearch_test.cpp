@@ -8,7 +8,7 @@
 
 #include <set>
 
-using namespace graph;
+using namespace labyrinth;
 
 class ExhaustiveSearchTest : public ::testing::Test {
 protected:
@@ -95,11 +95,11 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
     "---------------------------*"
 };
 
-::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
-                                                         const graph::MazeGraph & original_graph,
+::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::exhsearch::PlayerAction> & actions,
+                                                         const labyrinth::MazeGraph & original_graph,
                                                          const Location & player_start_location) {
-    std::set<graph::MazeGraph::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
-    graph::MazeGraph graph{original_graph};
+    std::set<labyrinth::MazeGraph::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
+    labyrinth::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
     auto player_location_id = graph.getNodeId(player_start_location);
     for (auto action : actions) {
@@ -133,7 +133,7 @@ bool isOpposing(const Location & location1, const Location & location2, size_t e
     return false;
 }
 
-::testing::AssertionResult respectPushbackRule(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
+::testing::AssertionResult respectPushbackRule(const std::vector<labyrinth::exhsearch::PlayerAction> & actions,
                                                size_t extent,
                                                const Location & previous_shift_location) {
     std::vector<Location> shift_locations;
@@ -152,12 +152,12 @@ bool isOpposing(const Location & location1, const Location & location2, size_t e
 
 }
 
-::testing::AssertionResult playerActionsReachObjective(const std::vector<algorithm::ExhaustiveSearch::PlayerAction> & actions,
-                                                       graph::MazeGraph & original_graph,
+::testing::AssertionResult playerActionsReachObjective(const std::vector<labyrinth::exhsearch::PlayerAction> & actions,
+                                                       labyrinth::MazeGraph & original_graph,
                                                        const Location & player_start_location,
-                                                       graph::MazeGraph::NodeId objective_id) {
+                                                       labyrinth::MazeGraph::NodeId objective_id) {
 
-    graph::MazeGraph graph{original_graph};
+    labyrinth::MazeGraph graph{original_graph};
     auto player_location_id = graph.getNodeId(player_start_location);
     for (auto action : actions) {
         graph.shift(action.shift.location, action.shift.rotation);
@@ -180,9 +180,7 @@ void performTest(MazeGraph & graph,
                  size_t expected_depth,
                  const Location & previous_shift = Location{-1, -1}) {
 
-    algorithm::ExhaustiveSearch search(graph);
-
-    auto actions = search.findBestActions(player_location, objective_id, previous_shift);
+    auto actions = labyrinth::exhsearch::findBestActions(graph, player_location, objective_id, previous_shift);
 
     ASSERT_THAT(actions, testing::SizeIs(testing::Ge(1)));
     EXPECT_TRUE(isCorrectPlayerActionSequence(actions, graph, player_location));

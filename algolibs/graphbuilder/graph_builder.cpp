@@ -1,6 +1,6 @@
 #include "graph_builder.h"
 
-namespace graph {
+namespace labyrinth {
 
 void GraphBuilder::addOutPath(OutPaths & out_paths, OutPath out_path) {
     out_paths.set(static_cast<size_t>(out_path));
@@ -16,7 +16,7 @@ void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<
     }
 }
 
-GraphBuilder & GraphBuilder::withStandardShiftLocations() {
+GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
     standard_shift_locations_ = true;
     return *this;
 }
@@ -29,7 +29,7 @@ GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath>
 }
 
 MazeGraph GraphBuilder::constructGraph() {
-    auto extent = out_paths_.size();
+    const auto extent = out_paths_.size();
     MazeGraph graph{extent};
     for (auto row = 0; row < extent; ++row) {
         for (auto column = 0; column < extent; ++column) {

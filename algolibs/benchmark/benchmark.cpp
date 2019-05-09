@@ -10,7 +10,7 @@
 #include <functional>
 #include <random>
 
-using namespace graph;
+using namespace labyrinth;
 using namespace std::chrono;
 
 using QuerySupplier = std::function<std::vector<std::pair<Location, Location>>()>;
@@ -26,14 +26,14 @@ void runQueries(const MazeGraph & graph, std::vector<std::pair<Location, Locatio
 void runBenchmark(const MazeGraph & graph, size_t runs, QuerySupplier query_supplier) {
     // warmup
     std::vector<std::pair<Location, Location>> queries = query_supplier();
-    size_t number = queries.size();
+    const size_t number = queries.size();
     runQueries(graph, queries);
     auto best = high_resolution_clock::duration::max();
     for (size_t run = 0; run < runs; run++) {
         queries = query_supplier();
-        auto start = high_resolution_clock::now();
+        const auto start = high_resolution_clock::now();
         runQueries(graph, queries);
-        auto stop = high_resolution_clock::now();
+        const auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
         if (best > duration) {
             best = duration;
@@ -45,7 +45,7 @@ void runBenchmark(const MazeGraph & graph, size_t runs, QuerySupplier query_supp
 
 std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent, size_t number) {
     std::default_random_engine rng;
-    std::uniform_int_distribution<int> dist(0, static_cast<int>(extent - 1));
+    const std::uniform_int_distribution<int> dist(0, static_cast<int>(extent - 1));
     std::vector<std::pair<Location, Location>> queries;
     queries.reserve(number);
     for (auto i = 0; i < number / 2; i++) {
@@ -59,7 +59,7 @@ std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent
 std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent, size_t number) {
     std::vector<std::pair<Location, Location>> queries;
     std::default_random_engine rng;
-    std::uniform_int_distribution<int> dist{0, static_cast<int>(extent - 2)};
+    const std::uniform_int_distribution<int> dist{0, static_cast<int>(extent - 2)};
     queries.reserve(number);
     for (auto i = 0; i < number / 2; i++) {
         queries.push_back(std::make_pair(Location{extent - 1, dist(rng)}, Location{dist(rng), 0}));

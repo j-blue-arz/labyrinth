@@ -7,7 +7,7 @@
 #include <vector>
 
 
-namespace graph {
+namespace labyrinth {
 
 namespace reachable {
 

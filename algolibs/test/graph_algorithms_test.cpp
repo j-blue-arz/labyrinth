@@ -3,7 +3,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace graph;
+using namespace labyrinth;
 
 class GraphAlgorithmsTest : public ::testing::Test {
 protected:

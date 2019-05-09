@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream> 
 
-namespace graph {
+namespace labyrinth {
 
 class Location {
 public:
@@ -44,15 +44,15 @@ protected:
     IndexType column_{0};
 };
 
-inline bool operator==(const graph::Location & lhs, const graph::Location & rhs) {
+inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) {
     return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
 }
 
-inline bool operator!=(const graph::Location & lhs, const graph::Location & rhs) noexcept {
+inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
     return !(lhs == rhs);
 }
 
-inline bool operator<(const graph::Location & lhs, const graph::Location & rhs) noexcept {
+inline bool operator<(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
     if (lhs.getRow() < rhs.getRow()) return true;
     if (lhs.getRow() > rhs.getRow()) return false;
     return lhs.getColumn() < rhs.getColumn();
@@ -61,10 +61,10 @@ inline bool operator<(const graph::Location & lhs, const graph::Location & rhs) 
 } // namespace graph
 
 namespace std {
-std::ostream & operator<<(std::ostream & stream, const graph::Location & location);
+std::ostream & operator<<(std::ostream & stream, const labyrinth::Location & location);
 
-template<> struct hash<graph::Location> {
-    std::size_t operator()(graph::Location const & location) const noexcept {
+template<> struct hash<labyrinth::Location> {
+    std::size_t operator()(labyrinth::Location const & location) const noexcept {
         std::size_t const row_hash{std::hash<std::size_t>{}(location.getRow())};
         std::size_t const column_hash{std::hash<std::size_t>{}(location.getColumn())};
         return row_hash ^ (column_hash << 1);

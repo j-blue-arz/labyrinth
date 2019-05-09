@@ -1,6 +1,6 @@
 #include "snake_graph_builder.h"
 
-namespace graph {
+namespace labyrinth {
 
 SnakeGraphBuilder & SnakeGraphBuilder::setExtent(size_t extent) {
     out_paths_.resize(extent);

@@ -7,7 +7,7 @@
 #include <vector>
 
 
-namespace graph {
+namespace labyrinth {
 /// This class models a graph which represents a maze.
 /// To construct such a graph, first construct an empty Graph with a fixed size.
 /// Then set the maze cell at each location. A maze cell is defined by a String over the alphabet {N,S,E,W}.
@@ -131,6 +131,6 @@ private:
 } // namespace graph
 
 namespace std {
-std::ostream & operator<<(std::ostream & os, const graph::MazeGraph & graph);
+std::ostream & operator<<(std::ostream & os, const labyrinth::MazeGraph & graph);
 }
 

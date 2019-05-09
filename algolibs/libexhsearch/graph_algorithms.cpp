@@ -3,7 +3,7 @@
 #include <limits>
 #include <queue>
 
-namespace graph {
+namespace labyrinth {
 namespace reachable {
 
 bool isReachable(const MazeGraph & graph, const Location & source, const Location & target) {

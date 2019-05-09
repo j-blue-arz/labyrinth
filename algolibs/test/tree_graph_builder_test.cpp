@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include <set>
 
-using namespace graph;
+using namespace labyrinth;
 
 TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     TreeGraphBuilder builder{};

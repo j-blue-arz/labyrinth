@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace graph {
+namespace labyrinth {
 
 namespace mazes {
 extern std::vector<std::string> big_component_maze_9;

@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace graph;
+using namespace labyrinth;
 
 TEST(LocationTest, OperatorPlusCorrectResult) {
     Location origin{3, 4};

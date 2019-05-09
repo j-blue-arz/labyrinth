@@ -2,7 +2,7 @@
 #include "location.h"
 #include <algorithm>
 
-namespace graph {
+namespace labyrinth {
 
 MazeGraph::MazeGraph(size_t extent) : extent_{extent} {
     NodeId current = 0;
@@ -217,22 +217,22 @@ MazeGraph::NeighborIterator MazeGraph::Neighbors::end() {
 
 namespace std {
 
-std::ostream & operator<<(std::ostream & os, const graph::MazeGraph & graph) {
-    auto extent = graph.getExtent();
+std::ostream & operator<<(std::ostream & os, const labyrinth::MazeGraph & graph) {
+    const auto extent = graph.getExtent();
     std::string row_delimiter(extent * 4, '-');
     for (size_t row = 0; row < extent; row++) {
         std::string lines[3] = {std::string(extent * 4, '#'), std::string(extent * 4, '#'), std::string(extent * 4, '#')};
         for (size_t column = 0; column < extent; column++) {
-            if (graph.hasOutPath(graph::Location(row, column), 'N')) {
+            if (graph.hasOutPath(labyrinth::Location(row, column), 'N')) {
                 lines[0][column * 4 + 1] = '.';
             }
-            if (graph.hasOutPath(graph::Location(row, column), 'E')) {
+            if (graph.hasOutPath(labyrinth::Location(row, column), 'E')) {
                 lines[1][column * 4 + 2] = '.';
             }
-            if (graph.hasOutPath(graph::Location(row, column), 'S')) {
+            if (graph.hasOutPath(labyrinth::Location(row, column), 'S')) {
                 lines[2][column * 4 + 1] = '.';
             }
-            if (graph.hasOutPath(graph::Location(row, column), 'W')) {
+            if (graph.hasOutPath(labyrinth::Location(row, column), 'W')) {
                 lines[1][column * 4 + 0] = '.';
             }
             lines[1][column * 4 + 1] = '.';

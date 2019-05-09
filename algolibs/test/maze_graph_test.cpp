@@ -7,7 +7,7 @@
 
 #include <set>
 
-using namespace graph;
+using namespace labyrinth;
 
 class MazeGraphTest : public ::testing::Test {
 protected:

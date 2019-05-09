@@ -1,6 +1,6 @@
 #include "text_graph_builder.h"
 
-namespace graph {
+namespace labyrinth {
 
 namespace mazes {
 std::vector<std::string> big_component_maze_9 = {

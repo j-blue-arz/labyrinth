@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace graph {
+namespace labyrinth {
 
 TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
     out_paths_.resize(extent);
