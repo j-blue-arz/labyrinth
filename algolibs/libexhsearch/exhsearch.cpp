@@ -31,14 +31,14 @@ using StatePtr = std::shared_ptr<GameStateNode>;
 struct GameStateNode {
     explicit GameStateNode(StatePtr parent, const ShiftAction & shift, const std::vector<reachable::ReachableNode> & reached_nodes)
         : parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
-    explicit GameStateNode() : parent{nullptr} {}
+    explicit GameStateNode() noexcept : parent{nullptr} {}
 
     StatePtr parent{nullptr};
     ShiftAction shift{};
     std::vector<reachable::ReachableNode> reached_nodes;
 
 
-    bool isRoot() { return parent == nullptr; }
+    bool isRoot() noexcept { return parent == nullptr; }
 };
 
 using QueueType = std::queue<std::shared_ptr<GameStateNode>>;
@@ -57,10 +57,10 @@ MazeGraph createGraphFromState(const MazeGraph & base_graph, StatePtr current_st
     return graph;
 }
 
-std::vector<Location> determineReachedLocations(StatePtr current_state, const MazeGraph & graph, Location shift_location) {
+std::vector<Location> determineReachedLocations(const GameStateNode & current_state, const MazeGraph & graph, Location shift_location) {
     std::vector<Location> updated_player_locations;
-    updated_player_locations.resize(current_state->reached_nodes.size());
-    std::transform(current_state->reached_nodes.begin(), current_state->reached_nodes.end(), updated_player_locations.begin(),
+    updated_player_locations.resize(current_state.reached_nodes.size());
+    std::transform(current_state.reached_nodes.begin(), current_state.reached_nodes.end(), updated_player_locations.begin(),
                    [&graph, &shift_location](reachable::ReachableNode reached_node) { return graph.getLocation(reached_node.reached_id, shift_location); });
     return updated_player_locations;
 }
@@ -68,7 +68,7 @@ std::vector<Location> determineReachedLocations(StatePtr current_state, const Ma
 StatePtr createNewState(const MazeGraph & graph, const ShiftAction & shift, StatePtr current_state) {
     MazeGraph graph_copy{graph};
     graph_copy.shift(shift.location, shift.rotation);
-    auto updated_player_locations = determineReachedLocations(current_state, graph_copy, shift.location);
+    auto updated_player_locations = determineReachedLocations(*current_state, graph_copy, shift.location);
     StatePtr new_state = std::make_shared<GameStateNode>(
         current_state,
         shift,
@@ -96,9 +96,9 @@ std::vector<PlayerAction> reconstructActions(const MazeGraph & base_graph, State
     return actions;
 }
 
-Location opposingShiftLocation(const Location & location, size_t extent) {
-    auto row = location.getRow();
-    auto column = location.getColumn();
+Location opposingShiftLocation(const Location & location, size_t extent) noexcept {
+    const auto row = location.getRow();
+    const auto column = location.getColumn();
     if (column == 0) {
         return Location{row, extent - 1};
     }
@@ -139,7 +139,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
                 auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
                                                     [objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
                 if (found_objective != new_state->reached_nodes.end()) {
-                    size_t reachable_index = found_objective - new_state->reached_nodes.begin();
+                    const size_t reachable_index = found_objective - new_state->reached_nodes.begin();
                     return reconstructActions(graph, new_state, reachable_index);
                 }
                 else {

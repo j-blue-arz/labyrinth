@@ -52,7 +52,7 @@ std::vector<std::pair<Location, Location>> createSnakeGraphQueries(size_t extent
         queries.push_back(std::make_pair(Location{0, dist(rng)}, Location{extent - 1, dist(rng)}));
         queries.push_back(std::make_pair(Location{extent - 1, dist(rng)}, Location{0, dist(rng)}));
     }
-    std::random_shuffle(queries.begin(), queries.end());
+    std::shuffle(queries.begin(), queries.end(), rng);
     return queries;
 }
 
@@ -65,7 +65,7 @@ std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent,
         queries.push_back(std::make_pair(Location{extent - 1, dist(rng)}, Location{dist(rng), 0}));
         queries.push_back(std::make_pair(Location{dist(rng), 0}, Location{extent - 1, dist(rng)}));
     }
-    std::random_shuffle(queries.begin(), queries.end());
+    std::shuffle(queries.begin(), queries.end(), rng);
     return queries;
 }
 

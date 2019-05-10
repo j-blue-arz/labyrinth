@@ -29,3 +29,9 @@ Best run took 106us per query.
 Benchmarking isReachable() for tree graph with extent 32, running 2000 queries, 10 times.
 Best run took 96us per query.
 
+After implementing rotation and switching to C++20:
+Benchmarking isReachable() for snake graph with extent 28, running 2000 queries, 10 times.
+Best run took 118us per query.
+Benchmarking isReachable() for tree graph with extent 32, running 2000 queries, 10 times.
+Best run took 135us per query.
+

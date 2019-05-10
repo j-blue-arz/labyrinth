@@ -1,6 +1,7 @@
 #include "maze_graph.h"
 #include "location.h"
 #include <algorithm>
+#include <array>
 
 namespace labyrinth {
 
@@ -30,7 +31,7 @@ void MazeGraph::setLeftoverOutPaths(const std::string & out_paths) {
     leftover_.out_paths = out_paths;
 }
 
-bool MazeGraph::hasOutPath(const Location & location, const OutPathType & out_path) const noexcept {
+bool MazeGraph::hasOutPath(const Location & location, const OutPathType & out_path) const {
     return hasOutPath(getNode(location), out_path);
 }
 
@@ -105,7 +106,7 @@ MazeGraph::Node & MazeGraph::getNode(const Location & location) {
     return node_matrix_[location.getRow()][location.getColumn()];
 }
 
-bool MazeGraph::hasOutPath(const Node & node, const OutPathType & out_path) const noexcept {
+bool MazeGraph::hasOutPath(const Node & node, const OutPathType & out_path) const {
     auto out_path_to_check = rotateOutPath(out_path, -node.rotation);
     return node.out_paths.find(out_path_to_check) != std::string::npos;
 }
@@ -119,7 +120,7 @@ bool MazeGraph::isInside(const Location & location) const noexcept {
 
 MazeGraph::OutPathType MazeGraph::rotateOutPath(OutPathType out_path, RotationDegreeType rotation) {
     static const std::string out_path_rotation{"NESW"};
-    auto rotations = rotation / 90;
+    const auto rotations = rotation / 90;
     return out_path_rotation[(out_path_rotation.find(out_path) + rotations + 4) % 4];
 }
 
@@ -202,7 +203,7 @@ void MazeGraph::NeighborIterator::moveToNextNeighbor() {
     }
 }
 
-MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) :
+MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) noexcept :
     graph_{graph}, location_{location}, node_{node} {}
 
 MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() {
@@ -221,7 +222,7 @@ std::ostream & operator<<(std::ostream & os, const labyrinth::MazeGraph & graph)
     const auto extent = graph.getExtent();
     std::string row_delimiter(extent * 4, '-');
     for (size_t row = 0; row < extent; row++) {
-        std::string lines[3] = {std::string(extent * 4, '#'), std::string(extent * 4, '#'), std::string(extent * 4, '#')};
+        std::array<std::string, 3> lines = {std::string(extent * 4, '#'), std::string(extent * 4, '#'), std::string(extent * 4, '#')};
         for (size_t column = 0; column < extent; column++) {
             if (graph.hasOutPath(labyrinth::Location(row, column), 'N')) {
                 lines[0][column * 4 + 1] = '.';

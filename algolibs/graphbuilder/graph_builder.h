@@ -20,6 +20,11 @@ public:
     virtual ~GraphBuilder() {};
     virtual MazeGraph buildGraph() = 0;
 
+    GraphBuilder(const GraphBuilder &) = default;
+    GraphBuilder & operator=(const GraphBuilder &) = default;
+    GraphBuilder(GraphBuilder &&) = default;
+    GraphBuilder & operator=(GraphBuilder &&) = default;
+
     GraphBuilder & withStandardShiftLocations() noexcept;
     GraphBuilder & withLeftoverOutPaths(std::initializer_list<OutPath> out_paths);
 protected:

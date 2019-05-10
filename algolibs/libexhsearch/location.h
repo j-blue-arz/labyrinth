@@ -44,7 +44,7 @@ protected:
     IndexType column_{0};
 };
 
-inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) {
+inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
     return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
 }
 

@@ -33,7 +33,7 @@ public:
 
     void shift(const Location & location, RotationDegreeType leftoverRotation);
 
-    bool hasOutPath(const Location & location, const OutPathType & out_path) const noexcept;
+    bool hasOutPath(const Location & location, const OutPathType & out_path) const;
 
     NodeId getNodeId(const Location & location) const;
 
@@ -98,7 +98,7 @@ private:
 
     class Neighbors {
     public:
-        explicit Neighbors(const MazeGraph & graph, const Location & location, const Node & node);
+        explicit Neighbors(const MazeGraph & graph, const Location & location, const Node & node) noexcept;
 
         NeighborIterator begin();
         NeighborIterator end();
@@ -112,7 +112,7 @@ private:
     const Node & getNode(const Location & location) const;
     Node & getNode(const Location & location);
 
-    bool hasOutPath(const Node & node, const OutPathType & out_path) const noexcept;
+    bool hasOutPath(const Node & node, const OutPathType & out_path) const;
 
     bool isInside(const Location & location) const noexcept;
 

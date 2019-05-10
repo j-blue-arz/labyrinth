@@ -31,8 +31,8 @@ public:
 
     SnakeGraphBuilder & setExtent(size_t extent);
 private:
-    static bool even(size_t x) { return x % 2 == 0; }
-    static bool odd(size_t x) { return x % 2 == 1; }
+    static bool even(size_t x) noexcept { return x % 2 == 0; }
+    static bool odd(size_t x) noexcept { return x % 2 == 1; }
     void setInnerColumns();
     void setFirstColumn();
     void setLastColumn();
