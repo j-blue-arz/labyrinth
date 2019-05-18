@@ -35,7 +35,7 @@ MazeGraph::MazeGraph(size_t extent, std::vector<InputNode> nodes) : extent_{exte
     leftover_.out_paths = outPathsFromBitmask(current_input->out_paths_bit_mask);
 }
 
-std::string MazeGraph::outPathsFromBitmask(unsigned short out_paths_bitmask) noexcept {
+std::string MazeGraph::outPathsFromBitmask(unsigned short out_paths_bitmask) {
     static const std::string all_out_paths{"NESW"};
     std::string out_paths_str;
     unsigned short bit_mask = 1;

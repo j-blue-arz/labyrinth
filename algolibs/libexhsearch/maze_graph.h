@@ -136,7 +136,7 @@ private:
 
     static OffsetType offsetFromOutPath(OutPathType out_path) noexcept;
 
-    static std::string outPathsFromBitmask(unsigned short out_paths_bitmask) noexcept;
+    static std::string outPathsFromBitmask(unsigned short out_paths_bitmask);
 
     size_t extent_;
     Node leftover_;
