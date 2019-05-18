@@ -10,6 +10,6 @@ set(
 		"tree_graph_builder.cpp"
 )
 
-add_library(BUILDER OBJECT ${SOURCES})
+add_library(BUILDER ${SOURCES})
 target_include_directories(BUILDER PUBLIC ${PROJECT_SOURCE_DIR})
-target_link_libraries(BUILDER REACHABLE)
+target_link_libraries(BUILDER exhsearch)

@@ -20,6 +20,7 @@ public:
     virtual ~GraphBuilder() {};
     virtual MazeGraph buildGraph() = 0;
 
+    GraphBuilder() = default;
     GraphBuilder(const GraphBuilder &) = default;
     GraphBuilder & operator=(const GraphBuilder &) = default;
     GraphBuilder(GraphBuilder &&) = default;
@@ -35,7 +36,7 @@ protected:
     void addOutPath(const Location & location, OutPath out_path);
     void addOutPaths(const Location & location, std::initializer_list<OutPath> out_paths);
 
-    std::bitset<4> leftover_out_paths_;
+    OutPaths leftover_out_paths_;
     bool standard_shift_locations_{false};
     std::vector<std::vector<OutPaths>> out_paths_;
 private:

@@ -267,3 +267,104 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInserte
     Location location = graph_.getLocation(old_leftover_id, Location{1, 1});
     EXPECT_EQ(location, (Location{1, 2}));
 }
+
+enum class OutPath : uint8_t {
+    North = 1,
+    East = 2,
+    South = 4,
+    West = 8
+};
+
+uint8_t getBitmask(const std::initializer_list<OutPath> & out_paths) {
+    uint8_t result{0};
+    for (OutPath out_path : out_paths) {
+        result |= static_cast<uint8_t>(out_path);
+    }
+    return result;
+}
+
+/*
+"###|#.#|#.#|"
+"#..|...|..#|"
+"#.#|#.#|###|"
+"------------"
+"#.#|###|###|"
+"#..|...|...|"
+"#.#|###|###|"
+"------------"
+"#.#|#.#|###|"
+"#..|#.#|..#|"
+"###|#.#|#.#|"
+"------------"*/
+
+MazeGraph createMazeGraphWithInputNodes() {
+    const size_t extent = 3;
+    std::vector<MazeGraph::InputNode> input_nodes;
+    const uint8_t corner = getBitmask({OutPath::North, OutPath::East});
+    const uint8_t straight = getBitmask({OutPath::North, OutPath::South});
+    const uint8_t t_junct = getBitmask({OutPath::North, OutPath::East, OutPath::South});
+    const uint8_t cross = getBitmask({OutPath::North, OutPath::East, OutPath::South, OutPath::West});
+    input_nodes.push_back(MazeGraph::InputNode{5, corner, 90});
+    input_nodes.push_back(MazeGraph::InputNode{6, cross, 90});
+    input_nodes.push_back(MazeGraph::InputNode{7, corner, 270});
+    input_nodes.push_back(MazeGraph::InputNode{8, t_junct, 0});
+    input_nodes.push_back(MazeGraph::InputNode{9, straight, 90});
+    input_nodes.push_back(MazeGraph::InputNode{0, straight, 270});
+    input_nodes.push_back(MazeGraph::InputNode{1, corner, 0});
+    input_nodes.push_back(MazeGraph::InputNode{2, straight, 0});
+    input_nodes.push_back(MazeGraph::InputNode{3, corner, 180});
+    input_nodes.push_back(MazeGraph::InputNode{4, t_junct, 180});
+    return MazeGraph(extent, input_nodes);
+}
+
+TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) {
+    const MazeGraph input_graph = createMazeGraphWithInputNodes();
+
+    for (auto row = 0; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0; column < MazeGraphTest::extent; column++) {
+            Location location{row, column};
+            for (MazeGraph::OutPathType out_path : std::initializer_list({'N', 'S', 'E', 'W'})) {
+                EXPECT_EQ(input_graph.hasOutPath(location, out_path), graph_.hasOutPath(location, out_path)) <<
+                    "Created graph differs at location " << location; 
+            }
+        }
+    }
+}
+
+TEST_F(MazeGraphTest, leftoverHasOutPath_withLinearizedInputNodes_isCorrect) {
+    const MazeGraph input_graph = createMazeGraphWithInputNodes();
+    EXPECT_TRUE(input_graph.leftoverHasOutPath('N'));
+    EXPECT_FALSE(input_graph.leftoverHasOutPath('E'));
+    EXPECT_TRUE(input_graph.leftoverHasOutPath('S'));
+    EXPECT_TRUE(input_graph.leftoverHasOutPath('W'));
+}
+
+TEST_F(MazeGraphTest, getNodeId_withLinearizedInputNodes_returnsCorrectIds) {
+    const MazeGraph input_graph = createMazeGraphWithInputNodes();
+
+    EXPECT_EQ(input_graph.getLeftoverNodeId(), 4);
+    EXPECT_EQ(input_graph.getNodeId(Location{0, 0}), 5);
+    EXPECT_EQ(input_graph.getNodeId(Location{0, 1}), 6);
+    EXPECT_EQ(input_graph.getNodeId(Location{0, 2}), 7);
+    EXPECT_EQ(input_graph.getNodeId(Location{1, 0}), 8);
+    EXPECT_EQ(input_graph.getNodeId(Location{1, 1}), 9);
+    EXPECT_EQ(input_graph.getNodeId(Location{1, 2}), 0);
+    EXPECT_EQ(input_graph.getNodeId(Location{2, 0}), 1);
+    EXPECT_EQ(input_graph.getNodeId(Location{2, 1}), 2);
+    EXPECT_EQ(input_graph.getNodeId(Location{2, 2}), 3);
+}
+
+TEST_F(MazeGraphTest, getLocation_withLinearizedInputNodes_returnsCorrectLocations) {
+    const MazeGraph input_graph = createMazeGraphWithInputNodes();
+
+    EXPECT_EQ(input_graph.getLocation(4, Location{-1, -1}), (Location{-1, -1}));
+    EXPECT_EQ(input_graph.getLocation(5, Location{-1, -1}), (Location{0, 0}));
+    EXPECT_EQ(input_graph.getLocation(6, Location{-1, -1}), (Location{0, 1}));
+    EXPECT_EQ(input_graph.getLocation(7, Location{-1, -1}), (Location{0, 2}));
+    EXPECT_EQ(input_graph.getLocation(8, Location{-1, -1}), (Location{1, 0}));
+    EXPECT_EQ(input_graph.getLocation(9, Location{-1, -1}), (Location{1, 1}));
+    EXPECT_EQ(input_graph.getLocation(0, Location{-1, -1}), (Location{1, 2}));
+    EXPECT_EQ(input_graph.getLocation(1, Location{-1, -1}), (Location{2, 0}));
+    EXPECT_EQ(input_graph.getLocation(2, Location{-1, -1}), (Location{2, 1}));
+    EXPECT_EQ(input_graph.getLocation(3, Location{-1, -1}), (Location{2, 2}));
+}

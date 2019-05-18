@@ -10,4 +10,8 @@ set(
 		"exhsearch.cpp"
 )
 
-add_library(REACHABLE OBJECT ${SOURCES})
+add_library(exhsearch STATIC ${SOURCES})
+add_library(libexhsearch SHARED ${SOURCES} extern.h extern.cpp)
+install(TARGETS libexhsearch
+            ARCHIVE DESTINATION lib/static
+            RUNTIME DESTINATION bin)

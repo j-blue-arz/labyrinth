@@ -22,12 +22,7 @@ public:
 
     template <typename T, typename U>
     explicit Location(T row, U column) noexcept : row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
-    virtual ~Location() = default;
-    Location(const Location &) = default;
-    Location & operator=(const Location &) = default;
-    Location(Location &&) = default;
-    Location & operator=(Location &&) = default;
-
+    
     const Location operator+(const OffsetType & offset) const noexcept;
     const Location & operator+=(const OffsetType & offset) noexcept;
 
@@ -39,7 +34,7 @@ public:
         return column_;
     }
 
-protected:
+private:
     IndexType row_{0};
     IndexType column_{0};
 };

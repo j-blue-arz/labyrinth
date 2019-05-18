@@ -15,13 +15,25 @@ class MazeGraph {
 private:
     class Neighbors;
     class ShiftLocation;
+    using OutPathIntegerType = uint8_t;
 public:
     using NodeId = unsigned int;
     using OutPathType = std::string::value_type;
     using RotationDegreeType = int16_t;
 
+    struct InputNode {
+        NodeId node_id{0};
+        uint8_t out_paths_bit_mask{0};
+        RotationDegreeType rotation{0};
+    };
+
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
     explicit MazeGraph(size_t extent);
+
+    // Constructor takes two arguments. Second argument is expected to be of size extent*extent + 1,
+    // and specify the row-wise nodes of the maze. The last entry is the leftover.
+    // node ids are expected to be unique.
+    explicit MazeGraph(size_t extent, std::vector<InputNode> nodes);
 
     void setOutPaths(const Location & location, const std::string & out_paths);
 
@@ -34,6 +46,8 @@ public:
     void shift(const Location & location, RotationDegreeType leftoverRotation);
 
     bool hasOutPath(const Location & location, const OutPathType & out_path) const;
+
+    bool leftoverHasOutPath(const OutPathType & out_path) const;
 
     NodeId getNodeId(const Location & location) const;
 
@@ -57,9 +71,9 @@ private:
     using OffsetType = Location::OffsetType;
 
     struct Node {
+        NodeId node_id{0};
         std::string out_paths{""};
         RotationDegreeType rotation{0};
-        NodeId node_id{0};
     };
 
     class NeighborIterator {
@@ -121,6 +135,8 @@ private:
     static OutPathType mirrorOutPath(OutPathType out_path) noexcept;
 
     static OffsetType offsetFromOutPath(OutPathType out_path) noexcept;
+
+    static std::string outPathsFromBitmask(unsigned short out_paths_bitmask) noexcept;
 
     size_t extent_;
     Node leftover_;

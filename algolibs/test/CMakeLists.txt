@@ -1,7 +1,7 @@
 macro(package_add_test TESTNAME)
     add_executable(${TESTNAME} ${ARGN})
 	target_include_directories(${TESTNAME} PUBLIC ${PROJECT_SOURCE_DIR})
-    target_link_libraries(${TESTNAME} gtest gmock gtest_main REACHABLE BUILDER)
+    target_link_libraries(${TESTNAME} gtest gmock gtest_main exhsearch BUILDER)
     add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
     set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 endmacro()
