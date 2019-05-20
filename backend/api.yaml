@@ -161,6 +161,7 @@ components:
                         - "exhaustive-search"
                         - "minimax"
                         - "alpha-beta"
+                        - "libexhsearch"
         errorObject:
             type: "object"
             properties:

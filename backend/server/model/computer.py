@@ -13,11 +13,14 @@ import copy
 from random import choice
 import time
 from threading import Thread
+import os
+from flask import current_app
 import requests
 import server.mapper.api
 import server.model.algorithm.exhaustive_search as exh
 import server.model.algorithm.minimax as mm
 import server.model.algorithm.alpha_beta as ab
+import server.model.algorithm.external_library as extlib
 from .reachable import Graph
 from .game import Player, Turns
 from .exceptions import LabyrinthDomainException
@@ -40,11 +43,13 @@ class ComputerPlayer(Player, Thread):
     def __init__(self, algorithm_name=None, url_supplier=None, move_url=None, shift_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
-        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm, MinimaxAlgorithm, AlphaBetaAlgorithm]
+        algorithms = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm,
+                      MinimaxAlgorithm, AlphaBetaAlgorithm, LibraryBinding]
         self.algorithm = ExhaustiveSearchAlgorithm
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
+        self._library_path = current_app.config['LIBRARY_PATH']
         if url_supplier:
             self._shift_url = url_supplier.get_shift_url(self._game.identifier, self._id)
             self._move_url = url_supplier.get_move_url(self._game.identifier, self._id)
@@ -62,7 +67,10 @@ class ComputerPlayer(Player, Thread):
     def run(self):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        algorithm = self.algorithm(board, piece, self._game)
+        if self.algorithm == LibraryBinding:
+            algorithm = LibraryBinding(board, piece, self._game, self._library_path)
+        else:
+            algorithm = self.algorithm(board, piece, self._game)
         algorithm.start()
         time.sleep(algorithm.SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
@@ -125,9 +133,6 @@ class ComputerPlayer(Player, Thread):
             print("objective location: {}".format(objective_location))
             print("shift_action: {}, move_action: {}".format(shift_action, move_action))
             print(maze_string)
-
-
-
 
 
 class RandomActionsAlgorithm(Thread):
@@ -197,6 +202,7 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
             self._shift_action = actions[0]
             self._move_action = actions[1]
 
+
 class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
     """ Uses the minimax algorithm to determine an action in a two-player game. """
     SHORT_NAME = "minimax"
@@ -255,3 +261,36 @@ class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
 
     def run(self):
         self.start_iterating(self._board, self._pieces, self._game.previous_shift_location)
+
+
+class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
+    """ Calls an external library to perform the move. Random move as fallback """
+    SHORT_NAME = "libexhsearch"
+    SECONDS_TO_COMPUTE = 1.5
+
+    def __init__(self, board, piece, game, library_path):
+        print(os.path.join(library_path, "libexhsearch.dll"))
+        extlib.ExternalLibraryBinding.__init__(self, os.path.join(library_path, "libexhsearch.dll"),
+                                               board, piece, game.previous_shift_location)
+        Thread.__init__(self)
+        self._shift_action = None
+        self._move_action = None
+
+    @property
+    def shift_action(self):
+        """ Getter for shift_action """
+        return self._shift_action
+
+    @property
+    def move_action(self):
+        """ Getter for move_action """
+        return self._move_action
+
+    def abort_search(self):
+        """ not abortable, hence pass """
+
+    def run(self):
+        action = self.find_optimal_action()
+        if action:
+            self._shift_action = action[0]
+            self._move_action = action[1]

@@ -19,15 +19,15 @@ extern "C" {
         // expected to be of size extent*extent + 1,
         // and specify the row-wise nodes of the maze. The last entry is the leftover.
         // node ids are expected to be unique.
-        CNode * nodes;
-        CLocation last_shift_location;
+        struct CNode nodes[50];
     };
 
     struct CAction {
-        CLocation shift_location;
+        struct CLocation shift_location;
         short rotation;
-        CLocation move_location;
+        struct CLocation move_location;
     };
 
-    __declspec(dllexport) struct CAction find_action(struct CGraph maze, struct CLocation player_location, unsigned int objective_id);
+    __declspec(dllexport) struct CAction find_action(struct CGraph cgraph, struct CLocation c_player_location, unsigned int objective_id,
+                                                     struct CLocation c_previous_shift_location);
 }

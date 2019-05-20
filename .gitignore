@@ -24,7 +24,7 @@ yarn-error.log*
 *.vs
 CMakeSettings.json
 
-# python
+# python / flask
 **/__pycache__/
 **/.cache
 **/.pytest_cache
@@ -32,6 +32,12 @@ CMakeSettings.json
 **/venv/
 *.pyc
 instance/
+**/lib/*.dll
+**/lib/*.so
 .coverage
 htmlcov/
 *.egg-info/
+
+# C++ build folders
+**/algolibs/build/
+**/algolibs/install/

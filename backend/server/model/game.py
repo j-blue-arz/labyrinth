@@ -191,7 +191,7 @@ class Maze:
         self._maze_size = maze_size
         self._maze_locations = [BoardLocation(row, column) for row in range(maze_size) for column in range(maze_size)]
         self._maze_cards = [[None for _ in range(maze_size)] for _ in range(maze_size)]
-        self._validation = validate_locations
+        self.validation = validate_locations
 
     @property
     def maze_size(self):
@@ -210,7 +210,7 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :return: the MazeCard instance
         """
-        if self._validation:
+        if self.validation:
             self._validate_location(location)
         return self._maze_cards[location.row][location.column]
 
@@ -221,7 +221,7 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :param maze_card: the maze card to set
         """
-        if self._validation:
+        if self.validation:
             self._validate_location(location)
         self._maze_cards[location.row][location.column] = maze_card
 
@@ -302,7 +302,7 @@ class Maze:
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
     def _validate_insert_location(self, insert_location):
-        if self._validation:
+        if self.validation:
             self._validate_location(insert_location)
 
 
