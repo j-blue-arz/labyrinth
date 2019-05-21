@@ -10,7 +10,8 @@ from server.model.game import Board, BoardLocation, MazeCard, Piece
 
 def test_d1_direct_path():
     """ Test-case where there is a direct path from start location to objective in the initial state """
-    optimizer, board, piece = create_optimizer("d1-direct-path")
+    board, piece = create_board_and_piece_by_key("d1-direct-path")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 2
     _check_actions(board, piece, actions)
@@ -18,7 +19,8 @@ def test_d1_direct_path():
 
 def test_d1_shift_req():
     """ Test-case where one shift action is required to reach objective """
-    optimizer, board, piece = create_optimizer("d1-shift-req")
+    board, piece = create_board_and_piece_by_key("d1-shift-req")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 2
     _check_actions(board, piece, actions)
@@ -26,7 +28,8 @@ def test_d1_shift_req():
 
 def test_d2_two_shifts():
     """ Test-case where two shift actions are required to reach objective """
-    optimizer, board, piece = create_optimizer("d2-two-shifts")
+    board, piece = create_board_and_piece_by_key("d2-two-shifts")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
@@ -34,7 +37,8 @@ def test_d2_two_shifts():
 
 def test_d2_self_push_out():
     """ Test-case where solution is to push himself out, two turns required """
-    optimizer, board, piece = create_optimizer("d2-self-push-out")
+    board, piece = create_board_and_piece_by_key("d2-self-push-out")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
@@ -44,7 +48,8 @@ def test_d2_no_pushback_violation():
     """ Test-case where a solution of depth 2 violates no-pushback-rule:
     [((0, 1), 180), (0, 1), ((6, 1), 90), (6, 0)]
     Checks that optimizer does not violate no-pushback-rule """
-    optimizer, board, piece = create_optimizer("d2-pushback-violation")
+    board, piece = create_board_and_piece_by_key("d2-pushback-violation")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
@@ -57,7 +62,8 @@ def test_d2_two_shifts_with_previous_shift():
     """ Test case where there is a solution of depth 2: [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
     The test makes the first shift of this solution a rule violation, and checks
     that the optimizer does not violate no-pushback-rule """
-    optimizer, board, piece = create_optimizer("d2-two-shifts", previous_shift_location=BoardLocation(6, 1))
+    board, piece = create_board_and_piece_by_key("d2-two-shifts")
+    optimizer = Optimizer(board, piece, previous_shift_location=BoardLocation(6, 1))
     actions = optimizer.find_optimal_actions()
     _check_actions(board, piece, actions)
     first_shift_location = actions[0][0]
@@ -66,7 +72,8 @@ def test_d2_two_shifts_with_previous_shift():
 @pytest.mark.skip("long running-time")
 def test_d2_long_running():
     """ Two turns required """
-    optimizer, board, piece = create_optimizer("d2-long-running")
+    board, piece = create_board_and_piece_by_key("d2-long-running")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
@@ -74,7 +81,8 @@ def test_d2_long_running():
 
 def test_d3_obj_push_out():
     """ Test-case where solution is to push objective out, three turns required (ca. 7s)"""
-    optimizer, board, piece = create_optimizer("d3-obj-push-out")
+    board, piece = create_board_and_piece_by_key("d3-obj-push-out")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -82,7 +90,8 @@ def test_d3_obj_push_out():
 
 def test_d3_long_running():
     """ Three turns required """
-    optimizer, board, piece = create_optimizer("d3-long-running")
+    board, piece = create_board_and_piece_by_key("d3-long-running")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -90,7 +99,8 @@ def test_d3_long_running():
 @pytest.mark.skip("long running-time")
 def test_d3_generated_1():
     """ three turns required """
-    optimizer, board, piece = create_optimizer("d3-generated-8s")
+    board, piece = create_board_and_piece_by_key("d3-generated-8s")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -98,7 +108,8 @@ def test_d3_generated_1():
 @pytest.mark.skip("long running-time")
 def test_d3_generated_2():
     """ three turns required """
-    optimizer, board, piece = create_optimizer("d3-generated-23s")
+    board, piece = create_board_and_piece_by_key("d3-generated-23s")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -106,7 +117,8 @@ def test_d3_generated_2():
 @pytest.mark.skip("long running-time")
 def test_d3_generated_3():
     """ three turns required, running-time currently 8s """
-    optimizer, board, piece = create_optimizer("d3-generated-33s")
+    board, piece = create_board_and_piece_by_key("d3-generated-33s")
+    optimizer = Optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
@@ -237,17 +249,14 @@ def _create_board_and_piece(maze, leftover_card, start_location, objective_locat
     board.pieces.append(piece)
     return board, piece
 
-
-def create_optimizer(key, previous_shift_location=None):
-    """Creates a test case, instantiates an Optimizer with this case.
+def create_board_and_piece_by_key(key):
+    """ Creates a board with a single piece, as used by the exhaustive search optimizer.
 
     :param key: a key for the test-case
     :return: an Optimizer instance, the board and the piece of the created test-case
     """
     param_dict = _param_tuple_to_param_dict(*(CASES_PARAMS[key]))
-    board, piece = _create_board_and_piece(**param_dict)
-    optimizer = Optimizer(board, piece, previous_shift_location=previous_shift_location)
-    return optimizer, board, piece
+    return _create_board_and_piece(**param_dict)
 
 def _check_actions(board, piece, actions):
     assert len(actions) % 2 == 0

@@ -13,8 +13,6 @@ import copy
 from random import choice
 import time
 from threading import Thread
-import os
-from flask import current_app
 import requests
 import server.mapper.api
 import server.model.algorithm.exhaustive_search as exh
@@ -49,7 +47,6 @@ class ComputerPlayer(Player, Thread):
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
-        self._library_path = current_app.config['LIBRARY_PATH']
         if url_supplier:
             self._shift_url = url_supplier.get_shift_url(self._game.identifier, self._id)
             self._move_url = url_supplier.get_move_url(self._game.identifier, self._id)
@@ -67,10 +64,7 @@ class ComputerPlayer(Player, Thread):
     def run(self):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        if self.algorithm == LibraryBinding:
-            algorithm = LibraryBinding(board, piece, self._game, self._library_path)
-        else:
-            algorithm = self.algorithm(board, piece, self._game)
+        algorithm = self.algorithm(board, piece, self._game)
         algorithm.start()
         time.sleep(algorithm.SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
@@ -269,8 +263,7 @@ class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
     SECONDS_TO_COMPUTE = 1.5
 
     def __init__(self, board, piece, game, library_path):
-        print(os.path.join(library_path, "libexhsearch.dll"))
-        extlib.ExternalLibraryBinding.__init__(self, os.path.join(library_path, "libexhsearch.dll"),
+        extlib.ExternalLibraryBinding.__init__(self, library_path,
                                                board, piece, game.previous_shift_location)
         Thread.__init__(self)
         self._shift_action = None

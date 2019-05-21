@@ -41,22 +41,30 @@ def _generate_and_print_maze_string():
     print(maze_to_string(maze))
     print(leftover)
 
+def create_optimizer(key, previous_shift_location=None):
+    """Creates a test case, instantiates an Optimizer with this case.
 
+    :param key: a key for the test-case
+    :return: an Optimizer instance, the board and the piece of the created test-case
+    """
+    board, piece = setup.create_board_and_piece_by_key(key)
+    optimizer = exh.Optimizer(board, piece, previous_shift_location=previous_shift_location)
+    return optimizer, board, piece
 
 def _benchmark(name):
     repeat = 5
     runs = 1
-    optimizer, _, _ = setup.create_optimizer(name)
+    optimizer, _, _ = create_optimizer(name)
     min_time = min(timeit.Timer(optimizer.find_optimal_actions).repeat(repeat, runs)) / runs * 1000
     print("Test case {:<24} \t best of {}: {:.2f}ms".format(name, repeat, min_time))
 
 
 def _profile(name):
-    optimizer, _, _ = setup.create_optimizer(name)
+    optimizer, _, _ = create_optimizer(name)
     cProfile.runctx("optimizer.find_optimal_actions()", globals(), locals(), filename=name)
 
 def _results(name):
-    optimizer, _, _ = setup.create_optimizer(name)
+    optimizer, _, _ = create_optimizer(name)
     print("Test case {:<24} \t resulted in actions {}".format(name, optimizer.find_optimal_actions()))
 
 
