@@ -130,7 +130,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
         MazeGraph current_graph = createGraphFromState(graph, current_state);
         auto shift_locations = current_graph.getShiftLocations();
         auto invalid_shift_location = opposingShiftLocation(current_state->shift.location, graph.getExtent());
-        for (auto shift_location : shift_locations) {
+        for (const auto & shift_location : shift_locations) {
             if (shift_location == invalid_shift_location) {
                 continue;
             }

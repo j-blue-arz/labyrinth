@@ -38,6 +38,10 @@ struct CAction actionToCAction(const labyrinth::exhsearch::PlayerAction & action
 
 __declspec(dllexport) struct CAction find_action(struct CGraph cgraph, struct CLocation c_player_location, unsigned int objective_id,
                                                  struct CLocation c_previous_shift_location) {
+    std::cout << "Sanity check.." << std::endl;
+    std::cout << "cgraph.nodes[0].node_id: " << cgraph.nodes[0].node_id << std::endl;
+    std::cout << "cgraph.nodes[0].out_paths: " << +cgraph.nodes[0].out_paths << std::endl;
+    std::cout << "cgraph.nodes[0].rotation: " << cgraph.nodes[0].rotation << std::endl;
     auto graph = mapGraph(cgraph);
     auto player_location = mapLocation(c_player_location);
     auto previous_shift_location = mapLocation(c_previous_shift_location);

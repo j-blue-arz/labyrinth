@@ -3,15 +3,16 @@ Each testcase verifies the precomputed depth of the found solution,
 and asserts that the solution is valid """
 import copy
 import pytest
+from library_binding import CompletePathLibraryBinding
 from server.model.algorithm.exhaustive_search import Optimizer
 from server.model.factories import create_maze
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 
 
-def test_d1_direct_path():
+def test_d1_direct_path(create_optimizer):
     """ Test-case where there is a direct path from start location to objective in the initial state """
     board, piece = create_board_and_piece_by_key("d1-direct-path")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 2
     _check_actions(board, piece, actions)
@@ -265,4 +266,17 @@ def _check_actions(board, piece, actions):
         board.shift(shift_action[0], shift_action[1])
         reached = board.move(piece, move_location)
     assert reached
-    
+
+@pytest.fixture(params=[Optimizer, CompletePathLibraryBinding])
+def create_optimizer(request):
+
+    def _create_optimizer(board, piece, previous_shift_location=None):
+        if request.param is Optimizer:
+            print("")
+            print("creating Optimizer")
+            return Optimizer(board, piece, previous_shift_location)
+        if request.param is CompletePathLibraryBinding:
+            print("creating CompletePathLibraryBinding")
+            return CompletePathLibraryBinding("../../lib/libexhsearch.dll", board, piece, previous_shift_location)
+
+    return _create_optimizer

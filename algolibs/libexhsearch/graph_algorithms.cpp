@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <queue>
+#include <unordered_map>
 
 namespace labyrinth {
 namespace reachable {
@@ -17,7 +18,7 @@ bool isReachable(const MazeGraph & graph, const Location & source, const Locatio
         }
         q.pop();
         visited[graph.getNodeId(location)] = true;
-        for (auto neighbor_location : graph.neighbors(location)) {
+        for (const auto & neighbor_location : graph.neighbors(location)) {
             if (!visited[graph.getNodeId(neighbor_location)]) {
                 q.push(neighbor_location);
             }
@@ -37,7 +38,7 @@ std::vector<Location> reachableLocations(const MazeGraph & graph, const Location
         result.push_back(location);
         q.pop();
         visited[graph.getNodeId(location)] = true;
-        for (auto neighbor_location : graph.neighbors(location)) {
+        for (const auto & neighbor_location : graph.neighbors(location)) {
             if (!visited[graph.getNodeId(neighbor_location)]) {
                 q.push(neighbor_location);
             }
@@ -57,7 +58,7 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph
     while (!q.empty()) {
         auto location = q.front();
         q.pop();
-        for (auto neighbor_location : graph.neighbors(location)) {
+        for (const auto & neighbor_location : graph.neighbors(location)) {
             if (no_parent == parent_index[graph.getNodeId(neighbor_location)]) {
                 parent_index[graph.getNodeId(neighbor_location)] = parent_index[graph.getNodeId(location)];
                 q.push(neighbor_location);

@@ -102,7 +102,7 @@ const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
     labyrinth::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
     auto player_location_id = graph.getNodeId(player_start_location);
-    for (auto action : actions) {
+    for (const auto & action : actions) {
         if (std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
             return ::testing::AssertionFailure() << "Invalid shift location: " << action.shift.location;
         }
@@ -159,7 +159,7 @@ bool isOpposing(const Location & location1, const Location & location2, size_t e
 
     labyrinth::MazeGraph graph{original_graph};
     auto player_location_id = graph.getNodeId(player_start_location);
-    for (auto action : actions) {
+    for (const auto & action : actions) {
         graph.shift(action.shift.location, action.shift.rotation);
         auto player_location = graph.getLocation(player_location_id, action.shift.location);
         player_location_id = graph.getNodeId(action.move_location);
@@ -271,4 +271,42 @@ TEST_F(ExhaustiveSearchTest, withResultOfLengthOneViolatingGivenPreviousShift_sh
 
     performTest(graph_, player_location, objective_id, 1);
     performTest(graph_, player_location, objective_id, 2, Location{0, 3});
+}
+
+
+TEST_F(ExhaustiveSearchTest, withNonConsecutiveIds_shouldReturnOneMove) {
+    SCOPED_TRACE("withNonConsecutiveIds_shouldReturnOneMove");
+    /*
+    "###|#.#|#.#|"
+    "#..|...|..#|"
+    "#.#|#.#|###|"
+    "------------"
+    "#.#|###|###|"
+    "#..|...|...|"
+    "#.#|###|###|"
+    "------------"
+    "#.#|#.#|###|"
+    "#..|#.#|..#|"
+    "###|#.#|#.#|"
+    "------------"*/
+    std::vector<MazeGraph::InputNode> input_nodes;
+    input_nodes.push_back(MazeGraph::InputNode{15, 3, 90});
+    input_nodes.push_back(MazeGraph::InputNode{25, 15, 0});
+    input_nodes.push_back(MazeGraph::InputNode{35, 3, 270});
+    input_nodes.push_back(MazeGraph::InputNode{45, 7, 0});
+    input_nodes.push_back(MazeGraph::InputNode{55, 5, 90});
+    input_nodes.push_back(MazeGraph::InputNode{65, 5, 90});
+    input_nodes.push_back(MazeGraph::InputNode{75, 3, 0});
+    input_nodes.push_back(MazeGraph::InputNode{85, 5, 0});
+    input_nodes.push_back(MazeGraph::InputNode{95, 3, 180});
+    input_nodes.push_back(MazeGraph::InputNode{99, 5, 0});
+
+    auto graph = MazeGraph{3, input_nodes};
+
+    graph.addShiftLocation(Location{0, 1});
+    graph.addShiftLocation(Location{1, 0});
+    graph.addShiftLocation(Location{1, 2});
+    graph.addShiftLocation(Location{2, 1});
+
+    performTest(graph, Location{0, 0}, 95, 1);
 }

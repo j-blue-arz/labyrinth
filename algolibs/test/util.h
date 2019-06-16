@@ -9,7 +9,7 @@
 
 std::string locationsToString(std::set<labyrinth::Location> locations) {
     std::stringstream stream;
-    for (auto location : locations) {
+    for (const auto & location : locations) {
         stream << location << ", ";
     }
     return stream.str();

@@ -11,7 +11,7 @@ void GraphBuilder::addOutPath(const Location & location, OutPath out_path) {
 }
 
 void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<OutPath> out_paths) {
-    for (auto out_path : out_paths) {
+    for (const auto & out_path : out_paths) {
         addOutPath(location, out_path);
     }
 }
@@ -22,7 +22,7 @@ GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
 }
 
 GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath> out_paths) {
-    for (auto out_path : out_paths) {
+    for (const auto & out_path : out_paths) {
         addOutPath(leftover_out_paths_, out_path);
     }
     return *this;

@@ -1,10 +1,13 @@
+""" This module provides a binding to an external library.
+
+It models the structs with ctypes and defines a class which implements the algorithm interface by
+binding to a library at a given path """
 import ctypes
-import tests.unit.test_exhaustive_search as setup
 from server.model.game import BoardLocation
 
 class LOCATION(ctypes.Structure):
-        """ corresponds to game.BoardLocation """
-        _fields_ = [("row", ctypes.c_short), ("column", ctypes.c_short)]
+    """ corresponds to game.BoardLocation """
+    _fields_ = [("row", ctypes.c_short), ("column", ctypes.c_short)]
 
 class NODE(ctypes.Structure):
     """ corresponds to game.MazeCard
@@ -27,6 +30,8 @@ class ACTION(ctypes.Structure):
     ]
 
 class ExternalLibraryBinding:
+    """ Binds to an external library at given path. 
+    Translates the game datastructures to the ctypes structures and back """
     _DOOR_TO_BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
 
     def __init__(self, path, board, piece, previous_shift_location=None):
@@ -42,15 +47,16 @@ class ExternalLibraryBinding:
 
     def find_optimal_action(self):
         """ finds optimal action by calling the external library """
+        print("find_optimal_action")
         graph = self._create_graph(self._board)
         start_location = self._board.maze.maze_card_location(self._piece.maze_card)
         start_location = self._create_location(start_location)
         previous_shift_location = self._create_location(self._previous_shift_location)
         objective_id = self._board.objective_maze_card.identifier
+        print("library call")
         action = self._library.find_action(graph, start_location, objective_id, previous_shift_location)
+        print("library return")
         return self._map_returned_action(action)
-
-    
 
     @staticmethod
     def _create_node(maze_card):
