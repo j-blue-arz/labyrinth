@@ -5,7 +5,7 @@ import copy
 import pytest
 from library_binding import CompletePathLibraryBinding
 from server.model.algorithm.exhaustive_search import Optimizer
-from server.model.factories import create_maze
+from server.model.factories import create_maze, MazeCardFactory
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 
 
@@ -236,8 +236,9 @@ CASES_PARAMS = {
 
 
 def _param_tuple_to_param_dict(maze_string, leftover_doors, start_tuple, objective_tuple):
-    return {"maze": create_maze(maze_string),
-            "leftover_card": MazeCard.create_instance(leftover_doors, 0),
+    maze_card_factory = MazeCardFactory()
+    return {"maze": create_maze(maze_string, maze_card_factory),
+            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
             "start_location": BoardLocation(*start_tuple),
             "objective_location": BoardLocation(*objective_tuple)}
 
@@ -272,11 +273,8 @@ def create_optimizer(request):
 
     def _create_optimizer(board, piece, previous_shift_location=None):
         if request.param is Optimizer:
-            print("")
-            print("creating Optimizer")
             return Optimizer(board, piece, previous_shift_location)
         if request.param is CompletePathLibraryBinding:
-            print("creating CompletePathLibraryBinding")
             return CompletePathLibraryBinding("../../lib/libexhsearch.dll", board, piece, previous_shift_location)
 
     return _create_optimizer

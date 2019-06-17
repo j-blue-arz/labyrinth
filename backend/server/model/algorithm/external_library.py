@@ -47,15 +47,12 @@ class ExternalLibraryBinding:
 
     def find_optimal_action(self):
         """ finds optimal action by calling the external library """
-        print("find_optimal_action")
         graph = self._create_graph(self._board)
         start_location = self._board.maze.maze_card_location(self._piece.maze_card)
         start_location = self._create_location(start_location)
         previous_shift_location = self._create_location(self._previous_shift_location)
         objective_id = self._board.objective_maze_card.identifier
-        print("library call")
         action = self._library.find_action(graph, start_location, objective_id, previous_shift_location)
-        print("library return")
         return self._map_returned_action(action)
 
     @staticmethod

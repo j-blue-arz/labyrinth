@@ -6,21 +6,23 @@ mapping the DTO back to a Game and then asserting the structure of the result ""
 import server.mapper.persistence as mapper
 from server.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
 from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
+from server.model.factories import MazeCardFactory
 
 
 def _create_test_game(with_computer=False):
     """ Creates a Game instance by hand """
+    card_factory = MazeCardFactory()
     board = Board(leftover_card=MazeCard(0, MazeCard.T_JUNCT, 0))
     for row in range(board.maze.maze_size):
         for column in range(board.maze.maze_size):
             if row == 0 and column == 0:
-                board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.STRAIGHT, 0)
+                board.maze[BoardLocation(row, column)] = card_factory.create_instance(MazeCard.STRAIGHT, 0)
             elif row == 1 and column == 1:
-                board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.CORNER, 0)
+                board.maze[BoardLocation(row, column)] = card_factory.create_instance(MazeCard.CORNER, 0)
             elif row == 2 and column == 2:
-                board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.T_JUNCT, 270)
+                board.maze[BoardLocation(row, column)] = card_factory.create_instance(MazeCard.T_JUNCT, 270)
             else:
-                board.maze[BoardLocation(row, column)] = MazeCard.create_instance(MazeCard.T_JUNCT, 0)
+                board.maze[BoardLocation(row, column)] = card_factory.create_instance(MazeCard.T_JUNCT, 0)
     player_ids = [3, 4]
     players = [Player(identifier=player_id, game=None) for player_id in player_ids]
     if with_computer:

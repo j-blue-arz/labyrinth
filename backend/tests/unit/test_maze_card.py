@@ -1,25 +1,6 @@
 """ Tests for MazeCard of game.py """
 import pytest
 from server.model.game import MazeCard
-from server.model.factories import create_random_maze_card
-
-
-def test_generate_assigns_unique_ids():
-    """ Tests generate_random """
-    MazeCard.reset_ids()
-    maze_card1 = MazeCard.create_instance(MazeCard.CORNER, 270)
-    maze_card2 = MazeCard.create_instance(MazeCard.CORNER, 270)
-    assert maze_card1.identifier != maze_card2.identifier
-
-
-def test_generate_with_reset_ids_should_start_at_0():
-    """ Tests generate_random with reset_ids """
-    MazeCard.reset_ids()
-    maze_card = MazeCard.create_instance(MazeCard.CORNER, 270)
-    MazeCard.reset_ids()
-    maze_card2 = MazeCard.create_instance(MazeCard.CORNER, 270)
-    assert maze_card.identifier == maze_card2.identifier
-
 
 def test_rotation_should_be_settable():
     """ Tests rotation getter and setter """

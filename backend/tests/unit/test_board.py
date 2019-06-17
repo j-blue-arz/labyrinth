@@ -1,6 +1,6 @@
 """ Tests for Game of game.py """
 import pytest
-from tests.unit.factories import create_random_maze, create_random_maze_card
+from tests.unit.factories import create_random_maze, MazeCardFactory
 from server.model.game import Board, BoardLocation
 from server.model.factories import create_maze
 from server.model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
@@ -72,11 +72,12 @@ def test_clear_pieces_after_creations_empties_pieces():
 
 def test_move_new_objective_locations_after_reaching_location():
     """ Tests new objective generation after reaching one """
-    maze = create_maze(MAZE_STRING)
+    maze_card_factory = MazeCardFactory()
+    maze = create_maze(MAZE_STRING, maze_card_factory)
     objective_maze_card = maze[BoardLocation(1, 6)]
     board = Board(
         maze=maze,
-        leftover_card=create_random_maze_card(),
+        leftover_card=maze_card_factory.create_random_maze_card(),
         objective_maze_card=objective_maze_card)
     piece = board.create_piece()
     piece.maze_card = maze[BoardLocation(0, 6)]
@@ -138,7 +139,9 @@ def test_move_updates_players_maze_card_correctly():
     Instead of calling init_board(), the board is built manually, and
     the player's position is set manually as well, so that
     randomness is eliminated for testing """
-    board = Board(maze=create_maze(MAZE_STRING), leftover_card=create_random_maze_card())
+    maze_card_factory = MazeCardFactory()
+    board = Board(maze=create_maze(MAZE_STRING, maze_card_factory),
+                  leftover_card=maze_card_factory.create_random_maze_card())
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(0, 1)]
     board.move(piece, BoardLocation(0, 2))
@@ -147,7 +150,9 @@ def test_move_updates_players_maze_card_correctly():
 
 def test_move_raises_error_on_unreachable_location():
     """ Tests move validation """
-    board = Board(maze=create_maze(MAZE_STRING), leftover_card=create_random_maze_card())
+    maze_card_factory = MazeCardFactory()
+    board = Board(maze=create_maze(MAZE_STRING, maze_card_factory),
+                  leftover_card=maze_card_factory.create_random_maze_card())
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(0, 1)]
     with pytest.raises(MoveUnreachableException):

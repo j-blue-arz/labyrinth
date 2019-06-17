@@ -14,7 +14,7 @@ These types are implemented on two boards.
 import copy
 import pytest
 import server.model.algorithm.minimax as mm
-from server.model.factories import create_maze
+from server.model.factories import create_maze, MazeCardFactory
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE
 
@@ -139,8 +139,9 @@ CASES_PARAMS = {
 
 
 def _param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
-    return {"maze": create_maze(maze_string),
-            "leftover_card": MazeCard.create_instance(leftover_doors, 0),
+    maze_card_factory = MazeCardFactory()
+    return {"maze": create_maze(maze_string, maze_card_factory),
+            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
             "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
             "objective_location": BoardLocation(*objective_tuple)}
 

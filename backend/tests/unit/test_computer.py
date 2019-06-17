@@ -3,7 +3,7 @@ The tests only run these classes in a single thread, by calling run() directly. 
 import copy
 from unittest.mock import MagicMock, patch, PropertyMock
 from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
-from server.model.factories import create_maze
+from server.model.factories import create_maze, MazeCardFactory
 from server.model.game import Board, MazeCard, BoardLocation, Game
 
 
@@ -47,7 +47,8 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
     """ Tests that the computer player starts algorithm.
     .start() is patched so that the algorithm runs sequentially.
     """
-    board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
     game = MagicMock()
     type(game).identifier = PropertyMock(return_value=7)
@@ -67,7 +68,8 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
 
 def test_random_actions_algorithm_computes_valid_actions():
     """ Runs algorithm 100 times and expects that it returns valid actions in each run """
-    orig_board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     for _ in range(100):
         board = copy.deepcopy(orig_board)
         maze = board.maze
@@ -101,7 +103,8 @@ def test_random_actions_algorithm_computes_valid_actions():
 def test_random_actions_algorithm_should_have_different_results():
     """ Runs algorithm 200 times and checks that a certain move is performed sooner or later.
     This test has a probability of about 0.008 to fail. """
-    orig_board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     move_locations = set()
     for _ in range(200):
         board = copy.deepcopy(orig_board)
@@ -128,7 +131,8 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     This test recreates a bug, where the pushed-out piece is not updated correctly, leading
     to exceptions thrown when computer makes a move.
     """
-    board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
     game = MagicMock()
@@ -151,7 +155,8 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
 def test_random_actions_algorithm_should_respect_no_pushback_rule():
     """ Runs algorithm 50 times and checks that none of the computed shifts reverts the previous shift action """
 
-    orig_board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     for _ in range(50):
         board = copy.deepcopy(orig_board)
         maze = board.maze
@@ -176,7 +181,8 @@ def test_computer_player_random_algorith_respects_no_pushback_rule(post_move, po
     This test recreates a bug, where the algorithm was not informed of the previous shift,
     leading to invalid shift actions.
     """
-    board = Board(create_maze(MAZE_STRING), leftover_card=MazeCard.create_instance("NE", 0))
+    card_factory = MazeCardFactory()
+    board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
     previous_shift_location = BoardLocation(6, 1)
     game = MagicMock()

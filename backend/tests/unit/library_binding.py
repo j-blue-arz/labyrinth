@@ -21,7 +21,6 @@ class CompletePathLibraryBinding(ExternalLibraryBinding):
         steps = 0
         while not has_reached and steps < 20:
             shift_action, move_location = self.find_optimal_action()
-            print(shift_action, move_location)
             actions.extend([shift_action, move_location])
             self._board.shift(shift_action[0], shift_action[1])
             has_reached = self._board.move(self._piece, move_location)

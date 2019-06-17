@@ -7,18 +7,30 @@ import math
 from server.model.game import MazeCard, Maze, BoardLocation, Board, Game
 from server.model.exceptions import InvalidSizeException
 
-def even(number):
-    return number % 2 == 0
+class MazeCardFactory:
+    """ Constructs maze cards, taking care of unique ids """
+    def __init__(self):
+        self._next_id = 0
 
-def create_random_maze_card(doors=None):
-    """ Creates a new instance of MazeCard with
-    random doors and rotation
-    """
-    if not doors:
-        doors = random.choice([MazeCard.STRAIGHT, MazeCard.CORNER, MazeCard.T_JUNCT])
-    rotation = random.choice([0, 90, 180, 270])
-    return MazeCard.create_instance(doors, rotation)
+    def reset_ids(self):
+        """ Resets the instance counter, such that a newly generated instance will have ID of 0 """
+        self._next_id = 0
 
+    def create_instance(self, doors, rotation):
+        """Generates a new instance, with autoincreasing ID.
+        """
+        maze_card = MazeCard(self._next_id, doors, rotation)
+        self._next_id = self._next_id + 1
+        return maze_card
+
+    def create_random_maze_card(self, doors=None):
+        """ Creates a new instance of MazeCard with
+        random doors and rotation
+        """
+        if not doors:
+            doors = random.choice([MazeCard.STRAIGHT, MazeCard.CORNER, MazeCard.T_JUNCT])
+        rotation = random.choice([0, 90, 180, 270])
+        return self.create_instance(doors, rotation)
 
 def create_maze_and_leftover(size=7):
     """ Generates a random maze state with a given odd size.
@@ -33,6 +45,9 @@ def create_maze_and_leftover(size=7):
     randomly placed on the board, with the last remaing card beeing returned as the leftover.
     The ratios are approximately kept for other sizes, rounding in favor of corners and then straights.
     """
+    def even(number):
+        return number % 2 == 0
+
     if even(size) or not 2 < size < 32:
         raise InvalidSizeException("Requested size {} is not an odd number between 2 and 32.".format(size))
     maze = Maze(maze_size=size)
@@ -79,14 +94,14 @@ def create_maze_and_leftover(size=7):
     loose_cards_doors = [MazeCard.CORNER]*num_corners + \
                         [MazeCard.T_JUNCT]*num_t_juncts +  \
                         [MazeCard.STRAIGHT]*num_straights
-    MazeCard.reset_ids()
-    loose_cards = [create_random_maze_card(doors=doors) for doors in loose_cards_doors]
+    card_factory = MazeCardFactory()
+    loose_cards = [card_factory.create_random_maze_card(doors=doors) for doors in loose_cards_doors]
     random.shuffle(loose_cards)
     card_iter = iter(loose_cards)
 
     for location in maze.maze_locations:
         if location in fixed_cards:
-            maze[location] = MazeCard.create_instance(fixed_cards[location].doors, fixed_cards[location].rotation)
+            maze[location] = card_factory.create_instance(fixed_cards[location].doors, fixed_cards[location].rotation)
         else:
             maze[location] = card_iter.__next__()
 
@@ -95,13 +110,14 @@ def create_maze_and_leftover(size=7):
 
 
 def create_fixed_board(maze_string, leftover_doors=None, start_locations=None, objective_location=None):
-    """ Creates a Board instance. Random maze, random leftover. """
-    maze = create_maze(maze_string)
+    """ Creates a Board instance. Maze is given as a string. """
+    maze_card_factory = MazeCardFactory()
+    maze = create_maze(maze_string, maze_card_factory)
     if start_locations:
         Board.START_LOCATIONS = start_locations
     if objective_location:
         Board.OBJECTIVE_LOCATION = objective_location
-    return Board(maze=maze, leftover_card=create_random_maze_card(leftover_doors))
+    return Board(maze=maze, leftover_card=maze_card_factory.create_random_maze_card(leftover_doors))
 
 
 def create_fixed_game(maze_string, game_id=0, leftover_doors=None,
@@ -128,11 +144,14 @@ def create_game(maze_size=7, game_id=0):
     return Game(game_id, board=create_board(maze_size))
 
 
-def create_maze(maze_string):
+def create_maze(maze_string, maze_card_factory=None):
     """ Reads a multi-line string representing a labyrinth configuration.
     Each maze card is a 3*3 substring of this multiline string. Walls are represented by '#',
     paths with '.'. After each field, there is one delimiter symbol, both horizontally and vertically.
     First line starts at index 1. """
+    if not maze_card_factory:
+        maze_card_factory = MazeCardFactory()
+
     maze = Maze()
 
     lines = maze_string.splitlines()[1:]
@@ -147,27 +166,27 @@ def create_maze(maze_string):
     def create_maze_card(field):
         line = "".join(field)
         if line == "###...###":
-            return MazeCard.create_instance(doors=MazeCard.STRAIGHT, rotation=90)
+            return maze_card_factory.create_instance(doors=MazeCard.STRAIGHT, rotation=90)
         if line == "#.##.##.#":
-            return MazeCard.create_instance(doors=MazeCard.STRAIGHT, rotation=0)
+            return maze_card_factory.create_instance(doors=MazeCard.STRAIGHT, rotation=0)
         if line == "#.##..###":
-            return MazeCard.create_instance(doors=MazeCard.CORNER, rotation=0)
+            return maze_card_factory.create_instance(doors=MazeCard.CORNER, rotation=0)
         if line == "####..#.#":
-            return MazeCard.create_instance(doors=MazeCard.CORNER, rotation=90)
+            return maze_card_factory.create_instance(doors=MazeCard.CORNER, rotation=90)
         if line == "###..##.#":
-            return MazeCard.create_instance(doors=MazeCard.CORNER, rotation=180)
+            return maze_card_factory.create_instance(doors=MazeCard.CORNER, rotation=180)
         if line == "#.#..####":
-            return MazeCard.create_instance(doors=MazeCard.CORNER, rotation=270)
+            return maze_card_factory.create_instance(doors=MazeCard.CORNER, rotation=270)
         if line == "#.##..#.#":
-            return MazeCard.create_instance(doors=MazeCard.T_JUNCT, rotation=0)
+            return maze_card_factory.create_instance(doors=MazeCard.T_JUNCT, rotation=0)
         if line == "###...#.#":
-            return MazeCard.create_instance(doors=MazeCard.T_JUNCT, rotation=90)
+            return maze_card_factory.create_instance(doors=MazeCard.T_JUNCT, rotation=90)
         if line == "#.#..##.#":
-            return MazeCard.create_instance(doors=MazeCard.T_JUNCT, rotation=180)
+            return maze_card_factory.create_instance(doors=MazeCard.T_JUNCT, rotation=180)
         if line == "#.#...###":
-            return MazeCard.create_instance(doors=MazeCard.T_JUNCT, rotation=270)
+            return maze_card_factory.create_instance(doors=MazeCard.T_JUNCT, rotation=270)
         if line == "#.#...#.#":
-            return MazeCard.create_instance(doors=MazeCard.CROSS, rotation=0)
+            return maze_card_factory.create_instance(doors=MazeCard.CROSS, rotation=0)
         return None
 
     for location in maze.maze_locations:

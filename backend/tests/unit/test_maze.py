@@ -1,6 +1,6 @@
 """ Tests for Maze of game.py """
 from server.model.game import Maze, MazeCard, BoardLocation
-from tests.unit.factories import create_random_maze, create_random_maze_card
+from tests.unit.factories import create_random_maze, MazeCardFactory
 
 
 def _get_id_matrix(maze):
@@ -28,9 +28,10 @@ def test_getter_returns_set_card():
 
 def test_setter_does_not_alter_other_state():
     """ Tests setter and getter """
-    maze = create_random_maze()
+    card_factory = MazeCardFactory()
+    maze = create_random_maze(card_factory)
     old_id_matrix = _get_id_matrix(maze)
-    maze[BoardLocation(3, 3)] = create_random_maze_card()
+    maze[BoardLocation(3, 3)] = card_factory.create_random_maze_card()
     new_id_matrix = _get_id_matrix(maze)
     difference = _compare_id_matrices(old_id_matrix, new_id_matrix)
     assert len(difference) == 1
@@ -39,24 +40,28 @@ def test_setter_does_not_alter_other_state():
 
 def test_shift_inserts_leftover():
     """ Tests shift """
-    maze = create_random_maze()
-    insertion = create_random_maze_card()
+    
+    card_factory = MazeCardFactory()
+    maze = create_random_maze(card_factory)
+    insertion = card_factory.create_random_maze_card()
     maze.shift(BoardLocation(0, 1), insertion)
     assert maze[BoardLocation(0, 1)] == insertion
 
 def test_shift_returns_pushed_out_card():
     """ Test shift """
-    maze = create_random_maze()
+    card_factory = MazeCardFactory()
+    maze = create_random_maze(card_factory)
     opposite = maze[BoardLocation(0, 3)]
-    pushed_out = maze.shift(BoardLocation(maze.maze_size - 1, 3), create_random_maze_card())
+    pushed_out = maze.shift(BoardLocation(maze.maze_size - 1, 3), card_factory.create_random_maze_card())
     assert opposite == pushed_out
 
 
 def test_shift_alters_entire_row_correctly():
     """ Test shift """
-    maze = create_random_maze()
+    card_factory = MazeCardFactory()
+    maze = create_random_maze(card_factory)
     old_id_matrix = _get_id_matrix(maze)
-    insertion = create_random_maze_card()
+    insertion = card_factory.create_random_maze_card()
     maze.shift(BoardLocation(5, maze.maze_size - 1), insertion)
     new_id_matrix = _get_id_matrix(maze)
     assert new_id_matrix[5][maze.maze_size - 1] == insertion.identifier
@@ -65,9 +70,10 @@ def test_shift_alters_entire_row_correctly():
 
 def test_shift_does_not_alter_rest_of_maze():
     """ Test shift """
-    maze = create_random_maze()
+    card_factory = MazeCardFactory()
+    maze = create_random_maze(card_factory)
     old_id_matrix = _get_id_matrix(maze)
-    maze.shift(BoardLocation(5, 0), create_random_maze_card())
+    maze.shift(BoardLocation(5, 0), card_factory.create_random_maze_card())
     new_id_matrix = _get_id_matrix(maze)
     differences = _compare_id_matrices(old_id_matrix, new_id_matrix)
     assert len(differences) == maze.maze_size

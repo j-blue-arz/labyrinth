@@ -142,19 +142,6 @@ class MazeCard:
         """
         return self._OUT_PATHS_DICT[(self._doors, self._rotation)]
 
-    @classmethod
-    def reset_ids(cls):
-        """ Resets the instance counter, such that a newly generated instance will have ID of 0 """
-        cls.next_id = 0
-
-    @classmethod
-    def create_instance(cls, doors, rotation):
-        """Generates a new instance, with autoincreasing ID.
-        """
-        maze_card = MazeCard(cls.next_id, doors, rotation)
-        cls.next_id = cls.next_id + 1
-        return maze_card
-
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
             self.identifier == other.identifier
