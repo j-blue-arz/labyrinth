@@ -8,7 +8,7 @@
 
 using namespace labyrinth;
 
-TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
+TEST(TreeGraphBuilderTest, buildGraph_withExtentOfTwo_resultsInCorrectNeighbors) {
     TreeGraphBuilder builder{};
     MazeGraph graph = builder.setExtent(2).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 4);
@@ -18,7 +18,7 @@ TEST(TreeGraphBuilderTest, CorrectNeighborsForExtentOfTwo) {
     EXPECT_TRUE(hasNeighbors(graph, Location{1, 1}, {Location{0, 1}, Location{1, 0}}));
 }
 
-TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
+TEST(TreeGraphBuilderTest, buildGraph_withExtentOfFour_graphisTree) {
     TreeGraphBuilder builder{};
     MazeGraph graph = builder.setExtent(4).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 16);
@@ -27,7 +27,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfFour) {
     EXPECT_EQ(reachable_from_corner.size(), 16);
 }
 
-TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
+TEST(TreeGraphBuilderTest, buildGraph_withExtentOfEight_graphIsTree) {
     TreeGraphBuilder builder{};
     MazeGraph graph = builder.setExtent(8).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 64);
@@ -36,7 +36,7 @@ TEST(TreeGraphBuilderTest, IsTreeForExtentOfEight) {
     EXPECT_EQ(reachable_from_corner.size(), 64);
 }
 
-TEST(TreeGraphBuilderTest, IsTreeForExtentOfSixteen) {
+TEST(TreeGraphBuilderTest, buildGraph_withExtentOfSixteen_graphIsTree) {
     TreeGraphBuilder builder{};
     MazeGraph graph = builder.setExtent(16).buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 256);

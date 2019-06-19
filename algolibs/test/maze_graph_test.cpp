@@ -48,11 +48,11 @@ protected:
 
 const size_t MazeGraphTest::extent;
 
-TEST_F(MazeGraphTest, NumberOfNodesIsCorrect) {
+TEST_F(MazeGraphTest, constructedGraph_hasCorrectNumberOfNodes) {
     EXPECT_EQ(graph_.getNumberOfNodes(), 9);
 }
 
-TEST_F(MazeGraphTest, AllNodesHaveUniqueIds) {
+TEST_F(MazeGraphTest, constructedGraph_hasUniqueNodeIds) {
     std::set<MazeGraph::NodeId> ids;
     for (auto row = 0; row < MazeGraphTest::extent; row++) {
         for (auto column = 0; column < MazeGraphTest::extent; column++) {
@@ -62,7 +62,7 @@ TEST_F(MazeGraphTest, AllNodesHaveUniqueIds) {
     EXPECT_EQ(ids.size(), graph_.getNumberOfNodes()) << "duplicate node ids detected";
 }
 
-TEST_F(MazeGraphTest, NodeIdsAreConsecutiveStartingWith0) {
+TEST_F(MazeGraphTest, constructedGraph_hasConsecutiveNodeIdsStartingWith0) {
     std::set<MazeGraph::NodeId> ids;
     for (auto row = 0; row < MazeGraphTest::extent; row++) {
         for (auto column = 0; column < MazeGraphTest::extent; column++) {
@@ -74,34 +74,34 @@ TEST_F(MazeGraphTest, NodeIdsAreConsecutiveStartingWith0) {
     }
 }
 
-TEST_F(MazeGraphTest, NodeIdOfLeftoverIs49forExtent7) {
+TEST_F(MazeGraphTest, constructedGraph_withExtent7_assignsNodeId49toLeftover) {
     MazeGraph graph{7};
     auto leftover_id = graph.getLeftoverNodeId();
     EXPECT_EQ(leftover_id, 49u);
 
 }
 
-TEST_F(MazeGraphTest, NeighborsForCornerWithOneNeighbor) {
+TEST_F(MazeGraphTest, neighbors_forCornerWithOneNeighbor) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{0, 2}, {Location{0, 1}}));
 }
 
-TEST_F(MazeGraphTest, NeighborsForCornerWithNoNeighbor) {
+TEST_F(MazeGraphTest, neighbors_forCornerWithNoNeighbor) {
     EXPECT_TRUE(assertNumNeighbors(graph_, Location{2, 2}, 0));
 }
 
-TEST_F(MazeGraphTest, NeighborsForBorderWithNoNeighbor) {
+TEST_F(MazeGraphTest, neighbors_forBorderWithNoNeighbor) {
     EXPECT_TRUE(assertNumNeighbors(graph_, Location{2, 1}, 0));
 }
 
-TEST_F(MazeGraphTest, NeighborsForInnerNodeWithTwoNeighbors) {
+TEST_F(MazeGraphTest, neighbors_forInnerNodeWithTwoNeighbors) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 1}, {Location{1, 0}, Location{1, 2}}));
 }
 
-TEST_F(MazeGraphTest, NeighborsForBorderNodeWithThreeNeighbors) {
+TEST_F(MazeGraphTest, neighbors_forBorderNodeWithThreeNeighbors) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 0}, {Location{0, 0}, Location{1, 1}, Location{2, 0}}));
 }
 
-TEST_F(MazeGraphTest, NeighborsForBorderNodeWithThreeNeighbors_Iter) {
+TEST_F(MazeGraphTest, neighbors_forBorderNodeWithThreeNeighbors_isIterable) {
     auto neighbors = graph_.neighbors(Location{1, 0});
     std::set<Location> neighbor_set;
     for (auto iter = neighbors.begin(); iter != neighbors.end(); ++iter) {
@@ -114,12 +114,12 @@ TEST_F(MazeGraphTest, NeighborsForBorderNodeWithThreeNeighbors_Iter) {
         "(1, 0) should have three neighbors, (0, 0), (1, 1), and (2, 0).";
 }
 
-TEST_F(MazeGraphTest, GetShiftLocationsWithoutValidLocations) {
+TEST_F(MazeGraphTest, getShiftLocations_withoutValidLocations_returnsEmptyCollection) {
     auto shift_locations = graph_.getShiftLocations();
     EXPECT_THAT(shift_locations, testing::IsEmpty());
 }
 
-TEST_F(MazeGraphTest, GetShiftLocationsWithTwoValidLocations) {
+TEST_F(MazeGraphTest, getShiftLocations_withTwoValidLocations_returnsBoth) {
     graph_.addShiftLocation(Location{0, 2});
     graph_.addShiftLocation(Location{0, 1});
     auto shift_locations = graph_.getShiftLocations();
@@ -127,7 +127,7 @@ TEST_F(MazeGraphTest, GetShiftLocationsWithTwoValidLocations) {
     EXPECT_THAT(shift_locations, testing::UnorderedElementsAre(Location{0, 1}, Location{0, 2}));
 }
 
-TEST_F(MazeGraphTest, GetShiftLocationsWithTwoEqualLocations) {
+TEST_F(MazeGraphTest, getShiftLocations_withAddingTwoEqualLocations_returnsOnlyOne) {
     graph_.addShiftLocation(Location{0, 2});
     graph_.addShiftLocation(Location{0, 2});
     auto shift_locations = graph_.getShiftLocations();
@@ -135,19 +135,7 @@ TEST_F(MazeGraphTest, GetShiftLocationsWithTwoEqualLocations) {
     EXPECT_THAT(shift_locations, testing::UnorderedElementsAre(Location{0, 2}));
 }
 
-TEST_F(MazeGraphTest, ShiftLocationComparesEqualToLocation) {
-    graph_.addShiftLocation(Location{1, 0});
-    auto shift_locations = graph_.getShiftLocations();
-    EXPECT_TRUE(*shift_locations.begin() == (Location{1, 0})) << "Location object and return value of getShiftLocations() are not comparable";
-}
-
-TEST_F(MazeGraphTest, ShiftLocationComparesUnequalToLocation) {
-    graph_.addShiftLocation(Location{1, 0});
-    auto shift_locations = graph_.getShiftLocations();
-    EXPECT_TRUE(*shift_locations.begin() != (Location{1, 1})) << "Location object and return value of getShiftLocations() are not comparable";
-}
-
-TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectNodeIds) {
+TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectNodeIds) {
     MazeGraph::NodeId old_column_ids[] = {graph_.getNodeId(Location{0, 1}), graph_.getNodeId(Location{1, 1}), graph_.getNodeId(Location{2, 1})};
 
     graph_.shift(Location{0, 1}, 0);
@@ -156,7 +144,7 @@ TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectNodeIds) {
     EXPECT_EQ(old_column_ids[1], graph_.getNodeId(Location{2, 1}));
 }
 
-TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectPaths) {
+TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectPaths) {
 
     graph_.shift(Location{0, 1}, 0);
 
@@ -164,7 +152,7 @@ TEST_F(MazeGraphTest, ShiftAlongColumnResultsInCorrectPaths) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{2, 2}}));
 }
 
-TEST_F(MazeGraphTest, ShiftAlongColumnInsertsLeftover) {
+TEST_F(MazeGraphTest, shift_alongColumn_insertsLeftover) {
     graph_.setLeftoverOutPaths("ES");
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
@@ -174,7 +162,7 @@ TEST_F(MazeGraphTest, ShiftAlongColumnInsertsLeftover) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{0, 1}, {Location{1, 1}, Location{0, 2}}));
 }
 
-TEST_F(MazeGraphTest, ShiftAlongColumnUpdatesLeftover) {
+TEST_F(MazeGraphTest, shift_alongColumn_updatesLeftover) {
     auto pushed_out_id = graph_.getNodeId(Location{2, 1});
 
     graph_.shift(Location{0, 1}, 0);
@@ -182,7 +170,7 @@ TEST_F(MazeGraphTest, ShiftAlongColumnUpdatesLeftover) {
     EXPECT_EQ(pushed_out_id, graph_.getLeftoverNodeId());
 }
 
-TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectNodeIds) {
+TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectNodeIds) {
     MazeGraph::NodeId old_row_ids[] = {graph_.getNodeId(Location{1, 0}), graph_.getNodeId(Location{1, 1}), graph_.getNodeId(Location{1, 2})};
 
     graph_.shift(Location{1, 2}, 0);
@@ -191,7 +179,7 @@ TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectNodeIds) {
     EXPECT_EQ(old_row_ids[2], graph_.getNodeId(Location{1, 1}));
 }
 
-TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectPaths) {
+TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectPaths) {
 
     graph_.shift(Location{1, 2}, 0);
 
@@ -199,7 +187,7 @@ TEST_F(MazeGraphTest, ShiftAlongRowResultsInCorrectPaths) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 0}, {Location{1, 1}}));
 }
 
-TEST_F(MazeGraphTest, ShiftAlongRowInsertsLeftover) {
+TEST_F(MazeGraphTest, shift_alongRow_insertsLeftover) {
     graph_.setLeftoverOutPaths("NEW");
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
@@ -209,7 +197,7 @@ TEST_F(MazeGraphTest, ShiftAlongRowInsertsLeftover) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 2}, {Location{1, 1}}));
 }
 
-TEST_F(MazeGraphTest, TwoShiftsResultInCorrectPathAroundPushedOutAndPushedInNode) {
+TEST_F(MazeGraphTest, shift_atOppositeLocationOfPreviouslyPushedInNode_insertsCorrectNodeAndResultsInCorrectNeighbors) {
     graph_.addShiftLocation(Location{2, 1});
     graph_.addShiftLocation(Location{1, 2});
     auto pushed_out_id = graph_.getNodeId(Location{1, 0});
