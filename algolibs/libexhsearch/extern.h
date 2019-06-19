@@ -16,10 +16,12 @@ extern "C" {
 
     struct CGraph {
         unsigned long long extent;
-        // expected to be of size extent*extent + 1,
-        // and specify the row-wise nodes of the maze. The last entry is the leftover.
-        // node ids are expected to be unique.
-        struct CNode nodes[50];
+        // The graph is always quadratic.
+        // Hence, the given number of nodes is expected to be equal to extent*extent + 1.
+        // The nodes specify the row-wise layout of the maze. The last entry is the leftover.
+        // Node ids are expected to be unique.
+        unsigned long long num_nodes;
+        struct CNode * nodes;
     };
 
     struct CAction {

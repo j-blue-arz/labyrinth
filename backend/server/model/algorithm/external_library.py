@@ -18,7 +18,8 @@ class GRAPH(ctypes.Structure):
     """ corresponds to game.Maze """
     _fields_ = [
         ("extent", ctypes.c_ulonglong),
-        ("nodes", NODE * 50)
+        ("num_nodes", ctypes.c_ulonglong),
+        ("nodes", ctypes.POINTER(NODE))
     ]
 
 class ACTION(ctypes.Structure):
@@ -73,8 +74,8 @@ class ExternalLibraryBinding:
         extent = maze.maze_size
         node_array = [ExternalLibraryBinding._create_node(maze[location]) for location in maze.maze_locations]
         node_array.append(ExternalLibraryBinding._create_node(board.leftover_card))
-        nodes = (NODE * 50)(*node_array)
-        return GRAPH(extent=extent, nodes=nodes)
+        nodes = (NODE * len(node_array))(*node_array)
+        return GRAPH(extent=extent, num_nodes=len(node_array), nodes=nodes)
 
     @staticmethod
     def _create_location(board_location):

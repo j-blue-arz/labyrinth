@@ -10,10 +10,9 @@ labyrinth::MazeGraph::InputNode mapNode(const struct CNode & node) noexcept {
 }
 
 labyrinth::MazeGraph mapGraph(struct CGraph graph) {
-    const auto num_nodes = graph.extent * graph.extent + 1;
     std::vector<labyrinth::MazeGraph::InputNode> input_nodes;
-    input_nodes.reserve(num_nodes);
-    for (size_t i = 0; i < num_nodes; ++i) {
+    input_nodes.reserve(graph.num_nodes);
+    for (size_t i = 0; i < graph.num_nodes; ++i) {
         input_nodes.push_back(mapNode(graph.nodes[i]));
     }
     labyrinth::MazeGraph maze_graph{graph.extent, input_nodes};
