@@ -18,39 +18,39 @@ def test_d1_direct_path(create_optimizer):
     _check_actions(board, piece, actions)
 
 
-def test_d1_shift_req():
+def test_d1_shift_req(create_optimizer):
     """ Test-case where one shift action is required to reach objective """
     board, piece = create_board_and_piece_by_key("d1-shift-req")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 2
     _check_actions(board, piece, actions)
 
 
-def test_d2_two_shifts():
+def test_d2_two_shifts(create_optimizer):
     """ Test-case where two shift actions are required to reach objective """
     board, piece = create_board_and_piece_by_key("d2-two-shifts")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
 
 
-def test_d2_self_push_out():
+def test_d2_self_push_out(create_optimizer):
     """ Test-case where solution is to push himself out, two turns required """
     board, piece = create_board_and_piece_by_key("d2-self-push-out")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
 
 
-def test_d2_no_pushback_violation():
+def test_d2_no_pushback_violation(create_optimizer):
     """ Test-case where a solution of depth 2 violates no-pushback-rule:
     [((0, 1), 180), (0, 1), ((6, 1), 90), (6, 0)]
     Checks that optimizer does not violate no-pushback-rule """
     board, piece = create_board_and_piece_by_key("d2-pushback-violation")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
@@ -59,67 +59,67 @@ def test_d2_no_pushback_violation():
         shift_location = shift_action[0]
         assert board.opposing_insert_location(shift_location) != prev_shift_location
 
-def test_d2_two_shifts_with_previous_shift():
+def test_d2_two_shifts_with_previous_shift(create_optimizer):
     """ Test case where there is a solution of depth 2: [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
     The test makes the first shift of this solution a rule violation, and checks
     that the optimizer does not violate no-pushback-rule """
     board, piece = create_board_and_piece_by_key("d2-two-shifts")
-    optimizer = Optimizer(board, piece, previous_shift_location=BoardLocation(6, 1))
+    optimizer = create_optimizer(board, piece, previous_shift_location=BoardLocation(6, 1))
     actions = optimizer.find_optimal_actions()
     _check_actions(board, piece, actions)
     first_shift_location = actions[0][0]
     assert first_shift_location != BoardLocation(0, 1)
 
 @pytest.mark.skip("long running-time")
-def test_d2_long_running():
+def test_d2_long_running(create_optimizer):
     """ Two turns required """
     board, piece = create_board_and_piece_by_key("d2-long-running")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 4
     _check_actions(board, piece, actions)
 
 
-def test_d3_obj_push_out():
+def test_d3_obj_push_out(create_optimizer):
     """ Test-case where solution is to push objective out, three turns required (ca. 7s)"""
     board, piece = create_board_and_piece_by_key("d3-obj-push-out")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
 
-def test_d3_long_running():
+def test_d3_long_running(create_optimizer):
     """ Three turns required """
     board, piece = create_board_and_piece_by_key("d3-long-running")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
 @pytest.mark.skip("long running-time")
-def test_d3_generated_1():
+def test_d3_generated_1(create_optimizer):
     """ three turns required """
     board, piece = create_board_and_piece_by_key("d3-generated-8s")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
 @pytest.mark.skip("long running-time")
-def test_d3_generated_2():
+def test_d3_generated_2(create_optimizer):
     """ three turns required """
     board, piece = create_board_and_piece_by_key("d3-generated-23s")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
 @pytest.mark.skip("long running-time")
-def test_d3_generated_3():
+def test_d3_generated_3(create_optimizer):
     """ three turns required, running-time currently 8s """
     board, piece = create_board_and_piece_by_key("d3-generated-33s")
-    optimizer = Optimizer(board, piece)
+    optimizer = create_optimizer(board, piece)
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
