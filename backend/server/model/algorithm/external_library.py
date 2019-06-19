@@ -5,14 +5,17 @@ binding to a library at a given path """
 import ctypes
 from server.model.game import BoardLocation
 
+
 class LOCATION(ctypes.Structure):
     """ corresponds to game.BoardLocation """
     _fields_ = [("row", ctypes.c_short), ("column", ctypes.c_short)]
+
 
 class NODE(ctypes.Structure):
     """ corresponds to game.MazeCard
     The doors are represented as a bitfield """
     _fields_ = [("node_id", ctypes.c_uint), ("out_paths", ctypes.c_ubyte), ("rotation", ctypes.c_short)]
+
 
 class GRAPH(ctypes.Structure):
     """ corresponds to game.Maze """
@@ -22,6 +25,7 @@ class GRAPH(ctypes.Structure):
         ("nodes", ctypes.POINTER(NODE))
     ]
 
+
 class ACTION(ctypes.Structure):
     """ return type of algolibs function call: shift location, rotation and move location """
     _fields_ = [
@@ -29,6 +33,7 @@ class ACTION(ctypes.Structure):
         ("rotation", ctypes.c_short),
         ("move_location", LOCATION),
     ]
+
 
 class ExternalLibraryBinding:
     """ Binds to an external library at given path. 
@@ -53,7 +58,8 @@ class ExternalLibraryBinding:
         start_location = self._create_location(start_location)
         previous_shift_location = self._create_location(self._previous_shift_location)
         objective_id = self._board.objective_maze_card.identifier
-        action = self._library.find_action(graph, start_location, objective_id, previous_shift_location)
+        action = self._library.find_action(ctypes.byref(graph), ctypes.byref(start_location), objective_id,
+                                           ctypes.byref(previous_shift_location))
         return self._map_returned_action(action)
 
     @staticmethod
@@ -86,5 +92,4 @@ class ExternalLibraryBinding:
     def _map_returned_action(action):
         """ creates an action tuple (shift_location, rotation), move_location from an ACTION """
         return (BoardLocation(action.shift_location.row, action.shift_location.column), action.rotation), \
-                BoardLocation(action.move_location.row, action.move_location.column)
-
+            BoardLocation(action.move_location.row, action.move_location.column)
