@@ -1,6 +1,7 @@
 #include "libexhsearch/exhsearch.h"
 #include "libexhsearch/graph_algorithms.h"
 #include "graphbuilder/text_graph_builder.h"
+#include "mazes.h"
 
 
 #include "gtest/gtest.h"
@@ -13,14 +14,11 @@ using namespace labyrinth;
 class ExhaustiveSearchTest : public ::testing::Test {
 protected:
 
-    static const std::vector<std::string> big_component_maze;
-    static const std::vector<std::string> difficult_maze;
-
     void SetUp() override {
         buildGraph();
     }
 
-    void buildGraph(const std::vector<std::string> & maze = big_component_maze,
+    void buildGraph(const std::vector<std::string> & maze = mazes::big_component_maze,
                     const std::initializer_list<GraphBuilder::OutPath> leftover_out_paths = {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East}) {
         TextGraphBuilder builder{};
 
@@ -31,68 +29,6 @@ protected:
     }
 
     MazeGraph graph_{0};
-};
-
-const std::vector<std::string> ExhaustiveSearchTest::big_component_maze = {
-    "###|#.#|#.#|###|#.#|#.#|###|",
-    "#..|#..|...|...|#..|..#|..#|",
-    "#.#|###|###|#.#|###|###|#.#|",
-    "---------------------------|",
-    "###|###|#.#|#.#|#.#|#.#|#.#|",
-    "...|...|#.#|#..|#.#|...|..#|",
-    "#.#|#.#|#.#|###|#.#|###|#.#|",
-    "---------------------------|",
-    "#.#|#.#|#.#|#.#|#.#|#.#|#.#|",
-    "#..|#..|..#|#..|..#|#.#|..#|",
-    "#.#|#.#|#.#|#.#|#.#|#.#|#.#|",
-    "---------------------------|",
-    "#.#|#.#|#.#|###|#.#|###|###|",
-    "..#|..#|#..|...|...|...|..#|",
-    "###|#.#|###|#.#|###|#.#|#.#|",
-    "---------------------------|",
-    "###|#.#|###|#.#|###|#.#|###|",
-    "#..|..#|#..|#.#|...|#..|...|",
-    "#.#|###|#.#|#.#|#.#|###|###|",
-    "---------------------------|",
-    "###|#.#|###|#.#|#.#|#.#|#.#|",
-    "..#|#..|...|...|#.#|#..|..#|",
-    "#.#|#.#|###|###|#.#|#.#|#.#|",
-    "---------------------------|",
-    "#.#|#.#|###|###|#.#|#.#|#.#|",
-    "#..|...|...|...|#.#|...|..#|",
-    "###|###|#.#|###|#.#|###|###|",
-    "---------------------------*"
-};
-
-const std::vector<std::string> ExhaustiveSearchTest::difficult_maze = {
-    "###|#.#|###|###|#.#|###|###|",
-    "#..|#..|...|#..|#..|#..|..#|",
-    "#.#|###|#.#|#.#|###|#.#|#.#|",
-    "---------------------------|",
-    "#.#|#.#|#.#|###|#.#|#.#|###|",
-    "#..|..#|..#|...|#..|#.#|...|",
-    "###|###|#.#|###|###|#.#|###|",
-    "---------------------------|",
-    "#.#|###|#.#|#.#|###|###|#.#|",
-    "#..|#..|#..|#.#|...|...|..#|",
-    "#.#|#.#|#.#|#.#|#.#|###|#.#|",
-    "---------------------------|",
-    "###|#.#|###|#.#|###|###|###|",
-    "...|..#|#..|#.#|#..|...|...|",
-    "###|#.#|#.#|#.#|#.#|###|###|",
-    "---------------------------|",
-    "#.#|#.#|#.#|#.#|#.#|###|#.#|",
-    "#..|#..|#..|#.#|..#|...|...|",
-    "#.#|###|#.#|#.#|#.#|###|###|",
-    "---------------------------|",
-    "###|#.#|#.#|#.#|#.#|#.#|#.#|",
-    "..#|#..|#..|...|#.#|#..|..#|",
-    "#.#|###|#.#|###|#.#|#.#|#.#|",
-    "---------------------------|",
-    "#.#|###|###|###|#.#|#.#|#.#|",
-    "#..|...|#..|...|#.#|...|..#|",
-    "###|###|#.#|###|#.#|###|###|",
-    "---------------------------*"
 };
 
 ::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::exhsearch::PlayerAction> & actions,
@@ -229,7 +165,7 @@ TEST_F(ExhaustiveSearchTest, d2_long_running) {
 
 TEST_F(ExhaustiveSearchTest, d2_self_push_out) {
     SCOPED_TRACE("d2_self_push_out");
-    buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
+    buildGraph(mazes::difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
     auto objective_id = graph_.getNodeId(Location{6, 6});
     Location player_location{0, 6};
 
@@ -238,7 +174,7 @@ TEST_F(ExhaustiveSearchTest, d2_self_push_out) {
 
 TEST_F(ExhaustiveSearchTest, d3_obj_push_out) {
     SCOPED_TRACE("d3_obj_push_out");
-    buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
+    buildGraph(mazes::difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
     auto objective_id = graph_.getNodeId(Location{5, 1});
     Location player_location{0, 6};
 
@@ -247,7 +183,7 @@ TEST_F(ExhaustiveSearchTest, d3_obj_push_out) {
 
 TEST_F(ExhaustiveSearchTest, d3_long_running) {
     SCOPED_TRACE("d3_long_running");
-    buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
+    buildGraph(mazes::difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
     auto objective_id = graph_.getNodeId(Location{1, 1});
     Location player_location{4, 6};
 
@@ -256,7 +192,7 @@ TEST_F(ExhaustiveSearchTest, d3_long_running) {
 
 TEST_F(ExhaustiveSearchTest, withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves) {
     SCOPED_TRACE("withResultOfLengthTwoViolatingPushbackRule_shouldReturnThreeMoves");
-    buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
+    buildGraph(mazes::difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
     auto objective_id = graph_.getNodeId(Location{6, 6});
     Location player_location{0, 4};
 
@@ -265,10 +201,19 @@ TEST_F(ExhaustiveSearchTest, withResultOfLengthTwoViolatingPushbackRule_shouldRe
 
 TEST_F(ExhaustiveSearchTest, withResultOfLengthOneViolatingGivenPreviousShift_shouldReturnTwoMoves) {
     SCOPED_TRACE("withResultOfLengthOneViolatingGivenPreviousShift_shouldReturnTwoMoves");
-    buildGraph(difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
+    buildGraph(mazes::difficult_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::South});
     auto objective_id = graph_.getLeftoverNodeId();
     Location player_location{6, 2};
 
     performTest(graph_, player_location, objective_id, 1);
     performTest(graph_, player_location, objective_id, 2, Location{0, 3});
+}
+
+TEST_F(ExhaustiveSearchTest, d4_generated_86s) { // takes too long (1 minute for debug build)
+    SCOPED_TRACE("d4_generated_depth4");
+    buildGraph(mazes::exh_depth_4_maze, {GraphBuilder::OutPath::North, GraphBuilder::OutPath::East});
+    auto objective_id = graph_.getNodeId(Location{6, 7});
+    Location player_location{4, 2};
+
+    performTest(graph_, player_location, objective_id, 4);
 }
