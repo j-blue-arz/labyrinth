@@ -152,3 +152,21 @@ Test case d3-generated-33s               best of 3: 1495.85ms
 Also tried to get rid of id to maze card map, which is required to set the objective's and pieces' maze card.
 There are 50 insertions, but only two fetches on this map. Tried to replace it and setting objective and piece during loop. This was slower, though.
 Further optimizations require more intensive work, e.g. reimplementing a dynamic graph, which can handle shift operations and copying by itself.
+
+After performance optimizations of minimax and alpha-beta:
+- Implemented out_paths() of MazeCard with a table lookup. 
+- No neighbor check for already reached maze cards (in reachable_locations):
+- Implemented own hash function for BoardLocation:
+Test case d1-direct-path                 best of 5: 2.64ms
+Test case d1-shift-req                   best of 5: 7.76ms
+Test case d2-two-shifts                  best of 5: 26.90ms
+Test case d2-self-push-out               best of 5: 11.65ms
+Test case d2-pushback-violation          best of 5: 342.95ms
+Test case d2-long-running                best of 5: 189.88ms
+Test case d3-obj-push-out                best of 5: 426.92ms
+Test case d3-long-running                best of 5: 298.97ms
+Test case d3-generated-8s                best of 5: 715.42ms
+Test case d3-generated-23s               best of 5: 950.72ms
+Test case d3-generated-33s               best of 5: 1054.98ms
+Test case d4-generated-86s               best of 5: 86554.79ms
+Test case d4-generated-86s               resulted in actions [((0, 1), 0), (4, 2), ((0, 7), 0), (4, 2), ((5, 0), 0), (7, 0), ((7, 8), 0), (7, 6)]

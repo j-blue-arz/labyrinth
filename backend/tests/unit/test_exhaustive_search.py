@@ -1,12 +1,11 @@
 """ Tests for exhaustive search algorithm.
 Each testcase verifies the precomputed depth of the found solution,
 and asserts that the solution is valid """
-import copy
 import pytest
-from library_binding import CompletePathLibraryBinding
+from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
+from tests.unit.library_binding import CompletePathLibraryBinding
 from server.model.algorithm.exhaustive_search import Optimizer
-from server.model.factories import create_maze, MazeCardFactory
-from server.model.game import Board, BoardLocation, MazeCard, Piece
+from server.model.game import Board, BoardLocation, Piece
 
 
 def test_d1_direct_path(create_optimizer):
@@ -221,35 +220,18 @@ GENERATED_WITH_LINE_LEFTOVER = """
 """
 
 CASES_PARAMS = {
-    "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", (3, 3), (6, 2)),
-    "d1-shift-req": (BIG_COMPONENT_MAZE, "NE", (3, 3), (0, 3)),
-    "d2-two-shifts": (BIG_COMPONENT_MAZE, "NE", (3, 3), (6, 6)),
-    "d2-self-push-out": (DIFFICULT_MAZE, "NE", (0, 6), (6, 6)),
-    "d2-pushback-violation": (DIFFICULT_MAZE, "NE", (0, 0), (6, 0)),
-    "d2-long-running": (BIG_COMPONENT_MAZE, "NES", (3, 2), (0, 5)),
-    "d3-obj-push-out": (DIFFICULT_MAZE, "NE", (0, 6), (5, 1)),
-    "d3-long-running": (DIFFICULT_MAZE, "NS", (4, 6), (1, 1)),
-    "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (1, 4), (6, 2)),
-    "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (6, 6), (0, 0)),
-    "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", (1, 4), (5, 6))
+    "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", [(3, 3)], (6, 2)),
+    "d1-shift-req": (BIG_COMPONENT_MAZE, "NE", [(3, 3)], (0, 3)),
+    "d2-two-shifts": (BIG_COMPONENT_MAZE, "NE", [(3, 3)], (6, 6)),
+    "d2-self-push-out": (DIFFICULT_MAZE, "NE", [(0, 6)], (6, 6)),
+    "d2-pushback-violation": (DIFFICULT_MAZE, "NE", [(0, 0)], (6, 0)),
+    "d2-long-running": (BIG_COMPONENT_MAZE, "NES", [(3, 2)], (0, 5)),
+    "d3-obj-push-out": (DIFFICULT_MAZE, "NE", [(0, 6)], (5, 1)),
+    "d3-long-running": (DIFFICULT_MAZE, "NS", [(4, 6)], (1, 1)),
+    "d3-generated-8s": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4)], (6, 2)),
+    "d3-generated-23s": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(6, 6)], (0, 0)),
+    "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4)], (5, 6))
 }
-
-
-def _param_tuple_to_param_dict(maze_string, leftover_doors, start_tuple, objective_tuple):
-    maze_card_factory = MazeCardFactory()
-    return {"maze": create_maze(maze_string, maze_card_factory),
-            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
-            "start_location": BoardLocation(*start_tuple),
-            "objective_location": BoardLocation(*objective_tuple)}
-
-
-def _create_board_and_piece(maze, leftover_card, start_location, objective_location):
-    maze = copy.deepcopy(maze)
-    board = Board(maze=maze, leftover_card=leftover_card, objective_maze_card=maze[objective_location])
-    board.clear_pieces()
-    piece = Piece(0, board.maze[start_location])
-    board.pieces.append(piece)
-    return board, piece
 
 def create_board_and_piece_by_key(key):
     """ Creates a board with a single piece, as used by the exhaustive search optimizer.
@@ -257,8 +239,9 @@ def create_board_and_piece_by_key(key):
     :param key: a key for the test-case
     :return: an Optimizer instance, the board and the piece of the created test-case
     """
-    param_dict = _param_tuple_to_param_dict(*(CASES_PARAMS[key]))
-    return _create_board_and_piece(**param_dict)
+    param_dict = param_tuple_to_param_dict(*(CASES_PARAMS[key]))
+    board = create_board_and_pieces(**param_dict)
+    return board, board.pieces[0]
 
 def _check_actions(board, piece, actions):
     assert len(actions) % 2 == 0

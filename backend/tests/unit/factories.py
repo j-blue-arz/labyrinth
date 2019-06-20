@@ -2,9 +2,9 @@
 
 In contrast to the factories in server.model.factories, this module has almost no guarantees on the layout
 of the created mazes and on the ratio of placed maze cards."""
-import random
-from server.model.game import MazeCard, Maze, BoardLocation
-from server.model.factories import MazeCardFactory
+import copy
+from server.model.game import MazeCard, Maze, BoardLocation, Board, Piece
+from server.model.factories import create_maze, MazeCardFactory
 
 def create_random_maze(maze_card_factory=None):
     """ Generates a random maze state.
@@ -28,3 +28,20 @@ def create_random_maze(maze_card_factory=None):
     for location in maze.maze_locations:
         maze[location] = card_at(location)
     return maze
+
+def param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
+    maze_card_factory = MazeCardFactory()
+    return {"maze": create_maze(maze_string, maze_card_factory),
+            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
+            "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
+            "objective_location": BoardLocation(*objective_tuple)}
+
+
+def create_board_and_pieces(maze, leftover_card, piece_locations, objective_location):
+    maze = copy.deepcopy(maze)
+    board = Board(maze=maze, leftover_card=leftover_card, objective_maze_card=maze[objective_location])
+    board.clear_pieces()
+    for index, location in enumerate(piece_locations):
+        piece = Piece(index, board.maze[location])
+        board.pieces.append(piece)
+    return board

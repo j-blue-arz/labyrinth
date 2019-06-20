@@ -14,7 +14,7 @@ These types are implemented on two boards.
 import copy
 import pytest
 import server.model.algorithm.minimax as mm
-from server.model.factories import create_maze, MazeCardFactory
+from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
 from server.model.game import Board, BoardLocation, MazeCard, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE
 
@@ -137,33 +137,14 @@ CASES_PARAMS = {
     "bug-d1": (MINIMAX_BUG_MAZE, "NS", [(4, 5), (0, 2)], (6, 2))
 }
 
-
-def _param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
-    maze_card_factory = MazeCardFactory()
-    return {"maze": create_maze(maze_string, maze_card_factory),
-            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
-            "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
-            "objective_location": BoardLocation(*objective_tuple)}
-
-
-def _create_board_and_piece(maze, leftover_card, piece_locations, objective_location):
-    maze = copy.deepcopy(maze)
-    board = Board(maze=maze, leftover_card=leftover_card, objective_maze_card=maze[objective_location])
-    board.clear_pieces()
-    for index, location in enumerate(piece_locations):
-        piece = Piece(index, board.maze[location])
-        board.pieces.append(piece)
-    return board
-
-
 def create_optimizer(key, previous_shift_location=None, depth=3):
     """Creates a test case, instantiates an Optimizer with this case.
 
     :param key: a key for the test-case
     :return: an Optimizer instance, the board and the piece of the created test-case
     """
-    param_dict = _param_tuple_to_param_dict(*(CASES_PARAMS[key]))
-    board = _create_board_and_piece(**param_dict)
+    param_dict = param_tuple_to_param_dict(*(CASES_PARAMS[key]))
+    board = create_board_and_pieces(**param_dict)
     optimizer = mm.Minimax(board, board.pieces, previous_shift_location=previous_shift_location, depth=depth)
     return optimizer, board, board.pieces
 

@@ -1,45 +1,57 @@
 """ Usage:
 bench_exhaustive_search <task> <case>
-where task is either 'profile' or 'benchmark'
-and 'case' is one of "d1-direct-path", "d1-shift-req", "d2-two-shifts", "d2-self-push-out", "d3-obj-push-out".
+where task is either 'profile', 'benchmark', or result
+and 'case' is either the name of a specific test case, or
+'all' for all test cases defined in test_exhaustive_search
 """
 import timeit
 import cProfile
 import sys
 from random import randint
 import server.model.algorithm.exhaustive_search as exh
-from server.model.factories import create_maze, create_random_maze_card, create_maze_and_leftover, \
-                                   maze_to_string
+from server.model.factories import create_maze, MazeCardFactory, create_maze_and_leftover, \
+    maze_to_string
 from server.model.game import BoardLocation
-import tests.unit.test_exhaustive_search as setup
+from tests.unit.mazes import EXH_DEPTH_4_MAZE
+from tests.unit.test_exhaustive_search import CASES_PARAMS
+import tests.unit.factories as setup
 
 
 def _find_setups():
     actions = []
-    maze_card = None
+    leftover_card = None
     start_location = None
     objective_location = None
-    maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER)
-    while len(actions) <= 6:
-        maze_card = create_random_maze_card(doors="NS")
-        start_location = BoardLocation(randint(0, 6), randint(0, 6))
-        objective_location = BoardLocation(randint(0, 6), randint(0, 6))
-        board, piece = setup._create_board_and_piece(maze, maze_card, start_location, objective_location)
+    card_factory = MazeCardFactory()
+    size = 9
+    max_index = size - 1
+    #maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER, card_factory)
+    while len(actions) <= 8:
+        maze, leftover_card = create_maze_and_leftover(size=size)
+        start_location = BoardLocation(randint(0, max_index), randint(0, max_index))
+        objective_location = BoardLocation(randint(0, max_index), randint(0, max_index))
+        board = setup.create_board_and_pieces(maze, leftover_card, start_location, objective_location)
+        piece = board.pieces[0]
         optimizer = exh.Optimizer(board, piece)
         start = timeit.default_timer()
         actions = optimizer.find_optimal_actions()
         stop = timeit.default_timer()
-        if len(actions) > 5:
-            print("Found setup of depth {}, with actions: {}, running for {:.2f}s".format(
-                len(actions) / 2, actions, stop - start))
-            print("Setup: {} {} {}".format(maze_card, start_location, objective_location))
-    print("Found setup of depth {} with actions: {}".format(len(actions)/2, actions))
-    print("Setup: {} {} {}".format(maze_card, start_location, objective_location))
+        print("Found setup of depth {}, with actions: {}, running for {:.2f}s".format(
+            len(actions) // 2, [start_location] + [objective_location] + actions, stop - start))
+        if len(actions) > 7:
+            print("Setup: {} {} {}".format(leftover_card, start_location, objective_location))
+            print("Maze:")
+            print(maze_to_string(maze))
+
 
 def _generate_and_print_maze_string():
     maze, leftover = create_maze_and_leftover()
     print(maze_to_string(maze))
     print(leftover)
+
+BENCH_CASES_PARAMS = {
+    "d4-generated-86s": (EXH_DEPTH_4_MAZE, "NE", [(4, 2)], (6, 7))
+}
 
 def create_optimizer(key, previous_shift_location=None):
     """Creates a test case, instantiates an Optimizer with this case.
@@ -47,12 +59,18 @@ def create_optimizer(key, previous_shift_location=None):
     :param key: a key for the test-case
     :return: an Optimizer instance, the board and the piece of the created test-case
     """
-    board, piece = setup.create_board_and_piece_by_key(key)
+    if key in BENCH_CASES_PARAMS:
+        param_dict = setup.param_tuple_to_param_dict(*(BENCH_CASES_PARAMS[key]))
+    else:
+        param_dict = setup.param_tuple_to_param_dict(*(CASES_PARAMS[key]))
+    board = setup.create_board_and_pieces(**param_dict)
+    piece = board.pieces[0]
     optimizer = exh.Optimizer(board, piece, previous_shift_location=previous_shift_location)
     return optimizer, board, piece
 
+
 def _benchmark(name):
-    repeat = 5
+    repeat = 3
     runs = 1
     optimizer, _, _ = create_optimizer(name)
     min_time = min(timeit.Timer(optimizer.find_optimal_actions).repeat(repeat, runs)) / runs * 1000
@@ -62,6 +80,7 @@ def _benchmark(name):
 def _profile(name):
     optimizer, _, _ = create_optimizer(name)
     cProfile.runctx("optimizer.find_optimal_actions()", globals(), locals(), filename=name)
+
 
 def _results(name):
     optimizer, _, _ = create_optimizer(name)
@@ -77,7 +96,7 @@ def _main(argv):
         case_name = argv[2]
     cases = []
     if case_name == "all":
-        cases = setup.CASES_PARAMS.keys()
+        cases = CASES_PARAMS.keys()
     else:
         cases = [case_name]
     for name in cases:
@@ -92,4 +111,4 @@ def _main(argv):
 if __name__ == "__main__":
     _main(sys.argv)
     #_find_setups()
-    #_generate_and_print_maze_string()
+    # _generate_and_print_maze_string()
