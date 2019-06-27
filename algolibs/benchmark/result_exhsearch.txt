@@ -1,0 +1,7 @@
+Best of 5: 1.4s.
+
+maze graph: replacing vector of vectors by one vector
+Best of 5: 1.315s.
+
+maze graph: anonymous namespace instead of static members
+Best of 5: 1.293s.

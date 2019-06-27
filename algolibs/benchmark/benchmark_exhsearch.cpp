@@ -39,7 +39,7 @@ void benchmark(size_t runs = 3) {
 
 
 int main() {
-    benchmark(1);
+    benchmark(5);
     std::cout << "Enter to exit." << std::endl;
     std::cin.ignore();
 }

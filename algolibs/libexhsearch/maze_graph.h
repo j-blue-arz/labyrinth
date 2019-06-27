@@ -14,8 +14,6 @@ namespace labyrinth {
 class MazeGraph {
 private:
     class Neighbors;
-    class ShiftLocation;
-    using OutPathIntegerType = uint8_t;
 public:
     using NodeId = unsigned int;
     using OutPathType = std::string::value_type;
@@ -130,17 +128,9 @@ private:
 
     bool isInside(const Location & location) const noexcept;
 
-    static OutPathType rotateOutPath(OutPathType out_path, RotationDegreeType rotation);
-
-    static OutPathType mirrorOutPath(OutPathType out_path) noexcept;
-
-    static OffsetType offsetFromOutPath(OutPathType out_path) noexcept;
-
-    static std::string outPathsFromBitmask(unsigned short out_paths_bitmask);
-
     size_t extent_;
     Node leftover_;
-    std::vector<std::vector<Node>> node_matrix_;
+    std::vector<Node> node_matrix_;
     std::vector<Location> shift_locations_;
 };
 
