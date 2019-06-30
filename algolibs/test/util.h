@@ -53,3 +53,35 @@ size_t countEdges(const labyrinth::MazeGraph & g) {
     return count / 2;
 }
 
+template<class It>
+labyrinth::MazeGraph::OutPaths getBitmask(It first, It last) {
+    labyrinth::MazeGraph::OutPathsIntegerType result{0};
+    for (auto it = first; it != last; ++it) {
+        result |= static_cast<labyrinth::MazeGraph::OutPathsIntegerType>(*it);
+    }
+    return static_cast<labyrinth::MazeGraph::OutPaths>(result);
+}
+
+labyrinth::MazeGraph::OutPaths getBitmask(std::string out_paths_string) {
+    std::vector<labyrinth::MazeGraph::OutPaths> out_path_vector;
+    if (out_paths_string.find('N') != std::string::npos) {
+        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::North);
+    }
+    if (out_paths_string.find('E') != std::string::npos) {
+        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::East);
+    }
+    if (out_paths_string.find('S') != std::string::npos) {
+        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::South);
+    }
+    if (out_paths_string.find('W') != std::string::npos) {
+        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::West);
+    }
+    return getBitmask(std::begin(out_path_vector), std::end(out_path_vector));
+}
+
+labyrinth::MazeGraph::OutPaths getBitmask(const std::initializer_list<labyrinth::MazeGraph::OutPaths> & out_paths) {
+    return getBitmask(std::begin(out_paths), std::end(out_paths));
+}
+
+
+

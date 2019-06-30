@@ -6,7 +6,8 @@ labyrinth::Location mapLocation(const struct CLocation & location) noexcept {
 }
 
 labyrinth::MazeGraph::InputNode mapNode(const struct CNode & node) noexcept {
-    return labyrinth::MazeGraph::InputNode{node.node_id, node.out_paths, node.rotation};
+    auto out_paths = static_cast<labyrinth::MazeGraph::OutPaths>(node.out_paths);
+    return labyrinth::MazeGraph::InputNode{node.node_id, out_paths, node.rotation};
 }
 
 labyrinth::MazeGraph mapGraph(struct CGraph graph) {

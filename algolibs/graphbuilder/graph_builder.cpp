@@ -33,11 +33,11 @@ MazeGraph GraphBuilder::constructGraph() {
     MazeGraph graph{extent};
     for (auto row = 0; row < extent; ++row) {
         for (auto column = 0; column < extent; ++column) {
-            auto graph_out_paths = outPathsToString(out_paths_[row][column]);
+            auto graph_out_paths = outPathsForMazeGraph(out_paths_[row][column]);
             graph.setOutPaths(Location{row, column}, graph_out_paths);
         }
     }
-    auto leftover_out_paths = outPathsToString(leftover_out_paths_);
+    auto leftover_out_paths = outPathsForMazeGraph(leftover_out_paths_);
     graph.setLeftoverOutPaths(leftover_out_paths);
     if (standard_shift_locations_) {
         for (auto pos = 1; pos < extent; pos += 2) {
@@ -50,21 +50,15 @@ MazeGraph GraphBuilder::constructGraph() {
     return graph;
 }
 
-std::string GraphBuilder::outPathsToString(GraphBuilder::OutPaths out_paths) {
-    std::string graph_out_paths;
-    if (out_paths.test(static_cast<size_t>(OutPath::North))) {
-        graph_out_paths.append("N");
+MazeGraph::OutPaths GraphBuilder::outPathsForMazeGraph(GraphBuilder::OutPaths out_paths) {
+    MazeGraph::OutPathsIntegerType out_paths_int{0};
+    for (OutPath out_path : {OutPath::North, OutPath::East, OutPath::South, OutPath::West}) {
+        auto position = static_cast<size_t>(out_path);
+        if (out_paths.test(position)) {
+            out_paths_int += (1 << position);
+        }
     }
-    if (out_paths.test(static_cast<size_t>(OutPath::East))) {
-        graph_out_paths.append("E");
-    }
-    if (out_paths.test(static_cast<size_t>(OutPath::South))) {
-        graph_out_paths.append("S");
-    }
-    if (out_paths.test(static_cast<size_t>(OutPath::West))) {
-        graph_out_paths.append("W");
-    }
-    return graph_out_paths;
+    return static_cast<MazeGraph::OutPaths>(out_paths_int);
 }
 
 }

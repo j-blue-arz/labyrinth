@@ -16,12 +16,19 @@ private:
     class Neighbors;
 public:
     using NodeId = unsigned int;
-    using OutPathType = std::string::value_type;
     using RotationDegreeType = int16_t;
+
+    using OutPathsIntegerType = uint8_t;
+    enum class OutPaths : OutPathsIntegerType {
+        North = 1,
+        East = 2,
+        South = 4,
+        West = 8
+    };
 
     struct InputNode {
         NodeId node_id{0};
-        uint8_t out_paths_bit_mask{0};
+        OutPaths out_paths{static_cast<OutPaths>(0)};
         RotationDegreeType rotation{0};
     };
 
@@ -33,19 +40,19 @@ public:
     // node ids are expected to be unique.
     explicit MazeGraph(size_t extent, std::vector<InputNode> nodes);
 
-    void setOutPaths(const Location & location, const std::string & out_paths);
+    void setOutPaths(const Location & location, OutPaths out_paths);
 
     void addShiftLocation(const Location & location);
 
-    void setLeftoverOutPaths(const std::string & out_paths);
+    void setLeftoverOutPaths(OutPaths out_paths);
 
     const std::vector<Location> & getShiftLocations() const noexcept { return shift_locations_; };
 
     void shift(const Location & location, RotationDegreeType leftoverRotation);
 
-    bool hasOutPath(const Location & location, const OutPathType & out_path) const;
+    bool hasOutPath(const Location & location, OutPaths out_path) const;
 
-    bool leftoverHasOutPath(const OutPathType & out_path) const;
+    bool leftoverHasOutPath(OutPaths out_path) const;
 
     NodeId getNodeId(const Location & location) const;
 
@@ -70,7 +77,7 @@ private:
 
     struct Node {
         NodeId node_id{0};
-        std::string out_paths{""};
+        OutPaths out_paths{static_cast<OutPaths>(0)};
         RotationDegreeType rotation{0};
     };
 
@@ -94,15 +101,17 @@ private:
         NeighborIterator & operator++();
         NeighborIterator operator++(int);
     private:
-        using NeighborIndex = unsigned int;
-        NeighborIterator(NeighborIndex index, const MazeGraph & graph, const Location & location, const Node & node) :
-            index_{index}, graph_{graph}, location_{location}, node_{node} {
+        using OutPath = MazeGraph::OutPaths;
+        NeighborIterator(OutPath current_out_path, const MazeGraph & graph, const Location & location, const Node & node) :
+            current_out_path_{current_out_path}, graph_{graph}, location_{location}, node_{node} {
             moveToNextNeighbor();
         };
 
         void moveToNextNeighbor();
 
-        NeighborIndex index_;
+        bool isNeighbor(OutPath out_path);
+
+        OutPath current_out_path_;
         const MazeGraph & graph_;
         const Location location_;
         const Node & node_;
@@ -124,7 +133,7 @@ private:
     const Node & getNode(const Location & location) const;
     Node & getNode(const Location & location);
 
-    bool hasOutPath(const Node & node, const OutPathType & out_path) const;
+    bool hasOutPath(const Node & node, OutPaths out_paths) const;
 
     bool isInside(const Location & location) const noexcept;
 

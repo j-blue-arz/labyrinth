@@ -66,6 +66,7 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph
         }
     }
     std::vector<ReachableNode> result;
+    result.reserve(sources.size());
     for (MazeGraph::NodeId node_id = 0; node_id < parent_index.size(); ++node_id) {
         if (no_parent != parent_index[node_id]) {
             result.emplace_back(parent_index[node_id], node_id);

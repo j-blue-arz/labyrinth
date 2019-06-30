@@ -40,7 +40,7 @@ protected:
     bool standard_shift_locations_{false};
     std::vector<std::vector<OutPaths>> out_paths_;
 private:
-    std::string outPathsToString(OutPaths out_paths);
+    MazeGraph::OutPaths outPathsForMazeGraph(OutPaths out_paths);
 };
 
 }

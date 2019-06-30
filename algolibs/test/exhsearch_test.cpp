@@ -2,6 +2,7 @@
 #include "libexhsearch/graph_algorithms.h"
 #include "graphbuilder/text_graph_builder.h"
 #include "mazes.h"
+#include "util.h"
 
 
 #include "gtest/gtest.h"
@@ -141,7 +142,7 @@ TEST_F(ExhaustiveSearchTest, withObjectiveLeftover_shouldReturnOneCorrectMove) {
 
 TEST_F(ExhaustiveSearchTest, requiresRotatingLeftover_shouldReturnOneCorrectMove) {
     SCOPED_TRACE("requiresRotatingLeftover_shouldReturnOneCorrectMove");
-    graph_.setLeftoverOutPaths("NW");
+    graph_.setLeftoverOutPaths(getBitmask("NW"));
     auto objective_id = graph_.getNodeId(Location{4, 0});
     Location player_location{0, 0};
     performTest(graph_, player_location, objective_id, 1);
@@ -156,7 +157,7 @@ TEST_F(ExhaustiveSearchTest, d2_two_shifts) {
 
 TEST_F(ExhaustiveSearchTest, d2_long_running) {
     SCOPED_TRACE("d2_long_running");
-    graph_.setLeftoverOutPaths("NES");
+    graph_.setLeftoverOutPaths(getBitmask("NES"));
     auto objective_id = graph_.getNodeId(Location{3, 2});
     Location player_location{0, 5};
 

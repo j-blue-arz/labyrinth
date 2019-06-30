@@ -30,20 +30,22 @@ protected:
     "------------"*/
 
     void SetUp() override {
-        graph_.setOutPaths(Location{0, 0}, "ES");
-        graph_.setOutPaths(Location{0, 1}, "NESW");
-        graph_.setOutPaths(Location{0, 2}, "NW");
+        graph_.setOutPaths(Location{0, 0}, getBitmask("ES"));
+        graph_.setOutPaths(Location{0, 1}, getBitmask("NESW"));
+        graph_.setOutPaths(Location{0, 2}, getBitmask("NW"));
 
-        graph_.setOutPaths(Location{1, 0}, "NES");
-        graph_.setOutPaths(Location{1, 1}, "EW");
-        graph_.setOutPaths(Location{1, 2}, "EW");
+        graph_.setOutPaths(Location{1, 0}, getBitmask("NES"));
+        graph_.setOutPaths(Location{1, 1}, getBitmask("EW"));
+        graph_.setOutPaths(Location{1, 2}, getBitmask("EW"));
 
-        graph_.setOutPaths(Location{2, 0}, "NE");
-        graph_.setOutPaths(Location{2, 1}, "NS");
-        graph_.setOutPaths(Location{2, 2}, "WS");
+        graph_.setOutPaths(Location{2, 0}, getBitmask("NE"));
+        graph_.setOutPaths(Location{2, 1}, getBitmask("NS"));
+        graph_.setOutPaths(Location{2, 2}, getBitmask("WS"));
     }
 
     MazeGraph graph_;
+
+    
 };
 
 const size_t MazeGraphTest::extent;
@@ -153,7 +155,7 @@ TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectPaths) {
 }
 
 TEST_F(MazeGraphTest, shift_alongColumn_insertsLeftover) {
-    graph_.setLeftoverOutPaths("ES");
+    graph_.setLeftoverOutPaths(getBitmask("ES"));
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
     graph_.shift(Location{0, 1}, 0);
@@ -188,7 +190,7 @@ TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectPaths) {
 }
 
 TEST_F(MazeGraphTest, shift_alongRow_insertsLeftover) {
-    graph_.setLeftoverOutPaths("NEW");
+    graph_.setLeftoverOutPaths(getBitmask("NEW"));
     auto old_leftover_id = graph_.getLeftoverNodeId();
 
     graph_.shift(Location{1, 2}, 0);
@@ -210,7 +212,7 @@ TEST_F(MazeGraphTest, shift_atOppositeLocationOfPreviouslyPushedInNode_insertsCo
 }
 
 TEST_F(MazeGraphTest, shift_tJunctWithRotation_resultsInCorrectNeighbors) {
-    graph_.setLeftoverOutPaths("NES");
+    graph_.setLeftoverOutPaths(getBitmask("NES"));
 
     graph_.shift(Location{2, 1}, 90);
 
@@ -218,7 +220,7 @@ TEST_F(MazeGraphTest, shift_tJunctWithRotation_resultsInCorrectNeighbors) {
 }
 
 TEST_F(MazeGraphTest, shift_cornerWithRotation_resultsInCorrectNeighbors) {
-    graph_.setLeftoverOutPaths("NE");
+    graph_.setLeftoverOutPaths(getBitmask("NE"));
 
     graph_.shift(Location{2, 1}, 270);
 
@@ -256,21 +258,6 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInserte
     EXPECT_EQ(location, (Location{1, 2}));
 }
 
-enum class OutPath : uint8_t {
-    North = 1,
-    East = 2,
-    South = 4,
-    West = 8
-};
-
-uint8_t getBitmask(const std::initializer_list<OutPath> & out_paths) {
-    uint8_t result{0};
-    for (OutPath out_path : out_paths) {
-        result |= static_cast<uint8_t>(out_path);
-    }
-    return result;
-}
-
 /*
 "###|#.#|#.#|"
 "#..|...|..#|"
@@ -288,10 +275,10 @@ uint8_t getBitmask(const std::initializer_list<OutPath> & out_paths) {
 MazeGraph createMazeGraphWithInputNodes() {
     const size_t extent = 3;
     std::vector<MazeGraph::InputNode> input_nodes;
-    const uint8_t corner = getBitmask({OutPath::North, OutPath::East});
-    const uint8_t straight = getBitmask({OutPath::North, OutPath::South});
-    const uint8_t t_junct = getBitmask({OutPath::North, OutPath::East, OutPath::South});
-    const uint8_t cross = getBitmask({OutPath::North, OutPath::East, OutPath::South, OutPath::West});
+    const MazeGraph::OutPaths corner = getBitmask({MazeGraph::OutPaths::North, MazeGraph::OutPaths::East});
+    const MazeGraph::OutPaths straight = getBitmask({MazeGraph::OutPaths::North, MazeGraph::OutPaths::South});
+    const MazeGraph::OutPaths t_junct = getBitmask({MazeGraph::OutPaths::North, MazeGraph::OutPaths::East, MazeGraph::OutPaths::South});
+    const MazeGraph::OutPaths cross = getBitmask({MazeGraph::OutPaths::North, MazeGraph::OutPaths::East, MazeGraph::OutPaths::South, MazeGraph::OutPaths::West});
     input_nodes.push_back(MazeGraph::InputNode{5, corner, 90});
     input_nodes.push_back(MazeGraph::InputNode{6, cross, 90});
     input_nodes.push_back(MazeGraph::InputNode{7, corner, 270});
@@ -307,11 +294,12 @@ MazeGraph createMazeGraphWithInputNodes() {
 
 TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) {
     const MazeGraph input_graph = createMazeGraphWithInputNodes();
+    static const auto all_out_paths = {MazeGraph::OutPaths::North, MazeGraph::OutPaths::East, MazeGraph::OutPaths::South, MazeGraph::OutPaths::West};
 
     for (auto row = 0; row < MazeGraphTest::extent; row++) {
         for (auto column = 0; column < MazeGraphTest::extent; column++) {
             Location location{row, column};
-            for (MazeGraph::OutPathType out_path : std::initializer_list({'N', 'S', 'E', 'W'})) {
+            for (auto out_path : all_out_paths) {
                 EXPECT_EQ(input_graph.hasOutPath(location, out_path), graph_.hasOutPath(location, out_path)) <<
                     "Created graph differs at location " << location; 
             }
@@ -321,10 +309,10 @@ TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) 
 
 TEST_F(MazeGraphTest, leftoverHasOutPath_withLinearizedInputNodes_isCorrect) {
     const MazeGraph input_graph = createMazeGraphWithInputNodes();
-    EXPECT_TRUE(input_graph.leftoverHasOutPath('N'));
-    EXPECT_FALSE(input_graph.leftoverHasOutPath('E'));
-    EXPECT_TRUE(input_graph.leftoverHasOutPath('S'));
-    EXPECT_TRUE(input_graph.leftoverHasOutPath('W'));
+    EXPECT_TRUE(input_graph.leftoverHasOutPath(MazeGraph::OutPaths::North));
+    EXPECT_FALSE(input_graph.leftoverHasOutPath(MazeGraph::OutPaths::East));
+    EXPECT_TRUE(input_graph.leftoverHasOutPath(MazeGraph::OutPaths::South));
+    EXPECT_TRUE(input_graph.leftoverHasOutPath(MazeGraph::OutPaths::West));
 }
 
 TEST_F(MazeGraphTest, getNodeId_withLinearizedInputNodes_returnsCorrectIds) {

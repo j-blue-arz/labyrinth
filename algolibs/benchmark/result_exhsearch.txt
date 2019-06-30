@@ -5,3 +5,9 @@ Best of 5: 1.315s.
 
 maze graph: anonymous namespace instead of static members
 Best of 5: 1.293s.
+
+maze graph: out paths with scoped enum and bitfiddling instead of string
+Best of 5: 0.918s.
+
+multi-start bfs: reserve number of output-nodes = number of starts
+Best of 5: 0.878s.
