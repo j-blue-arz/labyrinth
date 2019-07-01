@@ -12,10 +12,10 @@ namespace labyrinth {
 namespace reachable {
 
 struct ReachableNode {
-    explicit ReachableNode(size_t parent_source_index, MazeGraph::NodeId reached_id) noexcept :
+    explicit ReachableNode(size_t parent_source_index, NodeId reached_id) noexcept :
         parent_source_index{parent_source_index}, reached_id{reached_id} {}
     size_t parent_source_index;
-    MazeGraph::NodeId reached_id;
+    NodeId reached_id;
 };
 
 bool isReachable(const MazeGraph & graph, const Location & source, const Location & target);

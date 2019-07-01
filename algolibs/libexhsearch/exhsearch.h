@@ -11,7 +11,7 @@ namespace exhsearch {
 
     struct ShiftAction {
         Location location{0, 0};
-        MazeGraph::RotationDegreeType rotation{0};
+        RotationDegreeType rotation{0};
     };
 
     struct PlayerAction {
@@ -22,7 +22,7 @@ namespace exhsearch {
     std::vector<PlayerAction> findBestActions(
         const MazeGraph & graph,
         const Location & source,
-        MazeGraph::NodeId objective_id,
+        NodeId objective_id,
         const Location & previous_shift_location = Location{-1, -1});
 
 } // namespace algorithm

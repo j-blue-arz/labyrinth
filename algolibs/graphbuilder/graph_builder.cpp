@@ -2,15 +2,15 @@
 
 namespace labyrinth {
 
-void GraphBuilder::addOutPath(OutPaths & out_paths, OutPath out_path) {
+void GraphBuilder::addOutPath(OutPathBitset & out_paths, OutPathPosition out_path) {
     out_paths.set(static_cast<size_t>(out_path));
 }
 
-void GraphBuilder::addOutPath(const Location & location, OutPath out_path) {
+void GraphBuilder::addOutPath(const Location & location, OutPathPosition out_path) {
     addOutPath(out_paths_[location.getRow()][location.getColumn()], out_path);
 }
 
-void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<OutPath> out_paths) {
+void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<OutPathPosition> out_paths) {
     for (const auto & out_path : out_paths) {
         addOutPath(location, out_path);
     }
@@ -18,13 +18,6 @@ void GraphBuilder::addOutPaths(const Location & location, std::initializer_list<
 
 GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
     standard_shift_locations_ = true;
-    return *this;
-}
-
-GraphBuilder & GraphBuilder::withLeftoverOutPaths(std::initializer_list<OutPath> out_paths) {
-    for (const auto & out_path : out_paths) {
-        addOutPath(leftover_out_paths_, out_path);
-    }
     return *this;
 }
 
@@ -50,15 +43,16 @@ MazeGraph GraphBuilder::constructGraph() {
     return graph;
 }
 
-MazeGraph::OutPaths GraphBuilder::outPathsForMazeGraph(GraphBuilder::OutPaths out_paths) {
-    MazeGraph::OutPathsIntegerType out_paths_int{0};
-    for (OutPath out_path : {OutPath::North, OutPath::East, OutPath::South, OutPath::West}) {
+OutPaths GraphBuilder::outPathsForMazeGraph(GraphBuilder::OutPathBitset out_paths) {
+    OutPathsIntegerType out_paths_int{0};
+    auto all_positions = {OutPathPosition::North, OutPathPosition::East, OutPathPosition::South, OutPathPosition::West};
+    for (OutPathPosition out_path : all_positions) {
         auto position = static_cast<size_t>(out_path);
         if (out_paths.test(position)) {
             out_paths_int += (1 << position);
         }
     }
-    return static_cast<MazeGraph::OutPaths>(out_paths_int);
+    return static_cast<OutPaths>(out_paths_int);
 }
 
 }

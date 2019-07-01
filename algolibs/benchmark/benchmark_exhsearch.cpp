@@ -25,7 +25,7 @@ void benchmark(size_t runs = 3) {
     auto best = std::chrono::high_resolution_clock::duration::max();
     for (size_t run = 0; run < runs; run++) {
         const MazeGraph & graph = builder.buildGraph();
-        auto objective_id = graph.getNodeId(Location{6, 7});
+        auto objective_id = graph.getNode(Location{6, 7}).node_id;
         Location player_location{4, 2};
         auto duration = benchmarkSearch(graph, player_location, objective_id);
         if (best > duration) {

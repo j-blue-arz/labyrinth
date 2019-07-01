@@ -16,8 +16,8 @@ TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
 
 MazeGraph TreeGraphBuilder::buildGraph() {
     auto extent = out_paths_.size();
-    addPath(Location{extent - 1, 0}, extent, OutPath::East);
-    addPath(Location{0, extent - 1}, extent, OutPath::South);
+    addPath(Location{extent - 1, 0}, extent, OutPathPosition::East);
+    addPath(Location{0, extent - 1}, extent, OutPathPosition::South);
     recursivelyBuildTree(Location{0, extent - 1}, extent, 0);
 
     return constructGraph();
@@ -31,10 +31,10 @@ void TreeGraphBuilder::recursivelyBuildTree(const Location & root, size_t size, 
         size_t half = size / 2;
 
         // correct orientations by rotation
-        Location::OffsetType toSouth = offsetFromOutPath(rotateOutPath(OutPath::South, rotation));
-        Location::OffsetType toWest = offsetFromOutPath(rotateOutPath(OutPath::West, rotation));
-        Location::OffsetType toNorth = offsetFromOutPath(rotateOutPath(OutPath::North, rotation));
-        Location::OffsetType toEast = offsetFromOutPath(rotateOutPath(OutPath::East, rotation));
+        Location::OffsetType toSouth = offsetFromOutPath(rotateOutPath(OutPathPosition::South, rotation));
+        Location::OffsetType toWest = offsetFromOutPath(rotateOutPath(OutPathPosition::West, rotation));
+        Location::OffsetType toNorth = offsetFromOutPath(rotateOutPath(OutPathPosition::North, rotation));
+        Location::OffsetType toEast = offsetFromOutPath(rotateOutPath(OutPathPosition::East, rotation));
 
         // corners of the current square
         auto offset = size - 1;
@@ -55,11 +55,11 @@ void TreeGraphBuilder::recursivelyBuildTree(const Location & root, size_t size, 
 }
 
 void TreeGraphBuilder::addLShapedPath(const Location & start, size_t size, RotationDegreeType rotation) {
-    Location corner = addPath(start, size, rotateOutPath(OutPath::South, rotation));
-    addPath(corner, size - 1, rotateOutPath(OutPath::East, rotation));
+    Location corner = addPath(start, size, rotateOutPath(OutPathPosition::South, rotation));
+    addPath(corner, size - 1, rotateOutPath(OutPathPosition::East, rotation));
 }
 
-Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPath direction) {
+Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPathPosition direction) {
     Location current = start;
     for (int i = 0; i < length - 1; ++i) {
         current = setNeighbor(current, direction);
@@ -67,40 +67,32 @@ Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPat
     return current;
 }
 
-Location TreeGraphBuilder::setNeighbor(const Location & location, OutPath out_path) {
+Location TreeGraphBuilder::setNeighbor(const Location & location, OutPathPosition out_path) {
     addOutPath(location, out_path);
     Location neighborLocation = location + offsetFromOutPath(out_path);
     addOutPath(neighborLocation, mirrorOutPath(out_path));
     return neighborLocation;
 }
 
-TreeGraphBuilder::OutPath TreeGraphBuilder::mirrorOutPath(OutPath out_path) noexcept {
-    switch (out_path) {
-    case OutPath::North:
-        return OutPath::South;
-    case OutPath::East:
-        return OutPath::West;
-    case OutPath::South:
-        return OutPath::North;
-    }
-    return OutPath::East;
+TreeGraphBuilder::OutPathPosition TreeGraphBuilder::mirrorOutPath(OutPathPosition out_path) noexcept {
+    return rotateOutPath(out_path, 180);
 }
 
-Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPath out_path) noexcept {
+Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPathPosition out_path) noexcept {
     switch (out_path) {
-    case OutPath::North:
+    case OutPathPosition::North:
         return Location::OffsetType{-1, 0};
-    case OutPath::East:
+    case OutPathPosition::East:
         return Location::OffsetType{0, 1};
-    case OutPath::South:
+    case OutPathPosition::South:
         return Location::OffsetType{1, 0};
     }
     return Location::OffsetType{0, -1};
 }
 
-TreeGraphBuilder::OutPath TreeGraphBuilder::rotateOutPath(OutPath out_path, RotationDegreeType degree) {
+TreeGraphBuilder::OutPathPosition TreeGraphBuilder::rotateOutPath(OutPathPosition out_path, RotationDegreeType degree) {
     int16_t numRightAngleRotations = degree / 90;
-    return static_cast<TreeGraphBuilder::OutPath>((static_cast<OutPathIntegerType>(out_path) + numRightAngleRotations) % 4);
+    return static_cast<TreeGraphBuilder::OutPathPosition>((static_cast<size_t>(out_path) + numRightAngleRotations) % 4);
 }
 
 TreeGraphBuilder::RotationDegreeType TreeGraphBuilder::addRotations(RotationDegreeType rotation1, RotationDegreeType rotation2) {

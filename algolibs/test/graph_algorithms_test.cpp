@@ -24,8 +24,8 @@ protected:
             "###|#.#|#.#|",
             "------------"
         };
-        builder.setMaze(maze).withLeftoverOutPaths({GraphBuilder::OutPath::North});
-        graph_ = builder.buildGraph();
+        graph_ = builder.setMaze(maze).buildGraph();
+        graph_.setLeftoverOutPaths(OutPaths::North);
     }
 
     MazeGraph graph_{0};

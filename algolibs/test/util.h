@@ -54,32 +54,32 @@ size_t countEdges(const labyrinth::MazeGraph & g) {
 }
 
 template<class It>
-labyrinth::MazeGraph::OutPaths getBitmask(It first, It last) {
-    labyrinth::MazeGraph::OutPathsIntegerType result{0};
+labyrinth::OutPaths getBitmask(It first, It last) {
+    labyrinth::OutPathsIntegerType result{0};
     for (auto it = first; it != last; ++it) {
-        result |= static_cast<labyrinth::MazeGraph::OutPathsIntegerType>(*it);
+        result |= static_cast<labyrinth::OutPathsIntegerType>(*it);
     }
-    return static_cast<labyrinth::MazeGraph::OutPaths>(result);
+    return static_cast<labyrinth::OutPaths>(result);
 }
 
-labyrinth::MazeGraph::OutPaths getBitmask(std::string out_paths_string) {
-    std::vector<labyrinth::MazeGraph::OutPaths> out_path_vector;
+labyrinth::OutPaths getBitmask(std::string out_paths_string) {
+    std::vector<labyrinth::OutPaths> out_path_vector;
     if (out_paths_string.find('N') != std::string::npos) {
-        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::North);
+        out_path_vector.push_back(labyrinth::OutPaths::North);
     }
     if (out_paths_string.find('E') != std::string::npos) {
-        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::East);
+        out_path_vector.push_back(labyrinth::OutPaths::East);
     }
     if (out_paths_string.find('S') != std::string::npos) {
-        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::South);
+        out_path_vector.push_back(labyrinth::OutPaths::South);
     }
     if (out_paths_string.find('W') != std::string::npos) {
-        out_path_vector.push_back(labyrinth::MazeGraph::OutPaths::West);
+        out_path_vector.push_back(labyrinth::OutPaths::West);
     }
     return getBitmask(std::begin(out_path_vector), std::end(out_path_vector));
 }
 
-labyrinth::MazeGraph::OutPaths getBitmask(const std::initializer_list<labyrinth::MazeGraph::OutPaths> & out_paths) {
+labyrinth::OutPaths getBitmask(const std::initializer_list<labyrinth::OutPaths> & out_paths) {
     return getBitmask(std::begin(out_paths), std::end(out_paths));
 }
 

@@ -8,6 +8,26 @@
 
 
 namespace labyrinth {
+
+using NodeId = unsigned int;
+using RotationDegreeType = int16_t;
+
+using OutPathsIntegerType = uint8_t;
+enum class OutPaths : OutPathsIntegerType {
+    North = 1,
+    East = 2,
+    South = 4,
+    West = 8
+};
+
+struct Node {
+    NodeId node_id{0};
+    OutPaths out_paths{static_cast<OutPaths>(0)};
+    RotationDegreeType rotation{0};
+};
+
+bool hasOutPath(const Node & node, OutPaths out_path);
+
 /// This class models a graph which represents a maze.
 /// To construct such a graph, first construct an empty Graph with a fixed size.
 /// Then set the maze cell at each location. A maze cell is defined by a String over the alphabet {N,S,E,W}.
@@ -15,30 +35,13 @@ class MazeGraph {
 private:
     class Neighbors;
 public:
-    using NodeId = unsigned int;
-    using RotationDegreeType = int16_t;
-
-    using OutPathsIntegerType = uint8_t;
-    enum class OutPaths : OutPathsIntegerType {
-        North = 1,
-        East = 2,
-        South = 4,
-        West = 8
-    };
-
-    struct InputNode {
-        NodeId node_id{0};
-        OutPaths out_paths{static_cast<OutPaths>(0)};
-        RotationDegreeType rotation{0};
-    };
-
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
     explicit MazeGraph(size_t extent);
 
     // Constructor takes two arguments. Second argument is expected to be of size extent*extent + 1,
     // and specify the row-wise nodes of the maze. The last entry is the leftover.
     // node ids are expected to be unique.
-    explicit MazeGraph(size_t extent, std::vector<InputNode> nodes);
+    explicit MazeGraph(size_t extent, std::vector<Node> nodes);
 
     void setOutPaths(const Location & location, OutPaths out_paths);
 
@@ -46,17 +49,15 @@ public:
 
     void setLeftoverOutPaths(OutPaths out_paths);
 
+    const Node & getNode(const Location & location) const;
+
+    Node & getNode(const Location & location);
+
+    const Node & getLeftover() const;
+
     const std::vector<Location> & getShiftLocations() const noexcept { return shift_locations_; };
 
     void shift(const Location & location, RotationDegreeType leftoverRotation);
-
-    bool hasOutPath(const Location & location, OutPaths out_path) const;
-
-    bool leftoverHasOutPath(OutPaths out_path) const;
-
-    NodeId getNodeId(const Location & location) const;
-
-    NodeId getLeftoverNodeId() const noexcept;
 
     /// Returns the location of a given node identifier.
     /// If the location cannot be found in the maze, the second parameter is returned.
@@ -74,12 +75,6 @@ public:
 
 private:
     using OffsetType = Location::OffsetType;
-
-    struct Node {
-        NodeId node_id{0};
-        OutPaths out_paths{static_cast<OutPaths>(0)};
-        RotationDegreeType rotation{0};
-    };
 
     class NeighborIterator {
     public:
@@ -101,17 +96,16 @@ private:
         NeighborIterator & operator++();
         NeighborIterator operator++(int);
     private:
-        using OutPath = MazeGraph::OutPaths;
-        NeighborIterator(OutPath current_out_path, const MazeGraph & graph, const Location & location, const Node & node) :
+        NeighborIterator(OutPaths current_out_path, const MazeGraph & graph, const Location & location, const Node & node) :
             current_out_path_{current_out_path}, graph_{graph}, location_{location}, node_{node} {
             moveToNextNeighbor();
         };
 
         void moveToNextNeighbor();
 
-        bool isNeighbor(OutPath out_path);
+        bool isNeighbor(OutPaths out_path);
 
-        OutPath current_out_path_;
+        OutPaths current_out_path_;
         const MazeGraph & graph_;
         const Location location_;
         const Node & node_;
@@ -130,11 +124,6 @@ private:
         const Node & node_;
     };
 
-    const Node & getNode(const Location & location) const;
-    Node & getNode(const Location & location);
-
-    bool hasOutPath(const Node & node, OutPaths out_paths) const;
-
     bool isInside(const Location & location) const noexcept;
 
     size_t extent_;
@@ -143,7 +132,7 @@ private:
     std::vector<Location> shift_locations_;
 };
 
-} // namespace graph
+} // namespace labyrinth
 
 namespace std {
 std::ostream & operator<<(std::ostream & os, const labyrinth::MazeGraph & graph);

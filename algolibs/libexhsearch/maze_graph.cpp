@@ -2,33 +2,34 @@
 #include "location.h"
 #include <algorithm>
 #include <array>
+#include <vector>
 
 namespace labyrinth {
 
 namespace { // anonymous namespace for file-internal linkage
 
-constexpr MazeGraph::OutPaths rotateOutPaths(MazeGraph::OutPaths out_paths, MazeGraph::RotationDegreeType rotation) noexcept {
-    const MazeGraph::OutPathsIntegerType mask = 15;
+constexpr OutPaths rotateOutPaths(OutPaths out_paths, RotationDegreeType rotation) noexcept {
+    const OutPathsIntegerType mask = 15;
     const auto rotations = (rotation / 90 + 4) % 4;
-    auto out_paths_integer = static_cast<MazeGraph::OutPathsIntegerType>(out_paths);
+    auto out_paths_integer = static_cast<OutPathsIntegerType>(out_paths);
     out_paths_integer = out_paths_integer << rotations | out_paths_integer >> (4 - rotations);
     out_paths_integer &= mask;
-    return static_cast<MazeGraph::OutPaths>(out_paths_integer);
+    return static_cast<OutPaths>(out_paths_integer);
 }
 
-constexpr MazeGraph::OutPaths mirrorOutPath(MazeGraph::OutPaths out_path) noexcept {
+constexpr OutPaths mirrorOutPath(OutPaths out_path) noexcept {
     return rotateOutPaths(out_path, 180);
 }
 
-Location::OffsetType offsetFromOutPath(MazeGraph::OutPaths out_path) noexcept {
+Location::OffsetType offsetFromOutPath(OutPaths out_path) noexcept {
     switch (out_path) {
-    case MazeGraph::OutPaths::North:
+    case OutPaths::North:
         return Location::OffsetType{-1, 0};
-    case MazeGraph::OutPaths::East:
+    case OutPaths::East:
         return Location::OffsetType{0, 1};
-    case MazeGraph::OutPaths::South:
+    case OutPaths::South:
         return Location::OffsetType{1, 0};
-    case MazeGraph::OutPaths::West:
+    case OutPaths::West:
         return Location::OffsetType{0, -1};
     default:
         return Location::OffsetType{0, 0};
@@ -36,6 +37,12 @@ Location::OffsetType offsetFromOutPath(MazeGraph::OutPaths out_path) noexcept {
 }
 
 } // anonymous namespace
+
+bool hasOutPath(const Node & node, OutPaths out_path) {
+    auto out_path_to_check = rotateOutPaths(out_path, -node.rotation);
+    return static_cast<OutPathsIntegerType>(node.out_paths)
+        & static_cast<OutPathsIntegerType>(out_path_to_check);
+}
 
 MazeGraph::MazeGraph(size_t extent) : extent_{extent} {
     NodeId current = 0;
@@ -48,21 +55,17 @@ MazeGraph::MazeGraph(size_t extent) : extent_{extent} {
     leftover_.node_id = current;
 }
 
-MazeGraph::MazeGraph(size_t extent, std::vector<InputNode> nodes) : extent_{extent} {
+MazeGraph::MazeGraph(size_t extent, std::vector<Node> nodes) : extent_{extent} {
     auto current_input = nodes.begin();
     node_matrix_.resize(extent * extent);
     for (auto row = 0; row < extent; row++) {
         for (auto column = 0; column < extent; column++) {
             auto & node = getNode(Location{row, column});
-            node.node_id = current_input->node_id;
-            node.rotation = current_input->rotation;
-            node.out_paths = current_input->out_paths;
+            node = *current_input;
             ++current_input;
         }
     }
-    leftover_.node_id = current_input->node_id;
-    leftover_.rotation = current_input->rotation;
-    leftover_.out_paths = current_input->out_paths;
+    leftover_ = *current_input;
 }
 
 void MazeGraph::setOutPaths(const Location & location, OutPaths out_paths) {
@@ -79,23 +82,7 @@ void MazeGraph::setLeftoverOutPaths(OutPaths out_paths) {
     leftover_.out_paths = out_paths;
 }
 
-bool MazeGraph::hasOutPath(const Location & location, OutPaths out_path) const {
-    return hasOutPath(getNode(location), out_path);
-}
-
-MazeGraph::NodeId MazeGraph::getNodeId(const Location & location) const {
-    return getNode(location).node_id;
-}
-
-MazeGraph::NodeId MazeGraph::getLeftoverNodeId() const noexcept {
-    return leftover_.node_id;
-}
-
-bool MazeGraph::leftoverHasOutPath(OutPaths out_path) const {
-    return hasOutPath(leftover_, out_path);
-}
-
-Location MazeGraph::getLocation(MazeGraph::NodeId node_id, const Location & leftover_location) const {
+Location MazeGraph::getLocation(NodeId node_id, const Location & leftover_location) const {
     Location result = leftover_location;
     for (Location::IndexType row = 0; row < extent_; ++row) {
         for (Location::IndexType column = 0; column < extent_; ++column) {
@@ -151,18 +138,16 @@ void MazeGraph::shift(const Location & location, RotationDegreeType leftoverRota
     leftover_ = updated_leftover;
 }
 
-const MazeGraph::Node & MazeGraph::getNode(const Location & location) const {
+const Node & MazeGraph::getNode(const Location & location) const {
     return node_matrix_[location.getRow() * extent_ + location.getColumn()];
 }
 
-MazeGraph::Node & MazeGraph::getNode(const Location & location) {
+Node & MazeGraph::getNode(const Location & location) {
     return node_matrix_[location.getRow() * extent_ + location.getColumn()];
 }
 
-bool MazeGraph::hasOutPath(const Node & node, OutPaths out_path) const {
-    auto out_path_to_check = rotateOutPaths(out_path, -node.rotation);
-    return static_cast<MazeGraph::OutPathsIntegerType>(node.out_paths)
-           & static_cast<MazeGraph::OutPathsIntegerType>(out_path_to_check);
+const Node & MazeGraph::getLeftover() const {
+    return leftover_;
 }
 
 bool MazeGraph::isInside(const Location & location) const noexcept {
@@ -173,11 +158,11 @@ bool MazeGraph::isInside(const Location & location) const noexcept {
 }
 
 MazeGraph::NeighborIterator MazeGraph::NeighborIterator::begin(const MazeGraph & graph, const Location & location, const Node & node){
-    return MazeGraph::NeighborIterator{OutPath::North, graph, location, node};
+    return MazeGraph::NeighborIterator{OutPaths::North, graph, location, node};
 }
 
 MazeGraph::NeighborIterator MazeGraph::NeighborIterator::end(const MazeGraph & graph, const Location & location, const Node & node) {
-    auto sentinel = static_cast<OutPath>(static_cast<OutPathsIntegerType>(OutPath::West) << 1);
+    auto sentinel = static_cast<OutPaths>(static_cast<OutPathsIntegerType>(OutPaths::West) << 1);
     return MazeGraph::NeighborIterator{sentinel, graph, location, node};
 }
 
@@ -194,7 +179,7 @@ MazeGraph::NeighborIterator::reference MazeGraph::NeighborIterator::operator*() 
 }
 
 MazeGraph::NeighborIterator & MazeGraph::NeighborIterator::operator++() {
-    current_out_path_ = static_cast<OutPath>(static_cast<OutPathsIntegerType>(current_out_path_) << 1);
+    current_out_path_ = static_cast<OutPaths>(static_cast<OutPathsIntegerType>(current_out_path_) << 1);
     moveToNextNeighbor();
     return *this;
 }
@@ -206,7 +191,7 @@ MazeGraph::NeighborIterator MazeGraph::NeighborIterator::operator++(int) {
 }
 
 void MazeGraph::NeighborIterator::moveToNextNeighbor() {
-    static const auto sentinel = static_cast<OutPathsIntegerType>(OutPath::West) << 1;
+    static const auto sentinel = static_cast<OutPathsIntegerType>(OutPaths::West) << 1;
     const auto rotated_out_paths = rotateOutPaths(node_.out_paths, node_.rotation);
     const auto node_out_paths = static_cast<OutPathsIntegerType>(rotated_out_paths);
     auto out_path_int = static_cast<OutPathsIntegerType>(current_out_path_);
@@ -215,13 +200,13 @@ void MazeGraph::NeighborIterator::moveToNextNeighbor() {
         && (!(out_path_int & node_out_paths)
         || !isNeighbor(current_out_path_))) {
         out_path_int <<= 1;
-        current_out_path_ = static_cast<OutPath>(out_path_int);
+        current_out_path_ = static_cast<OutPaths>(out_path_int);
     }
 }
 
-bool MazeGraph::NeighborIterator::isNeighbor(OutPath out_path) {
+bool MazeGraph::NeighborIterator::isNeighbor(OutPaths out_path) {
     const auto potential_location = location_ + offsetFromOutPath(out_path);
-    return graph_.isInside(potential_location) && graph_.hasOutPath(graph_.getNode(potential_location), mirrorOutPath(out_path));
+    return graph_.isInside(potential_location) && hasOutPath(graph_.getNode(potential_location), mirrorOutPath(out_path));
 }
 
 MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) noexcept :
@@ -235,7 +220,7 @@ MazeGraph::NeighborIterator MazeGraph::Neighbors::end() {
     return MazeGraph::NeighborIterator::end(graph_, location_, node_);
 }
 
-} // namespace graph
+} // namespace labyrinth
 
 namespace std {
 
@@ -245,16 +230,17 @@ std::ostream & operator<<(std::ostream & os, const labyrinth::MazeGraph & graph)
     for (size_t row = 0; row < extent; row++) {
         std::array<std::string, 3> lines = {std::string(extent * 4, '#'), std::string(extent * 4, '#'), std::string(extent * 4, '#')};
         for (size_t column = 0; column < extent; column++) {
-            if (graph.hasOutPath(labyrinth::Location(row, column), labyrinth::MazeGraph::OutPaths::North)) {
+            auto node = graph.getNode(labyrinth::Location(row, column));
+            if (labyrinth::hasOutPath(node, labyrinth::OutPaths::North)) {
                 lines[0][column * 4 + 1] = '.';
             }
-            if (graph.hasOutPath(labyrinth::Location(row, column), labyrinth::MazeGraph::OutPaths::East)) {
+            if (labyrinth::hasOutPath(node, labyrinth::OutPaths::East)) {
                 lines[1][column * 4 + 2] = '.';
             }
-            if (graph.hasOutPath(labyrinth::Location(row, column), labyrinth::MazeGraph::OutPaths::South)) {
+            if (labyrinth::hasOutPath(node, labyrinth::OutPaths::South)) {
                 lines[2][column * 4 + 1] = '.';
             }
-            if (graph.hasOutPath(labyrinth::Location(row, column), labyrinth::MazeGraph::OutPaths::West)) {
+            if (labyrinth::hasOutPath(node, labyrinth::OutPaths::West)) {
                 lines[1][column * 4 + 0] = '.';
             }
             lines[1][column * 4 + 1] = '.';

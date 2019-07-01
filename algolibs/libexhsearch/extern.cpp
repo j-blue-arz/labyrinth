@@ -5,13 +5,13 @@ labyrinth::Location mapLocation(const struct CLocation & location) noexcept {
     return labyrinth::Location{location.row, location.column};
 }
 
-labyrinth::MazeGraph::InputNode mapNode(const struct CNode & node) noexcept {
-    auto out_paths = static_cast<labyrinth::MazeGraph::OutPaths>(node.out_paths);
-    return labyrinth::MazeGraph::InputNode{node.node_id, out_paths, node.rotation};
+labyrinth::Node mapNode(const struct CNode & node) noexcept {
+    auto out_paths = static_cast<labyrinth::OutPaths>(node.out_paths);
+    return labyrinth::Node{node.node_id, out_paths, node.rotation};
 }
 
 labyrinth::MazeGraph mapGraph(struct CGraph graph) {
-    std::vector<labyrinth::MazeGraph::InputNode> input_nodes;
+    std::vector<labyrinth::Node> input_nodes;
     input_nodes.reserve(graph.num_nodes);
     for (size_t i = 0; i < graph.num_nodes; ++i) {
         input_nodes.push_back(mapNode(graph.nodes[i]));

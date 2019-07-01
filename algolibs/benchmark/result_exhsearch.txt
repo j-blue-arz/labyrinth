@@ -11,3 +11,6 @@ Best of 5: 0.918s.
 
 multi-start bfs: reserve number of output-nodes = number of starts
 Best of 5: 0.878s.
+
+refactoring graph: made Node publicly accessable
+Best of 5: 0.916s.

@@ -23,8 +23,6 @@ namespace exhsearch {
 
 namespace { // anonymous namespace for file-internal linkage
 
-using NodeId = MazeGraph::NodeId;
-
 struct GameStateNode;
 using StatePtr = std::shared_ptr<GameStateNode>;
 
@@ -79,7 +77,7 @@ StatePtr createNewState(const MazeGraph & graph, const ShiftAction & shift, Stat
 std::vector<PlayerAction> reconstructActions(const MazeGraph & base_graph, StatePtr new_state, size_t reachable_index) {
     auto cur = new_state;
     auto index = reachable_index;
-    std::vector<std::pair<ShiftAction, MazeGraph::NodeId>> id_actions;
+    std::vector<std::pair<ShiftAction, NodeId>> id_actions;
     while (!cur->isRoot()) {
         id_actions.push_back(std::make_pair(cur->shift, cur->reached_nodes[index].reached_id));
         index = cur->reached_nodes[index].parent_source_index;
@@ -117,11 +115,11 @@ Location opposingShiftLocation(const Location & location, size_t extent) noexcep
 } // anonymous namespace
 
 std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
-    const Location & player_location, MazeGraph::NodeId objective_id, const Location & previous_shift_location) {
+    const Location & player_location, NodeId objective_id, const Location & previous_shift_location) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
-    root->reached_nodes.emplace_back(0, graph.getNodeId(player_location));
+    root->reached_nodes.emplace_back(0, graph.getNode(player_location).node_id);
     root->shift = ShiftAction{previous_shift_location, 0};
     state_queue.push(root);
     while (!state_queue.empty()) {
@@ -134,7 +132,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
             if (shift_location == invalid_shift_location) {
                 continue;
             }
-            for (MazeGraph::RotationDegreeType rotation : std::initializer_list<MazeGraph::RotationDegreeType>{0, 90, 180, 270}) {
+            for (RotationDegreeType rotation : std::initializer_list<RotationDegreeType>{0, 90, 180, 270}) {
                 auto new_state = createNewState(current_graph, ShiftAction{shift_location, rotation}, current_state);
                 auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
                                                     [objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
