@@ -112,10 +112,27 @@ Location opposingShiftLocation(const Location & location, size_t extent) noexcep
     return location;
 }
 
+OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) {
+    return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) | static_cast<OutPathsIntegerType>(out_paths2));
+}
+
+std::vector<RotationDegreeType> determineRotations(const Node & node) {
+    auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
+    auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
+    if (node.out_paths == north_south || node.out_paths == east_west) {
+        return std::vector<RotationDegreeType>{0, 90};
+    }
+    else {
+        return std::vector<RotationDegreeType>{0, 90, 180, 270};
+    }
+}
+
+
+
 } // anonymous namespace
 
 std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
-    const Location & player_location, NodeId objective_id, const Location & previous_shift_location) {
+                                          const Location & player_location, NodeId objective_id, const Location & previous_shift_location) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
@@ -132,7 +149,8 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
             if (shift_location == invalid_shift_location) {
                 continue;
             }
-            for (RotationDegreeType rotation : std::initializer_list<RotationDegreeType>{0, 90, 180, 270}) {
+            auto rotations = determineRotations(current_graph.getLeftover());
+            for (RotationDegreeType rotation : rotations) {
                 auto new_state = createNewState(current_graph, ShiftAction{shift_location, rotation}, current_state);
                 auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
                                                     [objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });

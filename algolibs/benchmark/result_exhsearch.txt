@@ -14,3 +14,6 @@ Best of 5: 0.878s.
 
 refactoring graph: made Node publicly accessable
 Best of 5: 0.916s.
+
+Straights only two rotations:
+Best of 5: 0.463s.
