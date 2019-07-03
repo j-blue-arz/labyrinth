@@ -69,7 +69,7 @@ std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent,
     return queries;
 }
 
-void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = {7, 14, 28}) {
+void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t> & extents = {7, 14, 28}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;
@@ -79,7 +79,7 @@ void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::initi
     }
 }
 
-void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::initializer_list<size_t> & extents = {8, 16, 32}) {
+void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t> & extents = {8, 16, 32}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for tree graph with extent " << extent << ", "
             << "running " << number << " queries, " << runs << " times." << std::endl;

@@ -49,11 +49,17 @@ public:
 
     void setLeftoverOutPaths(OutPaths out_paths);
 
-    const Node & getNode(const Location & location) const;
+    const Node & MazeGraph::getNode(const Location & location) const {
+        return node_matrix_[location.getRow() * extent_ + location.getColumn()];
+    }
 
-    Node & getNode(const Location & location);
+    Node & MazeGraph::getNode(const Location & location) {
+        return node_matrix_[location.getRow() * extent_ + location.getColumn()];
+    }
 
-    const Node & getLeftover() const;
+    const Node & MazeGraph::getLeftover() const {
+        return leftover_;
+    }
 
     const std::vector<Location> & getShiftLocations() const noexcept { return shift_locations_; };
 
@@ -124,7 +130,12 @@ private:
         const Node & node_;
     };
 
-    bool isInside(const Location & location) const noexcept;
+    bool MazeGraph::isInside(const Location & location) const noexcept {
+        return (location.getRow() >= 0) &&
+            (location.getColumn() >= 0) &&
+            (location.getRow() < extent_) &&
+            (location.getColumn() < extent_);
+    }
 
     size_t extent_;
     Node leftover_;

@@ -138,25 +138,6 @@ void MazeGraph::shift(const Location & location, RotationDegreeType leftoverRota
     leftover_ = updated_leftover;
 }
 
-const Node & MazeGraph::getNode(const Location & location) const {
-    return node_matrix_[location.getRow() * extent_ + location.getColumn()];
-}
-
-Node & MazeGraph::getNode(const Location & location) {
-    return node_matrix_[location.getRow() * extent_ + location.getColumn()];
-}
-
-const Node & MazeGraph::getLeftover() const {
-    return leftover_;
-}
-
-bool MazeGraph::isInside(const Location & location) const noexcept {
-    return (location.getRow() >= 0) &&
-        (location.getColumn() >= 0) &&
-        (location.getRow() < extent_) &&
-        (location.getColumn() < extent_);
-}
-
 MazeGraph::NeighborIterator MazeGraph::NeighborIterator::begin(const MazeGraph & graph, const Location & location, const Node & node){
     return MazeGraph::NeighborIterator{OutPaths::North, graph, location, node};
 }

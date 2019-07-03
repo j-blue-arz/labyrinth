@@ -15,8 +15,7 @@ std::string locationsToString(std::set<labyrinth::Location> locations) {
     return stream.str();
 }
 
-::testing::AssertionResult hasNeighbors(const labyrinth::MazeGraph & graph, const labyrinth::Location & source, std::initializer_list<labyrinth::Location> targets) {
-    std::set<labyrinth::Location> expected{targets};
+::testing::AssertionResult hasNeighbors(const labyrinth::MazeGraph & graph, const labyrinth::Location & source, std::set<labyrinth::Location> expected) {
     auto neighbors = graph.neighbors(source);
     std::set<labyrinth::Location> actual{neighbors.begin(), neighbors.end()};
     if (actual == expected) {
@@ -79,7 +78,7 @@ labyrinth::OutPaths getBitmask(std::string out_paths_string) {
     return getBitmask(std::begin(out_path_vector), std::end(out_path_vector));
 }
 
-labyrinth::OutPaths getBitmask(const std::initializer_list<labyrinth::OutPaths> & out_paths) {
+labyrinth::OutPaths getBitmask(const std::vector<labyrinth::OutPaths> & out_paths) {
     return getBitmask(std::begin(out_paths), std::end(out_paths));
 }
 

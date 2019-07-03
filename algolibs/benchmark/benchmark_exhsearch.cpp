@@ -11,11 +11,11 @@
 
 using namespace labyrinth;
 
-std::chrono::milliseconds benchmarkSearch(const MazeGraph & graph, const Location & source, int objective_id) {
+std::chrono::microseconds benchmarkSearch(const MazeGraph & graph, const Location & source, int objective_id) {
     const auto start = std::chrono::high_resolution_clock::now();
     auto best_actions = exhsearch::findBestActions(graph, source, objective_id);
     const auto stop = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    return std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 }
 
 void benchmark(size_t runs = 3) {
@@ -32,14 +32,14 @@ void benchmark(size_t runs = 3) {
             best = duration;
         }
     }
-    auto best_s = (std::chrono::duration_cast<std::chrono::milliseconds>(best)).count() / 1000.0;
+    auto best_s = (std::chrono::duration_cast<std::chrono::microseconds>(best)).count() / 1000000.0;
     std::cout << "Best of " << runs << ": " << best_s << "s." << std::endl;
 }
 
 
 
 int main() {
-    benchmark(5);
+    benchmark(15);
     std::cout << "Enter to exit." << std::endl;
     std::cin.ignore();
 }

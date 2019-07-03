@@ -17,3 +17,7 @@ Best of 5: 0.916s.
 
 Straights only two rotations:
 Best of 5: 0.463s.
+Best of 15: 0.435516s.
+
+Moved some small methods to header, allowing for inlining:
+Best of 15: 0.391461s.

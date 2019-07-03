@@ -21,7 +21,7 @@ protected:
     }
 
     void buildGraph(const std::vector<std::string> & maze = mazes::big_component_maze,
-                    const std::initializer_list<OutPaths> leftover_out_paths = {OutPaths::North, OutPaths::East}) {
+                    const std::vector<OutPaths> leftover_out_paths = {OutPaths::North, OutPaths::East}) {
         TextGraphBuilder builder{};
 
         graph_ = builder.setMaze(maze)

@@ -3,6 +3,7 @@
 #include "libexhsearch/maze_graph.h"
 
 #include <bitset>
+#include <vector>
 
 namespace labyrinth {
 
@@ -30,7 +31,7 @@ protected:
 
     void addOutPath(OutPathBitset & out_paths, OutPathPosition out_path);
     void addOutPath(const Location & location, OutPathPosition out_path);
-    void addOutPaths(const Location & location, std::initializer_list<OutPathPosition> out_paths);
+    void addOutPaths(const Location & location, std::vector<OutPathPosition> out_paths);
 
     OutPathBitset leftover_out_paths_;
     bool standard_shift_locations_{false};
