@@ -21,3 +21,14 @@ Best of 15: 0.435516s.
 
 Moved some small methods to header, allowing for inlining:
 Best of 15: 0.391461s.
+
+tried to improve getLocation, which currently searches over all nodes. Made it search directly on
+nodes instead of through getNode(Location).
+Best of 15: 0.413454s.
+-> Slower, due to computation of Location from index
+
+Ideas:
+- more inlining, e.g. operators of neighbor iterator
+- more noexcept
+- 
+

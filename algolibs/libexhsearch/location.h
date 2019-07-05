@@ -1,5 +1,7 @@
 #pragma once
-#include <iostream> 
+#include <compare>
+#include <iostream>
+
 
 namespace labyrinth {
 
@@ -18,10 +20,10 @@ public:
         }
     };
 
-    Location() noexcept : row_{-1}, column_{-1} {}
+    constexpr Location() noexcept : row_{-1}, column_{-1} {}
 
     template <typename T, typename U>
-    explicit Location(T row, U column) noexcept : row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
+    constexpr explicit Location(T row, U column) noexcept : row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
     
     const Location operator+(const OffsetType & offset) const noexcept;
     const Location & operator+=(const OffsetType & offset) noexcept;
@@ -34,24 +36,26 @@ public:
         return column_;
     }
 
+    auto operator<=>(const Location &) const = default;
+
 private:
     IndexType row_{0};
     IndexType column_{0};
 };
 
-inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-    return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
-}
-
-inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-    return !(lhs == rhs);
-}
-
-inline bool operator<(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-    if (lhs.getRow() < rhs.getRow()) return true;
-    if (lhs.getRow() > rhs.getRow()) return false;
-    return lhs.getColumn() < rhs.getColumn();
-}
+//inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+//    return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
+//}
+//
+//inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+//    return !(lhs == rhs);
+//}
+//
+//inline bool operator<(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+//    if (lhs.getRow() < rhs.getRow()) return true;
+//    if (lhs.getRow() > rhs.getRow()) return false;
+//    return lhs.getColumn() < rhs.getColumn();
+//}
 
 } // namespace graph
 
