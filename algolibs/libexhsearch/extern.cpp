@@ -37,7 +37,7 @@ struct CAction actionToCAction(const labyrinth::exhsearch::PlayerAction & action
     return c_action;
 }
 
-__declspec(dllexport) struct CAction find_action(struct CGraph * c_graph, struct CLocation * c_player_location, unsigned int objective_id,
+PUBLIC_API struct CAction find_action(struct CGraph * c_graph, struct CLocation * c_player_location, unsigned int objective_id,
                                                  struct CLocation * c_previous_shift_location) {
     auto graph = mapGraph(*c_graph);
     auto player_location = mapLocation(*c_player_location);

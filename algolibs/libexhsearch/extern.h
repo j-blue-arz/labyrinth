@@ -1,4 +1,11 @@
+#pragma once
+
 // extern c library interface. no namespace, no class, no inline
+#ifdef WIN32
+#define PUBLIC_API __declspec(dllexport)
+#else
+#define PUBLIC_API
+#endif
 
 #include "location.h"
 
@@ -30,6 +37,6 @@ extern "C" {
         struct CLocation move_location;
     };
 
-    __declspec(dllexport) struct CAction find_action(struct CGraph * c_graph, struct CLocation * c_player_location, unsigned int objective_id,
+    PUBLIC_API struct CAction find_action(struct CGraph * c_graph, struct CLocation * c_player_location, unsigned int objective_id,
                                                      struct CLocation * c_previous_shift_location);
 }

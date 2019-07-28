@@ -36,16 +36,23 @@ public:
         return column_;
     }
 
-    auto operator<=>(const Location &) const = default;
+    // auto operator<=>(const Location &) const = default;
+
+    std::strong_ordering operator<=>(const Location & other) const {
+        if (auto cmp = row_ <=> other.getRow(); cmp != 0) return cmp;
+        return column_ <=> other.getColumn();
+    }
+
+
 
 private:
     IndexType row_{0};
     IndexType column_{0};
 };
 
-//inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-//    return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
-//}
+inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+    return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
+}
 //
 //inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
 //    return !(lhs == rhs);
