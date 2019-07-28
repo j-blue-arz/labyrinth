@@ -94,7 +94,7 @@ std::vector<PlayerAction> reconstructActions(const MazeGraph & base_graph, State
     return actions;
 }
 
-Location opposingShiftLocation(const Location & location, size_t extent) noexcept {
+Location opposingShiftLocation(const Location & location, MazeGraph::ExtentType extent) noexcept {
     const auto row = location.getRow();
     const auto column = location.getColumn();
     if (column == 0) {

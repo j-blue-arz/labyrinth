@@ -16,8 +16,9 @@ labyrinth::MazeGraph mapGraph(struct CGraph graph) {
     for (size_t i = 0; i < graph.num_nodes; ++i) {
         input_nodes.push_back(mapNode(graph.nodes[i]));
     }
-    labyrinth::MazeGraph maze_graph{graph.extent, input_nodes};
-    for (auto pos = 1; pos < graph.extent; pos += 2) {
+    auto extent = static_cast<labyrinth::MazeGraph::ExtentType>(graph.extent);
+    labyrinth::MazeGraph maze_graph{extent, input_nodes};
+    for (auto pos = 1; pos < extent; pos += 2) {
         maze_graph.addShiftLocation(labyrinth::Location{0, pos});
         maze_graph.addShiftLocation(labyrinth::Location{graph.extent - 1, pos});
         maze_graph.addShiftLocation(labyrinth::Location{pos, 0});
@@ -46,7 +47,6 @@ __declspec(dllexport) struct CAction find_action(struct CGraph * c_graph, struct
         player_location,
         objective_id,
         previous_shift_location);
-    auto best_action = best_actions[0];
     struct CAction action = actionToCAction(best_actions[0]);
     return action;
 }

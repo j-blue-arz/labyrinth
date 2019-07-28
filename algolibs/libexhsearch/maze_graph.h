@@ -35,13 +35,16 @@ class MazeGraph {
 private:
     class Neighbors;
 public:
+    using SizeType = size_t;
+    using ExtentType = int32_t;
+
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
-    explicit MazeGraph(size_t extent);
+    explicit MazeGraph(ExtentType extent);
 
     // Constructor takes two arguments. Second argument is expected to be of size extent*extent + 1,
     // and specify the row-wise nodes of the maze. The last entry is the leftover.
     // node ids are expected to be unique.
-    explicit MazeGraph(size_t extent, std::vector<Node> nodes);
+    explicit MazeGraph(ExtentType extent, std::vector<Node> nodes);
 
     void setOutPaths(const Location & location, OutPaths out_paths);
 
@@ -49,15 +52,15 @@ public:
 
     void setLeftoverOutPaths(OutPaths out_paths);
 
-    const Node & MazeGraph::getNode(const Location & location) const {
+    const Node & getNode(const Location & location) const {
         return node_matrix_[location.getRow() * extent_ + location.getColumn()];
     }
 
-    Node & MazeGraph::getNode(const Location & location) {
+    Node & getNode(const Location & location) {
         return node_matrix_[location.getRow() * extent_ + location.getColumn()];
     }
 
-    const Node & MazeGraph::getLeftover() const {
+    const Node & getLeftover() const {
         return leftover_;
     }
 
@@ -75,9 +78,9 @@ public:
     /// for (auto neighbor_location : graph.neighbors(Location(0, 0))) { ... }
     Neighbors neighbors(const Location & location) const;
 
-    size_t getNumberOfNodes() const noexcept;
+    SizeType getNumberOfNodes() const noexcept;
 
-    size_t getExtent() const noexcept;
+    ExtentType getExtent() const noexcept;
 
 private:
     using OffsetType = Location::OffsetType;
@@ -130,14 +133,15 @@ private:
         const Node & node_;
     };
 
-    bool MazeGraph::isInside(const Location & location) const noexcept {
+    bool isInside(const Location & location) const noexcept {
         return (location.getRow() >= 0) &&
             (location.getColumn() >= 0) &&
             (location.getRow() < extent_) &&
             (location.getColumn() < extent_);
     }
 
-    size_t extent_;
+    const SizeType size_;
+    const ExtentType extent_;
     Node leftover_;
     std::vector<Node> node_matrix_;
     std::vector<Location> shift_locations_;
