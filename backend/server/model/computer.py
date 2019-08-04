@@ -13,6 +13,8 @@ import copy
 from random import choice
 import time
 from threading import Thread
+import os
+from flask import current_app
 import requests
 import server.mapper.api
 import server.model.algorithm.exhaustive_search as exh
@@ -47,6 +49,10 @@ class ComputerPlayer(Player, Thread):
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
+        if current_app:
+            self._app = current_app._get_current_object()
+        else:
+            self._app = None
         if url_supplier:
             self._shift_url = url_supplier.get_shift_url(self._game.identifier, self._id)
             self._move_url = url_supplier.get_move_url(self._game.identifier, self._id)
@@ -64,7 +70,7 @@ class ComputerPlayer(Player, Thread):
     def run(self):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        algorithm = self.algorithm(board, piece, self._game)
+        algorithm = self.algorithm(board, piece, self._game, current_app=self._app)
         algorithm.start()
         time.sleep(algorithm.SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
@@ -136,7 +142,7 @@ class RandomActionsAlgorithm(Thread):
     SHORT_NAME = "random"
     SECONDS_TO_COMPUTE = 0.5
 
-    def __init__(self, board, piece, game):
+    def __init__(self, board, piece, game, **kwargs):
         super().__init__()
         self._board = board
         self._maze = board.maze
@@ -174,7 +180,7 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
     SHORT_NAME = "exhaustive-search"
     SECONDS_TO_COMPUTE = 1.5
 
-    def __init__(self, board, piece, game):
+    def __init__(self, board, piece, game, **kwargs):
         exh.Optimizer.__init__(self, board, piece, game.previous_shift_location)
         Thread.__init__(self)
         self._shift_action = None
@@ -202,7 +208,7 @@ class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
     SHORT_NAME = "minimax"
     SECONDS_TO_COMPUTE = 2.5
 
-    def __init__(self, board, player_piece, game):
+    def __init__(self, board, player_piece, game, **kwargs):
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
         pieces = [player_piece, other_piece]
         mm.IterativeDeepening.__init__(self, board, pieces, game.previous_shift_location)
@@ -231,7 +237,7 @@ class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
     SHORT_NAME = "alpha-beta"
     SECONDS_TO_COMPUTE = 2.5
 
-    def __init__(self, board, player_piece, game):
+    def __init__(self, board, player_piece, game, **kwargs):
         self._board = board
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
         self._pieces = [player_piece, other_piece]
@@ -259,11 +265,12 @@ class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
 
 class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
     """ Calls an external library to perform the move. Random move as fallback """
-    SHORT_NAME = "libexhsearch"
+    SHORT_NAME = "library"
     SECONDS_TO_COMPUTE = 1.5
 
-    def __init__(self, board, piece, game, library_path):
-        extlib.ExternalLibraryBinding.__init__(self, library_path,
+    def __init__(self, board, piece, game, library_dll="libexhsearch.dll", **kwargs):
+        library_path_to_dll = os.path.join(kwargs["current_app"].config['LIBRARY_PATH'], library_dll)
+        extlib.ExternalLibraryBinding.__init__(self, library_path_to_dll,
                                                board, piece, game.previous_shift_location)
         Thread.__init__(self)
         self._shift_action = None
