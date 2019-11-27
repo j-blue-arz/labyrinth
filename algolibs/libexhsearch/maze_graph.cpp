@@ -36,10 +36,18 @@ Location::OffsetType offsetFromOutPath(OutPaths out_path) noexcept {
     }
 }
 
+size_t integerSquareRoot(size_t number) {
+    size_t root = 0;
+    while (root * root <= number) {
+        root++;
+    }
+    return root - 1;
+}
+
 } // anonymous namespace
 
 bool hasOutPath(const Node & node, OutPaths out_path) {
-    auto out_path_to_check = rotateOutPaths(out_path, -node.rotation);
+    const auto out_path_to_check = rotateOutPaths(out_path, -node.rotation);
     return static_cast<OutPathsIntegerType>(node.out_paths)
         & static_cast<OutPathsIntegerType>(out_path_to_check);
 }
@@ -55,7 +63,9 @@ MazeGraph::MazeGraph(ExtentType extent) : size_{static_cast<SizeType>(extent * e
     leftover_.node_id = current;
 }
 
-MazeGraph::MazeGraph(ExtentType extent, std::vector<Node> nodes) : size_{static_cast<SizeType>(extent * extent)}, extent_{extent} {
+MazeGraph::MazeGraph(const std::vector<Node> & nodes) {
+    extent_ = static_cast<ExtentType>(integerSquareRoot(nodes.size()));
+    size_ = static_cast<SizeType>(extent_) * static_cast<SizeType>(extent_);
     auto current_input = nodes.begin();
     node_matrix_.resize(size_);
     for (auto row = 0; row < extent_; row++) {
@@ -63,6 +73,7 @@ MazeGraph::MazeGraph(ExtentType extent, std::vector<Node> nodes) : size_{static_
             auto & node = getNode(Location{row, column});
             node = *current_input;
             ++current_input;
+
         }
     }
     leftover_ = *current_input;
@@ -175,7 +186,7 @@ void MazeGraph::NeighborIterator::moveToNextNeighbor() {
     const auto rotated_out_paths = rotateOutPaths(node_.out_paths, node_.rotation);
     const auto node_out_paths = static_cast<OutPathsIntegerType>(rotated_out_paths);
     auto out_path_int = static_cast<OutPathsIntegerType>(current_out_path_);
-    
+
     while ((out_path_int < sentinel)
         && (!(out_path_int & node_out_paths)
         || !isNeighbor(current_out_path_))) {

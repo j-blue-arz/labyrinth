@@ -41,10 +41,10 @@ public:
     /// Constructor takes one argument, the extent of the quadratic maze in both directions.
     explicit MazeGraph(ExtentType extent);
 
-    // Constructor takes two arguments. Second argument is expected to be of size extent*extent + 1,
+    // Constructor argument is expected to be of size extent*extent + 1,
     // and specify the row-wise nodes of the maze. The last entry is the leftover.
     // node ids are expected to be unique.
-    explicit MazeGraph(ExtentType extent, std::vector<Node> nodes);
+    explicit MazeGraph(const std::vector<Node> & nodes);
 
     void setOutPaths(const Location & location, OutPaths out_paths);
 
@@ -72,8 +72,8 @@ public:
     /// If the location cannot be found in the maze, the second parameter is returned.
     Location getLocation(NodeId node_id, const Location & leftover_location) const;
 
-    /// returns a range over neighboring locations. 
-    /// The returned object which has two member functions begin() and end(), so 
+    /// returns a range over neighboring locations.
+    /// The returned object which has two member functions begin() and end(), so
     /// that it can be used in range-based for loop, e.g.
     /// for (auto neighbor_location : graph.neighbors(Location(0, 0))) { ... }
     Neighbors neighbors(const Location & location) const;
@@ -133,15 +133,15 @@ private:
         const Node & node_;
     };
 
-    bool isInside(const Location & location) const noexcept {
+    bool isInside(const Location & location) const {
         return (location.getRow() >= 0) &&
             (location.getColumn() >= 0) &&
             (location.getRow() < extent_) &&
             (location.getColumn() < extent_);
     }
 
-    const SizeType size_;
-    const ExtentType extent_;
+    SizeType size_;
+    ExtentType extent_;
     Node leftover_;
     std::vector<Node> node_matrix_;
     std::vector<Location> shift_locations_;

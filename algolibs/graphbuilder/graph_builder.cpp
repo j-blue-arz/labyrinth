@@ -22,7 +22,7 @@ GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
 }
 
 MazeGraph GraphBuilder::constructGraph() {
-    const auto extent = out_paths_.size();
+    MazeGraph::ExtentType extent = out_paths_.size();
     MazeGraph graph{extent};
     for (auto row = 0; row < extent; ++row) {
         for (auto column = 0; column < extent; ++column) {

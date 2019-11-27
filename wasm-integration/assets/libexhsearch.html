@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style>
+            #output {
+                width: 40em;
+            }
+        </style>
+    </head>
+    <body>
+        <textarea id="output" rows="20"></textarea>
+        <script>
+            let SMALL_MAZE = [
+                "###|###|#.#|",
+                "#..|...|..#|",
+                "#.#|#.#|###|",
+                "------------",
+                "#.#|###|###|",
+                "#..|...|...|",
+                "#.#|###|###|",
+                "------------",
+                "#.#|###|###|",
+                "#..|#..|...|",
+                "###|#.#|#.#|",
+                "------------"
+            ];
+
+            function getOutPathsBitmask(mazeStringArray, row, column) {
+                let result = 0;
+                row = row * 4;
+                column = column * 4;
+                if (mazeStringArray[row].charAt(column + 1) === ".") {
+                    result = result + 1;
+                }
+                if (mazeStringArray[row + 1].charAt(column + 2) === ".") {
+                    result = result + 2;
+                }
+                if (mazeStringArray[row + 2].charAt(column + 1) === ".") {
+                    result = result + 4;
+                }
+                if (mazeStringArray[row + 1].charAt(column) === ".") {
+                    result = result + 8;
+                }
+                return result;
+            }
+
+            function outPathsForMaze(maze) {
+                return function(row, column) {
+                    return getOutPathsBitmask(maze, row, column);
+                }
+            }
+
+            var Module = {
+                onRuntimeInitialized: function() {
+                    const objectiveId = 7;
+                    const playerLocation = {row: 1, column: 2};
+                    const previousShiftLocation = {row: 1, column: 0};
+
+                    let outPaths = outPathsForMaze(SMALL_MAZE);
+                    var vectorNodes = new Module.vectorOfNode();
+
+                    vectorNodes.push_back(new Module.Node(0, outPaths(0, 0), 0));
+                    vectorNodes.push_back(new Module.Node(1, outPaths(0, 1), 0));
+                    vectorNodes.push_back(new Module.Node(2, outPaths(0, 2), 0));
+                    vectorNodes.push_back(new Module.Node(3, outPaths(1, 0), 0));
+                    vectorNodes.push_back(new Module.Node(4, outPaths(1, 1), 0));
+                    vectorNodes.push_back(new Module.Node(5, outPaths(1, 2), 0));
+                    vectorNodes.push_back(new Module.Node(6, outPaths(2, 0), 0));
+                    vectorNodes.push_back(new Module.Node(7, outPaths(2, 1), 0));
+                    vectorNodes.push_back(new Module.Node(8, outPaths(2, 2), 0));
+                    vectorNodes.push_back(new Module.Node(9, 3, 0));
+
+                    let mazeGraph = new Module.MazeGraph(vectorNodes);
+                    mazeGraph.addShiftLocation({row: 0, column: 1});
+                    mazeGraph.addShiftLocation({row: 1, column: 0});
+                    mazeGraph.addShiftLocation({row: 1, column: 2});
+                    mazeGraph.addShiftLocation({row: 2, column: 1});
+
+                    let result = Module.findBestAction(mazeGraph, playerLocation, objectiveId, previousShiftLocation);
+
+                    let element = document.getElementById("output");
+                    element.value = "shift location: {row: " + result.shift.location.row + ", column: " + result.shift.location.column + "}\n";
+                    element.value += "shift rotation: " + result.shift.rotation + "\n";
+                    element.value += "move location: {row: " + result.move_location.row + ", column: " + result.move_location.column + "}\n";
+
+                    mazeGraph.delete();
+                    for (let i = 0; i < vectorNodes.size(); ++i) {
+                        vectorNodes.get(i).delete();
+                    }
+                    vectorNodes.delete();
+                }
+            };
+        </script>
+        <script type="text/javascript" src="../assets/libexhsearch.js"></script>
+    </body>
+
+</html>

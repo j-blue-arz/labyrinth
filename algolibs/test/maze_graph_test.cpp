@@ -227,7 +227,7 @@ TEST_F(MazeGraphTest, shift_cornerWithRotation_resultsInCorrectNeighbors) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{1, 1}}));
 }
 
-TEST_F(MazeGraphTest, LocationOfNode_WithInnerNode_ReturnsCorrectLocation) {
+TEST_F(MazeGraphTest, getLocation_WithInnerNode_ReturnsCorrectLocation) {
     auto node_id = graph_.getNode(Location{1, 1}).node_id;
 
     Location location = graph_.getLocation(node_id, Location{-1, -1});
@@ -235,7 +235,7 @@ TEST_F(MazeGraphTest, LocationOfNode_WithInnerNode_ReturnsCorrectLocation) {
     EXPECT_EQ(location, (Location{1, 1}));
 }
 
-TEST_F(MazeGraphTest, LocationOfNode_WithInnerNodeAfterShift_ReturnsCorrectLocation) {
+TEST_F(MazeGraphTest, getLocation_WithInnerNodeAfterShift_ReturnsCorrectLocation) {
     auto node_id = graph_.getNode(Location{1, 1}).node_id;
 
     graph_.shift(Location{0, 1}, 0);
@@ -244,7 +244,7 @@ TEST_F(MazeGraphTest, LocationOfNode_WithInnerNodeAfterShift_ReturnsCorrectLocat
     EXPECT_EQ(location, (Location{2, 1}));
 }
 
-TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeId_ReturnsGivenLocation) {
+TEST_F(MazeGraphTest, getLocation_WithLeftoverNodeId_ReturnsGivenLocation) {
     Location location = graph_.getLocation(9, Location{0, 1});
     EXPECT_EQ(location, (Location{0, 1}));
 }
@@ -256,6 +256,34 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInserte
 
     Location location = graph_.getLocation(old_leftover_id, Location{1, 1});
     EXPECT_EQ(location, (Location{1, 2}));
+}
+
+TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_modificationOfInputNodeDoesNotAlterGraph) {
+    std::vector<Node> nodes;
+    nodes.push_back(Node{0, getBitmask("ES"), 0});
+    nodes.push_back(Node{1, getBitmask("NESW"), 0});
+    nodes.push_back(Node{2, getBitmask("NW"), 0});
+
+    nodes.push_back(Node{3, getBitmask("NES"), 0});
+    nodes.push_back(Node{4, getBitmask("EW"), 0});
+    nodes.push_back(Node{5, getBitmask("EW"), 0});
+
+    nodes.push_back(Node{6, getBitmask("NE"), 0});
+    nodes.push_back(Node{7, getBitmask("NS"), 0});
+    nodes.push_back(Node{8, getBitmask("WS"), 0});
+
+    nodes.push_back(Node{9, getBitmask("NS"), 0});
+
+    MazeGraph graph{nodes};
+
+    EXPECT_TRUE(hasOutPath(graph.getNode(Location{0, 0}), OutPaths::East));
+    EXPECT_TRUE(hasOutPath(graph.getLeftover(), OutPaths::South));
+
+    nodes[0].out_paths = getBitmask("NS");
+    nodes[9].out_paths = getBitmask("EW");
+
+    EXPECT_TRUE(hasOutPath(graph.getNode(Location{0, 0}), OutPaths::East));
+    EXPECT_TRUE(hasOutPath(graph.getLeftover(), OutPaths::South));
 }
 
 /*
@@ -273,7 +301,6 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInserte
 "------------"*/
 
 MazeGraph createMazeGraphWithInputNodes() {
-    const size_t extent = 3;
     std::vector<Node> input_nodes;
     const OutPaths corner = getBitmask({OutPaths::North, OutPaths::East});
     const OutPaths straight = getBitmask({OutPaths::North, OutPaths::South});
@@ -289,7 +316,7 @@ MazeGraph createMazeGraphWithInputNodes() {
     input_nodes.push_back(Node{2, straight, 0});
     input_nodes.push_back(Node{3, corner, 180});
     input_nodes.push_back(Node{4, t_junct, 180});
-    return MazeGraph(extent, input_nodes);
+    return MazeGraph(input_nodes);
 }
 
 TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) {

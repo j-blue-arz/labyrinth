@@ -9,21 +9,21 @@ namespace labyrinth {
 
 namespace exhsearch {
 
-    struct ShiftAction {
-        Location location{0, 0};
-        RotationDegreeType rotation{0};
-    };
+struct ShiftAction {
+    Location location{0, 0};
+    RotationDegreeType rotation{0};
+};
 
-    struct PlayerAction {
-        ShiftAction shift;
-        Location move_location;
-    };
+struct PlayerAction {
+    ShiftAction shift;
+    Location move_location;
+};
 
-    std::vector<PlayerAction> findBestActions(
-        const MazeGraph & graph,
-        const Location & source,
-        NodeId objective_id,
-        const Location & previous_shift_location = Location{-1, -1});
+std::vector<PlayerAction> findBestActions(
+    const MazeGraph & graph,
+    const Location & source,
+    NodeId objective_id,
+    const Location & previous_shift_location = Location{-1, -1});
 
 } // namespace algorithm
 } // namespace graph

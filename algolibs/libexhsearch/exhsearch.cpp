@@ -10,12 +10,13 @@
 // The algorithm searches for a path reaching the objective in a tree of game states.
 // For each analyzed succession of shift actions, it keeps track of all reachable locations.
 // The root of this game tree is the initial graph given in the constructor.
-// Each other game state is reached from its parent game state with a GameStateTransition, 
+// Each other game state is reached from its parent game state with a GameStateTransition,
 // i.e. with a shift action and the set of then-reachable nodes.
 
-// To be able to reconstruct the player actions, the reachable nodes have to include their source node in the previous game state
-// Therefore, they are computed and stored as pairs, where the second entry is the NodeId of the reached node, and the first entry 
-// is the index of the source node in the respective parent array.
+// To be able to reconstruct the player actions,
+// the reachable nodes have to include their source node in the previous game state
+// Therefore, they are computed and stored as pairs, where the second entry is the NodeId of the reached node,
+// and the first entry is the index of the source node in the respective parent array.
 
 namespace labyrinth {
 
@@ -27,7 +28,8 @@ struct GameStateNode;
 using StatePtr = std::shared_ptr<GameStateNode>;
 
 struct GameStateNode {
-    explicit GameStateNode(StatePtr parent, const ShiftAction & shift, const std::vector<reachable::ReachableNode> & reached_nodes)
+    explicit GameStateNode(StatePtr parent, const ShiftAction& shift,
+        const std::vector<reachable::ReachableNode>& reached_nodes)
         : parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
     explicit GameStateNode() noexcept : parent{nullptr} {}
 
@@ -41,7 +43,7 @@ struct GameStateNode {
 
 using QueueType = std::queue<std::shared_ptr<GameStateNode>>;
 
-MazeGraph createGraphFromState(const MazeGraph & base_graph, StatePtr current_state) {
+MazeGraph createGraphFromState(const MazeGraph& base_graph, StatePtr current_state) {
     MazeGraph graph{base_graph};
     std::vector<ShiftAction> shifts;
     auto cur = current_state;
@@ -55,15 +57,19 @@ MazeGraph createGraphFromState(const MazeGraph & base_graph, StatePtr current_st
     return graph;
 }
 
-std::vector<Location> determineReachedLocations(const GameStateNode & current_state, const MazeGraph & graph, Location shift_location) {
+std::vector<Location> determineReachedLocations(const GameStateNode& current_state, const MazeGraph& graph,
+    Location shift_location) {
     std::vector<Location> updated_player_locations;
     updated_player_locations.resize(current_state.reached_nodes.size());
-    std::transform(current_state.reached_nodes.begin(), current_state.reached_nodes.end(), updated_player_locations.begin(),
-                   [&graph, &shift_location](reachable::ReachableNode reached_node) { return graph.getLocation(reached_node.reached_id, shift_location); });
+    std::transform(current_state.reached_nodes.begin(), current_state.reached_nodes.end(),
+        updated_player_locations.begin(),
+        [&graph, &shift_location](reachable::ReachableNode reached_node) {
+            return graph.getLocation(reached_node.reached_id, shift_location);
+        });
     return updated_player_locations;
 }
 
-StatePtr createNewState(const MazeGraph & graph, const ShiftAction & shift, StatePtr current_state) {
+StatePtr createNewState(const MazeGraph& graph, const ShiftAction& shift, StatePtr current_state) {
     MazeGraph graph_copy{graph};
     graph_copy.shift(shift.location, shift.rotation);
     auto updated_player_locations = determineReachedLocations(*current_state, graph_copy, shift.location);
@@ -74,7 +80,7 @@ StatePtr createNewState(const MazeGraph & graph, const ShiftAction & shift, Stat
     return new_state;
 }
 
-std::vector<PlayerAction> reconstructActions(const MazeGraph & base_graph, StatePtr new_state, size_t reachable_index) {
+std::vector<PlayerAction> reconstructActions(const MazeGraph& base_graph, StatePtr new_state, size_t reachable_index) {
     auto cur = new_state;
     auto index = reachable_index;
     std::vector<std::pair<ShiftAction, NodeId>> id_actions;
@@ -94,7 +100,7 @@ std::vector<PlayerAction> reconstructActions(const MazeGraph & base_graph, State
     return actions;
 }
 
-Location opposingShiftLocation(const Location & location, MazeGraph::ExtentType extent) noexcept {
+Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType extent) noexcept {
     const auto row = location.getRow();
     const auto column = location.getColumn();
     if (column == 0) {
@@ -113,10 +119,11 @@ Location opposingShiftLocation(const Location & location, MazeGraph::ExtentType 
 }
 
 OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) {
-    return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) | static_cast<OutPathsIntegerType>(out_paths2));
+    return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) |
+        static_cast<OutPathsIntegerType>(out_paths2));
 }
 
-std::vector<RotationDegreeType> determineRotations(const Node & node) {
+std::vector<RotationDegreeType> determineRotations(const Node& node) {
     auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
     auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
     if (node.out_paths == north_south || node.out_paths == east_west) {
@@ -131,8 +138,8 @@ std::vector<RotationDegreeType> determineRotations(const Node & node) {
 
 } // anonymous namespace
 
-std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
-                                          const Location & player_location, NodeId objective_id, const Location & previous_shift_location) {
+std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
+    const Location& player_location, NodeId objective_id, const Location& previous_shift_location) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
@@ -145,7 +152,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
         MazeGraph current_graph = createGraphFromState(graph, current_state);
         auto shift_locations = current_graph.getShiftLocations();
         auto invalid_shift_location = opposingShiftLocation(current_state->shift.location, graph.getExtent());
-        for (const auto & shift_location : shift_locations) {
+        for (const auto& shift_location : shift_locations) {
             if (shift_location == invalid_shift_location) {
                 continue;
             }
@@ -153,7 +160,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph & graph,
             for (RotationDegreeType rotation : rotations) {
                 auto new_state = createNewState(current_graph, ShiftAction{shift_location, rotation}, current_state);
                 auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
-                                                    [objective_id](auto & reached_node) {return reached_node.reached_id == objective_id; });
+                    [objective_id](auto& reached_node) {return reached_node.reached_id == objective_id; });
                 if (found_objective != new_state->reached_nodes.end()) {
                     const size_t reachable_index = found_objective - new_state->reached_nodes.begin();
                     return reconstructActions(graph, new_state, reachable_index);

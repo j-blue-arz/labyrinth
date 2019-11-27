@@ -211,11 +211,20 @@ TEST_F(ExhaustiveSearchTest, withResultOfLengthOneViolatingGivenPreviousShift_sh
     performTest(graph_, player_location, objective_id, 2, Location{0, 3});
 }
 
-TEST_F(ExhaustiveSearchTest, d4_generated_86s) { // takes too long (1 minute for debug build)
+TEST_F(ExhaustiveSearchTest, d4_generated_86s) { 
     SCOPED_TRACE("d4_generated_depth4");
     buildGraph(mazes::exh_depth_4_maze, {OutPaths::North, OutPaths::East});
     auto objective_id = graph_.getNode(Location{6, 7}).node_id;
     Location player_location{4, 2};
 
     performTest(graph_, player_location, objective_id, 4);
+}
+
+TEST_F(ExhaustiveSearchTest, withThreeByThree_shouldReturnOneMove) {
+    SCOPED_TRACE("withThreeByThree_shouldReturnOneMove");
+    buildGraph(mazes::three_by_three, { OutPaths::North, OutPaths::East });
+    auto objective_id = graph_.getNode(Location{0, 2}).node_id;
+    Location player_location{0, 0};
+
+    performTest(graph_, player_location, objective_id, 1);
 }

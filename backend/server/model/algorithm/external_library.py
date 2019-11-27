@@ -20,8 +20,8 @@ class NODE(ctypes.Structure):
 class GRAPH(ctypes.Structure):
     """ corresponds to game.Maze """
     _fields_ = [
-        ("extent", ctypes.c_ulonglong),
-        ("num_nodes", ctypes.c_ulonglong),
+        ("extent", ctypes.c_long),
+        ("num_nodes", ctypes.c_ulong),
         ("nodes", ctypes.POINTER(NODE))
     ]
 
