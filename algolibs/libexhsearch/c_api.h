@@ -18,7 +18,7 @@ extern "C" {
     struct CNode {
         unsigned int node_id;
         unsigned char out_paths; // bitmask. 1, 2, 4, 8 for N, E, S, W, respectively
-        int rotation;
+        short rotation;
     };
 
     struct CGraph {
