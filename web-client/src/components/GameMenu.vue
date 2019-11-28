@@ -21,7 +21,7 @@ import MenuItem from "@/model/menuItem.js";
 const NOT_PARTICIPATING = -1;
 const REMOVE_PREFIX = "remove-";
 const ADD_PREFIX = "add-";
-const RESTART_PREFIX = "restart-"
+const RESTART_PREFIX = "restart-";
 
 export default {
     name: "game-menu",
@@ -64,7 +64,7 @@ export default {
                     new MenuItem(RESTART_PREFIX + "7", "original size (7)"),
                     new MenuItem(RESTART_PREFIX + "9", "large size (9)"),
                     new MenuItem(RESTART_PREFIX + "13", "huge size (13)")
-                ]),
+                ])
             ]
         };
     },

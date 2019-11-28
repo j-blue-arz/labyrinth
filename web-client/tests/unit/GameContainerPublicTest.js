@@ -62,7 +62,7 @@ describe("GameContainer as web-client", () => {
     it("sets leftover maze card according to fetched state.", async () => {
         let gameContainer = factory();
         await flushPromises();
-        expect(mockFetchState).toHaveBeenCalledTimes(1);
+        expect(mockFetchState).toHaveBeenCalled();
         var leftOverVMazeCard = gameContainer
             .find(InteractiveBoard)
             .find(LeftoverMazeCard)

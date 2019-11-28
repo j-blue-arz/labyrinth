@@ -5,7 +5,7 @@ import pytest
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
 from tests.unit.library_binding import CompletePathLibraryBinding
 from server.model.algorithm.exhaustive_search import Optimizer
-from server.model.game import Board, BoardLocation, Piece
+from server.model.game import BoardLocation
 
 
 def test_d1_direct_path(create_optimizer):
@@ -253,7 +253,7 @@ def _check_actions(board, piece, actions):
 
 @pytest.fixture(params=[Optimizer, CompletePathLibraryBinding])
 def create_optimizer(request):
-
+    """ Creates object under test """
     def _create_optimizer(board, piece, previous_shift_location=None):
         if request.param is Optimizer:
             return Optimizer(board, piece, previous_shift_location)

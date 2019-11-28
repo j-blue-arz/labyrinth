@@ -298,7 +298,7 @@ export default class Game {
             this.nextAction = nextAction;
             this.getPlayer(nextAction.playerId).turnAction = nextAction.action;
         } else {
-            this.nextAction = {playerId: 0, action: NO_ACTION}
+            this.nextAction = { playerId: 0, action: NO_ACTION };
         }
     }
 
