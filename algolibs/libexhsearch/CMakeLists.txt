@@ -17,6 +17,9 @@ if(COMPILE_TO_WASM)
                              " -s WASM=1"
                              " -o libexhsearch.js"
                              " -s ALLOW_MEMORY_GROWTH=1"
+                             " -s MODULARIZE=1"
+                             " -s EXPORT_NAME=libexhsearch"
+                             " -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']\""
                              " --bind")
     set_target_properties(libexhsearch PROPERTIES
             SUFFIX ".js"
