@@ -258,6 +258,10 @@ def create_optimizer(request):
         if request.param is Optimizer:
             return Optimizer(board, piece, previous_shift_location)
         if request.param is CompletePathLibraryBinding:
-            return CompletePathLibraryBinding("../../lib/libexhsearch.dll", board, piece, previous_shift_location)
+            dll_path = "../../lib/libexhsearch.dll"
+            try:
+                return CompletePathLibraryBinding(dll_path, board, piece, previous_shift_location)
+            except OSError:
+                return pytest.skip("skipped due to missing dll: {}".format(dll_path))
 
     return _create_optimizer
