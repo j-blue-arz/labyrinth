@@ -53,17 +53,18 @@ the python-based implementations shipped with the backend.
 Requires cmake version 3.13 or newer. Tested with gcc 7.4.0. MSVC 14.23 works as well, but the library path is currently hard-coded in the python scripts, so you would have to change the respective path to get it to work.
 
     cd algolibs
-    mkdir build && cd build
-    cmake ../
-    make
-    mkdir -p ../../backend/lib/
-    cp libexhsearch/libexhsearch.so ../../backend/lib/
+    mkdir builds
+    cmake -S. -Bbuilds/shared
+    cmake --build builds/shared
+    mkdir -p ../../../backend/lib/
+    cp builds/shared/libexhsearch/libexhsearch.so ../backend/lib/
 
-## Webassembly
-cmake ../.. -DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCOMPILE_TO_WASM=ON
-make VERBOSE=1
-~/emsdk/upstream/bin/wasm-dis libexhsearch/libexhsearch.wasm -o libexhsearch/libexhsearch.wast
-cp libexhsearch/libexhsearch.js ../../../wasm-integration/assets/
-cp libexhsearch/libexhsearch.wasm ../../../wasm-integration/assets/
+## WebAssembly
+The repository contains a precompiled WebAssebmly binary and runtime. If you want to compile it yourself, you need the emsdk.
+
+    cmake -S. -Bbuilds/wasm -DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCOMPILE_TO_WASM=ON
+    cmake --build builds/wasm
+    cp builds/wasm/libexhsearch/libexhsearch.js ../wasm-integration/assets/
+    cp builds/wasm/libexhsearch/libexhsearch.wasm ../wasm-integration/assets/
 
 

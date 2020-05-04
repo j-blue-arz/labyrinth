@@ -40,5 +40,4 @@ htmlcov/
 *.egg-info/
 
 # C++ build folders
-**/algolibs/build/
-**/algolibs/install/
+**/algolibs/builds/
