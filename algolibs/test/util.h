@@ -2,6 +2,7 @@
 #include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
 
+#include <iterator>
 #include <sstream>
 #include <set>
 
@@ -25,11 +26,8 @@ std::string locationsToString(std::set<labyrinth::Location> locations) {
 }
 
 ::testing::AssertionResult assertNumNeighbors(const labyrinth::MazeGraph & g, const labyrinth::Location & source, size_t expected) {
-    size_t actual{0};
-    auto neighbors = g.neighbors(source);
-    for (auto neighbor : neighbors) {
-        actual++;
-    }
+    const auto neighbors = g.neighbors(source);
+    size_t actual = std::distance(std::cbegin(neighbors), std::cend(neighbors));
     if (actual == expected) {
         return ::testing::AssertionSuccess();
     }

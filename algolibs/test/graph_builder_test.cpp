@@ -114,8 +114,8 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
     builder.setExtent(extent);
     MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 900);
-    for (auto row = 0; row < extent; row++) {
-        for (auto column = 0; column < extent; column++) {
+    for (auto row = 0u; row < extent; row++) {
+        for (auto column = 0u; column < extent; column++) {
             if (row == 0 && column == 0) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Top left corner does not have exactly one neighbor";
@@ -138,8 +138,8 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirtyOne) {
     builder.setExtent(extent);
     MazeGraph graph = builder.buildGraph();
     EXPECT_EQ(graph.getNumberOfNodes(), 961);
-    for (auto row = 0; row < extent; row++) {
-        for (auto column = 0; column < extent; column++) {
+    for (auto row = 0u; row < extent; row++) {
+        for (auto column = 0u; column < extent; column++) {
             if (row == 0 && column == 0) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Top left corner does not have exactly one neighbor";

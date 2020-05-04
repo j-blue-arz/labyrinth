@@ -268,7 +268,7 @@ class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
     SHORT_NAME = "library"
     SECONDS_TO_COMPUTE = 1.5
 
-    def __init__(self, board, piece, game, library_dll="libexhsearch.dll", **kwargs):
+    def __init__(self, board, piece, game, library_dll="libexhsearch.so", **kwargs):
         library_path_to_dll = os.path.join(kwargs["current_app"].config['LIBRARY_PATH'], library_dll)
         extlib.ExternalLibraryBinding.__init__(self, library_path_to_dll,
                                                board, piece, game.previous_shift_location)

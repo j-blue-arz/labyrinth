@@ -48,8 +48,8 @@ MazeGraph TextGraphBuilder::buildGraph() {
     for (auto & row : out_paths_) {
         row.resize(extent);
     }
-    for (auto row = 0; row < extent; row++) {
-        for (auto column = 0; column < extent; column++) {
+    for (auto row = 0u; row < extent; row++) {
+        for (auto column = 0u; column < extent; column++) {
             if (lines_[first(row)][second(column)] == '.') {
                 addOutPath(Location{row, column}, OutPathPosition::North);
             }

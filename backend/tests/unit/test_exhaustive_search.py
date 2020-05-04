@@ -69,7 +69,6 @@ def test_d2_two_shifts_with_previous_shift(create_optimizer):
     first_shift_location = actions[0][0]
     assert first_shift_location != BoardLocation(0, 1)
 
-@pytest.mark.skip("long running-time")
 def test_d2_long_running(create_optimizer):
     """ Two turns required """
     board, piece = create_board_and_piece_by_key("d2-long-running")
@@ -114,7 +113,7 @@ def test_d3_generated_2(create_optimizer):
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
-@pytest.mark.skip("long running-time")
+#@pytest.mark.skip("long running-time")
 def test_d3_generated_3(create_optimizer):
     """ three turns required, running-time currently 8s """
     board, piece = create_board_and_piece_by_key("d3-generated-33s")
@@ -258,10 +257,11 @@ def create_optimizer(request):
         if request.param is Optimizer:
             return Optimizer(board, piece, previous_shift_location)
         if request.param is CompletePathLibraryBinding:
-            dll_path = "../../lib/libexhsearch.dll"
-            try:
+            dll_path = "lib/libexhsearch.so"
+            return CompletePathLibraryBinding(dll_path, board, piece, previous_shift_location)
+            """ try:
                 return CompletePathLibraryBinding(dll_path, board, piece, previous_shift_location)
             except OSError:
-                return pytest.skip("skipped due to missing dll: {}".format(dll_path))
+                return pytest.skip("skipped due to missing dll: {}".format(dll_path)) """
 
     return _create_optimizer

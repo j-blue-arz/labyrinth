@@ -99,7 +99,6 @@ bool isOpposing(const Location & location1, const Location & location2, size_t e
     auto player_location_id = graph.getNode(player_start_location).node_id;
     for (const auto & action : actions) {
         graph.shift(action.shift.location, action.shift.rotation);
-        auto player_location = graph.getLocation(player_location_id, action.shift.location);
         player_location_id = graph.getNode(action.move_location).node_id;
     }
     if (player_location_id == objective_id) {

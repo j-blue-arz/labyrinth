@@ -203,11 +203,19 @@ bool MazeGraph::NeighborIterator::isNeighbor(OutPaths out_path) {
 MazeGraph::Neighbors::Neighbors(const MazeGraph & graph, const Location & location, const Node & node) noexcept :
     graph_{graph}, location_{location}, node_{node} {}
 
-MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() {
+MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() const {
     return MazeGraph::NeighborIterator::begin(graph_, location_, node_);
 }
 
-MazeGraph::NeighborIterator MazeGraph::Neighbors::end() {
+MazeGraph::NeighborIterator MazeGraph::Neighbors::end() const {
+    return MazeGraph::NeighborIterator::end(graph_, location_, node_);
+}
+
+MazeGraph::NeighborIterator MazeGraph::Neighbors::cbegin() const {
+    return MazeGraph::NeighborIterator::begin(graph_, location_, node_);
+}
+
+MazeGraph::NeighborIterator MazeGraph::Neighbors::cend() const {
     return MazeGraph::NeighborIterator::end(graph_, location_, node_);
 }
 

@@ -27,7 +27,9 @@ if(COMPILE_TO_WASM)
             COMPILE_FLAGS " -fno-exceptions")
 elseif(NOT COMPILE_TO_WASM)
     add_library(exhsearch STATIC ${SOURCES})
+    set_target_properties(exhsearch PROPERTIES OUTPUT_NAME exhsearch)
     add_library(libexhsearch SHARED ${SOURCES} c_api.h c_api.cpp)
+    set_target_properties(libexhsearch PROPERTIES OUTPUT_NAME exhsearch)
     install(TARGETS libexhsearch
         ARCHIVE DESTINATION lib/static
         RUNTIME DESTINATION bin)

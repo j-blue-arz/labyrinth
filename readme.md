@@ -8,7 +8,9 @@ The objective is always randomly chosen to be one of the 50 maze cards which is 
 
 Also, it is only possible to reach an objective while making a move. Reaching an objective while it is another player's move is not counted.
 
-## Installation
+# Quick start
+Build the client and run the flask web server.
+## Build web-client
     cd web-client
     npm install
     npm run test:unit
@@ -39,10 +41,29 @@ If you want the server to be visible in your local network:
 
     flask run --host=0.0.0.0 --port=5000
 
-## Computer opponents
-Use the game menu to set up a match containing computer players.
-
 ## Benchmarks
     python -m benchmarking.bench_alpha_beta benchmark all
 
 See the modules in backend/benchmarking for further instructions.
+
+# Compiling algolibs
+Algolibs contains C++ implementations of search algorithms, determining moves for a computer player. They are not required, but have better performance than
+the python-based implementations shipped with the backend.
+## Shared library
+Requires cmake version 3.13 or newer. Tested with gcc 7.4.0. MSVC 14.23 works as well, but the library path is currently hard-coded in the python scripts, so you would have to change the respective path to get it to work.
+
+    cd algolibs
+    mkdir build && cd build
+    cmake ../
+    make
+    mkdir -p ../../backend/lib/
+    cp libexhsearch/libexhsearch.so ../../backend/lib/
+
+## Webassembly
+cmake ../.. -DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCOMPILE_TO_WASM=ON
+make VERBOSE=1
+~/emsdk/upstream/bin/wasm-dis libexhsearch/libexhsearch.wasm -o libexhsearch/libexhsearch.wast
+cp libexhsearch/libexhsearch.js ../../../wasm-integration/assets/
+cp libexhsearch/libexhsearch.wasm ../../../wasm-integration/assets/
+
+

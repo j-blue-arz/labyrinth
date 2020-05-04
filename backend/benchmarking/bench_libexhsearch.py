@@ -34,7 +34,7 @@ def _create_single_result_optimizer(key, previous_shift_location=None):
     :return: an Optimizer instance, the board and the piece of the created test-case
     """
     board, piece = _create_board(key)
-    optimizer = libexhsearch.ExternalLibraryBinding("./lib/libexhsearch.dll",
+    optimizer = libexhsearch.ExternalLibraryBinding("./lib/libexhsearch.so",
                                                     board, piece, previous_shift_location=previous_shift_location)
     return optimizer, board, piece
 

@@ -6,6 +6,7 @@
 #include "location.h"
 
 #include <algorithm>
+#include <memory>
 
 // The algorithm searches for a path reaching the objective in a tree of game states.
 // For each analyzed succession of shift actions, it keeps track of all reachable locations.

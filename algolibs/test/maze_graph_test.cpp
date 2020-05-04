@@ -56,8 +56,8 @@ TEST_F(MazeGraphTest, constructedGraph_hasCorrectNumberOfNodes) {
 
 TEST_F(MazeGraphTest, constructedGraph_hasUniqueNodeIds) {
     std::set<NodeId> ids;
-    for (auto row = 0; row < MazeGraphTest::extent; row++) {
-        for (auto column = 0; column < MazeGraphTest::extent; column++) {
+    for (auto row = 0u; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0u; column < MazeGraphTest::extent; column++) {
             ids.insert(graph_.getNode(Location{row, column}).node_id);
         }
     }
@@ -66,8 +66,8 @@ TEST_F(MazeGraphTest, constructedGraph_hasUniqueNodeIds) {
 
 TEST_F(MazeGraphTest, constructedGraph_hasConsecutiveNodeIdsStartingWith0) {
     std::set<NodeId> ids;
-    for (auto row = 0; row < MazeGraphTest::extent; row++) {
-        for (auto column = 0; column < MazeGraphTest::extent; column++) {
+    for (auto row = 0u; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0u; column < MazeGraphTest::extent; column++) {
             ids.insert(graph_.getNode(Location{row, column}).node_id);
         }
     }
@@ -323,8 +323,8 @@ TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) 
     const MazeGraph input_graph = createMazeGraphWithInputNodes();
     static const auto all_out_paths = {OutPaths::North, OutPaths::East, OutPaths::South, OutPaths::West};
 
-    for (auto row = 0; row < MazeGraphTest::extent; row++) {
-        for (auto column = 0; column < MazeGraphTest::extent; column++) {
+    for (auto row = 0u; row < MazeGraphTest::extent; row++) {
+        for (auto column = 0u; column < MazeGraphTest::extent; column++) {
             Location location{row, column};
             for (auto out_path : all_out_paths) {
                 auto input_node = input_graph.getNode(location);

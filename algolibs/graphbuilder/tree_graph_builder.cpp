@@ -61,7 +61,7 @@ void TreeGraphBuilder::addLShapedPath(const Location & start, size_t size, Rotat
 
 Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPathPosition direction) {
     Location current = start;
-    for (int i = 0; i < length - 1; ++i) {
+    for (auto i = 0u; i < length - 1; ++i) {
         current = setNeighbor(current, direction);
     }
     return current;
@@ -86,8 +86,10 @@ Location::OffsetType TreeGraphBuilder::offsetFromOutPath(OutPathPosition out_pat
         return Location::OffsetType{0, 1};
     case OutPathPosition::South:
         return Location::OffsetType{1, 0};
+    case OutPathPosition::West:
+        return Location::OffsetType{0, -1};
     }
-    return Location::OffsetType{0, -1};
+    return Location::OffsetType{0, 0};
 }
 
 TreeGraphBuilder::OutPathPosition TreeGraphBuilder::rotateOutPath(OutPathPosition out_path, RotationDegreeType degree) {

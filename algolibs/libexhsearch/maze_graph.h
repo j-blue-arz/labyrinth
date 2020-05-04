@@ -124,8 +124,10 @@ private:
     public:
         explicit Neighbors(const MazeGraph & graph, const Location & location, const Node & node) noexcept;
 
-        NeighborIterator begin();
-        NeighborIterator end();
+        NeighborIterator begin() const;
+        NeighborIterator end() const;
+        NeighborIterator cbegin() const;
+        NeighborIterator cend() const;
 
     private:
         const MazeGraph & graph_;

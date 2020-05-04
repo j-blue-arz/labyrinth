@@ -22,6 +22,7 @@ yarn-error.log*
 *.sln
 *.sw*
 *.vs
+*.code-workspace
 CMakeSettings.json
 
 # python / flask

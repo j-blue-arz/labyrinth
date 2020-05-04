@@ -28,8 +28,8 @@ MazeGraph SnakeGraphBuilder::buildGraph() {
 
 void SnakeGraphBuilder::setInnerColumns() {
     const auto extent = out_paths_.size();
-    for (auto column = 1; column < extent - 1; column++) {
-        for (auto row = 0; row < extent; row++) {
+    for (auto column = 1u; column < extent - 1; column++) {
+        for (auto row = 0u; row < extent; row++) {
             addOutPaths(Location{row, column}, {OutPathPosition::East, OutPathPosition::West});
         }
     }
@@ -38,7 +38,7 @@ void SnakeGraphBuilder::setInnerColumns() {
 void SnakeGraphBuilder::setFirstColumn() {
     const auto extent = out_paths_.size();
     const auto column = 0;
-    for (auto row = 1; row < extent; row++) {
+    for (auto row = 1u; row < extent; row++) {
         if (odd(row)) {
             addOutPaths(Location{row, column}, {OutPathPosition::East, OutPathPosition::South});
         }
@@ -51,7 +51,7 @@ void SnakeGraphBuilder::setFirstColumn() {
 void SnakeGraphBuilder::setLastColumn() {
     const auto extent = out_paths_.size();
     const auto column = extent - 1;
-    for (auto row = 0; row < extent; row++) {
+    for (auto row = 0u; row < extent; row++) {
         if (even(row)) {
             addOutPaths(Location{row, column}, {OutPathPosition::South, OutPathPosition::West});
         }

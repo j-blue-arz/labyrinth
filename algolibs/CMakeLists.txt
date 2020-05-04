@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 set(PROJECT_VERSION "0.1.2")
 project (algolibs VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 option(COMPILE_TO_WASM "Compiles to WebAssembly" OFF)
 
@@ -14,7 +14,7 @@ if (MSVC)
 	endforeach()
 else()
     # lots of warnings
-    add_compile_options(-Wall -Wextra -pedantic)
+    add_compile_options(-Wall -Wextra)
 endif()
 
 if(NOT COMPILE_TO_WASM)

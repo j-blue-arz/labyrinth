@@ -1,5 +1,5 @@
 #pragma once
-#include <compare>
+//#include <compare>
 #include <iostream>
 
 
@@ -38,10 +38,10 @@ public:
 
     // auto operator<=>(const Location &) const = default;
 
-    std::strong_ordering operator<=>(const Location & other) const {
+    /* std::strong_ordering operator<=>(const Location & other) const {
         if (auto cmp = row_ <=> other.getRow(); cmp != 0) return cmp;
         return column_ <=> other.getColumn();
-    }
+    } */
 
 
 
@@ -53,16 +53,16 @@ private:
 inline bool operator==(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
     return lhs.getRow() == rhs.getRow() && lhs.getColumn() == rhs.getColumn();
 }
-//
-//inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-//    return !(lhs == rhs);
-//}
-//
-//inline bool operator<(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
-//    if (lhs.getRow() < rhs.getRow()) return true;
-//    if (lhs.getRow() > rhs.getRow()) return false;
-//    return lhs.getColumn() < rhs.getColumn();
-//}
+
+inline bool operator!=(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+   return !(lhs == rhs);
+}
+
+inline bool operator<(const labyrinth::Location & lhs, const labyrinth::Location & rhs) noexcept {
+   if (lhs.getRow() < rhs.getRow()) return true;
+   if (lhs.getRow() > rhs.getRow()) return false;
+   return lhs.getColumn() < rhs.getColumn();
+}
 
 } // namespace graph
 
