@@ -60,7 +60,7 @@ export default class Game {
 
     shift(location) {
         if (this._locationsEqual(location, this.disabledInsertLocation)) {
-            throw new ValueError();
+            throw new ValueError("Inserting at " + location + " is not allowed.");
         }
 
         if (!this.isInside(location)) {
@@ -110,7 +110,7 @@ export default class Game {
                 return player;
             }
         }
-        throw new ValueError();
+        throw new ValueError("No player with id " + playerId);
     }
 
     addPlayer(player) {
