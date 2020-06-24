@@ -46,6 +46,7 @@ export default {
         },
         userPlayerId: function() {
             this.updateLeaveEnterMenuItem();
+            this.updateReplaceWasmMenuItem();
         }
     },
     data() {
@@ -53,6 +54,7 @@ export default {
             menuIsVisible: false,
             menuItems: [
                 new MenuItem("leave", "Leave game"),
+                new MenuItem("replace-wasm", "Let WASM play for me"),
                 new MenuItem("add", "Add computer..", [
                     new MenuItem(ADD_PREFIX + "exhaustive-search", "Exhaustive Search"),
                     new MenuItem(ADD_PREFIX + "minimax", "Minimax"),
@@ -90,6 +92,16 @@ export default {
                 Vue.set(this.menuItems, 0, new MenuItem("leave", "Leave game"));
             }
         },
+        updateReplaceWasmMenuItem: function() {
+            var menuItemReplaceIndex = this.menuItems.findIndex(
+                item => item.key === "replace-wasm"
+            );
+            if (menuItemReplaceIndex >= 0 && this.userPlayerId === NOT_PARTICIPATING) {
+                this.menuItems.splice(menuItemReplaceIndex, 1);
+            } else if (menuItemReplaceIndex === -1 && this.userPlayerId !== NOT_PARTICIPATING) {
+                this.menuItems.splice(1, 0, new MenuItem("replace-wasm", "Let WASM play for me"));
+            }
+        },
         onToggleMenu: function() {
             this.menuIsVisible = !this.menuIsVisible;
         },
@@ -99,6 +111,8 @@ export default {
                 this.$emit("leave-game");
             } else if ($event === "enter") {
                 this.$emit("enter-game");
+            } else if ($event === "replace-wasm") {
+                this.$emit("replace-wasm");
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let algorithm = $event.substr(ADD_PREFIX.length);
                 this.addComputer(algorithm);
@@ -141,6 +155,7 @@ export default {
     mounted() {
         this.updateRemoveMenuItems();
         this.updateLeaveEnterMenuItem();
+        this.updateReplaceWasmMenuItem();
     }
 };
 </script>

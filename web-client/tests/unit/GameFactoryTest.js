@@ -1,5 +1,6 @@
 import GameFactory from "@/model/gameFactory";
-import { assertConsistentLocation, loc } from "./testutils.js";
+import { loc } from "@/model/game";
+import { assertConsistentLocation } from "./testutils.js";
 
 describe("GameFactory.createGame()", () => {
     it("creates a game with 7x7 maze cards", () => {

@@ -1,6 +1,5 @@
-import Game from "@/model/game";
+import Game, { loc } from "@/model/game.js";
 import Graph from "@/model/mazeAlgorithm";
-import { loc } from "./testutils.js";
 
 describe("Graph", () => {
     describe("reachableLocations", () => {

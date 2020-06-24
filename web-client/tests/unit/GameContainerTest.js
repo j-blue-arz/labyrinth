@@ -1,11 +1,12 @@
 import { mount } from "@vue/test-utils";
+import { loc } from "@/model/game";
 import GameContainer from "@/components/GameContainer.vue";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import GameFactory from "@/model/gameFactory";
-import { loc, extractIdMatrix } from "./testutils.js";
+import { extractIdMatrix } from "./testutils.js";
 
 const determineLeftOverId = function(gameContainer) {
     let board = gameContainer.find(InteractiveBoard);

@@ -5,8 +5,7 @@ import VGameBoard from "@/components/VGameBoard.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import { copyObjectStructure } from "./testutils.js";
-import Game from "@/model/game.js";
-import { loc } from "./testutils.js";
+import Game, { loc } from "@/model/game.js";
 
 const shallowFactory = function(game) {
     return shallowMount(InteractiveBoard, {

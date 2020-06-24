@@ -8,6 +8,10 @@ export const MOVE_ACTION = "MOVE";
 export const SHIFT_ACTION = "SHIFT";
 export const NO_ACTION = "NONE";
 
+export function loc(row, column) {
+    return { row: row, column: column };
+}
+
 export default class Game {
     constructor() {
         this.n = 7;
@@ -67,28 +71,37 @@ export default class Game {
             throw new RangeError();
         }
         var shiftLocations = [];
-        let opposite_location = null;
         if (location.row === 0) {
             shiftLocations = this._columnLocations(location.column);
-            opposite_location = { row: this.n - 1, column: location.column };
         } else if (location.row === this.n - 1) {
             shiftLocations = this._columnLocations(location.column);
             shiftLocations.reverse();
-            opposite_location = { row: 0, column: location.column };
         } else if (location.column === this.n - 1) {
             shiftLocations = this._rowLocations(location.row);
             shiftLocations.reverse();
-            opposite_location = { row: location.row, column: 0 };
         } else if (location.column === 0) {
             shiftLocations = this._rowLocations(location.row);
-            opposite_location = { row: location.row, column: this.n - 1 };
         }
         if (shiftLocations.length === this.n) {
             this._shiftAlongLocations(shiftLocations);
-            this.disabledInsertLocation = opposite_location;
+            this.disabledInsertLocation = this.getOppositeLocation(location);
         } else {
             throw new ValueError();
         }
+    }
+
+    getOppositeLocation(insertLocation) {
+        let oppositeLocation = null;
+        if (insertLocation.row === 0) {
+            oppositeLocation = { row: this.n - 1, column: insertLocation.column };
+        } else if (insertLocation.row === this.n - 1) {
+            oppositeLocation = { row: 0, column: insertLocation.column };
+        } else if (insertLocation.column === this.n - 1) {
+            oppositeLocation = { row: insertLocation.row, column: 0 };
+        } else if (insertLocation.column === 0) {
+            oppositeLocation = { row: insertLocation.row, column: this.n - 1 };
+        }
+        return oppositeLocation;
     }
 
     _locationsEqual(locA, locB) {
@@ -221,7 +234,6 @@ export default class Game {
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
-
         this.setNextAction(apiState.nextAction);
 
         this.disabledInsertLocation = this._findMissingInsertLocation(
@@ -291,12 +303,15 @@ export default class Game {
 
     setNextAction(nextAction) {
         for (let player of this._players) {
-            player.turnAction = NO_ACTION;
+            if(nextAction && player.id === nextAction.playerId) {
+                player.turnAction = nextAction.action;
+            } else {
+                player.turnAction = NO_ACTION;
+            }
         }
 
         if (nextAction !== null) {
             this.nextAction = nextAction;
-            this.getPlayer(nextAction.playerId).turnAction = nextAction.action;
         } else {
             this.nextAction = { playerId: 0, action: NO_ACTION };
         }

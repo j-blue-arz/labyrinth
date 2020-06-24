@@ -1,10 +1,11 @@
 import { mount } from "@vue/test-utils";
+import { loc } from "@/model/game";
 import GameContainer from "@/components/GameContainer.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import flushPromises from "flush-promises";
-import { loc, copyObjectStructure } from "./testutils.js";
+import { copyObjectStructure } from "./testutils.js";
 import GameApi from "@/api/gameApi.js";
 
 jest.useFakeTimers();

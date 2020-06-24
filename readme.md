@@ -60,11 +60,15 @@ Requires cmake version 3.13 or newer. Tested with gcc 7.4.0. MSVC 14.23 works as
     cp builds/shared/libexhsearch/libexhsearch.so ../backend/lib/
 
 ## WebAssembly
-The repository contains a precompiled WebAssebmly binary and runtime. If you want to compile it yourself, you need the emsdk.
+The repository contains a precompiled WebAssembly binary and runtime. If you want to compile it yourself, you need the emsdk.
 
     cmake -S. -Bbuilds/wasm -DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCOMPILE_TO_WASM=ON
     cmake --build builds/wasm
-    cp builds/wasm/libexhsearch/libexhsearch.js ../wasm-integration/assets/
-    cp builds/wasm/libexhsearch/libexhsearch.wasm ../wasm-integration/assets/
+    cp builds/wasm/libexhsearch/libexhsearch.js ../dist/wasm/
+    cp builds/wasm/libexhsearch/libexhsearch.wasm ../dist/wasm/
+
+The distribution folder is overwritten if you build the web-client. To keep your versions of the WebAssembly files, put them in 
+
+    web-client/public/wasm/
 
 

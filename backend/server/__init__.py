@@ -4,6 +4,8 @@ and defines a set of API methods to play the game """
 import os
 
 from flask import Flask, render_template, send_from_directory
+import mimetypes
+
 
 version_info = (0, 1, 2)
 __version__ = '.'.join(map(str, version_info))
@@ -13,8 +15,8 @@ def create_app(test_config=None):
     """ basic Flask app setup. Creates the instance folder if not existing """
     app = Flask(__name__,
                 instance_relative_config=True,
-                static_folder="../../dist/static",
-                template_folder="../../dist")
+                static_folder="../../dist",
+                static_url_path="")
 
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -39,14 +41,11 @@ def create_app(test_config=None):
     app.before_first_request(database.init_database)
     app.teardown_request(database.close_database)
 
-    @app.route('/favicon.ico')
-    def favicon():
-        return send_from_directory(app.template_folder,
-                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    mimetypes.add_type('application/wasm', '.wasm')
 
     @app.route('/')
     def index():
         """ Serves the 'static' part, i.e. the Vue application """
-        return render_template("index.html")
+        return app.send_static_file("index.html")
 
     return app

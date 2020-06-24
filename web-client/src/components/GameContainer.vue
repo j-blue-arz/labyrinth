@@ -8,6 +8,12 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
+        <wasm-player
+            @move-piece="onMovePlayerPiece"
+            @insert-card="onInsertCard"
+            :game="game"
+            :player-id="userPlayerId"
+        />
         <score-board :players="players" class="game-container__score" />
         <game-menu
             v-if="isUsingApi"
@@ -16,6 +22,7 @@
             :user-player-id="userPlayerId"
             @enter-game="enterGame"
             @leave-game="leaveGame"
+            @replace-wasm="replaceWithWasm"
             @called-api-method="startPolling"
             class="game-container__menu"
         />
@@ -26,6 +33,7 @@
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
+import WasmPlayer from "@/components/WasmPlayer.vue";
 import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
@@ -38,7 +46,8 @@ export default {
     components: {
         InteractiveBoard,
         GameMenu,
-        ScoreBoard
+        ScoreBoard,
+        WasmPlayer
     },
     props: {
         gameFactory: {
@@ -141,6 +150,11 @@ export default {
             if (this.useStorage()) {
                 sessionStorage.playerId = this.userPlayerId;
             }
+        },
+        replaceWithWasm: function() {
+            let player = this.game.getPlayer(this.userPlayerId);
+            player.isComputer = true;
+            player.algorithm = "wasm";
         },
         addPlayer: function(apiResponse) {
             this.userPlayerId = parseInt(apiResponse.data);

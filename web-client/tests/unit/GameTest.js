@@ -1,12 +1,12 @@
-import Game from "@/model/game";
+import Game, { loc } from "@/model/game";
 import MazeCard from "@/model/mazeCard";
 import Player from "@/model/player";
 import ValueError from "@/util/exceptions";
-import { assertConsistentLocation, loc } from "./testutils.js";
+import { assertConsistentLocation } from "./testutils.js";
 
 describe("Game", () => {
     describe(".mazeCardsAsList()", () => {
-        it("returns 1d-array which contains all the game's maze cards.", () => {
+        it("returns 1d-array which contains all the game's maze cards in row-first order", () => {
             let game = new Game();
             game.n = 3;
 
@@ -24,6 +24,23 @@ describe("Game", () => {
             let mazeCardList = game.mazeCardsAsList();
             expect(mazeCardList).toBeInstanceOf(Array);
             expect(mazeCardList.length).toBe(0);
+        });
+
+        it("returns 1d-array with the game's maze cards ordered by row, then by column", () => {
+            let game = new Game();
+            game.n = 7;
+
+            _buildMazeCardMatrix(game);
+
+            let mazeCardList = game.mazeCardsAsList();
+            expect(mazeCardList.length).toBe(49);
+            let index = 0;
+            for (var row = 0; row < game.n; row++) {
+                for (var col = 0; col < game.n; col++) {
+                    expect(mazeCardList[index]).toBe(game.getMazeCard(loc(row, col)));
+                    index++;
+                }
+            }
         });
     });
 
@@ -209,6 +226,16 @@ describe("Game", () => {
             _addPlayer(game, loc(0, 0), 42);
 
             expect(() => game.move(17, loc(1, 1))).toThrow(ValueError);
+        });
+    });
+
+    describe(".getOppositeLocation()", () => {
+        it("returns opposing location for top shift location", () => {
+            let game = new Game();
+            game.n = 7;
+
+            let result = game.getOppositeLocation(loc(0, 3));
+            expect(result).toEqual(loc(6, 3));
         });
     });
 
