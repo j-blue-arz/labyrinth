@@ -102,6 +102,7 @@ def test_random_actions_algorithm_computes_valid_actions():
 
 def test_random_actions_algorithm_should_have_different_results():
     """ Runs algorithm 200 times and checks that a certain move is performed sooner or later.
+    One run has a possibilty of 1/(12*4*8) + 1/(12*4) to succeed.
     This test has a probability of about 0.008 to fail. """
     card_factory = MazeCardFactory()
     orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))

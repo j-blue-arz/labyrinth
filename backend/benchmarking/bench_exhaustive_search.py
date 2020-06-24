@@ -22,9 +22,9 @@ def _find_setups():
     leftover_card = None
     start_location = None
     objective_location = None
-    card_factory = MazeCardFactory()
     size = 9
     max_index = size - 1
+    #card_factory = MazeCardFactory()
     #maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER, card_factory)
     while len(actions) <= 8:
         maze, leftover_card = create_maze_and_leftover(size=size)
