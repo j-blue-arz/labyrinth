@@ -140,7 +140,7 @@ def test_get_state_valid_after_error(client):
     _post_player(client, player_type="human", alone=True)
     _post_player(client, player_type="human", alone=True)
     response = _post_player(client, player_type="human", alone=True)
-    player_id = _assert_ok_single_int(response)
+    _assert_ok_single_int(response)
     response = _post_player(client, player_type="human", alone=True)
     assert response.status_code == 400
     response = _get_state(client)
@@ -366,28 +366,11 @@ def test_delete_player(client):
 
     After a player was deleted, he should not be able to see the game state.
     """
-    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _post_player(client, player_type="human", alone=True)
     player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
     _delete_player(client, player_id_1)
     state = _get_state(client).get_json()
     assert len(state["players"]) == 1
-
-
-def test_put_player(client):
-    """ Tests PUT for /api/games/0/players/<player_id> and GET for /api/games/0/state
-
-    Changes human player to computer player, expects state to respect this change
-    """
-    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    _put_player(client, player_id_1, player_type="random", alone=True)
-    state = _get_state(client).get_json()
-    assert len(state["players"]) == 2
-    player = state["players"][1]
-    assert "isComputerPlayer" in player
-    assert player["isComputerPlayer"] is True
-    assert player["algorithm"] == "random"
-    assert player["id"] == player_id_1
 
 
 def _assert_invalid_argument_and_unchanged_state(client, action_callable):
@@ -469,11 +452,6 @@ def _post_player(client, player_type=None, alone=None, game_id=0):
 
 def _delete_player(client, player_id):
     return client.delete("/api/games/0/players/{}".format(player_id))
-
-
-def _put_player(client, player_id, player_type=None, alone=None):
-    player_data = _player_data(player_type, alone)
-    return client.put("/api/games/0/players/{}".format(player_id), data=player_data, mimetype="application/json")
 
 
 def _put_game(client, game_id=0, size=7):

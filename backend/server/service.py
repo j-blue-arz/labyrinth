@@ -45,23 +45,6 @@ def delete_player(game_id, player_id):
     return ""
 
 
-def replace_player(game_id, player_id, player_request_dto):
-    """ Changes a player in a game.
-
-    :param game_id: specifies the game. Has to exist.
-    :param player_id: specifies the player to remove
-    :param player_request_dto: contains information about the type of player to add.
-    Currently the only supported option is to replace a human player by a computer player.
-    """
-    player_type = mapper.dto_to_type(player_request_dto)
-    if player_type == 'human':
-        raise exceptions.INVALID_ARGUMENTS()
-    else:
-        game = _load_game_or_throw(game_id)
-        game.change_player(player_id,
-                           ComputerPlayer, algorithm_name=player_type, url_supplier=URLSupplier())
-        database.update_game(game_id, game)
-
 def change_game(game_id, game_request_dto):
     """ Changes game setup.
 
@@ -74,6 +57,7 @@ def change_game(game_id, game_request_dto):
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
     _try(lambda: game.replace_board(new_board))
     database.update_game(game_id, game)
+
 
 def get_game_state(game_id):
     """ Returns the game state """

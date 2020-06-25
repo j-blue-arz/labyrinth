@@ -54,7 +54,7 @@ def test_big_component_d3_reach():
     actions, value = optimizer.find_actions()
     assert value == 1
     _check_actions(board, pieces[0], actions)
-    shift_location, shift_rotation = actions[0]
+    shift_location, _ = actions[0]
     move_location = actions[1]
     assert (shift_location == BoardLocation(0, 5) and move_location == BoardLocation(6, 5))
 
@@ -104,7 +104,7 @@ def test_difficult_d3_reach():
     actions, value = optimizer.find_actions()
     assert value == 1
     _check_actions(board, pieces[0], actions)
-    shift_location, shift_rotation = actions[0]
+    shift_location, _ = actions[0]
     move_location = actions[1]
     assert (shift_location == BoardLocation(0, 3) and move_location == BoardLocation(6, 3)) or \
            (shift_location == BoardLocation(6, 3) and move_location == BoardLocation(4, 2)) or \

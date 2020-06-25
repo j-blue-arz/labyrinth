@@ -38,29 +38,6 @@ paths:
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
     /games/{game_id}/players/{player_id}:
-        put:
-            tags:
-                - "players"
-            summary: "Replaces a player with a computer opponent."
-            operationId: "replaceUser"
-            description: ""
-            parameters:
-                - $ref: "#/components/parameters/gameId"
-                - $ref: "#/components/parameters/playerPathId"
-            requestBody:
-                description: "An optional request body specifies the type of computer opponent. Default is exhaustive search.
-                Currently, it is not possible to replace a computer player with a human player."
-                required: false
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/playerObject'
-            responses:
-                200:
-                    description: "If no error occurred."
-                ">=400":
-                    $ref: "#/components/responses/errorResponse"
-                    
         delete:
             tags:
                 - "players"

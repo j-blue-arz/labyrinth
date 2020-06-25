@@ -47,29 +47,6 @@ def test_add_and_remove_player_id_unique():
     assert actual == expected
 
 
-@patch("server.model.computer.ComputerPlayer")
-def test_change_player_calls_constructor_with_correct_arguments(mock_player_class):
-    """ Tests change_player """
-    game = Game(identifier=7)
-    game.add_player(Player)
-    player_id = game.add_player(Player)
-    piece = game.get_player(player_id).piece
-    board = game.get_player(player_id).board
-    game.change_player(player_id, mock_player_class, param_name="value")
-    mock_player_class.assert_called_once_with(
-        identifier=player_id, game=game, param_name="value", piece=piece, board=board)
-
-
-def test_change_player_keeps_id_and_piece_of_existing_player():
-    """ Tests change_player """
-    game = Game(identifier=7)
-    player_id = game.add_player(Player)
-    piece = game.players[0].piece
-    game.change_player(player_id, Player)
-    assert game.players[0].identifier == player_id
-    assert game.players[0].piece == piece
-
-
 def test_add_player_start_game_calls_methods_on_board():
     """ Tests add_player, start_game and Player """
     board = Board()
@@ -93,13 +70,11 @@ def test_add_player_start_game_calls_methods_on_turns():
     board = Board()
     turns = Mock()
     game = Game(identifier=0, board=board, turns=turns)
-    with patch.object(board, 'create_piece',
-                      wraps=board.create_piece) as board_create_piece:
-        for _ in range(4):
-            game.add_player(Player)
-        game.start_game()
-        expected_turn_calls = [call.init(game.players)] + [call.start()]
-        assert turns.mock_calls[-2:] == expected_turn_calls
+    for _ in range(4):
+        game.add_player(Player)
+    game.start_game()
+    expected_turn_calls = [call.init(game.players)] + [call.start()]
+    assert turns.mock_calls[-2:] == expected_turn_calls
 
 
 @patch("server.model.game.Player")

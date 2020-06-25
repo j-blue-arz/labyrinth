@@ -699,20 +699,6 @@ class Game:
         self.turns.remove_player(player)
         self.players.remove(player)
 
-    def change_player(self, player_id, player_class, **player_class_kwargs):
-        """ Changes the type of a player.
-
-        Replaces player with given ID by a newly created player.
-        :param player_id: the ID of the player to chane
-        :param player_class: a class, descendant of Player
-        :param player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
-        """
-        old_player = self.get_player(player_id)
-        new_player = player_class(identifier=player_id, game=self,
-                                  piece=old_player.piece, board=old_player.board, **player_class_kwargs)
-        self.players[self.players.index(old_player)] = new_player
-        self.start_game()
-
     def start_game(self):
         """ Initializes and starts turn progression.
         """
