@@ -1,6 +1,9 @@
 name: Python backend
 
 on: [push]
+defaults:
+  run:
+    working-directory: ./backend
 
 jobs:
   build:
