@@ -3,6 +3,7 @@
 /dist
 run.bat
 documentation/*.txt
+/test-results
 
 # local env files
 .env.local

@@ -26,4 +26,4 @@ jobs:
         flake8 . --count --exit-zero --max-line-length=127 --max-complexity=10
     - name: Test with pytest
       run: |
-        pytest tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+        pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
