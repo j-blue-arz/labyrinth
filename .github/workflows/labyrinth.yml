@@ -1,0 +1,72 @@
+name: labyrinth
+
+on: [push]
+
+default:
+    runs-on: ubuntu-latest
+
+jobs:
+    web-client:
+        defaults:
+            run:
+                working-directory: ./web-client
+        steps:
+        - uses: actions/checkout@v2
+        - name: Set up node
+          uses: actions/setup-node@v1
+          with:
+            node-version: "12.x"
+        - name: Install dependencies
+          run: |
+            npm ci
+        - name: Lint
+          run: |
+            npm run lint
+        - name: Run tests
+          run: |
+            npm run test:unit
+        - name: Build the application
+          run: |
+            npm run build
+
+    algolibs:
+        defaults:
+            run:
+                working-directory: ./algolibs
+        steps:
+        - uses: actions/checkout@v2
+        - name: Setup cmake
+          uses: lukka/get-cmake@latest
+        - name: Run cmake and build
+          run: |
+            mkdir builds
+            cmake -S. -Bbuilds/shared
+            cmake --build builds/shared
+        - name: Run tests
+          run: |
+            mkdir ../test-results
+            cd builds/shared/test/
+            ctest -V
+            mv all_tests.xml ../../../../test-results/algolibs-results.xml
+
+    backend:
+        defaults:
+            run:
+                working-directory: ./backend
+        steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python 3.8
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.8
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+        - name: Lint
+          run: |
+            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+            flake8 . --count --exit-zero --max-line-length=127 --max-complexity=10
+        - name: Run tests
+          run: |
+            pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
