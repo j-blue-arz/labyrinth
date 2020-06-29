@@ -8,6 +8,7 @@
 #include <set>
 
 using namespace labyrinth;
+using namespace labyrinth::testutils;
 
 class MazeGraphTest : public ::testing::Test {
 protected:

@@ -7,6 +7,7 @@
 #include <set>
 
 using namespace labyrinth;
+using namespace labyrinth::testutils;
 
 class GraphBuilderFromTextTest : public ::testing::Test {
 protected:

@@ -12,6 +12,7 @@
 #include <set>
 
 using namespace labyrinth;
+using namespace labyrinth::testutils;
 
 class ExhaustiveSearchTest : public ::testing::Test {
 protected:

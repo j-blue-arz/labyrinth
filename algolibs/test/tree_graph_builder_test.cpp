@@ -7,6 +7,7 @@
 #include <set>
 
 using namespace labyrinth;
+using namespace labyrinth::testutils;
 
 TEST(TreeGraphBuilderTest, buildGraph_withExtentOfTwo_resultsInCorrectNeighbors) {
     TreeGraphBuilder builder{};
