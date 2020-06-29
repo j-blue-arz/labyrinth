@@ -2,7 +2,7 @@ name: labyrinth
 
 on: [push]
 
-default:
+defaults:
     runs-on: ubuntu-latest
 
 jobs:
