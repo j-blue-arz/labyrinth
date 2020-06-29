@@ -1,0 +1,26 @@
+name: C++ algolibs
+
+on: [push]
+defaults:
+  run:
+    working-directory: ./algolibs
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup cmake
+      uses: lukka/get-cmake@latest
+    - name: Run cmake and build
+      run: |
+        mkdir builds
+        cmake -S. -Bbuilds/shared
+        cmake --build builds/shared
+    - name: Run tests
+      run: |
+        cd builds/shared/test/
+        ctest
+        mv all_tests.xml ../../../../test-results/algolibst-results.xml
