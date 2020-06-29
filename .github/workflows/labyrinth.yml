@@ -2,16 +2,15 @@ name: labyrinth
 
 on: [push]
 
-defaults:
-    runs-on: ubuntu-latest
-
 jobs:
     web-client:
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ./web-client
         steps:
-        - uses: actions/checkout@v2
+        - name: Check out repository
+          uses: actions/checkout@v2
         - name: Set up node
           uses: actions/setup-node@v1
           with:
@@ -30,11 +29,13 @@ jobs:
             npm run build
 
     algolibs:
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ./algolibs
         steps:
-        - uses: actions/checkout@v2
+        - name: Check out repository
+          uses: actions/checkout@v2
         - name: Setup cmake
           uses: lukka/get-cmake@latest
         - name: Run cmake and build
@@ -50,11 +51,13 @@ jobs:
             mv all_tests.xml ../../../../test-results/algolibs-results.xml
 
     backend:
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: ./backend
         steps:
-        - uses: actions/checkout@v2
+        - name: Check out repository
+          uses: actions/checkout@v2
         - name: Set up Python 3.8
           uses: actions/setup-python@v2
           with:
