@@ -19,9 +19,12 @@ jobs:
     - name: Install dependencies
       run: |
         npm ci
+    - name: Lint
+      run: |
+        npm run lint
     - name: Run tests
       run: |
-        npm test:unit
+        npm run test:unit
     - name: Build the application
       run: |
         npm run build
