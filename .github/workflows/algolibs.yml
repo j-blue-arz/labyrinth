@@ -21,6 +21,7 @@ jobs:
         cmake --build builds/shared
     - name: Run tests
       run: |
+        mkdir ../test-results
         cd builds/shared/test/
-        ctest
-        mv all_tests.xml ../../../../test-results/algolibst-results.xml
+        ctest -V
+        mv all_tests.xml ../../../../test-results/algolibs-results.xml
