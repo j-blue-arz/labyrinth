@@ -63,9 +63,8 @@ export default {
                 if (player) {
                     return player.algorithm;
                 }
-            } else {
-                return "";
             }
+            return "";
         },
         playerTurnAction: function() {
             if (this.game.hasStarted()) {
@@ -73,9 +72,8 @@ export default {
                 if (player) {
                     return player.turnAction;
                 }
-            } else {
-                return NO_ACTION;
             }
+            return NO_ACTION;
         }
     },
     methods: {
