@@ -140,7 +140,6 @@ describe("InteractiveBoard", () => {
         let board = shallowFactory(game);
         let insertPanels = board.find(InsertPanels);
         expect(insertPanels.props().disabledInsertLocation).toEqual(game.disabledInsertLocation);
-
     });
 });
 
@@ -637,7 +636,7 @@ var API_STATE = {
                 },
                 rotation: 270
             }
-        ],
+        ]
     },
     nextAction: {
         action: "MOVE",

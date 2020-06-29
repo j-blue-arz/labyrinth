@@ -106,7 +106,7 @@ describe("GameContainer", () => {
         expect(playerCardIds[0]).toBe(idMatrix[5][3]);
     });
 
-    it("moves players to opposing side of the board when shifted out", (done) => {
+    it("moves players to opposing side of the board when shifted out", done => {
         var gameContainer = factory([loc(6, 1)]);
 
         var pushedInCardId = determineLeftOverId(gameContainer);

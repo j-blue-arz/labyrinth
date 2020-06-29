@@ -29,9 +29,7 @@ describe("MazeCard", () => {
         });
 
         it("throws exception when doors is not string", () => {
-            expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(
-                Error
-            );
+            expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(Error);
         });
 
         it("throws exception when doors has same door twice", () => {

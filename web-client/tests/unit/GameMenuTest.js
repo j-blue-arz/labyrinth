@@ -164,8 +164,12 @@ describe("GameMenu", () => {
             expect(gameMenu.find(".menu").isVisible()).toBe(true);
             let entries = menu.findAll("li");
             expect(entries.length).toBe(3); // first entry is header
-            expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(1);
-            expect(entries.filter(entry => entry.element.textContent.includes("11")).length).toBe(1);
+            expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(
+                1
+            );
+            expect(entries.filter(entry => entry.element.textContent.includes("11")).length).toBe(
+                1
+            );
         });
 
         it("calls removePlayer() on gameApi with correct player ID", () => {
