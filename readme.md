@@ -1,12 +1,11 @@
-Labyrinth is a well-known german family board game. This project aims to recreate the game as a multiplayer game, develop understanding of the game's complexity and implement some computer opponents.
-
-English manual to the game: https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf  
-German manual to the game: https://www.ravensburger.de/spielanleitungen/ecm/Spielanleitungen/26446%20anl%201637944.pdf?ossl=pds_text_Spielanleitung
+Labyrinth is a family board game. This project aims to recreate the game as a online multiplayer game, develop understanding of the game's complexity and implement practical search algorithms.
 
 There is one major difference to the original game: all players have the same objective. 
 The objective is always randomly chosen to be one of the 50 maze cards which is not occupied by a player's piece.
 
 Also, it is only possible to reach an objective while making a move. Reaching an objective while it is another player's move is not counted.
+
+Manual to the original game: https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf
 
 # Quick start
 Build the client and run the flask web server.
@@ -56,7 +55,7 @@ Requires cmake version 3.13 or newer. Tested with gcc 7.4.0. MSVC 14.23 works as
     mkdir builds
     cmake -S. -Bbuilds/shared
     cmake --build builds/shared
-    mkdir -p ../../../backend/lib/
+    mkdir -p ../backend/lib/
     cp builds/shared/libexhsearch/libexhsearch.so ../backend/lib/
 
 ## WebAssembly
