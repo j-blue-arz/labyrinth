@@ -24,9 +24,14 @@ jobs:
         - name: Run tests
           run: |
             npm run test:unit
-        - name: Build the application
+        - name: Build web-client
           run: |
             npm run build
+        - name: Archive web-client
+          uses: actions/upload-artifact@v1
+          with:
+            name: webClient
+            path: ../dist
 
     algolibs:
         runs-on: ubuntu-latest
@@ -38,17 +43,25 @@ jobs:
           uses: actions/checkout@v2
         - name: Setup cmake
           uses: lukka/get-cmake@latest
-        - name: Run cmake and build
+        - name: Run cmake and build shared library
           run: |
             mkdir builds
             cmake -S. -Bbuilds/shared
             cmake --build builds/shared
+            mkdir -p ../backend/lib/
+            cp builds/shared/libexhsearch/libexhsearch.so ../backend/lib/
         - name: Run tests
           run: |
             mkdir ../test-results
             cd builds/shared/test/
             ctest -V
             mv all_tests.xml ../../../../test-results/algolibs-results.xml
+            cd ../../../
+        - name: Archive shared library
+          uses: actions/upload-artifact@v1
+          with:
+            name: sharedLib
+            path: ../backend/lib/
 
     backend:
         runs-on: ubuntu-latest
@@ -70,6 +83,16 @@ jobs:
           run: |
             flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
             flake8 . --count --exit-zero --max-line-length=127 --max-complexity=10
+        - name: Restore web-client artifact
+          uses: actions/download-artifact@v1
+            with:
+                name: webClient
+                path: ../dist
+        - name: Restore shared library artifact
+          uses: actions/download-artifact@v1
+            with:
+                name: sharedLib
+                path: ../backend/lib/
         - name: Run tests
           run: |
             pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
