@@ -85,14 +85,14 @@ jobs:
             flake8 . --count --exit-zero --max-line-length=127 --max-complexity=10
         - name: Restore web-client artifact
           uses: actions/download-artifact@v1
-            with:
-                name: webClient
-                path: ../dist
+          with:
+            name: webClient
+            path: ../dist
         - name: Restore shared library artifact
           uses: actions/download-artifact@v1
-            with:
-                name: sharedLib
-                path: ../backend/lib/
+          with:
+            name: sharedLib
+            path: ../backend/lib/
         - name: Run tests
           run: |
             pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
