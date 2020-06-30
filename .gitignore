@@ -1,8 +1,6 @@
 .DS_Store
 **/node_modules
 /dist
-run.bat
-documentation/*.txt
 /test-results
 
 # local env files
