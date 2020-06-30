@@ -12,7 +12,7 @@ API = Blueprint('api', __name__, url_prefix='/api')
 @API.errorhandler(ApiException)
 def handle_api_exception(api_exception):
     """ maps the ApiException to an error response """
-    return json.jsonify(api_exception.to_dto()), api_exception.status_code
+    return api_exception.to_dto(), api_exception.status_code
 
 
 @API.route('/games/<int:game_id>/players', methods=["POST"])
@@ -54,7 +54,7 @@ def change_game(game_id):
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):
     """ Returns the state of the game """
-    return json.jsonify(service.get_game_state(game_id))
+    return service.get_game_state(game_id)
 
 
 @API.route('/games/<int:game_id>/shift', methods=["POST"])
