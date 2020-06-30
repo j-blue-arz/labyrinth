@@ -68,6 +68,7 @@ jobs:
         defaults:
             run:
                 working-directory: ./backend
+        needs: [web-client, algolibs]
         steps:
         - name: Check out repository
           uses: actions/checkout@v2
