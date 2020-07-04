@@ -18,6 +18,7 @@ TEST(LocationTest, operatorPlus_doesNotAlterFirstOperand) {
     auto new_location = origin + offset;
     EXPECT_EQ(3, origin.getRow()) << "Row altered by operator+.";
     EXPECT_EQ(4, origin.getColumn()) << "Column altered by operator+.";
+    EXPECT_EQ(1, new_location.getColumn()) << "Wrong column result for operator+.";
 }
 
 TEST(LocationTest, operatorPlusInplace_altersFirstOperand) {
