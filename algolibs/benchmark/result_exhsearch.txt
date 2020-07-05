@@ -27,6 +27,11 @@ nodes instead of through getNode(Location).
 Best of 15: 0.413454s.
 -> Slower, due to computation of Location from index
 
+All previous measurements with MSVC. Now:gcc
+gcc, Release-Build:
+Best of 5: 0.151407s.
+- only smaller changes, which I would not expect to impact performance too much: int32_t instead of size_t for extent, removed all noexcepts, no c++20, no spaceship in location
+
 Ideas:
 - more inlining, e.g. operators of neighbor iterator
 - more noexcept
