@@ -132,16 +132,16 @@ export default {
         createNode: function(mazeCard) {
             let id = mazeCard.id;
             let outPathBitmask = 0;
-            if (mazeCard.hasNorthDoor()) {
+            if (mazeCard.hasNorthOutPath()) {
                 outPathBitmask += 1;
             }
-            if (mazeCard.hasEastDoor()) {
+            if (mazeCard.hasEastOutPath()) {
                 outPathBitmask += 2;
             }
-            if (mazeCard.hasSouthDoor()) {
+            if (mazeCard.hasSouthOutPath()) {
                 outPathBitmask += 4;
             }
-            if (mazeCard.hasWestDoor()) {
+            if (mazeCard.hasWestOutPath()) {
                 outPathBitmask += 8;
             }
             let rotation = mazeCard.rotation;

@@ -1,8 +1,8 @@
 export default class MazeCard {
-    constructor(id, row, column, doors, rotation) {
+    constructor(id, row, column, out_paths, rotation) {
         this.id = id;
         this.location = { row: row, column: column };
-        this.doors = doors;
+        this.out_paths = out_paths;
         this._rotation = rotation;
         this._players = [];
         this.hasObject = false;
@@ -17,21 +17,21 @@ export default class MazeCard {
             throw new Error(
                 "Invalid constructor argument for rotation, should be integer divisible by 90."
             );
-        if (typeof doors !== "string")
-            throw new Error("Invalid constructor argument for doors, should be string.");
-        if (!/^[NESW]{2,4}$/.test(doors))
+        if (typeof out_paths !== "string")
+            throw new Error("Invalid constructor argument for out_paths, should be string.");
+        if (!/^[NESW]{2,4}$/.test(out_paths))
             throw new Error(
-                "Invalid constructor argument for doors, should comply pattern '[NESW]{2,4}'."
+                "Invalid constructor argument for out_paths, should comply pattern '[NESW]{2,4}'."
             );
         if (
-            Number(this.hasNorthDoor()) +
-                Number(this.hasEastDoor()) +
-                Number(this.hasWestDoor()) +
-                Number(this.hasSouthDoor()) !==
-            doors.length
+            Number(this.hasNorthOutPath()) +
+                Number(this.hasEastOutPath()) +
+                Number(this.hasWestOutPath()) +
+                Number(this.hasSouthOutPath()) !==
+            out_paths.length
         )
             throw new Error(
-                "Invalid constructor argument for doors, should not include same door twice."
+                "Invalid constructor argument for out_paths, should not include same out_path twice."
             );
     }
 
@@ -40,49 +40,49 @@ export default class MazeCard {
             apiMazeCard.id,
             apiMazeCard.location.row,
             apiMazeCard.location.column,
-            apiMazeCard.doors,
+            apiMazeCard.out_paths,
             apiMazeCard.rotation
         );
     }
 
     static createNewRandom(id, row, column) {
-        return new this(id, row, column, this.generateRandomDoors(), 0);
+        return new this(id, row, column, this.generateRandomOutPaths(), 0);
     }
 
-    static generateRandomDoors() {
+    static generateRandomOutPaths() {
         return MazeCard.validCombinations[
             Math.floor(Math.random() * MazeCard.validCombinations.length)
         ];
     }
 
-    hasNorthDoor() {
-        return this._hasDoor("N");
+    hasNorthOutPath() {
+        return this._hasOutPath("N");
     }
 
-    hasEastDoor() {
-        return this._hasDoor("E");
+    hasEastOutPath() {
+        return this._hasOutPath("E");
     }
 
-    hasSouthDoor() {
-        return this._hasDoor("S");
+    hasSouthOutPath() {
+        return this._hasOutPath("S");
     }
 
-    hasWestDoor() {
-        return this._hasDoor("W");
+    hasWestOutPath() {
+        return this._hasOutPath("W");
     }
 
-    _hasDoor(door) {
-        return this.doors.indexOf(door) != -1;
+    _hasOutPath(out_path) {
+        return this.out_paths.indexOf(out_path) != -1;
     }
 
-    hasRotationEquivalentDoor(door) {
-        var rotationDoor = MazeCard.rotationEquivalentDoor(door, -this._rotation);
-        return this.doors.indexOf(rotationDoor) != -1;
+    hasRotationAwareOutPath(outPath) {
+        var unrotatedOutPath = MazeCard.rotatedOutPath(outPath, -this._rotation);
+        return this.out_paths.indexOf(unrotatedOutPath) != -1;
     }
 
-    static rotationEquivalentDoor(originalDoor, rotation) {
-        return MazeCard.doorsRotation[
-            (MazeCard.doorsRotation.indexOf(originalDoor) + rotation / 90 + 4) % 4
+    static rotatedOutPath(originalOutPath, rotation) {
+        return MazeCard.out_pathsRotation[
+            (MazeCard.out_pathsRotation.indexOf(originalOutPath) + rotation / 90 + 4) % 4
         ];
     }
 
@@ -145,4 +145,4 @@ MazeCard.validCombinations = [
     "SW"
 ];
 
-MazeCard.doorsRotation = ["N", "E", "S", "W"];
+MazeCard.out_pathsRotation = ["N", "E", "S", "W"];

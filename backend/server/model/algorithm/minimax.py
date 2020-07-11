@@ -63,9 +63,9 @@ class GameTreeNode:
     def _rotations(self, location):
         rotations = [0, 90, 180, 270]
         maze_card = self.board.maze[location]
-        if maze_card.doors == maze_card.STRAIGHT:
+        if maze_card.out_paths == maze_card.STRAIGHT:
             rotations = [0, 90]
-        if maze_card.doors == maze_card.CROSS:
+        if maze_card.out_paths == maze_card.CROSS:
             rotations = [0]
         return rotations
 

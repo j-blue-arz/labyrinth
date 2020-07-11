@@ -62,7 +62,7 @@ def test_mapping_leftover():
     assert len(leftover_dtos) == 1
     leftover_dto = leftover_dtos[0]
     assert leftover_dto[mapper.ID] == game.board.leftover_card.identifier
-    assert leftover_dto[mapper.DOORS] == game.board.leftover_card.doors
+    assert leftover_dto[mapper.OUT_PATHS] == game.board.leftover_card.out_paths
 
 
 def test_mapping_board():
@@ -79,7 +79,7 @@ def test_mapping_board():
         location = _assert_and_return_location_dto(maze_card_dto[mapper.LOCATION])
         maze_card_game = game.board.maze[location]
         assert maze_card_dto[mapper.ID] == maze_card_game.identifier
-        assert maze_card_dto[mapper.DOORS] == maze_card_game.doors
+        assert maze_card_dto[mapper.OUT_PATHS] == maze_card_game.out_paths
         assert maze_card_dto[mapper.ROTATION] == maze_card_game.rotation
         ids.add(maze_card_dto[mapper.ID])
     assert len(ids) == len(maze_card_dtos)

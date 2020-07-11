@@ -33,20 +33,20 @@ describe("VMazeCard", () => {
         expect(wrapper.element.getAttribute("height")).toBe("200");
     });
 
-    it("includes north door if MazeCard has a north door", () => {
+    it("includes north out_path if MazeCard has a north out_path", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "NW", 0),
             cardSize: 100
         });
-        expect(wrapper.find({ ref: "northDoor" }).exists()).toBeTruthy();
+        expect(wrapper.find({ ref: "north" }).exists()).toBeTruthy();
     });
 
-    it("does not include north door if MazeCard object does not have a north door", () => {
+    it("does not include north out_path if MazeCard object does not have a north out_path", () => {
         const wrapper = wrapperFactory({
             mazeCard: new MazeCard(0, 0, 0, "EW", 0),
             cardSize: 100
         });
-        expect(wrapper.find({ ref: "northDoor" }).exists()).toBeFalsy();
+        expect(wrapper.find({ ref: "north" }).exists()).toBeFalsy();
     });
 
     it("does not render players if the MazeCard object does not contain pieces", () => {

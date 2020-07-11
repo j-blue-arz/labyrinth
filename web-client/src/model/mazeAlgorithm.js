@@ -72,8 +72,8 @@ export default class Graph {
             };
             if (this.game.isInside(locationToTest)) {
                 let cardToTest = this.game.getMazeCard(locationToTest);
-                let mirroredDoor = this._mirror(outPath[2]);
-                if (cardToTest.hasRotationEquivalentDoor(mirroredDoor)) {
+                let mirroredOutPath = this._mirror(outPath[2]);
+                if (cardToTest.hasRotationAwareOutPath(mirroredOutPath)) {
                     neighbors.push(locationToTest);
                 }
             }
@@ -83,25 +83,25 @@ export default class Graph {
 
     _outPaths(mazeCard) {
         let result = [];
-        if (mazeCard.hasRotationEquivalentDoor("N")) {
+        if (mazeCard.hasRotationAwareOutPath("N")) {
             result.push([-1, 0, "N"]);
         }
-        if (mazeCard.hasRotationEquivalentDoor("E")) {
+        if (mazeCard.hasRotationAwareOutPath("E")) {
             result.push([0, 1, "E"]);
         }
-        if (mazeCard.hasRotationEquivalentDoor("S")) {
+        if (mazeCard.hasRotationAwareOutPath("S")) {
             result.push([1, 0, "S"]);
         }
-        if (mazeCard.hasRotationEquivalentDoor("W")) {
+        if (mazeCard.hasRotationAwareOutPath("W")) {
             result.push([0, -1, "W"]);
         }
         return result;
     }
 
-    _mirror(door) {
-        let doors = ["N", "E", "S", "W"];
-        let mirroredIndex = (doors.indexOf(door) + 2) % 4;
-        return doors[mirroredIndex];
+    _mirror(out_path) {
+        let out_paths = ["N", "E", "S", "W"];
+        let mirroredIndex = (out_paths.indexOf(out_path) + 2) % 4;
+        return out_paths[mirroredIndex];
     }
 
     _initReached() {

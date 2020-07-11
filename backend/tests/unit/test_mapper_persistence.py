@@ -147,9 +147,9 @@ def test_mapping_piece_index():
 
 
 def _compare_maze_cards(maze_card1, maze_card2):
-    """ Compares identifier, doors and rotation of MazeCard instances """
+    """ Compares identifier, out_paths and rotation of MazeCard instances """
     return maze_card1.identifier == maze_card2.identifier and \
-        maze_card1.doors == maze_card2.doors and \
+        maze_card1.out_paths == maze_card2.out_paths and \
         maze_card1.rotation == maze_card2.rotation
 
 

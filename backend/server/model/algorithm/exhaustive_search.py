@@ -62,9 +62,9 @@ class GameTreeNode:
     def _current_rotations(self):
         rotations = [0, 90, 180, 270]
         leftover_card = self.board.leftover_card
-        if leftover_card.doors == leftover_card.STRAIGHT:
+        if leftover_card.out_paths == leftover_card.STRAIGHT:
             rotations = [0, 90]
-        if leftover_card.doors == leftover_card.CROSS:
+        if leftover_card.out_paths == leftover_card.CROSS:
             rotations = [0]
         return rotations
 

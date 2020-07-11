@@ -125,7 +125,7 @@ def _dto_to_maze_card(maze_card_dto):
     as created by _maze_card_to_dto
     :return: a MazeCard instance and a BoardLocation instance (or None, for the leftover card)
     """
-    maze_card = MazeCard(maze_card_dto[ID], maze_card_dto[DOORS], maze_card_dto[ROTATION])
+    maze_card = MazeCard(maze_card_dto[ID], maze_card_dto[OUT_PATHS], maze_card_dto[ROTATION])
     location = _dto_to_board_location(maze_card_dto[LOCATION])
     return maze_card, location
 

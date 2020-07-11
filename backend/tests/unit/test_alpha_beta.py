@@ -129,10 +129,10 @@ CASES_PARAMS = {
 }
 
 
-def _param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
+def _param_tuple_to_param_dict(maze_string, leftover_out_paths, piece_starts, objective_tuple):
     maze_card_factory = MazeCardFactory()
     return {"maze": create_maze(maze_string, maze_card_factory),
-            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
+            "leftover_card": maze_card_factory.create_instance(leftover_out_paths, 0),
             "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
             "objective_location": BoardLocation(*objective_tuple)}
 

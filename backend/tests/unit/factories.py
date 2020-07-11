@@ -11,10 +11,10 @@ def create_random_maze(maze_card_factory=None):
     Corners of the maze are fixed as corners
     """
     fixed_cards = {
-        BoardLocation(0, 0): MazeCard(doors=MazeCard.CORNER, rotation=90),
-        BoardLocation(0, 6): MazeCard(doors=MazeCard.CORNER, rotation=180),
-        BoardLocation(6, 6): MazeCard(doors=MazeCard.CORNER, rotation=270),
-        BoardLocation(6, 0): MazeCard(doors=MazeCard.CORNER, rotation=0)}
+        BoardLocation(0, 0): MazeCard(out_paths=MazeCard.CORNER, rotation=90),
+        BoardLocation(0, 6): MazeCard(out_paths=MazeCard.CORNER, rotation=180),
+        BoardLocation(6, 6): MazeCard(out_paths=MazeCard.CORNER, rotation=270),
+        BoardLocation(6, 0): MazeCard(out_paths=MazeCard.CORNER, rotation=0)}
 
     if not maze_card_factory:
         maze_card_factory = MazeCardFactory()
@@ -22,17 +22,17 @@ def create_random_maze(maze_card_factory=None):
 
     def card_at(location):
         if location in fixed_cards:
-            return maze_card_factory.create_instance(fixed_cards[location].doors, fixed_cards[location].rotation)
+            return maze_card_factory.create_instance(fixed_cards[location].out_paths, fixed_cards[location].rotation)
         return maze_card_factory.create_random_maze_card()
 
     for location in maze.maze_locations:
         maze[location] = card_at(location)
     return maze
 
-def param_tuple_to_param_dict(maze_string, leftover_doors, piece_starts, objective_tuple):
+def param_tuple_to_param_dict(maze_string, leftover_out_paths, piece_starts, objective_tuple):
     maze_card_factory = MazeCardFactory()
     return {"maze": create_maze(maze_string, maze_card_factory),
-            "leftover_card": maze_card_factory.create_instance(leftover_doors, 0),
+            "leftover_card": maze_card_factory.create_instance(leftover_out_paths, 0),
             "piece_locations": [BoardLocation(*piece_start) for piece_start in piece_starts],
             "objective_location": BoardLocation(*objective_tuple)}
 

@@ -275,23 +275,23 @@ describe("Game", () => {
         });
 
         it("creates at least one maze card correctly", () => {
-            /* { "doors": "NE", "id": 7,  "location": { "column": 0, "row": 1 }, "rotation": 180 } */
+            /* { "out_paths": "NE", "id": 7,  "location": { "column": 0, "row": 1 }, "rotation": 180 } */
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let mazeCard = game.getMazeCard(loc(1, 0));
-            expect(mazeCard.doors).toEqual("NE");
+            expect(mazeCard.out_paths).toEqual("NE");
             expect(mazeCard.id).toBe(7);
             expect(mazeCard.rotation).toBe(180);
         });
 
         it("creates leftover maze card correctly", () => {
-            /* { "doors": "NES", "id": 49,  "location": null, "rotation": 0 } */
+            /* { "out_paths": "NES", "id": 49,  "location": null, "rotation": 0 } */
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
             let mazeCard = game.leftoverMazeCard;
-            expect(mazeCard.doors).toEqual("NES");
+            expect(mazeCard.out_paths).toEqual("NES");
             expect(mazeCard.id).toBe(49);
             expect(mazeCard.rotation).toBe(0);
         });
@@ -415,12 +415,12 @@ let GET_STATE_RESULT_FOR_N_3 = `{
   "maze": {
     "mazeSize": 3,
     "mazeCards": [{
-        "doors": "NES",
+        "out_paths": "NES",
         "id": 49,
         "location": null,
         "rotation": 0
     }, {
-        "doors": "NES",
+        "out_paths": "NES",
         "id": 0,
         "location": {
         "column": 0,
@@ -428,7 +428,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 180
     }, {
-        "doors": "NE",
+        "out_paths": "NE",
         "id": 1,
         "location": {
         "column": 1,
@@ -436,7 +436,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 180
     }, {
-        "doors": "NS",
+        "out_paths": "NS",
         "id": 2,
         "location": {
         "column": 2,
@@ -444,7 +444,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 90
     }, {
-        "doors": "NE",
+        "out_paths": "NE",
         "id": 7,
         "location": {
         "column": 0,
@@ -452,7 +452,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 180
     }, {
-        "doors": "NE",
+        "out_paths": "NE",
         "id": 8,
         "location": {
         "column": 1,
@@ -460,7 +460,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 270
     }, {
-        "doors": "NS",
+        "out_paths": "NS",
         "id": 9,
         "location": {
         "column": 2,
@@ -468,7 +468,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 0
     }, {
-        "doors": "NS",
+        "out_paths": "NS",
         "id": 14,
         "location": {
         "column": 0,
@@ -476,7 +476,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 180
     }, {
-        "doors": "NES",
+        "out_paths": "NES",
         "id": 15,
         "location": {
         "column": 1,
@@ -484,7 +484,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
         },
         "rotation": 180
     }, {
-        "doors": "NE",
+        "out_paths": "NE",
         "id": 16,
         "location": {
         "column": 2,

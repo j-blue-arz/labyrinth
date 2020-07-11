@@ -2,10 +2,10 @@ import MazeCard from "@/model/mazeCard.js";
 
 var hasValidState = function(mazeCard) {
     return (
-        Number(mazeCard.hasNorthDoor()) +
-            Number(mazeCard.hasEastDoor()) +
-            Number(mazeCard.hasWestDoor()) +
-            Number(mazeCard.hasSouthDoor()) >=
+        Number(mazeCard.hasNorthOutPath()) +
+            Number(mazeCard.hasEastOutPath()) +
+            Number(mazeCard.hasWestOutPath()) +
+            Number(mazeCard.hasSouthOutPath()) >=
             2 &&
         mazeCard.rotation % 90 === 0 &&
         Number.isInteger(mazeCard.location.row) &&
@@ -28,15 +28,15 @@ describe("MazeCard", () => {
             expect(() => new MazeCard(4, 1, [], "NS", 0)).toThrowError(Error);
         });
 
-        it("throws exception when doors is not string", () => {
+        it("throws exception when out_paths is not string", () => {
             expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(Error);
         });
 
-        it("throws exception when doors has same door twice", () => {
+        it("throws exception when out_paths has same out_path twice", () => {
             expect(() => new MazeCard(4, 1, 4, "NNE", 0)).toThrowError(Error);
         });
 
-        it("throws exception when doors has less than two doors", () => {
+        it("throws exception when out_paths has less than two out_paths", () => {
             expect(() => new MazeCard(4, 1, 4, "N", 0)).toThrowError(Error);
         });
 
@@ -72,56 +72,56 @@ describe("MazeCard", () => {
         });
     });
 
-    describe("doors", () => {
+    describe("out_paths", () => {
         it("are set from constructor", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
-            expect(mazeCard.hasNorthDoor()).toBe(true);
-            expect(mazeCard.hasEastDoor()).toBe(true);
-            expect(mazeCard.hasSouthDoor()).toBe(false);
-            expect(mazeCard.hasWestDoor()).toBe(false);
+            expect(mazeCard.hasNorthOutPath()).toBe(true);
+            expect(mazeCard.hasEastOutPath()).toBe(true);
+            expect(mazeCard.hasSouthOutPath()).toBe(false);
+            expect(mazeCard.hasWestOutPath()).toBe(false);
         });
 
         it("do not respect rotation", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NS", 270);
-            expect(mazeCard.hasNorthDoor()).toBe(true);
-            expect(mazeCard.hasEastDoor()).toBe(false);
-            expect(mazeCard.hasSouthDoor()).toBe(true);
-            expect(mazeCard.hasWestDoor()).toBe(false);
+            expect(mazeCard.hasNorthOutPath()).toBe(true);
+            expect(mazeCard.hasEastOutPath()).toBe(false);
+            expect(mazeCard.hasSouthOutPath()).toBe(true);
+            expect(mazeCard.hasWestOutPath()).toBe(false);
         });
 
         it("are not rotated when rotateClockwise() is called", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
             mazeCard.rotateClockwise();
-            expect(mazeCard.hasNorthDoor()).toBe(true);
-            expect(mazeCard.hasEastDoor()).toBe(true);
-            expect(mazeCard.hasSouthDoor()).toBe(false);
-            expect(mazeCard.hasWestDoor()).toBe(false);
+            expect(mazeCard.hasNorthOutPath()).toBe(true);
+            expect(mazeCard.hasEastOutPath()).toBe(true);
+            expect(mazeCard.hasSouthOutPath()).toBe(false);
+            expect(mazeCard.hasWestOutPath()).toBe(false);
         });
     });
 
-    describe("hasRotationEquivalentDoor", () => {
+    describe("hasRotationAwareOutPath", () => {
         it("respects rotation for straights", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NS", 270);
-            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(false);
-            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(false);
-            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("N")).toBe(false);
+            expect(mazeCard.hasRotationAwareOutPath("E")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("S")).toBe(false);
+            expect(mazeCard.hasRotationAwareOutPath("W")).toBe(true);
         });
 
         it("respects rotation for corner", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 90);
-            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(false);
-            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(false);
+            expect(mazeCard.hasRotationAwareOutPath("N")).toBe(false);
+            expect(mazeCard.hasRotationAwareOutPath("E")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("S")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("W")).toBe(false);
         });
 
         it("respects rotation for t-shape", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NES", 0);
-            expect(mazeCard.hasRotationEquivalentDoor("N")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("E")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("S")).toBe(true);
-            expect(mazeCard.hasRotationEquivalentDoor("W")).toBe(false);
+            expect(mazeCard.hasRotationAwareOutPath("N")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("E")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("S")).toBe(true);
+            expect(mazeCard.hasRotationAwareOutPath("W")).toBe(false);
         });
     });
 });

@@ -25,9 +25,9 @@ def test_create_maze_and_leftover_no_cross_for_size_11():
     """ Tests create_maze_and_leftover.
     Checks that there is no cross maze card for size 11, because it is not of the form 4k + 1. """
     maze, leftover = create_maze_and_leftover()
-    assert leftover.doors != MazeCard.CROSS
+    assert leftover.out_paths != MazeCard.CROSS
     for location in maze.maze_locations:
-        assert maze[location].doors != MazeCard.CROSS
+        assert maze[location].out_paths != MazeCard.CROSS
 
 def test_create_maze_and_leftover_unique_ids_for_size_7():
     """ Tests create_maze_and_leftover.
@@ -40,10 +40,10 @@ def test_create_maze_and_leftover_distribution_for_size_7():
     """ Tests create_maze_and_leftover.
     Checks maze card type distribution. """
     maze, leftover = create_maze_and_leftover()
-    doors = [maze[location].doors for location in maze.maze_locations]
-    doors.append(leftover.doors)
-    assert len(doors) == 50
-    counts = Counter(doors)
+    out_paths = [maze[location].out_paths for location in maze.maze_locations]
+    out_paths.append(leftover.out_paths)
+    assert len(out_paths) == 50
+    counts = Counter(out_paths)
     assert counts[MazeCard.CORNER] == 19
     assert counts[MazeCard.T_JUNCT] == 18
     assert counts[MazeCard.STRAIGHT] == 13
@@ -73,11 +73,11 @@ def test_create_maze_and_leftover_distribution_for_size_13():
     non-fixed distribution of the original game, i.e. (15, 6, 13) for corners, t-juncts, and straights. """
     size = 13
     maze, leftover = create_maze_and_leftover(size=size)
-    doors = [maze[location].doors for location in maze.maze_locations]
-    doors.append(leftover.doors)
-    assert len(doors) == 170
-    non_fixed = len(doors) - 49
-    counts = Counter(doors)
+    out_path = [maze[location].out_path for location in maze.maze_locations]
+    out_path.append(leftover.out_path)
+    assert len(out_path) == 170
+    non_fixed = len(out_path) - 49
+    counts = Counter(out_path)
     assert counts[MazeCard.CROSS] == 1
     approx_expected_corners = math.floor(15 / 34 * non_fixed + 4)
     approx_expected_t_juncts = math.floor(6 / 34 * non_fixed + 44)
@@ -106,22 +106,22 @@ def test_create_fixed_maze_for_size_3():
     Checks every single position for correct layout. """
     maze = create_maze(maze_string_3)
     assert maze.maze_size == 3
-    assert maze[BoardLocation(0, 0)].doors == MazeCard.T_JUNCT
+    assert maze[BoardLocation(0, 0)].out_paths == MazeCard.T_JUNCT
     assert maze[BoardLocation(0, 0)].rotation == 0
-    assert maze[BoardLocation(0, 1)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(0, 1)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(0, 1)].rotation == 180
-    assert maze[BoardLocation(0, 2)].doors == MazeCard.T_JUNCT
+    assert maze[BoardLocation(0, 2)].out_paths == MazeCard.T_JUNCT
     assert maze[BoardLocation(0, 2)].rotation == 270
-    assert maze[BoardLocation(1, 0)].doors == MazeCard.T_JUNCT
+    assert maze[BoardLocation(1, 0)].out_paths == MazeCard.T_JUNCT
     assert maze[BoardLocation(1, 0)].rotation == 90
-    assert maze[BoardLocation(1, 1)].doors == MazeCard.CROSS
-    assert maze[BoardLocation(1, 2)].doors == MazeCard.STRAIGHT
+    assert maze[BoardLocation(1, 1)].out_paths == MazeCard.CROSS
+    assert maze[BoardLocation(1, 2)].out_paths == MazeCard.STRAIGHT
     assert maze[BoardLocation(1, 2)].rotation == 0
-    assert maze[BoardLocation(2, 0)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(2, 0)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(2, 0)].rotation == 0
-    assert maze[BoardLocation(2, 1)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(2, 1)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(2, 1)].rotation == 270
-    assert maze[BoardLocation(2, 2)].doors == MazeCard.STRAIGHT
+    assert maze[BoardLocation(2, 2)].out_paths == MazeCard.STRAIGHT
     assert maze[BoardLocation(2, 2)].rotation == 90
 
 
@@ -137,13 +137,13 @@ def _assert_unique_ids(maze):
 
 def _assert_corners(maze):
     border = maze.maze_size - 1
-    assert maze[BoardLocation(0, 0)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(0, 0)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(0, 0)].rotation == 90
-    assert maze[BoardLocation(0, border)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(0, border)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(0, border)].rotation == 180
-    assert maze[BoardLocation(border, border)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(border, border)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(border, border)].rotation == 270
-    assert maze[BoardLocation(border, 0)].doors == MazeCard.CORNER
+    assert maze[BoardLocation(border, 0)].out_paths == MazeCard.CORNER
     assert maze[BoardLocation(border, 0)].rotation == 0
 
 
@@ -157,9 +157,9 @@ def _assert_fixed_pieces_t_juncts(maze):
     if border % 4 == 0:
         expected_t_junct_locations.remove(BoardLocation(border // 2, border // 2))
     for location in expected_t_junct_locations:
-        assert maze[location].doors == MazeCard.T_JUNCT
+        assert maze[location].out_paths == MazeCard.T_JUNCT
 
 def _assert_cross_center(maze):
     center = (maze.maze_size - 1) // 2
     center_location = BoardLocation(center, center)
-    assert maze[center_location].doors == MazeCard.CROSS
+    assert maze[center_location].out_paths == MazeCard.CROSS

@@ -26,7 +26,7 @@
                 class="maze-card__pathway"
             ></rect>
             <rect
-                ref="northDoor"
+                ref="north"
                 v-if="hasNorth"
                 :x="remainingSpace"
                 y="1"
@@ -35,7 +35,7 @@
                 class="maze-card__pathway"
             ></rect>
             <rect
-                ref="eastDoor"
+                ref="east"
                 v-if="hasEast"
                 :x="98 - remainingSpace"
                 :y="remainingSpace"
@@ -44,7 +44,7 @@
                 class="maze-card__pathway"
             ></rect>
             <rect
-                ref="southDoor"
+                ref="south"
                 v-if="hasSouth"
                 :x="remainingSpace"
                 :y="98 - remainingSpace"
@@ -53,7 +53,7 @@
                 class="maze-card__pathway"
             ></rect>
             <rect
-                ref="westDoor"
+                ref="west"
                 v-if="hasWest"
                 x="1"
                 :y="remainingSpace"
@@ -157,16 +157,16 @@ export default {
             return Math.floor((this.cardSize - this.pathWidth) / 2);
         },
         hasNorth: function() {
-            return this.mazeCard.hasNorthDoor();
+            return this.mazeCard.hasNorthOutPath();
         },
         hasEast: function() {
-            return this.mazeCard.hasEastDoor();
+            return this.mazeCard.hasEastOutPath();
         },
         hasSouth: function() {
-            return this.mazeCard.hasSouthDoor();
+            return this.mazeCard.hasSouthOutPath();
         },
         hasWest: function() {
-            return this.mazeCard.hasWestDoor();
+            return this.mazeCard.hasWestOutPath();
         }
     },
     created: function() {

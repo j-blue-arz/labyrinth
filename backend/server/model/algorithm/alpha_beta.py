@@ -33,7 +33,7 @@ class Heuristic:
             location = board.maze.maze_card_location(maze_card)
             reach[player_index] = graph.reachable_locations(source=location)
             objective_value[player_index] = self._objective_value(board, location, objective_location)
-            if maze_card.doors == MazeCard.T_JUNCT:
+            if maze_card.out_paths == MazeCard.T_JUNCT:
                 maze_card_value[player_index] = 1
         reach_value = len(reach[0]) - len(reach[1])
         reach_value = math.copysign(reach_value**2, reach_value)
@@ -132,9 +132,9 @@ class GameTreeNode:
     def _rotations(self, location):
         rotations = [0, 90, 180, 270]
         maze_card = self.board.maze[location]
-        if maze_card.doors == maze_card.STRAIGHT:
+        if maze_card.out_paths == maze_card.STRAIGHT:
             rotations = [0, 90]
-        if maze_card.doors == maze_card.CROSS:
+        if maze_card.out_paths == maze_card.CROSS:
             rotations = [0]
         return rotations
 

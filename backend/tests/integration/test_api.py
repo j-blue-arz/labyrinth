@@ -106,14 +106,14 @@ def test_get_state_has_correct_initial_state(client):
     assert player_maze_card
     assert player_maze_card["location"]["row"] == 0
     assert player_maze_card["location"]["column"] == 0
-    assert player_maze_card["doors"] == "NE"
+    assert player_maze_card["out_paths"] == "NE"
     assert player_maze_card["rotation"] == 90
     assert objective_maze_card
     leftover_cards = [maze_card for maze_card in state["maze"]["mazeCards"] if maze_card["location"] is None]
     assert len(leftover_cards) == 1
     leftover_card = leftover_cards[0]
-    assert not "W" in leftover_card["doors"]
-    assert "N" in leftover_card["doors"]
+    assert not "W" in leftover_card["out_paths"]
+    assert "N" in leftover_card["out_paths"]
     for player in state["players"]:
         assert player["score"] == 0
 
@@ -184,7 +184,7 @@ def test_post_move(client):
     with correct request body.
     The single player is placed on the top left corner. After pushing the leftover
     such that a move to the card to the right is possible, a move action is performed.
-    It is exploited that every card has a "N" door.
+    It is exploited that every card has a "N" out_path.
     Expects a 200 OK, with empty body.
     State respects new position of player.
     """
@@ -211,7 +211,7 @@ def test_post_move_unreachable_move(client):
     with an unreachable location. The state is constructed by
     shifting the pieces next to the top left corner so that
     all outgoing paths are blocked.
-    It is exploited that no card has a "W" door.
+    It is exploited that no card has a "W" out_path.
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
@@ -279,7 +279,7 @@ def test_post_shift(client):
     pushed_in_card = next((card for card in new_state["maze"]["mazeCards"]
                            if card["id"] == old_leftover_card["id"]),
                           None)
-    assert old_leftover_card["doors"] == pushed_in_card["doors"]
+    assert old_leftover_card["out_paths"] == pushed_in_card["out_paths"]
     assert pushed_in_card["rotation"] == new_rotation
     assert pushed_in_card["location"]["row"] == 0
     assert pushed_in_card["location"]["column"] == 1

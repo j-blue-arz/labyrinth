@@ -18,6 +18,7 @@ import itertools
 from random import choice
 from . import exceptions
 from .reachable import Graph
+from model.algorithm import out_paths_dict
 
 _HASH_MAX = 31
 
@@ -58,33 +59,10 @@ class BoardLocation:
         return self.__str__()
 
 
-def _generate_out_path_dict():
-    _direction_to_door = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
-
-    def _has_out_path(direction, rotation, doors):
-        door = _direction_to_door[direction]
-        door_index = "NESW".find(door)
-        turns = (rotation // 90)
-        adapted_index = (door_index - turns + 4) % 4
-        adapted_door = "NESW"[adapted_index]
-        return adapted_door in doors
-
-    def _out_paths(doors, rotation):
-        for direction in _direction_to_door:
-            if _has_out_path(direction, rotation, doors):
-                yield direction
-
-    out_path_dict = dict()
-    for doors in ["NS", "NE", "NES", "NESW"]:
-        for rotation in [0, 90, 180, 270]:
-            out_paths = _out_paths(doors, rotation)
-            out_path_dict[(doors, rotation)] = set(out_paths)
-    return out_path_dict
-
 
 class MazeCard:
     """ Represents one maze card
-    The doors field defines the type of the card.
+    The out_paths field defines the type of the card.
     It is a string made up of the letters 'N', 'E', 'S', 'W', defining the paths
     going out of this maze card in the directions Up, Right, Down and Left, respectively.
     There are three types of cards, the straight line (NS), the corner(NE) and the T-junction (NES).
@@ -98,10 +76,10 @@ class MazeCard:
     CROSS = "NESW"
 
     next_id = 0
-    _OUT_PATHS_DICT = _generate_out_path_dict()
+    _DIRECTIONS_BY_OUT_PATHS_ROTATED = out_paths_dict.dictionary
 
-    def __init__(self, identifier=0, doors=STRAIGHT, rotation=0):
-        self._doors = doors
+    def __init__(self, identifier=0, out_paths=STRAIGHT, rotation=0):
+        self._out_paths = out_paths
         self._rotation = rotation
         self._id = identifier
 
@@ -123,9 +101,9 @@ class MazeCard:
         self._rotation = value % 360
 
     @property
-    def doors(self):
-        """ Getter of read-only doors """
-        return self._doors
+    def out_paths(self):
+        """ Getter of read-only out_paths """
+        return self._out_paths
 
     def has_out_path(self, direction):
         """ Returns whether there is an outgoing path
@@ -134,13 +112,13 @@ class MazeCard:
         :param direction: a tuple describing the direction of the path, e.g. (-1, 0) for north
         :return: true iff there is a path in the given direction
         """
-        return direction in self._OUT_PATHS_DICT[(self._doors, self._rotation)]
+        return direction in self._DIRECTIONS_BY_OUT_PATHS_ROTATED[(self._out_paths, self._rotation)]
 
     def out_paths(self):
         """ Returns an iteratable over all directions
         with outgoing paths, taking rotation into account.
         """
-        return self._OUT_PATHS_DICT[(self._doors, self._rotation)]
+        return self._DIRECTIONS_BY_OUT_PATHS_ROTATED[(self._out_paths, self._rotation)]
 
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
@@ -153,7 +131,7 @@ class MazeCard:
         return hash((self.identifier))
 
     def __str__(self):
-        return "(MazeCard: identifier: {}, rotation: {}, doors: {})".format(self.identifier, self.rotation, self.doors)
+        return "(MazeCard: identifier: {}, rotation: {}, out_paths: {})".format(self.identifier, self.rotation, self.out_paths)
 
     def __repr__(self):
         return self.__str__()

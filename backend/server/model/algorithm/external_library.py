@@ -13,7 +13,7 @@ class LOCATION(ctypes.Structure):
 
 class NODE(ctypes.Structure):
     """ corresponds to game.MazeCard
-    The doors are represented as a bitfield """
+    The out_paths are represented as a bitfield """
     _fields_ = [("node_id", ctypes.c_uint), ("out_paths", ctypes.c_ubyte), ("rotation", ctypes.c_short)]
 
 
@@ -38,7 +38,7 @@ class ACTION(ctypes.Structure):
 class ExternalLibraryBinding:
     """ Binds to an external library at given path. 
     Translates the game datastructures to the ctypes structures and back """
-    _DOOR_TO_BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
+    _OUT_PATH_TO_BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
 
     def __init__(self, path, board, piece, previous_shift_location=None):
         self._library = ctypes.cdll.LoadLibrary(path)
@@ -66,8 +66,8 @@ class ExternalLibraryBinding:
     def _create_node(maze_card):
         """ creates a NODE from a MazeCard """
         out_paths = 0
-        for maze_card_door in maze_card.doors:
-            out_paths = out_paths | ExternalLibraryBinding._DOOR_TO_BIT[maze_card_door]
+        for out_path in maze_card.out_paths:
+            out_paths = out_paths | ExternalLibraryBinding._OUT_PATH_TO_BIT[out_path]
         return NODE(maze_card.identifier, out_paths, maze_card.rotation)
 
     @staticmethod

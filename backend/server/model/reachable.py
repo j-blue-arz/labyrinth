@@ -114,34 +114,9 @@ class Graph:
                     if card_to_test.has_out_path(_mirror(delta)):
                         yield location_to_test
 
-def _generate_out_path_dict():
-    _direction_to_door = {(-1, 0): "N", (0, 1): "E", (1, 0): "S", (0, -1): "W"}
-
-    def _has_out_path(direction, rotation, doors):
-        door = _direction_to_door[direction]
-        door_index = "NESW".find(door)
-        turns = (rotation // 90)
-        adapted_index = (door_index - turns + 4) % 4
-        adapted_door = "NESW"[adapted_index]
-        return adapted_door in doors
-
-    def _out_paths(doors, rotation):
-        for direction in _direction_to_door:
-            if _has_out_path(direction, rotation, doors):
-                yield direction
-
-    out_path_dict = dict()
-    for doors in ["NS", "NE", "NES"]:
-        for rotation in [0, 90, 180, 270]:
-            out_paths = _out_paths(doors, rotation)
-            out_path_dict[(doors, rotation)] = set(out_paths)
-    return out_path_dict
-
 class RotatableMazeCardGraph:
     """ Performs BFS on a graph represented by a maze.
     Allows for a specific maze card to be rotatable. """
-
-    _OUT_PATH_DICT = _generate_out_path_dict()
 
     def __init__(self, maze, rotatable_maze_card_location):
         self._maze = maze
@@ -215,9 +190,9 @@ class RotatableMazeCardGraph:
 
     def _rotations(self, maze_card):
         rotations = [0, 90, 180, 270]
-        if maze_card.doors == maze_card.STRAIGHT:
+        if maze_card.out_paths == maze_card.STRAIGHT:
             rotations = [0, 90]
-        if maze_card.doors == maze_card.CROSS:
+        if maze_card.out_paths == maze_card.CROSS:
             rotations = [0]
         return rotations
 
