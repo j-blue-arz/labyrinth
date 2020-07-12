@@ -73,11 +73,11 @@ def test_create_maze_and_leftover_distribution_for_size_13():
     non-fixed distribution of the original game, i.e. (15, 6, 13) for corners, t-juncts, and straights. """
     size = 13
     maze, leftover = create_maze_and_leftover(size=size)
-    out_path = [maze[location].out_path for location in maze.maze_locations]
-    out_path.append(leftover.out_path)
-    assert len(out_path) == 170
-    non_fixed = len(out_path) - 49
-    counts = Counter(out_path)
+    out_paths = [maze[location].out_paths for location in maze.maze_locations]
+    out_paths.append(leftover.out_paths)
+    assert len(out_paths) == 170
+    non_fixed = len(out_paths) - 49
+    counts = Counter(out_paths)
     assert counts[MazeCard.CROSS] == 1
     approx_expected_corners = math.floor(15 / 34 * non_fixed + 4)
     approx_expected_t_juncts = math.floor(6 / 34 * non_fixed + 44)

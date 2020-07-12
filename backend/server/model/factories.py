@@ -204,10 +204,10 @@ def maze_to_string(maze):
             ["#", "S", "#"]
         ]
         path_to_symbol = {True: ".", False: "#"}
-        result[0][1] = path_to_symbol[maze_card.has_out_path((-1, 0))]
-        result[1][0] = path_to_symbol[maze_card.has_out_path((0, -1))]
-        result[1][2] = path_to_symbol[maze_card.has_out_path((0, 1))]
-        result[2][1] = path_to_symbol[maze_card.has_out_path((1, 0))]
+        result[0][1] = path_to_symbol[maze_card.has_rotated_out_path((-1, 0))]
+        result[1][0] = path_to_symbol[maze_card.has_rotated_out_path((0, -1))]
+        result[1][2] = path_to_symbol[maze_card.has_rotated_out_path((0, 1))]
+        result[2][1] = path_to_symbol[maze_card.has_rotated_out_path((1, 0))]
         return list(map(lambda char_list: "".join(char_list), result))
 
     result = []

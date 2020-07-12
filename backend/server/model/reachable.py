@@ -106,12 +106,12 @@ class Graph:
         def _mirror(delta_tuple):
             return (-delta_tuple[0], -delta_tuple[1])
         maze_card = self._maze[location]
-        for delta in maze_card.out_paths():
+        for delta in maze_card.rotated_out_paths():
             location_to_test = location.add(*delta)
             if location_to_test not in self._reached_locations:
                 if self._maze.is_inside(location_to_test):
                     card_to_test = self._maze[location_to_test]
-                    if card_to_test.has_out_path(_mirror(delta)):
+                    if card_to_test.has_rotated_out_path(_mirror(delta)):
                         yield location_to_test
 
 class RotatableMazeCardGraph:
@@ -167,7 +167,7 @@ class RotatableMazeCardGraph:
             original_rotation = rotatable_card.rotation
             for rotation in self._rotations(rotatable_card):
                 rotatable_card.rotation = rotation
-                entered_paths = list(filter(rotatable_card.has_out_path, self._rotatable_touched_directions))
+                entered_paths = list(filter(rotatable_card.has_rotated_out_path, self._rotatable_touched_directions))
                 if entered_paths:
                     self._rotation_map[rotation] = self._determine_reachable(self._rotatable, None)
             rotatable_card.rotation = original_rotation
@@ -179,13 +179,13 @@ class RotatableMazeCardGraph:
         def _mirror(delta_tuple):
             return (-delta_tuple[0], -delta_tuple[1])
         maze_card = self._maze[location]
-        for delta in maze_card.out_paths():
+        for delta in maze_card.rotated_out_paths():
             location_to_test = location.add(*delta)
             if location_to_test == rotatable:
                 self._rotatable_touched_directions.append(_mirror(delta))
             elif self._maze.is_inside(location_to_test):
                 card_to_test = self._maze[location_to_test]
-                if card_to_test.has_out_path(_mirror(delta)):
+                if card_to_test.has_rotated_out_path(_mirror(delta)):
                     yield location_to_test
 
     def _rotations(self, maze_card):

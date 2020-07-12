@@ -18,7 +18,7 @@ import itertools
 from random import choice
 from . import exceptions
 from .reachable import Graph
-from model.algorithm import out_paths_dict
+from server.model.algorithm import out_paths_dict
 
 _HASH_MAX = 31
 
@@ -105,7 +105,7 @@ class MazeCard:
         """ Getter of read-only out_paths """
         return self._out_paths
 
-    def has_out_path(self, direction):
+    def has_rotated_out_path(self, direction):
         """ Returns whether there is an outgoing path
         in a given direction, taking the rotation into account.
 
@@ -114,7 +114,7 @@ class MazeCard:
         """
         return direction in self._DIRECTIONS_BY_OUT_PATHS_ROTATED[(self._out_paths, self._rotation)]
 
-    def out_paths(self):
+    def rotated_out_paths(self):
         """ Returns an iteratable over all directions
         with outgoing paths, taking rotation into account.
         """

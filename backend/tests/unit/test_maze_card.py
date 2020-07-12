@@ -17,36 +17,36 @@ def test_rotation_setter_should_throw_for_invalid_rotation():
 
 
 def test_has_out_path_for_corner_with_rotation_90():
-    """ Tests has_out_path """
+    """ Tests has_rotated_out_path """
     maze_card = MazeCard(0, MazeCard.CORNER, 90)
-    assert not maze_card.has_out_path((-1, 0))
-    assert maze_card.has_out_path((0, 1))
-    assert maze_card.has_out_path((1, 0))
-    assert not maze_card.has_out_path((0, -1))
+    assert not maze_card.has_rotated_out_path((-1, 0))
+    assert maze_card.has_rotated_out_path((0, 1))
+    assert maze_card.has_rotated_out_path((1, 0))
+    assert not maze_card.has_rotated_out_path((0, -1))
 
 
 def test_has_out_path_for_straight_with_rotation_270():
-    """ Tests has_out_path """
+    """ Tests has_rotated_out_path """
     maze_card = MazeCard(0, MazeCard.STRAIGHT, 270)
-    assert not maze_card.has_out_path((-1, 0))
-    assert maze_card.has_out_path((0, 1))
-    assert not maze_card.has_out_path((1, 0))
-    assert maze_card.has_out_path((0, -1))
+    assert not maze_card.has_rotated_out_path((-1, 0))
+    assert maze_card.has_rotated_out_path((0, 1))
+    assert not maze_card.has_rotated_out_path((1, 0))
+    assert maze_card.has_rotated_out_path((0, -1))
 
 
-def test_out_paths_for_t_junct_with_rotation_180():
+def test_rotated_out_paths_for_t_junct_with_rotation_180():
     """ Tests out_paths """
     maze_card = MazeCard(0, MazeCard.T_JUNCT, 180)
-    assert (-1, 0) in maze_card.out_paths()
-    assert (0, 1) not in maze_card.out_paths()
-    assert (1, 0) in maze_card.out_paths()
-    assert (0, -1) in maze_card.out_paths()
+    assert (-1, 0) in maze_card.rotated_out_paths()
+    assert (0, 1) not in maze_card.rotated_out_paths()
+    assert (1, 0) in maze_card.rotated_out_paths()
+    assert (0, -1) in maze_card.rotated_out_paths()
 
 
-def test_out_paths_for_corner_with_rotation_0():
+def test_rotated_out_paths_for_corner_with_rotation_0():
     """ Tests out_paths """
     maze_card = MazeCard(0, MazeCard.CORNER, 0)
-    assert (-1, 0) in maze_card.out_paths()
-    assert (0, 1) in maze_card.out_paths()
-    assert (1, 0) not in maze_card.out_paths()
-    assert (0, -1) not in maze_card.out_paths()
+    assert (-1, 0) in maze_card.rotated_out_paths()
+    assert (0, 1) in maze_card.rotated_out_paths()
+    assert (1, 0) not in maze_card.rotated_out_paths()
+    assert (0, -1) not in maze_card.rotated_out_paths()
