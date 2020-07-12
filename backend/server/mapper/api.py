@@ -78,11 +78,11 @@ def _value_or_none(dto, key):
     return None
 
 
-def shift_action_to_dto(insert_location, insert_rotation):
-    """ Maps an insert location and the rotation of the leftover maze card to a DTO, which is valid
+def shift_action_to_dto(location, rotation):
+    """ Maps a shift location and the rotation of the leftover maze card to a DTO, which is valid
     for the POST shift method of the API """
-    return {"location":  _board_location_to_dto(insert_location),
-            "leftoverRotation": insert_rotation}
+    return {"location":  _board_location_to_dto(location),
+            "leftoverRotation": rotation}
 
 
 def move_action_to_dto(move_location):

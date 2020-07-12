@@ -2,17 +2,17 @@
 
 #### action
 A shifting action or a move action.
-#### door
-A maze card's potential paths to its surrounding cards. 
-The door positions are a defining characteristic of a maze card. Together with its rotation, they result in certain out paths.
 #### computer player
 An artificial player, who plays the game by finding shift actions and move actions according to the rules.
 #### game board
 The set of all maze cards placed in a two-dimensional matrix of size 7x7
+#### insert location
+A location outside of the board adjacent to a shift location. The web-client places interactable panels on these locations. 
+They trigger a shift using the corresponding shift location.
 #### leftover maze card
 The single maze card which is not situated on the game board, but remains available for a shift.
 #### maze card
-The cards or tiles the game board consists of. There are different types of maze cards, defined by the layout of their doors. 
+The cards or tiles the game board consists of. There are different types of maze cards, defined by the layout of their out paths. 
 Maze cards have a rotation, which cannot be changed once it is placed on the board.
 #### move action, moves
 Place the player's piece to a maze card connected in the current maze card by pathways. 
@@ -21,8 +21,9 @@ Game rule which prohibits players make a shifting action which reverses the shif
 #### object, objectives
 Items placed on maze cards. The player has to reach them with their playing piece to win the game. The objectives stay on the maze card, even if they are pushed out.
 #### out paths
-The potential paths of a maze card to its surrounding cards. If and only if two neighboring maze cards have out paths facing the respective other, there is a path between them.
-Out paths take the rotation of a maze card into consideration, the doors do not.
+A maze card's potential paths to its surrounding cards. The out path positions define the layout of the maze card.
+If and only if two neighboring maze cards have out paths facing the respective other, there is a path between them.
+The actual direction of an out path is changed by the rotation of the maze card.
 #### pathways
 The graph built out of all subpaths. Pieces can only move along those pathways.
 #### piece
@@ -44,7 +45,7 @@ The shift location which was used in the latest shift action of one of the playe
 #### disabled shift location
 The shift location opposing the previous shift location.
 #### path
-The connection between a single maze card and its neighbor, if they have a door facing each other.
+The connection between a single maze card and its neighbor, if they have an out path facing each other.
 #### turn
 A player's turn consists of a shifting action followed by a move action.
 

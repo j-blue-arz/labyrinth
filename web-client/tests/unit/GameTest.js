@@ -346,18 +346,18 @@ describe("Game", () => {
             expect(player.isComputer).toBe(false);
         });
 
-        it("disables insert location, if enabled locations is missing one", () => {
+        it("disables shift location, if enabled locations is missing one", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
-            expect(game.disabledInsertLocation).toEqual({ column: 1, row: 2 });
+            expect(game.disabledShiftLocation).toEqual({ column: 1, row: 2 });
         });
 
-        it("sets disabled insert location to null if all locations are enabled", () => {
+        it("sets disabled shift location to null if all locations are enabled", () => {
             let game = new Game();
             let apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
             apiState.enabledShiftLocations.push({ column: 1, row: 2 });
             game.createFromApi(apiState);
-            expect(game.disabledInsertLocation).toEqual(null);
+            expect(game.disabledShiftLocation).toEqual(null);
         });
     });
 });

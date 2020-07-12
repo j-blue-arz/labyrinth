@@ -2,7 +2,7 @@
     <div class="game-container">
         <interactive-board
             @move-piece="onMovePlayerPiece"
-            @insert-card="onInsertCard"
+            @perform-shift="onInsertCard"
             :game="game"
             :user-player-id="userPlayerId"
             ref="interactive-board"
@@ -10,7 +10,7 @@
         />
         <wasm-player
             @move-piece="onMovePlayerPiece"
-            @insert-card="onInsertCard"
+            @perform-shift="onInsertCard"
             :game="game"
             :player-id="userPlayerId"
         />

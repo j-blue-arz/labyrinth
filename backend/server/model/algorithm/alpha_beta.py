@@ -14,7 +14,7 @@ class Heuristic:
         """ Heuristic zero-sum value, from viewpoint of player 0.
         
         :param node: the node to evaluate
-        :param current_player: the player who made the last move
+        :param current_player: the player who made the previous move
         :return: a value, and a tuple of value components. The first entry of this tuple should be
         1, if player 0 reaches the objective,
         -1, if player 1 reaches the objective, or
@@ -54,8 +54,8 @@ class Heuristic:
         distance = 15
         if objective_location:
             direct_distance = self._manhattan_distance(location, objective_location)
-            if location in board.insert_locations:
-                opposite = board.opposing_insert_location(location)
+            if location in board.shift_locations:
+                opposite = board.opposing_border_location(location)
                 push_out_distance = self._manhattan_distance(opposite, objective_location)
                 if push_out_distance < direct_distance:
                     return -(push_out_distance + 1)
@@ -99,35 +99,35 @@ class GameTreeNode:
                    previous_shift_location=previous_shift_location)
         return root
 
-    def children(self, player_index, sorted_insert_locations=None):
+    def children(self, player_index, sorted_shift_locations=None):
         """ Returns iterable over children of this node """
         piece = self.board.pieces[player_index]
-        for insert_location in self._insert_locations(sorted_insert_locations):
-            self._do_shift(insert_location, 0)
+        for sorted_shift_locations in self._shift_locations(sorted_shift_locations):
+            self._do_shift(sorted_shift_locations, 0)
             piece_location = self.board.maze.maze_card_location(piece.maze_card)
-            rotation_depended_locations = self._determine_reachable_locations(piece_location, insert_location)
+            rotation_depended_locations = self._determine_reachable_locations(piece_location, sorted_shift_locations)
             for rotation in rotation_depended_locations:
-                self._do_rotate(insert_location, rotation)
+                self._do_rotate(sorted_shift_locations, rotation)
                 for location in rotation_depended_locations[rotation]:
                     self._do_move(piece, piece_location, location)
                     yield GameTreeNode(self.objective_identifier, parent=self, board=self.board,
-                                       previous_shift_location=insert_location)
+                                       previous_shift_location=sorted_shift_locations)
                     self._undo_move(piece)
             self._undo_shift()
 
-    def _insert_locations(self, predefined_order=None):
+    def _shift_locations(self, predefined_order=None):
         if predefined_order is None:
             predefined_order = []
         disabled_shift_location = None
         if self.previous_shift_location:
-            disabled_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
-        for insert_location in predefined_order:
-            if insert_location != disabled_shift_location:
-                yield insert_location
-        for insert_location in self.board.insert_locations:
-            if insert_location not in predefined_order and \
-                    insert_location != disabled_shift_location:
-                yield insert_location
+            disabled_shift_location = self.board.opposing_border_location(self.previous_shift_location)
+        for shift_location in predefined_order:
+            if shift_location != disabled_shift_location:
+                yield shift_location
+        for shift_location in self.board.shift_locations:
+            if shift_location not in predefined_order and \
+                    shift_location != disabled_shift_location:
+                yield shift_location
 
     def _rotations(self, location):
         rotations = [0, 90, 180, 270]
@@ -167,20 +167,20 @@ class GameTreeNode:
         self._undo_move(piece)
         self._undo_shift()
 
-    def _do_shift(self, insert_location, rotation):
-        self.current_shift_action = (insert_location, rotation)
-        self.board.shift(insert_location, rotation)
+    def _do_shift(self, location, rotation):
+        self.current_shift_action = (location, rotation)
+        self.board.shift(location, rotation)
         self.pushed_out_rotation = self.board.leftover_card.rotation
 
-    def _do_rotate(self, insert_location, rotation):
-        self.current_shift_action = (insert_location, rotation)
-        self.board.maze[insert_location].rotation = rotation
+    def _do_rotate(self, shift_location, rotation):
+        self.current_shift_action = (shift_location, rotation)
+        self.board.maze[shift_location].rotation = rotation
 
     def _undo_shift(self):
-        insert_location, _ = self.current_shift_action
-        opposing_insert_location = self.board.opposing_insert_location(insert_location)
+        shift_location, _ = self.current_shift_action
+        opposing_border_location = self.board.opposing_border_location(shift_location)
         rotation = self.pushed_out_rotation
-        self.board.shift(opposing_insert_location, rotation)
+        self.board.shift(opposing_border_location, rotation)
 
     def _do_move(self, piece, source, target):
         self.current_move_action = (source, target)

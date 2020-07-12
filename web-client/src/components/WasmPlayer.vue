@@ -100,9 +100,9 @@ export default {
             }
 
             let previousShiftLocation = loc(-1, -1);
-            if (this.game.disabledInsertLocation) {
+            if (this.game.disabledShiftLocation) {
                 previousShiftLocation = this.game.getOppositeLocation(
-                    this.game.disabledInsertLocation
+                    this.game.disabledShiftLocation
                 );
             }
 
@@ -127,7 +127,7 @@ export default {
             }
             vectorNodes.delete();
 
-            this.$emit("insert-card", this.computedAction.shiftAction);
+            this.$emit("perform-shift", this.computedAction.shiftAction);
         },
         createNode: function(mazeCard) {
             let id = mazeCard.id;

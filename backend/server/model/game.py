@@ -198,18 +198,18 @@ class Maze:
                 return location
         return None
 
-    def shift(self, insert_location, inserted_maze_card):
+    def shift(self, location, inserted_maze_card):
         """ Performs a shifting action on the maze
 
-        :param insert_location: the location of the inserted maze card
+        :param location: the location of the inserted maze card
         :param inserted_maze_card: the maze card to insert
-        :raises InvalidShiftLocationException: for invalid insert location
+        :raises InvalidShiftLocationException: for invalid shift location
         :return: the pushed out maze card
         """
-        self._validate_insert_location(insert_location)
-        direction = self._determine_shift_direction(insert_location)
+        self._validate_shift_location(location)
+        direction = self._determine_shift_direction(location)
         shift_line_locations = []
-        current_location = insert_location
+        current_location = location
         while current_location is not None:
             shift_line_locations.append(current_location)
             current_location = self._neighbor(current_location, direction)
@@ -266,9 +266,9 @@ class Maze:
         if not self.is_inside(location):
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
-    def _validate_insert_location(self, insert_location):
+    def _validate_shift_location(self, location):
         if self.validation:
-            self._validate_location(insert_location)
+            self._validate_location(location)
 
 
 class Board:
@@ -283,7 +283,7 @@ class Board:
         if not maze:
             maze = Maze()
         self._maze = maze
-        self._insert_locations = self._generate_insert_locations()
+        self._shift_locations = self._generate_shift_locations()
         if not leftover_card:
             leftover_card = MazeCard()
         self._leftover_card = leftover_card
@@ -313,9 +313,9 @@ class Board:
         return self._pieces
 
     @property
-    def insert_locations(self):
-        """ Getter for insert_locations """
-        return self._insert_locations
+    def shift_locations(self):
+        """ Getter for shift_locations """
+        return self._shift_locations
 
     def clear_pieces(self):
         """ Removes all pieces currently on the board """
@@ -356,12 +356,12 @@ class Board:
         """ Removes a piece from the board """
         self._pieces.remove(piece)
 
-    def shift(self, new_leftover_location, leftover_rotation):
+    def shift(self, shift_location, leftover_rotation):
         """ Performs a shifting action """
-        self._validate_insert_location(new_leftover_location)
+        self._validate_shift_location(shift_location)
         self._leftover_card.rotation = leftover_rotation
         pushed_card = self._leftover_card
-        self._leftover_card = self._maze.shift(new_leftover_location, self._leftover_card)
+        self._leftover_card = self._maze.shift(shift_location, self._leftover_card)
         for card_piece in self._find_pieces_by_maze_card(self._leftover_card):
             card_piece.maze_card = pushed_card
 
@@ -376,16 +376,16 @@ class Board:
             return True
         return False
 
-    def opposing_insert_location(self, insert_location):
-        """ Returns the insert location directly opposite of the given location """
-        row, column = insert_location.row, insert_location.column
+    def opposing_border_location(self, border_location):
+        """ Returns the location directly opposite of the given location on the border """
+        row, column = border_location.row, border_location.column
         limit = self.maze.maze_size - 1
         borders = {0, limit}
         if row in borders:
             return BoardLocation(limit - row, column)
         if column in borders:
             return BoardLocation(row, limit - column)
-        raise exceptions.InvalidStateException("Location {} is not on the border".format(insert_location))
+        raise exceptions.InvalidStateException("Location {} is not on the border".format(border_location))
 
     def _validate_move_location(self, piece_location, target_location):
         if self.validate_moves:
@@ -393,20 +393,20 @@ class Board:
                 raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
                     piece_location, target_location))
 
-    def _validate_insert_location(self, insert_location):
-        if insert_location not in self._insert_locations:
+    def _validate_shift_location(self, location):
+        if location not in self._shift_locations:
             raise exceptions.InvalidShiftLocationException(
-                "Location {} is not shiftable (fixed maze cards)".format(str(insert_location)))
+                "Location {} is not shiftable (fixed maze cards)".format(str(location)))
 
-    def _generate_insert_locations(self):
+    def _generate_shift_locations(self):
         maze_size = self.maze.maze_size
-        insert_locations = []
+        shift_locations = []
         for position in range(1, maze_size, 2):
-            insert_locations.append(BoardLocation(0, position))
-            insert_locations.append(BoardLocation(position, 0))
-            insert_locations.append(BoardLocation(maze_size - 1, position))
-            insert_locations.append(BoardLocation(position, maze_size - 1))
-        return frozenset(insert_locations)
+            shift_locations.append(BoardLocation(0, position))
+            shift_locations.append(BoardLocation(position, 0))
+            shift_locations.append(BoardLocation(maze_size - 1, position))
+            shift_locations.append(BoardLocation(position, maze_size - 1))
+        return frozenset(shift_locations)
 
     def _find_pieces_by_maze_card(self, maze_card):
         """ Finds pieces whose maze_card field matches the given maze card
@@ -728,8 +728,8 @@ class Game:
         """
         opposing_shift_location = None
         if self.previous_shift_location:
-            opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
-        return self.board.insert_locations.difference({opposing_shift_location})
+            opposing_shift_location = self.board.opposing_border_location(self.previous_shift_location)
+        return self.board.shift_locations.difference({opposing_shift_location})
 
     def _validate_pushback_rule(self, shift_location):
         """ Checks if the requested shift location is different to the shift location of the previous turn
@@ -737,7 +737,7 @@ class Game:
         """
         opposing_shift_location = None
         if self.previous_shift_location:
-            opposing_shift_location = self.board.opposing_insert_location(self.previous_shift_location)
+            opposing_shift_location = self.board.opposing_border_location(self.previous_shift_location)
         if shift_location == opposing_shift_location:
             raise exceptions.InvalidShiftLocationException(
                 "Location {} is not shiftable (no-pushback rule)".format(str(shift_location)))

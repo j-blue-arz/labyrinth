@@ -77,7 +77,7 @@ describe("GameContainer as web-client", () => {
         await flushPromises();
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
+        interactiveBoard.vm.$emit("perform-shift", loc(0, 1));
         expect(mockCancel).toHaveBeenCalledTimes(1);
     });
 
@@ -86,7 +86,7 @@ describe("GameContainer as web-client", () => {
         await flushPromises();
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
 
-        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
+        interactiveBoard.vm.$emit("perform-shift", loc(0, 1));
         expect(mockShift).toHaveBeenCalledTimes(1);
         const shiftOperation = jest.spyOn(gameContainer.vm.$data.game, "shift");
         expect(shiftOperation).toHaveBeenCalledTimes(0);
@@ -96,7 +96,7 @@ describe("GameContainer as web-client", () => {
         var gameContainer = factory();
         await flushPromises();
         var interactiveBoard = gameContainer.find({ ref: "interactive-board" });
-        interactiveBoard.vm.$emit("insert-card", loc(0, 1));
+        interactiveBoard.vm.$emit("perform-shift", loc(0, 1));
         expect(mockShift).toHaveBeenCalledTimes(1);
         const shiftOperation = jest.spyOn(gameContainer.vm.$data.game, "shift");
         await flushPromises();

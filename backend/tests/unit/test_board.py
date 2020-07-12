@@ -167,24 +167,24 @@ def test_move_raises_error_on_invalid_location():
         board.move(piece, BoardLocation(-1, -1))
 
 
-def test_opposing_insert_location_for_east_location():
-    """ Tests opposing_insert_location """
+def test_opposing_border_location_for_east_location():
+    """ Tests opposing_border_location """
     board = Board()
     size = board.maze.maze_size
-    assert board.opposing_insert_location(BoardLocation(5, size-1)) == BoardLocation(5, 0)
+    assert board.opposing_border_location(BoardLocation(5, size-1)) == BoardLocation(5, 0)
 
 
-def test_opposing_insert_location_for_south_location():
-    """ Tests opposing_insert_location """
+def test_opposing_border_location_for_south_location():
+    """ Tests opposing_border_location """
     board = Board()
     size = board.maze.maze_size
-    assert board.opposing_insert_location(BoardLocation(size-1, 3)) == BoardLocation(0, 3)
+    assert board.opposing_border_location(BoardLocation(size-1, 3)) == BoardLocation(0, 3)
 
-def test_opposing_insert_location_for_west_location():
-    """ Tests opposing_insert_location """
+def test_opposing_border_location_for_west_location():
+    """ Tests opposing_border_location """
     board = Board()
     size = board.maze.maze_size
-    assert board.opposing_insert_location(BoardLocation(1, 0)) == BoardLocation(1, size-1)
+    assert board.opposing_border_location(BoardLocation(1, 0)) == BoardLocation(1, size-1)
 
 
 MAZE_STRING = """

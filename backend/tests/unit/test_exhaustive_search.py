@@ -57,7 +57,7 @@ def test_d2_no_pushback_violation(create_optimizer):
     for prev_shift_action, shift_action in zip(actions[::2], actions[2::2]):
         prev_shift_location = prev_shift_action[0]
         shift_location = shift_action[0]
-        assert board.opposing_insert_location(shift_location) != prev_shift_location
+        assert board.opposing_border_location(shift_location) != prev_shift_location
 
 def test_d2_two_shifts_with_previous_shift(create_optimizer):
     """ Test case where there is a solution of depth 2: [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]

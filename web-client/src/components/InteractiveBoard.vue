@@ -22,7 +22,7 @@
         ></v-move-animation>
         <insert-panels
             @insert-panel-clicked="onInsertPanelClick"
-            :disabledInsertLocation="disabledInsertLocation"
+            :disabledShiftLocation="disabledShiftLocation"
             :interaction="isMyTurnToShift"
             :card-size="cardSize"
             :n="mazeSize"
@@ -132,8 +132,8 @@ export default {
         players: function() {
             return this.game.getPlayers();
         },
-        disabledInsertLocation: function() {
-            return this.game.disabledInsertLocation;
+        disabledShiftLocation: function() {
+            return this.game.disabledShiftLocation;
         }
     },
     methods: {
@@ -154,12 +154,12 @@ export default {
                 return new Set([]);
             }
         },
-        onInsertPanelClick: function(insertLocation) {
-            let insertEvent = {
-                location: insertLocation,
+        onInsertPanelClick: function(shiftLocation) {
+            let shiftEvent = {
+                location: shiftLocation,
                 leftoverRotation: this.leftoverMazeCard.rotation
             };
-            this.$emit("insert-card", insertEvent);
+            this.$emit("perform-shift", shiftEvent);
         },
         onMazeCardClick: function(mazeCard) {
             if (

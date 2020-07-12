@@ -45,19 +45,19 @@ class GameTreeNode:
     def children(self):
         """ Returns iterable over children of this node """
         self._compute()
-        for insert_location in self._insert_locations():
+        for shift_location in self._shift_locations():
             for rotation in self._current_rotations():
-                yield GameTreeNode(parent=self, shift_action=(insert_location, rotation))
+                yield GameTreeNode(parent=self, shift_action=(shift_location, rotation))
         return []
 
-    def _insert_locations(self):
-        disabled_insert_location = None
+    def _shift_locations(self):
+        disabled_shift_location = None
         if self.current_shift_action:
             previous_shift_location, _ = self.current_shift_action
-            disabled_insert_location = self.board.opposing_insert_location(previous_shift_location)
-        for insert_location in self.board.insert_locations:
-            if insert_location != disabled_insert_location:
-                yield insert_location
+            disabled_shift_location = self.board.opposing_border_location(previous_shift_location)
+        for shift_location in self.board.shift_locations:
+            if shift_location != disabled_shift_location:
+                yield shift_location
 
     def _current_rotations(self):
         rotations = [0, 90, 180, 270]
@@ -129,7 +129,7 @@ class Optimizer:
         """ Finds the optimal succession of actions which reaches the objective.
         Runs until it has found a solution, or abort_search() was called.
         In the former case, returns the solution as a list,
-        where each even entry represents a shift action and is a tuple of the form (insert_location, rotation),
+        where each even entry represents a shift action and is a tuple of the form (shift_location, rotation),
         and each odd entry represents a move location.
         Returns None if the search was aborted. """
         root = GameTreeNode.get_root(self._board)

@@ -133,13 +133,13 @@ describe("InteractiveBoard", () => {
 
     it("forwards disabled insert location from game to insert panels", () => {
         let game = fromStateWithShiftAction();
-        game.disabledInsertLocation = {
+        game.disabledShiftLocation = {
             row: 0,
             column: 1
         };
         let board = shallowFactory(game);
         let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().disabledInsertLocation).toEqual(game.disabledInsertLocation);
+        expect(insertPanels.props().disabledShiftLocation).toEqual(game.disabledShiftLocation);
     });
 });
 

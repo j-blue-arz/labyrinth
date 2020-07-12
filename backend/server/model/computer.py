@@ -5,8 +5,8 @@ It uses an algorithm to compute a shift and a move.
 These algorithms are implemented in a separate class, ending with 'Algorithm'.
 The Algorithm classes are expected to have a getter for shift_action and move_action, with which they provide their
 solutions for the respective moves.
-shift_action is expected to return a tuple of the form (<insert_location>, <insert_rotation>),
-where <insert_location> is a BoardLocation, <insert_rotation> is one of [0, 90, 270, 180]
+shift_action is expected to return a tuple of the form (<shift_location>, <shift_rotation>),
+where <shift_location> is a BoardLocation, <shift_rotation> is one of [0, 90, 270, 180]
 move_action should return a BoardLocation  """
 
 import copy
@@ -102,8 +102,8 @@ class ComputerPlayer(Player, Thread):
         """ Getter for move_url """
         return self._move_url
 
-    def _post_shift(self, insert_location, insert_rotation):
-        dto = server.mapper.api.shift_action_to_dto(insert_location, insert_rotation)
+    def _post_shift(self, location, rotation):
+        dto = server.mapper.api.shift_action_to_dto(location, rotation)
         requests.post(self.shift_url, json=dto)
 
     def _post_move(self, move_location):
@@ -116,14 +116,15 @@ class ComputerPlayer(Player, Thread):
     def _validate(self, shift_action, move_action):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        insert_location, rotation = shift_action
+        
         maze_string = maze_to_string(board.maze)
         piece_locations = [board.maze.maze_card_location(piece.maze_card) for piece in board.pieces]
         self_location = board.maze.maze_card_location(piece.maze_card)
         objective_location = board.maze.maze_card_location(board.objective_maze_card)
         try:
-            self._game._validate_pushback_rule(insert_location)
-            board.shift(insert_location, rotation)
+            shift_location, rotation = shift_action
+            self._game._validate_pushback_rule(shift_location)
+            board.shift(shift_location, rotation)
             self_location = board.maze.maze_card_location(piece.maze_card)
             board._validate_move_location(self_location, move_action)
         except LabyrinthDomainException as exc:
@@ -165,10 +166,10 @@ class RandomActionsAlgorithm(Thread):
         """ To fulfill the interface """
 
     def run(self):
-        insert_location = choice(tuple(self._enabled_shift_locations))
-        insert_rotation = choice([0, 90, 180, 270])
-        self._shift_action = (insert_location, insert_rotation)
-        self._board.shift(insert_location, insert_rotation)
+        shift_location = choice(tuple(self._enabled_shift_locations))
+        shift_rotation = choice([0, 90, 180, 270])
+        self._shift_action = (shift_location, shift_rotation)
+        self._board.shift(shift_location, shift_rotation)
         piece_location = self._maze.maze_card_location(self._piece.maze_card)
         reachable_locations = Graph(self._maze).reachable_locations(piece_location)
         self._move_action = choice(tuple(reachable_locations))

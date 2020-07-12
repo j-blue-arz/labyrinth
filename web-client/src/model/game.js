@@ -21,7 +21,7 @@ export default class Game {
         this.nextAction = { playerId: 0, action: NO_ACTION };
         this.isLoading = false;
         this.isShifting = false;
-        this.disabledInsertLocation = null;
+        this.disabledShiftLocation = null;
     }
 
     hasStarted() {
@@ -63,8 +63,8 @@ export default class Game {
     }
 
     shift(location) {
-        if (this._locationsEqual(location, this.disabledInsertLocation)) {
-            throw new ValueError("Inserting at " + location + " is not allowed.");
+        if (this._locationsEqual(location, this.disabledShiftLocation)) {
+            throw new ValueError("Shifting at " + location + " is not allowed.");
         }
 
         if (!this.isInside(location)) {
@@ -84,22 +84,22 @@ export default class Game {
         }
         if (shiftLocations.length === this.n) {
             this._shiftAlongLocations(shiftLocations);
-            this.disabledInsertLocation = this.getOppositeLocation(location);
+            this.disabledShiftLocation = this.getOppositeLocation(location);
         } else {
             throw new ValueError();
         }
     }
 
-    getOppositeLocation(insertLocation) {
+    getOppositeLocation(borderLocation) {
         let oppositeLocation = null;
-        if (insertLocation.row === 0) {
-            oppositeLocation = { row: this.n - 1, column: insertLocation.column };
-        } else if (insertLocation.row === this.n - 1) {
-            oppositeLocation = { row: 0, column: insertLocation.column };
-        } else if (insertLocation.column === this.n - 1) {
-            oppositeLocation = { row: insertLocation.row, column: 0 };
-        } else if (insertLocation.column === 0) {
-            oppositeLocation = { row: insertLocation.row, column: this.n - 1 };
+        if (borderLocation.row === 0) {
+            oppositeLocation = { row: this.n - 1, column: borderLocation.column };
+        } else if (borderLocation.row === this.n - 1) {
+            oppositeLocation = { row: 0, column: borderLocation.column };
+        } else if (borderLocation.column === this.n - 1) {
+            oppositeLocation = { row: borderLocation.row, column: 0 };
+        } else if (borderLocation.column === 0) {
+            oppositeLocation = { row: borderLocation.row, column: this.n - 1 };
         }
         return oppositeLocation;
     }
@@ -236,9 +236,7 @@ export default class Game {
         objectiveCard.hasObject = true;
         this.setNextAction(apiState.nextAction);
 
-        this.disabledInsertLocation = this._findMissingInsertLocation(
-            apiState.enabledShiftLocations
-        );
+        this.disabledShiftLocation = this._findMissingShiftLocation(apiState.enabledShiftLocations);
 
         this.isLoading = false;
     }
@@ -273,20 +271,20 @@ export default class Game {
         }
     }
 
-    _findMissingInsertLocation(apiInsertLocations) {
-        let enabledInsertLocations = new Set();
-        for (let location of apiInsertLocations) {
-            enabledInsertLocations.add(this._key(location));
+    _findMissingShiftLocation(apiShiftLocations) {
+        let enabledShiftLocations = new Set();
+        for (let location of apiShiftLocations) {
+            enabledShiftLocations.add(this._key(location));
         }
-        let allInsertLocations = [];
+        let allShiftLocations = [];
         for (let position = 1; position < this.n - 1; position += 2) {
-            allInsertLocations.push({ row: 0, column: position });
-            allInsertLocations.push({ row: position, column: 0 });
-            allInsertLocations.push({ row: this.n - 1, column: position });
-            allInsertLocations.push({ row: position, column: this.n - 1 });
+            allShiftLocations.push({ row: 0, column: position });
+            allShiftLocations.push({ row: position, column: 0 });
+            allShiftLocations.push({ row: this.n - 1, column: position });
+            allShiftLocations.push({ row: position, column: this.n - 1 });
         }
-        for (let location of allInsertLocations) {
-            if (!enabledInsertLocations.has(this._key(location))) {
+        for (let location of allShiftLocations) {
+            if (!enabledShiftLocations.has(this._key(location))) {
                 return location;
             }
         }
@@ -295,10 +293,6 @@ export default class Game {
 
     _key(location) {
         return location.row * this.n + location.column;
-    }
-
-    _addInsertLocation(locationsMap, location) {
-        locationsMap.set(location.row * this.n + location.column, location);
     }
 
     setNextAction(nextAction) {

@@ -23,7 +23,7 @@ export default {
         VInsertPanel
     },
     props: {
-        disabledInsertLocation: {
+        disabledShiftLocation: {
             type: Object,
             required: false,
             default: null
@@ -61,7 +61,7 @@ export default {
                 result.push(new InsertPanel(id++, position, n, n));
             }
             for (var insertPanel of result) {
-                if (this.locationsEqual(insertPanel.insertLocation, this.disabledInsertLocation)) {
+                if (this.locationsEqual(insertPanel.shiftLocation, this.disabledShiftLocation)) {
                     insertPanel.enabled = false;
                 } else {
                     insertPanel.enabled = true;
@@ -82,7 +82,7 @@ export default {
         },
         onClick: function(event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {
-                this.$emit("insert-panel-clicked", insertPanel.insertLocation);
+                this.$emit("insert-panel-clicked", insertPanel.shiftLocation);
             }
         }
     }
