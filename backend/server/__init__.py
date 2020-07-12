@@ -7,7 +7,7 @@ from flask import Flask, render_template, send_from_directory
 import mimetypes
 
 
-version_info = (0, 1, 2)
+version_info = (0, 1, 3)
 __version__ = '.'.join(map(str, version_info))
 
 
