@@ -3,6 +3,7 @@ from server.model.reachable import Graph
 from server.model.game import BoardLocation
 import server.model.algorithm.util as util
 
+
 class ReachedMazeCard:
     """ Container type for a maze card reached on the path from the start location to the objective.
     It is a container of the identifier of the reached card, its location at the time it was reached,
@@ -15,6 +16,7 @@ class ReachedMazeCard:
         self.maze_card_id = maze_card_id
         self.location = location
         self.from_reached_maze_card = from_reached_maze_card
+
 
 class GameTreeNode:
     """ Represents a node in the game tree. Each node represents a shift action and all reachable maze cards
@@ -29,7 +31,6 @@ class GameTreeNode:
         else:
             self.depth = 0
         self.board = None
-
 
     @classmethod
     def get_root(cls, board):
@@ -113,8 +114,9 @@ class GameTreeNode:
     def _shift_location(self):
         return self.current_shift_action[0]
 
+
 class Optimizer:
-    """ Searches for a winning node in the game tree. 
+    """ Searches for a winning node in the game tree.
     The algorithm searches for a path which leads to the objective.
     """
 

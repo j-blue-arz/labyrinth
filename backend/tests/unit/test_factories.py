@@ -5,13 +5,13 @@ from server.model.factories import create_maze_and_leftover, create_maze
 from server.model.game import BoardLocation, MazeCard
 
 
-
 def test_create_maze_and_leftover_fixed_pieces_for_size_7():
     """ Tests create_maze_and_leftover.
     Checks corners and fixed t-juncts. """
     maze, _ = create_maze_and_leftover()
     _assert_corners(maze)
     _assert_fixed_pieces_t_juncts(maze)
+
 
 def test_create_maze_and_leftover_fixed_pieces_for_size_9():
     """ Tests create_maze_and_leftover.
@@ -20,7 +20,8 @@ def test_create_maze_and_leftover_fixed_pieces_for_size_9():
     _assert_corners(maze)
     _assert_fixed_pieces_t_juncts(maze)
     _assert_cross_center(maze)
-    
+
+
 def test_create_maze_and_leftover_no_cross_for_size_11():
     """ Tests create_maze_and_leftover.
     Checks that there is no cross maze card for size 11, because it is not of the form 4k + 1. """
@@ -29,12 +30,14 @@ def test_create_maze_and_leftover_no_cross_for_size_11():
     for location in maze.maze_locations:
         assert maze[location].out_paths != MazeCard.CROSS
 
+
 def test_create_maze_and_leftover_unique_ids_for_size_7():
     """ Tests create_maze_and_leftover.
     Checks unique ids. """
     maze, leftover = create_maze_and_leftover()
     ids = _assert_unique_ids(maze)
     assert leftover.identifier not in ids
+
 
 def test_create_maze_and_leftover_distribution_for_size_7():
     """ Tests create_maze_and_leftover.
@@ -48,15 +51,17 @@ def test_create_maze_and_leftover_distribution_for_size_7():
     assert counts[MazeCard.T_JUNCT] == 18
     assert counts[MazeCard.STRAIGHT] == 13
 
+
 def test_diagonal_locations_for_size_7():
     """ Checks that the maze cards on the diagonals are rotated
-    such that the cards on the center-to-NE look like a T (T_JUNCT rotated by 90), 
+    such that the cards on the center-to-NE look like a T (T_JUNCT rotated by 90),
     and the clockwise subsequent ones are successively rotated by 90 degrees. """
     maze, _ = create_maze_and_leftover()
     assert maze[BoardLocation(2, 4)].rotation == 90
     assert maze[BoardLocation(4, 4)].rotation == 180
     assert maze[BoardLocation(4, 2)].rotation == 270
     assert maze[BoardLocation(2, 2)].rotation == 0
+
 
 def test_diagonal_locations_for_size_13():
     """ Same as above, but for size 13. Only checks one location per sector """
@@ -65,6 +70,7 @@ def test_diagonal_locations_for_size_13():
     assert maze[BoardLocation(8, 8)].rotation == 180
     assert maze[BoardLocation(8, 4)].rotation == 270
     assert maze[BoardLocation(4, 4)].rotation == 0
+
 
 def test_create_maze_and_leftover_distribution_for_size_13():
     """ Tests create_maze_and_leftover.
@@ -86,6 +92,7 @@ def test_create_maze_and_leftover_distribution_for_size_13():
     assert approx_expected_t_juncts <= counts[MazeCard.T_JUNCT] <= approx_expected_t_juncts + 1
     assert approx_expected_straights <= counts[MazeCard.STRAIGHT] <= approx_expected_straights + 1
 
+
 maze_string_3 = """
 #.#|###|#.#|
 #..|..#|...|
@@ -100,6 +107,7 @@ maze_string_3 = """
 ###|###|###|
 -----------*
 """
+
 
 def test_create_fixed_maze_for_size_3():
     """ Creates a fixed maze of size 3 using a maze string.
@@ -149,7 +157,8 @@ def _assert_corners(maze):
 
 def _assert_fixed_pieces_t_juncts(maze):
     border = maze.maze_size - 1
-    expected_t_junct_locations = [BoardLocation(row, column) for row in range(0, maze.maze_size, 2) for column in range(0, maze.maze_size, 2)]
+    expected_t_junct_locations = [BoardLocation(row, column) for row in range(0, maze.maze_size, 2)
+                                  for column in range(0, maze.maze_size, 2)]
     expected_t_junct_locations.remove(BoardLocation(0, 0))
     expected_t_junct_locations.remove(BoardLocation(0, border))
     expected_t_junct_locations.remove(BoardLocation(border, border))
@@ -158,6 +167,7 @@ def _assert_fixed_pieces_t_juncts(maze):
         expected_t_junct_locations.remove(BoardLocation(border // 2, border // 2))
     for location in expected_t_junct_locations:
         assert maze[location].out_paths == MazeCard.T_JUNCT
+
 
 def _assert_cross_center(maze):
     center = (maze.maze_size - 1) // 2

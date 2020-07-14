@@ -78,6 +78,7 @@ def test_mapping_for_leftover():
     game = mapper.dto_to_game(game_dto)
     assert _compare_maze_cards(*map(lambda g: g.board.leftover_card, [created_game, game]))
 
+
 def test_mapping_for_maze():
     """ Tests correct mapping of current maze state """
     created_game, _ = _create_test_game()
@@ -136,6 +137,7 @@ def test_mapping_identifier():
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
     assert game.identifier == created_game.identifier
+
 
 def test_mapping_piece_index():
     """ Tests correct mapping of player piece's index """

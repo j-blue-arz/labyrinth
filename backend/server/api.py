@@ -51,6 +51,7 @@ def change_game(game_id):
     service.change_game(game_id, request_body)
     return ""
 
+
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):
     """ Returns the state of the game """

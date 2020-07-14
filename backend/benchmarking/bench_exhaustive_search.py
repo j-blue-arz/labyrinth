@@ -9,7 +9,7 @@ import cProfile
 import sys
 from random import randint
 import server.model.algorithm.exhaustive_search as exh
-from server.model.factories import create_maze, MazeCardFactory, create_maze_and_leftover, \
+from server.model.factories import create_maze_and_leftover, \
     maze_to_string
 from server.model.game import BoardLocation
 from tests.unit.mazes import EXH_DEPTH_4_MAZE
@@ -24,8 +24,8 @@ def _find_setups():
     objective_location = None
     size = 9
     max_index = size - 1
-    #card_factory = MazeCardFactory()
-    #maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER, card_factory)
+    # card_factory = MazeCardFactory()
+    # maze = create_maze(setup.GENERATED_WITH_LINE_LEFTOVER, card_factory)
     while len(actions) <= 8:
         maze, leftover_card = create_maze_and_leftover(size=size)
         start_location = BoardLocation(randint(0, max_index), randint(0, max_index))
@@ -49,9 +49,11 @@ def _generate_and_print_maze_string():
     print(maze_to_string(maze))
     print(leftover)
 
+
 BENCH_CASES_PARAMS = {
     "d4-generated-86s": (EXH_DEPTH_4_MAZE, "NE", [(4, 2)], (6, 7))
 }
+
 
 def create_optimizer(key, previous_shift_location=None):
     """Creates a test case, instantiates an Optimizer with this case.
@@ -110,5 +112,5 @@ def _main(argv):
 
 if __name__ == "__main__":
     _main(sys.argv)
-    #_find_setups()
+    # _find_setups()
     # _generate_and_print_maze_string()

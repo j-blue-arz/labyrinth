@@ -9,6 +9,7 @@ import cProfile
 import sys
 import tests.unit.test_alpha_beta as setup
 
+
 def _benchmark(name):
     depth = _extract_depth(name)
     repeat = 3
@@ -24,6 +25,7 @@ def _profile(name):
     optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     cProfile.runctx("optimizer.find_actions(root)", globals(), locals(), filename=name)
 
+
 def _results(name):
     optimizer, root, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     actions, values, win_value = optimizer.find_actions(root)
@@ -31,10 +33,10 @@ def _results(name):
     format_str = ', '.join(['{:0.2f}']*len(values))
     print(format_str.format(*values))
 
+
 def _extract_depth(test_case):
     pos = test_case.find("-d") + 2
     return int(test_case[pos])
-
 
 
 def _main(argv):

@@ -5,7 +5,6 @@ and 'case' is either the name of a specific test case, or
 'all' for all test cases defined in test_exhaustive_search
 """
 import timeit
-import cProfile
 import sys
 from tests.unit.mazes import EXH_DEPTH_4_MAZE
 from tests.unit.test_exhaustive_search import CASES_PARAMS

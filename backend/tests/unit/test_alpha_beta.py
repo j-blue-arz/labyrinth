@@ -15,7 +15,7 @@ import copy
 import pytest
 import server.model.algorithm.alpha_beta as ab
 from server.model.factories import create_maze, MazeCardFactory
-from server.model.game import Board, BoardLocation, MazeCard, Piece
+from server.model.game import Board, BoardLocation, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
 
 
@@ -110,12 +110,12 @@ def test_difficult_d3_reach():
 
 CASES_PARAMS = {
     "big-component-d1-shift-req": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(3, 3), (6, 6)], (0, 3)),
-    "big-component-d2-cannot-prevent": (MINIMAX_BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)), # solution: ((0, 5), x), (6, 5)
+    "big-component-d2-cannot-prevent": (MINIMAX_BIG_COMPONENT_MAZE, "NS", [(3, 2), (0, 4)], (0, 5)),
     "big-component-d3-reach": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)),
-    "difficult-d1-shift-req": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)),  # solution: ((0, 3), x), (6, 2)
+    "difficult-d1-shift-req": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (3, 3)], (6, 2)),
     "difficult-d2-cannot-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (0, 0)], (1, 1)),
-    "difficult-d2-can-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (2, 6)], (0, 6)),  # solution: ((1, 6), x)
-    "difficult-d3-reach": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)),  # ((0, 3), , (6, 3)
+    "difficult-d2-can-prevent": (MINIMAX_DIFFICULT_MAZE, "NE", [(3, 3), (2, 6)], (0, 6)),
+    "difficult-d3-reach": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)),
     "generated-2-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (6, 2)),
     "generated-2-d3": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4), (1, 4)], (6, 2)),
     "generated-5-d2": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(6, 6), (6, 6)], (0, 0)),
@@ -127,6 +127,11 @@ CASES_PARAMS = {
     "big-component-0-d2": (MINIMAX_BIG_COMPONENT_MAZE, "NE", [(6, 6), (0, 0)], (0, 6)),
     "difficult-0-d2": (MINIMAX_DIFFICULT_MAZE, "NE", [(2, 3), (6, 6)], (0, 2)),
 }
+
+# solution to big-component-d2-cannot-prevent: ((0, 5), x), (6, 5)
+# solution to difficult-d1-shift-req: ((0, 3), x), (6, 2)
+# solution to difficult-d2-can-prevent: ((1, 6), x)
+# solution to difficult-d3-reach: ((0, 3), , (6, 3)
 
 
 def _param_tuple_to_param_dict(maze_string, leftover_out_paths, piece_starts, objective_tuple):

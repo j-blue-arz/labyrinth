@@ -16,8 +16,9 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 """
 import itertools
 from random import choice
-from . import exceptions
-from .reachable import Graph
+
+from server.model import exceptions
+from server.model.reachable import Graph
 from server.model.algorithm import out_paths_dict
 
 _HASH_MAX = 31
@@ -57,7 +58,6 @@ class BoardLocation:
 
     def __repr__(self):
         return self.__str__()
-
 
 
 class MazeCard:
@@ -131,7 +131,9 @@ class MazeCard:
         return hash((self.identifier))
 
     def __str__(self):
-        return "(MazeCard: identifier: {}, rotation: {}, out_paths: {})".format(self.identifier, self.rotation, self.out_paths)
+        return "(MazeCard: identifier: {}, rotation: {}, out_paths: {})".format(self.identifier,
+                                                                                self.rotation,
+                                                                                self.out_paths)
 
     def __repr__(self):
         return self.__str__()
@@ -347,7 +349,7 @@ class Board:
         current_piece_indices = set(map(lambda piece: piece.piece_index, self._pieces))
         next_index = 0
         for try_index in itertools.count():
-            if not try_index in current_piece_indices:
+            if try_index not in current_piece_indices:
                 next_index = try_index
                 break
         return next_index

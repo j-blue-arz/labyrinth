@@ -2,10 +2,12 @@
 """
 import server.model.game as game
 
+
 def other(player):
     """ Returns the identifier of the respective other player in a two player game,
     if the two identifiers are 0 and 1 """
     return 1 - player
+
 
 def sign(player):
     """ Returns the sign of a player in a two-player minimax algorithm.
@@ -34,6 +36,7 @@ def copy_board(board, pieces=None):
     for index, maze_card in enumerate(piece_maze_cards):
         board_copy.pieces.append(game.Piece(index, maze_card))
     return board_copy
+
 
 def find_location_by_id(maze, card_id):
     for location in maze.maze_locations:

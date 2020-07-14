@@ -112,7 +112,7 @@ def test_get_state_has_correct_initial_state(client):
     leftover_cards = [maze_card for maze_card in state["maze"]["mazeCards"] if maze_card["location"] is None]
     assert len(leftover_cards) == 1
     leftover_card = leftover_cards[0]
-    assert not "W" in leftover_card["outPaths"]
+    assert "W" not in leftover_card["outPaths"]
     assert "N" in leftover_card["outPaths"]
     for player in state["players"]:
         assert player["score"] == 0
@@ -171,7 +171,7 @@ def test_change_maze_size_with_even_size(client):
     """ Tests PUT for /api/games/0
 
     With even size, the expectation is an exception.
-    """   
+    """
     _post_player(client, game_id=5)
     response = _put_game(client, game_id=5, size=12)
     _assert_error_response(response, user_message="The combination of arguments in this request is not supported.",
@@ -375,7 +375,8 @@ def test_delete_player(client):
 
 def _assert_invalid_argument_and_unchanged_state(client, action_callable):
     _assert_error_response_and_unchanged_state(
-        client, action_callable, expected_user_message="The combination of arguments in this request is not supported.", expected_key="INVALID_ARGUMENTS")
+        client, action_callable, expected_user_message="The combination of arguments in this request is not supported.",
+        expected_key="INVALID_ARGUMENTS")
 
 
 def _assert_invalid_action_and_unchanged_state(client, action_callable):

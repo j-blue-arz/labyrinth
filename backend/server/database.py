@@ -64,4 +64,3 @@ def close_database(exception=None):
 
     if database is not None:
         database.close()
-    

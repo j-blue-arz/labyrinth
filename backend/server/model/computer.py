@@ -27,7 +27,6 @@ from .exceptions import LabyrinthDomainException
 from .factories import maze_to_string
 
 
-
 class ComputerPlayer(Player, Thread):
     """ This class represents a computer player. It is instantiated with
     an algorithm_name parameter, either 'random', 'exhaustive-search', or 'minimax'. Default is 'exhaustive-search'.
@@ -86,7 +85,7 @@ class ComputerPlayer(Player, Thread):
             shift_action = fallback_algorithm.shift_action
             move_action = fallback_algorithm.move_action
 
-        #self._validate(shift_action, move_action)
+        # self._validate(shift_action, move_action)
         self._post_shift(*shift_action)
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_move(move_action)
@@ -116,7 +115,7 @@ class ComputerPlayer(Player, Thread):
     def _validate(self, shift_action, move_action):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        
+
         maze_string = maze_to_string(board.maze)
         piece_locations = [board.maze.maze_card_location(piece.maze_card) for piece in board.pieces]
         self_location = board.maze.maze_card_location(piece.maze_card)

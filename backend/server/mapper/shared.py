@@ -1,7 +1,8 @@
 """ All methods and constants which are shared in persistence and dto """
 
 from server.model.game import MazeCard, BoardLocation
-from .constants import ROW, COLUMN, ID, OUT_PATHS, ROTATION, LOCATION, MAZE_SIZE, MAZE_CARDS
+from server.mapper.constants import ROW, COLUMN, ID, OUT_PATHS, ROTATION, LOCATION, MAZE_SIZE, MAZE_CARDS
+
 
 def _objective_to_dto(maze_card: MazeCard):
     """ Maps a player's objective to a DTO

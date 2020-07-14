@@ -2,6 +2,7 @@
 from server.model.algorithm.external_library import ExternalLibraryBinding
 import server.model.algorithm.util as algo_util
 
+
 class CompletePathLibraryBinding(ExternalLibraryBinding):
     """ The external libraries only return one action, but the tests require a complete path, i.e. a series of actions
     which reach the objective. The subclass in this module repeatedly calls the library to create such a path.

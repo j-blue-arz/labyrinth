@@ -3,6 +3,7 @@ More specifically, it tests the method game_state_to_dto(),
 which maps a Game instance to an object used to transfer the state """
 import json
 import server.mapper.api as mapper
+import server.mapper.constants as keys
 from server.model.game import BoardLocation, Player
 from server.model.factories import create_game
 from server.model.computer import ComputerPlayer
@@ -26,62 +27,62 @@ def test_mapping_players():
     """ Tests correct mapping of players """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    assert mapper.PLAYERS in game_dto
-    assert len(game_dto[mapper.PLAYERS]) == len(game.board.pieces)
-    assert len(game_dto[mapper.PLAYERS]) == len(game.players)
-    for player_dto in game_dto[mapper.PLAYERS]:
-        assert mapper.ID in player_dto
-        player_game = game.get_player(player_dto[mapper.ID])
+    assert keys.PLAYERS in game_dto
+    assert len(game_dto[keys.PLAYERS]) == len(game.board.pieces)
+    assert len(game_dto[keys.PLAYERS]) == len(game.players)
+    for player_dto in game_dto[keys.PLAYERS]:
+        assert keys.ID in player_dto
+        player_game = game.get_player(player_dto[keys.ID])
         assert player_game
-        assert player_dto[mapper.MAZE_CARD_ID] == player_game.piece.maze_card.identifier
-        assert mapper.OBJECTIVE not in player_dto
-        assert mapper.SCORE in player_dto
-        assert player_dto[mapper.SCORE] == player_game.score
-        assert player_dto[mapper.PIECE_INDEX] == player_game.piece.piece_index
+        assert player_dto[keys.MAZE_CARD_ID] == player_game.piece.maze_card.identifier
+        assert keys.OBJECTIVE not in player_dto
+        assert keys.SCORE in player_dto
+        assert player_dto[keys.SCORE] == player_game.score
+        assert player_dto[keys.PIECE_INDEX] == player_game.piece.piece_index
 
 
 def test_mapping_computer_player():
     """ Tests correct mapping of information about computer player """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    computer_player_dto = game_dto[mapper.PLAYERS][2]
-    assert computer_player_dto[mapper.IS_COMPUTER]
-    assert computer_player_dto[mapper.ALGORITHM] == "random"
-    player_dto = game_dto[mapper.PLAYERS][1]
-    assert not player_dto[mapper.IS_COMPUTER]
-    assert mapper.ALGORITHM not in player_dto
+    computer_player_dto = game_dto[keys.PLAYERS][2]
+    assert computer_player_dto[keys.IS_COMPUTER]
+    assert computer_player_dto[keys.ALGORITHM] == "random"
+    player_dto = game_dto[keys.PLAYERS][1]
+    assert not player_dto[keys.IS_COMPUTER]
+    assert keys.ALGORITHM not in player_dto
 
 
 def test_mapping_leftover():
     """ Tests correct mapping of leftover maze card """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    maze_cards = game_dto[mapper.MAZE][mapper.MAZE_CARDS]
+    maze_cards = game_dto[keys.MAZE][keys.MAZE_CARDS]
     leftover_dtos = [maze_card for maze_card in maze_cards
-                     if not maze_card[mapper.LOCATION]]
+                     if not maze_card[keys.LOCATION]]
     assert len(leftover_dtos) == 1
     leftover_dto = leftover_dtos[0]
-    assert leftover_dto[mapper.ID] == game.board.leftover_card.identifier
-    assert leftover_dto[mapper.OUT_PATHS] == game.board.leftover_card.out_paths
+    assert leftover_dto[keys.ID] == game.board.leftover_card.identifier
+    assert leftover_dto[keys.OUT_PATHS] == game.board.leftover_card.out_paths
 
 
 def test_mapping_board():
     """ Tests correct mapping of current board state """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    maze_cards = game_dto[mapper.MAZE][mapper.MAZE_CARDS]
+    maze_cards = game_dto[keys.MAZE][keys.MAZE_CARDS]
     maze_card_dtos = [maze_card_dto for maze_card_dto in maze_cards
-                      if maze_card_dto[mapper.LOCATION]]
-    assert game_dto[mapper.MAZE][mapper.MAZE_SIZE] == game.board.maze.maze_size
+                      if maze_card_dto[keys.LOCATION]]
+    assert game_dto[keys.MAZE][keys.MAZE_SIZE] == game.board.maze.maze_size
     assert len(maze_card_dtos) == game.board.maze.maze_size * game.board.maze.maze_size
     ids = set()
     for maze_card_dto in maze_card_dtos:
-        location = _assert_and_return_location_dto(maze_card_dto[mapper.LOCATION])
+        location = _assert_and_return_location_dto(maze_card_dto[keys.LOCATION])
         maze_card_game = game.board.maze[location]
-        assert maze_card_dto[mapper.ID] == maze_card_game.identifier
-        assert maze_card_dto[mapper.OUT_PATHS] == maze_card_game.out_paths
-        assert maze_card_dto[mapper.ROTATION] == maze_card_game.rotation
-        ids.add(maze_card_dto[mapper.ID])
+        assert maze_card_dto[keys.ID] == maze_card_game.identifier
+        assert maze_card_dto[keys.OUT_PATHS] == maze_card_game.out_paths
+        assert maze_card_dto[keys.ROTATION] == maze_card_game.rotation
+        ids.add(maze_card_dto[keys.ID])
     assert len(ids) == len(maze_card_dtos)
 
 
@@ -89,25 +90,26 @@ def test_mapping_objectives():
     """ Tests correct mapping of players' objective """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    assert mapper.OBJECTIVE in game_dto
-    assert game_dto[mapper.OBJECTIVE] == game.board.objective_maze_card.identifier
+    assert keys.OBJECTIVE in game_dto
+    assert game_dto[keys.OBJECTIVE] == game.board.objective_maze_card.identifier
 
 
 def test_mapping_enabled_shift_loctions():
     """ Tests correct mapping of enabled shift loctions """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    assert mapper.ENABLED_SHIFT_LOCATIONS in game_dto
-    assert len(game_dto[mapper.ENABLED_SHIFT_LOCATIONS]) == 11
-    for enabled_shift_location in game_dto[mapper.ENABLED_SHIFT_LOCATIONS]:
-        assert mapper.ROW in enabled_shift_location
-        assert mapper.COLUMN in enabled_shift_location
+    assert keys.ENABLED_SHIFT_LOCATIONS in game_dto
+    assert len(game_dto[keys.ENABLED_SHIFT_LOCATIONS]) == 11
+    for enabled_shift_location in game_dto[keys.ENABLED_SHIFT_LOCATIONS]:
+        assert keys.ROW in enabled_shift_location
+        assert keys.COLUMN in enabled_shift_location
+
 
 def test_mapping_identifier():
     """ Tests correct mapping of game's identifier """
     game = _create_test_game()
     game_dto = mapper.game_state_to_dto(game)
-    assert game_dto[mapper.ID] == game.identifier
+    assert game_dto[keys.ID] == game.identifier
 
 
 def test_dto_to_shift_action():
@@ -144,21 +146,22 @@ def test_dto_to_type_and_alone_with_none():
 def test_shift_action_to_dto():
     """ Tests shift_action_to_dto """
     shift_dto = mapper.shift_action_to_dto(BoardLocation(1, 2), 180)
-    assert mapper.LOCATION in shift_dto
-    location = _assert_and_return_location_dto(shift_dto[mapper.LOCATION])
+    assert keys.LOCATION in shift_dto
+    location = _assert_and_return_location_dto(shift_dto[keys.LOCATION])
     assert location.row == 1
     assert location.column == 2
-    assert mapper.LEFTOVER_ROTATION in shift_dto
-    assert shift_dto[mapper.LEFTOVER_ROTATION] == 180
+    assert keys.LEFTOVER_ROTATION in shift_dto
+    assert shift_dto[keys.LEFTOVER_ROTATION] == 180
 
 
 def test_move_action_to_dto():
     """ Tests move_action_to_dto """
     move_dto = mapper.move_action_to_dto(BoardLocation(3, 4))
-    assert mapper.LOCATION in move_dto
-    location = _assert_and_return_location_dto(move_dto[mapper.LOCATION])
+    assert keys.LOCATION in move_dto
+    location = _assert_and_return_location_dto(move_dto[keys.LOCATION])
     assert location.row == 3
     assert location.column == 4
+
 
 def test_dto_to_maze_size():
     """ Tests dto_to_maze_size """
@@ -169,6 +172,6 @@ def test_dto_to_maze_size():
 
 def _assert_and_return_location_dto(location_dto):
     assert location_dto
-    assert mapper.ROW in location_dto
-    assert mapper.COLUMN in location_dto
-    return BoardLocation(location_dto[mapper.ROW], location_dto[mapper.COLUMN])
+    assert keys.ROW in location_dto
+    assert keys.COLUMN in location_dto
+    return BoardLocation(location_dto[keys.ROW], location_dto[keys.COLUMN])

@@ -36,7 +36,7 @@ class ACTION(ctypes.Structure):
 
 
 class ExternalLibraryBinding:
-    """ Binds to an external library at given path. 
+    """ Binds to an external library at given path.
     Translates the game datastructures to the ctypes structures and back """
     _OUT_PATH_TO_BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
 

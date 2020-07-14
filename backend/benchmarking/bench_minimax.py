@@ -11,7 +11,7 @@ import tests.unit.test_minimax as setup
 
 
 def _benchmark(name):
-    depth=_extract_depth(name)
+    depth = _extract_depth(name)
     repeat = 3
     if depth >= 3:
         repeat = 1
@@ -25,14 +25,15 @@ def _profile(name):
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     cProfile.runctx("optimizer.find_actions()", globals(), locals(), filename=name)
 
+
 def _results(name):
     optimizer, _, _ = setup.create_optimizer(name, depth=_extract_depth(name))
     print("Test case {:<30} \t resulted in actions {}".format(name, optimizer.find_actions()))
 
+
 def _extract_depth(test_case):
     pos = test_case.find("-d") + 2
     return int(test_case[pos])
-
 
 
 def _main(argv):

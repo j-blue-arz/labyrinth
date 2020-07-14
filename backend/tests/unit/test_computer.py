@@ -4,7 +4,7 @@ import copy
 from unittest.mock import MagicMock, patch, PropertyMock
 from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
 from server.model.factories import create_maze, MazeCardFactory
-from server.model.game import Board, MazeCard, BoardLocation, Game
+from server.model.game import Board, BoardLocation, Game
 
 
 def test_computer_player_fetches_urls_from_url_supplier():

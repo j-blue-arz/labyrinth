@@ -46,6 +46,7 @@ def test_after_series_of_creates_and_removes_no_corners_empty():
         piece_cards.add(piece.maze_card)
     assert len(piece_cards) == 4
 
+
 def test_create_piece_assigns_pieces_consecutive_unique_indices():
     """ Tests create_piece. Adds four pieces, removes first two, adds one, removes third, adds two,
     and checks that all pieces have consecutive unique index """
@@ -179,6 +180,7 @@ def test_opposing_border_location_for_south_location():
     board = Board()
     size = board.maze.maze_size
     assert board.opposing_border_location(BoardLocation(size-1, 3)) == BoardLocation(0, 3)
+
 
 def test_opposing_border_location_for_west_location():
     """ Tests opposing_border_location """

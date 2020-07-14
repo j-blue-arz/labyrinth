@@ -1,10 +1,10 @@
 """ This package is the backend of the labyrinth game.
 It serves the Vue application
 and defines a set of API methods to play the game """
+import mimetypes
 import os
 
-from flask import Flask, render_template, send_from_directory
-import mimetypes
+from flask import Flask
 
 
 version_info = (0, 1, 3)

@@ -59,6 +59,7 @@ def test_d2_no_pushback_violation(create_optimizer):
         shift_location = shift_action[0]
         assert board.opposing_border_location(shift_location) != prev_shift_location
 
+
 def test_d2_two_shifts_with_previous_shift(create_optimizer):
     """ Test case where there is a solution of depth 2: [((0, 1), 0), (4, 5), ((0, 5), 0), (6, 6)]
     The test makes the first shift of this solution a rule violation, and checks
@@ -69,6 +70,7 @@ def test_d2_two_shifts_with_previous_shift(create_optimizer):
     _check_actions(board, piece, actions)
     first_shift_location = actions[0][0]
     assert first_shift_location != BoardLocation(0, 1)
+
 
 def test_d2_long_running(create_optimizer):
     """ Two turns required """
@@ -96,6 +98,7 @@ def test_d3_long_running(create_optimizer):
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
+
 def test_d3_generated_1(create_optimizer):
     """ three turns required """
     board, piece = create_board_and_piece_by_key("d3-generated-8s")
@@ -103,6 +106,7 @@ def test_d3_generated_1(create_optimizer):
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
+
 
 def test_d3_generated_2(create_optimizer):
     """ three turns required """
@@ -112,6 +116,7 @@ def test_d3_generated_2(create_optimizer):
     assert len(actions) == 6
     _check_actions(board, piece, actions)
 
+
 def test_d3_generated_3(create_optimizer):
     """ three turns required, running-time currently 8s """
     board, piece = create_board_and_piece_by_key("d3-generated-33s")
@@ -119,6 +124,7 @@ def test_d3_generated_3(create_optimizer):
     actions = optimizer.find_optimal_actions()
     assert len(actions) == 6
     _check_actions(board, piece, actions)
+
 
 CASES_PARAMS = {
     "d1-direct-path": (BIG_COMPONENT_MAZE, "NE", [(3, 3)], (6, 2)),
@@ -134,6 +140,7 @@ CASES_PARAMS = {
     "d3-generated-33s": (GENERATED_WITH_LINE_LEFTOVER, "NS", [(1, 4)], (5, 6))
 }
 
+
 def create_board_and_piece_by_key(key):
     """ Creates a board with a single piece, as used by the exhaustive search optimizer.
 
@@ -144,6 +151,7 @@ def create_board_and_piece_by_key(key):
     board = create_board_and_pieces(**param_dict)
     return board, board.pieces[0]
 
+
 def _check_actions(board, piece, actions):
     assert len(actions) % 2 == 0
     reached = False
@@ -151,6 +159,7 @@ def _check_actions(board, piece, actions):
         board.shift(shift_action[0], shift_action[1])
         reached = board.move(piece, move_location)
     assert reached
+
 
 @pytest.fixture(params=[Optimizer, CompletePathLibraryBinding])
 def create_optimizer(request):

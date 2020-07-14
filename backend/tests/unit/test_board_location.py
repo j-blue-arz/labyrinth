@@ -1,12 +1,14 @@
 """ Tests for BoardLocation of game.py """
 from server.model.game import BoardLocation
 
+
 def test_add_should_not_alter_current():
     """ Tests add method of BoardLocation """
     location = BoardLocation(0, 0)
     location.add(1, 0)
     assert location.row == 0
     assert location.column == 0
+
 
 def test_add_should_return_correct_location():
     """ Tests add method of BoardLocation """

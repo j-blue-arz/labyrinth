@@ -10,6 +10,7 @@ __all__ = ["InvalidStateException",
            "TurnActionViolationException",
            "GameFullException"]
 
+
 class LabyrinthDomainException(Exception):
     """ A base class for all domain exceptions of the labyrinth domain model """
     pass
@@ -20,6 +21,7 @@ class InvalidStateException(LabyrinthDomainException):
     and it is unable to determine how it got there
     """
     pass
+
 
 class GameFullException(LabyrinthDomainException):
     """ If a player is added to game without empty places """
@@ -51,6 +53,7 @@ class MoveUnreachableException(InvalidLocationException, RuleViolationException)
     """ If there is no path to the requested location """
     pass
 
+
 class TurnActionViolationException(RuleViolationException):
     """ If an action was requested for a player, but it is not his turn to player,
     or he has to perform another action """
@@ -60,6 +63,7 @@ class TurnActionViolationException(RuleViolationException):
 class InvalidRotationException(LabyrinthDomainException, ValueError):
     """ If a given rotation parameter is not divisible by 90 """
     pass
+
 
 class InvalidSizeException(LabyrinthDomainException, ValueError):
     """ If a requested maze size is not admissible """

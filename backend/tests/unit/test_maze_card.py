@@ -2,6 +2,7 @@
 import pytest
 from server.model.game import MazeCard
 
+
 def test_rotation_should_be_settable():
     """ Tests rotation getter and setter """
     maze_card = MazeCard()

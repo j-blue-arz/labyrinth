@@ -4,6 +4,7 @@ Currently it only has one class to compute all reachable locations.
 """
 from collections import deque
 
+
 class ReachedLocation:
     """ A container type for a location reached in the search from the source """
     def __init__(self, location, source):
@@ -35,6 +36,7 @@ class ReachedLocation:
 
     def __repr__(self):
         return self.__str__()
+
 
 class Graph:
     """ Performs a BFS in a graph represented by the current maze to
@@ -99,7 +101,6 @@ class Graph:
                     next_elements.append(neighbor)
         return self._reached_locations
 
-
     def _neighbors(self, location):
         """ Returns an iterator over valid neighbor BoardLocations
         of the given BoardLocation, with the current state of the maze """
@@ -113,6 +114,7 @@ class Graph:
                     card_to_test = self._maze[location_to_test]
                     if card_to_test.has_rotated_out_path(_mirror(delta)):
                         yield location_to_test
+
 
 class RotatableMazeCardGraph:
     """ Performs BFS on a graph represented by a maze.
@@ -172,7 +174,6 @@ class RotatableMazeCardGraph:
                     self._rotation_map[rotation] = self._determine_reachable(self._rotatable, None)
             rotatable_card.rotation = original_rotation
 
-
     def _reachable_neighbors(self, location, rotatable):
         """ Returns an iterator over valid neighbor BoardLocations
         of the given BoardLocation, with the current state of the maze """
@@ -195,6 +196,7 @@ class RotatableMazeCardGraph:
         if maze_card.out_paths == maze_card.CROSS:
             rotations = [0]
         return rotations
+
 
 def all_reachables(certainly_reached, rotation_map, rotation):
     """ Given the two return values of RotatableMazeCardGraph.reachable_locations() along with a specific rotation,

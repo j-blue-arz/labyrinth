@@ -1,12 +1,14 @@
 """ Service Layer """
 from flask import url_for
+
 import server.model.factories as factory
 import server.mapper.api as mapper
-from . import exceptions
-from . import database
-from .model.exceptions import LabyrinthDomainException
-from .model.game import Player
-from .model.computer import ComputerPlayer
+from server import exceptions
+from server import database
+from server.model.exceptions import LabyrinthDomainException
+from server.model.game import Player
+from server.model.computer import ComputerPlayer
+
 
 def add_player(game_id, player_request_dto):
     """ Adds a player to a game.
@@ -97,7 +99,7 @@ def _create_game(game_id):
 def _load_game_or_throw(game_id):
     game = database.load_game(game_id)
     if game is None:
-        raise exceptions.GAME_NOT_FOUND()
+        raise exceptions.GAME_NOT_FOUND_API_EXCEPTION
     return game
 
 

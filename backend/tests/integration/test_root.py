@@ -1,4 +1,6 @@
 """ Tests the server root ( / ) """
+
+
 def test_get_root(client):
     """ Tests GET for /
     expects the 'static' VueJS app to be served.

@@ -6,6 +6,7 @@ import copy
 from server.model.game import MazeCard, Maze, BoardLocation, Board, Piece
 from server.model.factories import create_maze, MazeCardFactory
 
+
 def create_random_maze(maze_card_factory=None):
     """ Generates a random maze state.
     Corners of the maze are fixed as corners
@@ -28,6 +29,7 @@ def create_random_maze(maze_card_factory=None):
     for location in maze.maze_locations:
         maze[location] = card_at(location)
     return maze
+
 
 def param_tuple_to_param_dict(maze_string, leftover_out_paths, piece_starts, objective_tuple):
     maze_card_factory = MazeCardFactory()

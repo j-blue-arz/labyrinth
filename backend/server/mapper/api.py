@@ -6,8 +6,10 @@ which in turn are automatically translatable to structured text (JSON or XML)
 """
 from server.model.game import Game, Turns, Player
 import server.model.computer
-from .shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
-from .constants import *
+from server.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
+from server.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
+                                     MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
+                                     POST_PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
 
 
 def game_state_to_dto(game: Game):

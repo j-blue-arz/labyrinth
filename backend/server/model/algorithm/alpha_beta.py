@@ -2,8 +2,9 @@
 import math
 import operator
 from server.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
-from server.model.game import Board, MazeCard, BoardLocation
+from server.model.game import MazeCard, BoardLocation
 import server.model.algorithm.util as util
+
 
 class Heuristic:
     """ A heuristic is expected to define a value function. """
@@ -12,7 +13,7 @@ class Heuristic:
 
     def value(self, node, current_player):
         """ Heuristic zero-sum value, from viewpoint of player 0.
-        
+
         :param node: the node to evaluate
         :param current_player: the player who made the previous move
         :return: a value, and a tuple of value components. The first entry of this tuple should be
@@ -235,10 +236,13 @@ class AlphaBeta:
     def find_actions(self, root):
         """ Finds an action which maximzes the heuristic value.
         This algorithm only returns the best next action, not the entire path.
-        
+
         :param root: an instance of GameTreeNode, the root of the tree to search
         :return: the best actions, the maximin value, and a tuple of components of this value,
-        where the first entry signifies if player 0 is certainly loosing (-1), certainly winning (1), or none of both (0)
+        where the first entry is
+            -1, if player 0 is certainly loosing
+            1, if player 0 is certainly winning
+            or 0, if none of the above is true
         """
 
         self._shift_locations_per_depth = {}

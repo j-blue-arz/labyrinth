@@ -3,6 +3,7 @@ from server.model.reachable import RotatableMazeCardGraph, all_reachables
 from server.model.game import BoardLocation
 import server.model.algorithm.util as util
 
+
 class GameTreeNode:
     """ Represents a node in the game tree for two players.
     Each node represents a shift action and a subsequent move action
@@ -78,32 +79,53 @@ class GameTreeNode:
         """
         graph = RotatableMazeCardGraph(self.board.maze, rotatable_location)
         certainly_reachable, reachable_by_rotation = graph.reachable_locations(source)
-        for location in certainly_reachable:
-            if self.board.maze[location].identifier == self.objective_identifier:
-                return {0: [location]}
-        for rotation, locations in reachable_by_rotation.items():
-            for location in locations:
-                if self.board.maze[location].identifier == self.objective_identifier:
-                    return {rotation: [location]}
+        reachable_objective = self._objective_certainly_reachable(certainly_reachable, reachable_by_rotation)
+        if reachable_objective:
+            return reachable_objective
         if self.depth >= 3:
-            result = dict()
-            for rotation in self._rotations(rotatable_location):
-                result[rotation] = all_reachables(certainly_reachable, reachable_by_rotation, rotation)
-            return result
+            return self._all_reachable_locations_by_rotation(rotatable_location, certainly_reachable,
+                                                             reachable_by_rotation)
         if self.depth == 2:
-            result = dict()
-            for rotation in self._rotations(rotatable_location):
-                if rotation in reachable_by_rotation:
-                    result[rotation] = [next(iter(reachable_by_rotation[rotation]))]
-                else:
-                    result[rotation] = [next(iter(certainly_reachable))]
-            return result
+            return self._one_reachable_location_by_rotation(rotatable_location, reachable_by_rotation,
+                                                            certainly_reachable)
         if self.depth == 1:
-            if reachable_by_rotation:
-                available_rotation = next(iter(reachable_by_rotation))
-                return {available_rotation: [next(iter(reachable_by_rotation[available_rotation]))]}
-            return {0: [next(iter(certainly_reachable))]}
+            return self._one_reachable_location_one_rotation(reachable_by_rotation, certainly_reachable)
 
+    def _objective_certainly_reachable(self, certainly_reachable, reachable_by_rotation):
+        location = self._contains_objective(certainly_reachable)
+        if location:
+            return {0: [location]}
+        for rotation, locations in reachable_by_rotation.items():
+            location = self._contains_objective(locations)
+            if location:
+                return {rotation: [location]}
+
+    def _contains_objective(self, locations):
+        for location in locations:
+            if self.board.maze[location].identifier == self.objective_identifier:
+                return location
+        return None
+
+    def _all_reachable_locations_by_rotation(self, rotatable_location, certainly_reachable, reachable_by_rotation):
+        result = dict()
+        for rotation in self._rotations(rotatable_location):
+            result[rotation] = all_reachables(certainly_reachable, reachable_by_rotation, rotation)
+        return result
+
+    def _one_reachable_location_by_rotation(self, rotatable_location, reachable_by_rotation, certainly_reachable):
+        result = dict()
+        for rotation in self._rotations(rotatable_location):
+            if rotation in reachable_by_rotation:
+                result[rotation] = [next(iter(reachable_by_rotation[rotation]))]
+            else:
+                result[rotation] = [next(iter(certainly_reachable))]
+        return result
+
+    def _one_reachable_location_one_rotation(self, reachable_by_rotation, certainly_reachable):
+        if reachable_by_rotation:
+            available_rotation = next(iter(reachable_by_rotation))
+            return {available_rotation: [next(iter(reachable_by_rotation[available_rotation]))]}
+        return {0: [next(iter(certainly_reachable))]}
 
     def reset_board(self):
         """ The children() iterator alters the board state. Call this method to reset the board
