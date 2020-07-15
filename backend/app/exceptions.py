@@ -2,10 +2,10 @@
 It defines a few exception factories.
 It also maps domain exceptions to these pre-defined factories. """
 
-from server.model.exceptions import InvalidStateException, PlayerNotFoundException, \
+from app.model.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
     InvalidRotationException, TurnActionViolationException, GameFullException, InvalidSizeException
-from server.mapper.api import exception_to_dto
+from app.mapper.api import exception_to_dto
 
 
 class ApiException(Exception):

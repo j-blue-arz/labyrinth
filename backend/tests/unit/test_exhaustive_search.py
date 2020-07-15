@@ -4,8 +4,8 @@ and asserts that the solution is valid """
 import pytest
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
 from tests.unit.library_binding import CompletePathLibraryBinding
-from server.model.algorithm.exhaustive_search import Optimizer
-from server.model.game import BoardLocation
+from app.model.algorithm.exhaustive_search import Optimizer
+from app.model.game import BoardLocation
 from tests.unit.mazes import BIG_COMPONENT_MAZE, GENERATED_WITH_LINE_LEFTOVER, DIFFICULT_MAZE
 
 

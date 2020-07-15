@@ -4,12 +4,12 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from server.model.game import Game, Turns, Player
-import server.model.computer
-from server.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
-from server.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
-                                     MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                     POST_PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
+from app.model.game import Game, Turns, Player
+import app.model.computer
+from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
+from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
+                                  MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
+                                  POST_PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
 
 
 def game_state_to_dto(game: Game):
@@ -110,7 +110,7 @@ def _player_to_dto(player: Player):
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
                   PIECE_INDEX: player.piece.piece_index}
-    if type(player) is server.model.computer.ComputerPlayer:
+    if type(player) is app.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
     else:

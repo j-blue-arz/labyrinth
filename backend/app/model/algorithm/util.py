@@ -1,6 +1,6 @@
 """ This module contains utility functions for the algorithms implemented in this package.
 """
-import server.model.game as game
+import app.model.game as game
 
 
 def other(player):

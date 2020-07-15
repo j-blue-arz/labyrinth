@@ -1,6 +1,6 @@
 """ Tests for MazeCard of game.py """
 import pytest
-from server.model.game import MazeCard
+from app.model.game import MazeCard
 
 
 def test_rotation_should_be_settable():

@@ -3,10 +3,10 @@ Tests the main methods dto_to_game() and game_to_dto(), i.e.
 the methods used to persist a Game instance.
 The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
-import server.mapper.persistence as mapper
-from server.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from server.model.computer import ComputerPlayer, RandomActionsAlgorithm
-from server.model.factories import MazeCardFactory
+import app.mapper.persistence as mapper
+from app.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
+from app.model.computer import ComputerPlayer, RandomActionsAlgorithm
+from app.model.factories import MazeCardFactory
 
 
 def _create_test_game(with_computer=False):

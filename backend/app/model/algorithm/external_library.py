@@ -3,7 +3,7 @@
 It models the structs with ctypes and defines a class which implements the algorithm interface by
 binding to a library at a given path """
 import ctypes
-from server.model.game import BoardLocation
+from app.model.game import BoardLocation
 
 
 class LOCATION(ctypes.Structure):
@@ -74,7 +74,7 @@ class ExternalLibraryBinding:
     def _create_graph(board):
         """ creates a GRAPH function argument
 
-        :param board: an instance of server.model.game.board
+        :param board: an instance of app.model.game.board
         """
         maze = board.maze
         extent = maze.maze_size

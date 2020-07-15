@@ -1,10 +1,10 @@
 """ Provides random board and maze generation.
 
-In contrast to the factories in server.model.factories, this module has almost no guarantees on the layout
+In contrast to the factories in app.model.factories, this module has almost no guarantees on the layout
 of the created mazes and on the ratio of placed maze cards."""
 import copy
-from server.model.game import MazeCard, Maze, BoardLocation, Board, Piece
-from server.model.factories import create_maze, MazeCardFactory
+from app.model.game import MazeCard, Maze, BoardLocation, Board, Piece
+from app.model.factories import create_maze, MazeCardFactory
 
 
 def create_random_maze(maze_card_factory=None):

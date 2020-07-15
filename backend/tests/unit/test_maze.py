@@ -1,5 +1,5 @@
 """ Tests for Maze of game.py """
-from server.model.game import Maze, MazeCard, BoardLocation
+from app.model.game import Maze, MazeCard, BoardLocation
 from tests.unit.factories import create_random_maze, MazeCardFactory
 
 

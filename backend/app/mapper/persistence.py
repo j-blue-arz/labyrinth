@@ -3,12 +3,12 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from server.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
-import server.model.computer
-from server.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
-from server.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
-                                     PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
-                                     PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
+from app.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
+import app.model.computer
+from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
+from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
+                                  PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
+                                  PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
 
 
 def game_to_dto(game: Game):
@@ -75,7 +75,7 @@ def _player_to_dto(player: Player):
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
                   PIECE_INDEX: player.piece.piece_index}
-    if type(player) is server.model.computer.ComputerPlayer:
+    if type(player) is app.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
         player_dto[SHIFT_URL] = player.shift_url
@@ -106,7 +106,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     piece = Piece(player_dto[PIECE_INDEX], maze_card_dict[player_dto[MAZE_CARD_ID]])
     player = None
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
-        player = server.model.computer.ComputerPlayer(
+        player = app.model.computer.ComputerPlayer(
             algorithm_name=player_dto[ALGORITHM],
             identifier=player_dto[ID],
             game=game,

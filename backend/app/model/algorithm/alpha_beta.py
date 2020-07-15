@@ -1,9 +1,9 @@
 """ This module contains algorithms performing searches on a game tree. """
 import math
 import operator
-from server.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
-from server.model.game import MazeCard, BoardLocation
-import server.model.algorithm.util as util
+from app.model.reachable import RotatableMazeCardGraph, Graph, all_reachables
+from app.model.game import MazeCard, BoardLocation
+import app.model.algorithm.util as util
 
 
 class Heuristic:

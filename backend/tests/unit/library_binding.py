@@ -1,6 +1,6 @@
 """ This module provides a subclass for the external library call, which computes a series of actions """
-from server.model.algorithm.external_library import ExternalLibraryBinding
-import server.model.algorithm.util as algo_util
+from app.model.algorithm.external_library import ExternalLibraryBinding
+import app.model.algorithm.util as algo_util
 
 
 class CompletePathLibraryBinding(ExternalLibraryBinding):

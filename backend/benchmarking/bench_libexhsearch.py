@@ -8,7 +8,7 @@ import timeit
 import sys
 from tests.unit.mazes import EXH_DEPTH_4_MAZE
 from tests.unit.test_exhaustive_search import CASES_PARAMS
-import server.model.algorithm.external_library as libexhsearch
+import app.model.algorithm.external_library as libexhsearch
 from tests.unit.library_binding import CompletePathLibraryBinding
 import tests.unit.factories as setup
 

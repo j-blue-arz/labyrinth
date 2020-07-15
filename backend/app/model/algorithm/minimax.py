@@ -1,7 +1,7 @@
 """ This module contains algorithms performing searches on a game tree. """
-from server.model.reachable import RotatableMazeCardGraph, all_reachables
-from server.model.game import BoardLocation
-import server.model.algorithm.util as util
+from app.model.reachable import RotatableMazeCardGraph, all_reachables
+from app.model.game import BoardLocation
+import app.model.algorithm.util as util
 
 
 class GameTreeNode:

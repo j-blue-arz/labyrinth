@@ -1,8 +1,8 @@
 """ Tests for module model.factories """
 import math
 from collections import Counter
-from server.model.factories import create_maze_and_leftover, create_maze
-from server.model.game import BoardLocation, MazeCard
+from app.model.factories import create_maze_and_leftover, create_maze
+from app.model.game import BoardLocation, MazeCard
 
 
 def test_create_maze_and_leftover_fixed_pieces_for_size_7():

@@ -16,11 +16,11 @@ from threading import Thread
 import os
 from flask import current_app
 import requests
-import server.mapper.api
-import server.model.algorithm.exhaustive_search as exh
-import server.model.algorithm.minimax as mm
-import server.model.algorithm.alpha_beta as ab
-import server.model.algorithm.external_library as extlib
+import app.mapper.api
+import app.model.algorithm.exhaustive_search as exh
+import app.model.algorithm.minimax as mm
+import app.model.algorithm.alpha_beta as ab
+import app.model.algorithm.external_library as extlib
 from .reachable import Graph
 from .game import Player, Turns
 from .exceptions import LabyrinthDomainException
@@ -102,11 +102,11 @@ class ComputerPlayer(Player, Thread):
         return self._move_url
 
     def _post_shift(self, location, rotation):
-        dto = server.mapper.api.shift_action_to_dto(location, rotation)
+        dto = app.mapper.api.shift_action_to_dto(location, rotation)
         requests.post(self.shift_url, json=dto)
 
     def _post_move(self, move_location):
-        dto = server.mapper.api.move_action_to_dto(move_location)
+        dto = app.mapper.api.move_action_to_dto(move_location)
         requests.post(self.move_url, json=dto)
 
     def _find_equal_piece(self, board):
