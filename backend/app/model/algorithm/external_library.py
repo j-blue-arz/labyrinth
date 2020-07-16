@@ -67,7 +67,7 @@ class ExternalLibraryBinding:
         """ creates a NODE from a MazeCard """
         out_paths = 0
         for out_path in maze_card.out_paths:
-            out_paths = out_paths | ExternalLibraryBinding._OUT_PATH_TO_BIT[out_path]
+            out_paths |= ExternalLibraryBinding._OUT_PATH_TO_BIT[out_path]
         return NODE(maze_card.identifier, out_paths, maze_card.rotation)
 
     @staticmethod

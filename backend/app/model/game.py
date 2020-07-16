@@ -390,6 +390,7 @@ class Board:
         raise exceptions.InvalidStateException("Location {} is not on the border".format(border_location))
 
     def _validate_move_location(self, piece_location, target_location):
+        # sourcery skip: merge-nested-ifs
         if self.validate_moves:
             if not Graph(self._maze).is_reachable(piece_location, target_location):
                 raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
@@ -532,11 +533,12 @@ class Turns:
 
     def add_player(self, player, turn_callback=None):
         """ Adds a player to the turn progression, if he is not present already """
-        found = False
-        for player_action in self._player_actions:
-            if player_action.player is player:
-                found = True
-        if not found:
+        already_present = any(
+            player_action.player is player
+            for player_action in self._player_actions
+        )
+
+        if not already_present:
             self._player_actions.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
             self._player_actions.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
 
@@ -555,12 +557,9 @@ class Turns:
         self._player_actions = [player_action for player_action in self._player_actions
                                 if player_action.player is not player]
 
-    def start(self, next_action=None):
+    def start(self):
         """ Starts the progression, informs player if necessary """
-        if next_action:
-            self._next = self._player_actions.index(next_action)
-        else:
-            self._next = 0
+        self._next = 0
         next_player = self._player_actions[self._next]
         if next_player.turn_callback:
             next_player.turn_callback()
@@ -605,18 +604,9 @@ class Game:
 
     def __init__(self, identifier, board=None, players=None, turns=None):
         self._id = identifier
-        if players:
-            self._players = players
-        else:
-            self._players = []
-        if board:
-            self._board = board
-        else:
-            self._board = Board()
-        if turns:
-            self._turns = turns
-        else:
-            self._turns = Turns()
+        self._players = players if players else []
+        self._board = board if board else Board()
+        self._turns = turns if turns else Turns()
         self.previous_shift_location = None
 
     @property
@@ -648,7 +638,7 @@ class Game:
         """
         if len(self._players) >= self.MAX_PLAYERS:
             raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
-        next_id = max([player.identifier for player in self._players], default=0) + 1
+        next_id = max((player.identifier for player in self._players), default=0) + 1
         player = player_class(identifier=next_id, game=self, **player_class_kwargs)
         player.set_board(self._board)
         player.register_in_turns(self._turns)
