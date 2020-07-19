@@ -1,7 +1,10 @@
 """ This module contains fixtures for end to end tests """
+import glob
 import os
+import platform
 import tempfile
 import pytest
+
 from app import create_app
 
 
@@ -19,3 +22,12 @@ def client():
     yield app.test_client()
     os.close(file_descriptor)
     os.unlink(db_path)
+
+
+def pytest_generate_tests(metafunc):
+    if "dll_path" in metafunc.fixturenames:
+        extension = "*.so"
+        if platform.system() == "Windows":
+            extension = "*.dll"
+        filenames = glob.glob("lib/" + extension)
+        metafunc.parametrize("dll_path", filenames)
