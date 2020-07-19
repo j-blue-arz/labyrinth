@@ -15,7 +15,7 @@ import pytest
 import app.model.algorithm.minimax as mm
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
 from app.model.game import BoardLocation
-from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_BUG_MAZE, MINIMAX_DIFFICULT_MAZE
+from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_DIFFICULT_MAZE
 
 
 def test_big_component_d1_shift_req_with_depth_1():
@@ -133,6 +133,38 @@ def test_bug_d1_with_depth_2():
     actions, value = optimizer.find_actions()
     assert value == 1
     _check_actions(board, pieces[0], actions)
+
+
+MINIMAX_BUG_MAZE = """
+###|#.#|###|###|###|#.#|###|
+#..|#.#|...|..#|...|#.#|..#|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+#..|#..|#..|#.#|#..|#..|#.#|
+#.#|###|#.#|#.#|###|###|#.#|
+---------------------------|
+#.#|#.#|#.#|#.#|###|###|#.#|
+#..|#..|#..|#..|...|...|..#|
+#.#|###|#.#|###|#.#|###|#.#|
+---------------------------|
+###|#.#|###|#.#|#.#|#.#|#.#|
+...|#..|...|..#|..#|#..|#.#|
+###|###|#.#|#.#|#.#|###|#.#|
+---------------------------|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+#..|#..|...|#..|..#|#..|..#|
+#.#|###|###|###|#.#|###|#.#|
+---------------------------|
+#.#|#.#|#.#|#.#|#.#|###|#.#|
+#..|#..|#..|#.#|#.#|#..|#.#|
+###|#.#|###|#.#|#.#|#.#|#.#|
+---------------------------|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+#..|#.#|...|#..|...|#.#|..#|
+###|#.#|###|###|###|#.#|###|
+---------------------------|
+"""
 
 
 CASES_PARAMS = {
