@@ -29,11 +29,11 @@ class BoardLocation:
     The location does now know the extent of the maze.
     """
 
-    def __init__(self, row, column):
+    def __init__(self, row: int, column: int):
         self.row = row
         self.column = column
 
-    def add(self, row_delta, column_delta):
+    def add(self, row_delta: int, column_delta: int):
         """ Returns a new BoardLocation by adding the deltas to the current location """
         return BoardLocation(self.row + row_delta, self.column + column_delta)
 
@@ -358,7 +358,7 @@ class Board:
         """ Removes a piece from the board """
         self._pieces.remove(piece)
 
-    def shift(self, shift_location, leftover_rotation):
+    def shift(self, shift_location: BoardLocation, leftover_rotation: int):
         """ Performs a shifting action """
         self._validate_shift_location(shift_location)
         self._leftover_card.rotation = leftover_rotation

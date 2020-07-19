@@ -26,10 +26,7 @@ class GameTreeNode:
         self.parent = parent
         self.current_shift_action = shift_action
         self.reached_maze_cards = []
-        if parent:
-            self.depth = parent.depth + 1
-        else:
-            self.depth = 0
+        self.depth = parent.depth + 1 if parent else 0
         self.board = None
 
     @classmethod
@@ -102,10 +99,10 @@ class GameTreeNode:
         """ If this node is a shift, returns True iff the objective can be reached
         Returns False if this node is a move. """
         self._compute()
-        for reached in self.reached_maze_cards:
-            if self.board.objective_maze_card.identifier == reached.maze_card_id:
-                return True
-        return False
+        return any(
+            self.board.objective_maze_card.identifier == reached.maze_card_id
+            for reached in self.reached_maze_cards
+        )
 
     def is_root(self):
         """ Returns True iff this node is a root, i.e. iff parent is None """

@@ -47,7 +47,7 @@ class Graph:
         self._maze = maze
         self._reached_locations = {}
 
-    def is_reachable(self, source_location, target_location):
+    def is_reachable(self, source_location, target_location) -> bool:
         """ Performs a BFS in a graph represented by the current maze to
         verify if the source location and the target location
         are connected.
@@ -122,10 +122,10 @@ class RotatableMazeCardGraph:
 
     def __init__(self, maze, rotatable_maze_card_location):
         self._maze = maze
-        self._certainly_reached = {}
+        self._certainly_reached = set()
         self._rotatable = rotatable_maze_card_location
         self._rotatable_touched_directions = []
-        self._rotation_map = dict()
+        self._rotation_map = {}
 
     def reachable_locations(self, source):
         """ Performs a BFS, returning all reachable BoardLocations.
@@ -148,10 +148,10 @@ class RotatableMazeCardGraph:
         return self._certainly_reached, self._rotation_map
 
     def _determine_reachable(self, source, rotatable):
-        reached = {}
+        reached = set()
         if source == rotatable:
             self._rotatable_touched_directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-            reached = {}
+            reached = set()
         else:
             reached = {source}
             next_elements = deque([source])

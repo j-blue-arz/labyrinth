@@ -29,7 +29,7 @@ def test_start_from_rotatable():
     maze = create_maze(MAZE_STRING)
     graph = RotatableMazeCardGraph(maze, BoardLocation(6, 6))
     reachable, reachable_map = graph.reachable_locations(BoardLocation(6, 6))
-    assert reachable == dict()
+    assert reachable == set()
     expected_for_all_rotations_but_90 = {BoardLocation(*coord) for coord in [(6, 6), (5, 6), (6, 5), (5, 5)]}
     for rotation in [0, 180, 270]:
         assert reachable_map[rotation] == expected_for_all_rotations_but_90

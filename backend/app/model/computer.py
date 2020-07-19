@@ -48,10 +48,7 @@ class ComputerPlayer(Player, Thread):
         for algorithm in algorithms:
             if algorithm.SHORT_NAME == algorithm_name:
                 self.algorithm = algorithm
-        if current_app:
-            self._app = current_app._get_current_object()
-        else:
-            self._app = None
+        self._app = current_app._get_current_object() if current_app else None
         if url_supplier:
             self._shift_url = url_supplier.get_shift_url(self._game.identifier, self._id)
             self._move_url = url_supplier.get_move_url(self._game.identifier, self._id)
