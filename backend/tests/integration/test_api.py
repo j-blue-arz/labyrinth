@@ -7,7 +7,7 @@ def test_post_players(client):
 
     Expects an OK response with a single int in the body.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     assert response.content_type == "application/json"
     _assert_ok_single_int(response)
 
@@ -18,13 +18,13 @@ def test_post_players_four_times(client):
     Expects four OKs with pair-wise different numbers
     """
     player_ids = set()
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_ids.add(_assert_ok_single_int(response))
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_ids.add(_assert_ok_single_int(response))
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_ids.add(_assert_ok_single_int(response))
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_ids.add(_assert_ok_single_int(response))
     assert len(player_ids) == 4
 
@@ -35,15 +35,15 @@ def test_post_players_five_times(client):
     Expects four OKs
     and a 400 Bad Request with a exception body
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     _assert_ok_single_int(response)
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     _assert_ok_single_int(response)
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     _assert_ok_single_int(response)
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     _assert_ok_single_int(response)
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     _assert_error_response(response, user_message="Number of players has reached game limit.",
                            key="GAME_FULL", status=400)
 
@@ -54,8 +54,8 @@ def test_get_state(client):
     for existing game. Expects 50 mazeCards and two players
     with correct id
     """
-    player_id1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    player_id2 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id1 = _assert_ok_single_int(_post_player(client, player_type="human"))
+    player_id2 = _assert_ok_single_int(_post_player(client, player_type="human"))
     response = _get_state(client)
     assert response.status_code == 200
     assert response.content_type == "application/json"
@@ -91,7 +91,7 @@ def test_get_state_has_correct_initial_state(client):
     Expects an objective to be set for the player.
     Expects scores to be set to 0.
     """
-    _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _assert_ok_single_int(_post_player(client, player_type="human"))
     response = _get_state(client)
     state = response.get_json()
     player_card_id = state["players"][0]["mazeCardId"]
@@ -124,7 +124,7 @@ def test_get_state_for_nonexisting_game(client):
     for non-existing game. Expects 404 Not Found with
     exception body
     """
-    _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _assert_ok_single_int(_post_player(client, player_type="human"))
     response = client.get("/api/games/1/state")
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
@@ -136,12 +136,12 @@ def test_get_state_valid_after_error(client):
     after a previous request resulted in an error.
     Expects 200 OK
     """
-    _post_player(client, player_type="human", alone=True)
-    _post_player(client, player_type="human", alone=True)
-    _post_player(client, player_type="human", alone=True)
-    response = _post_player(client, player_type="human", alone=True)
+    _post_player(client, player_type="human")
+    _post_player(client, player_type="human")
+    _post_player(client, player_type="human")
+    response = _post_player(client, player_type="human")
     _assert_ok_single_int(response)
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     assert response.status_code == 400
     response = _get_state(client)
     assert response.status_code == 200
@@ -188,7 +188,7 @@ def test_post_move(client):
     Expects a 200 OK, with empty body.
     State respects new position of player.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _post_shift(client, player_id, 0, 1, 270)
     response = _post_move(client, player_id, 0, 1)
@@ -215,7 +215,7 @@ def test_post_move_unreachable_move(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _post_shift(client, player_id, 0, 1, 0)
     _post_move(client, player_id, 0, 0)
@@ -232,7 +232,7 @@ def test_post_move_invalid_move(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 7, 0))
 
@@ -243,7 +243,7 @@ def test_post_move_nonexisting_game(client):
     for non-existing game and with invalid location.
     Expects 404 Not Found with exception body about not found game
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     data = json.dumps({
         "location": {
@@ -263,7 +263,7 @@ def test_post_shift(client):
     Expects a 200 OK, with empty body.
     State is correct about pushed in card with rotation.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     old_state = _get_state(client).get_json()
     old_leftover_card = next((card for card in old_state["maze"]["mazeCards"] if card["location"] is None),
@@ -292,7 +292,7 @@ def test_post_shift_with_invalid_rotation(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _assert_invalid_argument_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 1, 66))
 
@@ -304,7 +304,7 @@ def test_post_shift_with_invalid_location(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 0, 90))
 
@@ -316,7 +316,7 @@ def test_post_move_with_invalid_turn_action(client):
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
-    response = _post_player(client, player_type="human", alone=True)
+    response = _post_player(client, player_type="human")
     player_id = _assert_ok_single_int(response)
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 0, 0))
 
@@ -326,8 +326,8 @@ def test_turn_action_progression(client):
 
     expects the nextAction to change as correct actions are performed.
     """
-    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human"))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human"))
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
     assert state["nextAction"]["action"] == "SHIFT"
@@ -354,8 +354,8 @@ def test_no_pushback_rule(client):
 
     expects the second shift, which tries to revert the previous shift, to fail
     """
-    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
-    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    player_id_0 = _assert_ok_single_int(_post_player(client, player_type="human"))
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human"))
     _post_shift(client, player_id_0, 0, 1, 270)
     _post_move(client, player_id_0, 0, 0)
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id_1, 6, 1, 270))
@@ -366,8 +366,8 @@ def test_delete_player(client):
 
     After a player was deleted, he should not be able to see the game state.
     """
-    _post_player(client, player_type="human", alone=True)
-    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human", alone=True))
+    _post_player(client, player_type="human")
+    player_id_1 = _assert_ok_single_int(_post_player(client, player_type="human"))
     _delete_player(client, player_id_1)
     state = _get_state(client).get_json()
     assert len(state["players"]) == 1
@@ -446,8 +446,8 @@ def _post_move(client, player_id, row, column):
     return client.post("/api/games/0/move?p_id={}".format(player_id), data=data, mimetype="application/json")
 
 
-def _post_player(client, player_type=None, alone=None, game_id=0):
-    player_data = _player_data(player_type, alone)
+def _post_player(client, player_type=None, game_id=0):
+    player_data = _player_data(player_type)
     return client.post("/api/games/{}/players".format(game_id), data=player_data, mimetype="application/json")
 
 
@@ -466,18 +466,9 @@ def _get_state(client, game_id=0):
     return client.get("/api/games/{}/state".format(game_id))
 
 
-def _player_data(player_type=None, alone=None):
+def _player_data(player_type=None):
     data = None
-    if alone is not None and player_type is not None:
-        data = {
-            "type": player_type,
-            "alone": alone
-        }
-    elif alone is not None:
-        data = {
-            "alone": alone
-        }
-    elif player_type is not None:
+    if player_type is not None:
         data = {
             "type": player_type
         }

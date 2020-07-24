@@ -136,7 +136,7 @@ def test_dto_to_type():
     assert player_type == "normal"
 
 
-def test_dto_to_type_and_alone_with_none():
+def test_dto_to_type_with_none():
     """ Tests dto_to_type """
     player_request_dto = None
     player_type = mapper.dto_to_type(player_request_dto)

@@ -62,7 +62,7 @@ def dto_to_move_action(move_dto):
 
 
 def dto_to_type(player_request_dto):
-    """ Maps a DTO for the add player api method to two values, the type and the flag 'alone' """
+    """ Maps a DTO for the add player api method to the type of the player """
     if isinstance(player_request_dto, dict):
         return _value_or_none(
             player_request_dto, POST_PLAYER_TYPE)
