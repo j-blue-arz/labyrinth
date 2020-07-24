@@ -40,7 +40,7 @@ export default class MazeCard {
             apiMazeCard.id,
             apiMazeCard.location.row,
             apiMazeCard.location.column,
-            apiMazeCard.out_paths,
+            apiMazeCard.outPaths,
             apiMazeCard.rotation
         );
     }
