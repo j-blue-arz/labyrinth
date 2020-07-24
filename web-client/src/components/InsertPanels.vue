@@ -30,7 +30,7 @@ export default {
         },
         interaction: {
             type: Boolean,
-            require: true
+            required: true
         },
         cardSize: {
             type: Number,

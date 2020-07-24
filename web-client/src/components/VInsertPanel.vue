@@ -14,15 +14,15 @@
                 :d="pathCross"
                 class="insert-panel__symbol insert-panel__cross"
             ></path>
-            <g v-if="interaction">
+            <g v-if="isEnabled">
                 <rect
+                    v-if="interaction"
                     :height="100"
                     :width="100"
                     class="insert-panel__click-area"
                     @click="onClick"
                 ></rect>
                 <path
-                    v-if="isEnabled"
                     :id="'panel-path-' + insertPanel.id"
                     @click="onClick"
                     :d="pathArrow"
@@ -127,12 +127,15 @@ export default {
 .insert-panel {
     stroke-width: 12;
 
-    &:not(&--disabled) {
-        filter: none;
-
+    &--interaction {
         .insert-panel__arrow {
             cursor: pointer;
             animation: insert-panel__stroke-width--pulse 3s infinite;
+            stroke: $interaction-color;
+        }
+
+        .insert-panel__cross {
+            stroke: $disabled-color;
         }
 
         .insert-panel__click-area {
@@ -145,11 +148,11 @@ export default {
     }
 
     &__cross {
-        stroke: $disabled-color;
+        stroke: $disabled-color-secondary;
     }
 
     &__arrow {
-        stroke: $interaction-color;
+        stroke: $interaction-color-secondary;
     }
 
     &__click-area {

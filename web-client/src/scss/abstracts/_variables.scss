@@ -1,5 +1,7 @@
-$interaction-color: #749966;
-$disabled-color: #bf5e40;
+$interaction-color: hsl(104, 25%, 45%);
+$interaction-color-secondary: lighten($interaction-color, 40%);
+$disabled-color: hsl(14, 45%, 45%);
+$disabled-color-secondary: lighten($disabled-color, 40%);
 
 $color-outline: black;
 
