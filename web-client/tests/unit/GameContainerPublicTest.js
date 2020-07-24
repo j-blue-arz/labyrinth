@@ -160,13 +160,13 @@ var state = {
         mazeSize: 7,
         mazeCards: [
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 49,
                 location: null,
                 rotation: 270
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 0,
                 location: {
                     column: 0,
@@ -175,7 +175,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 1,
                 location: {
                     column: 1,
@@ -184,7 +184,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 2,
                 location: {
                     column: 2,
@@ -193,7 +193,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 3,
                 location: {
                     column: 3,
@@ -202,7 +202,7 @@ var state = {
                 rotation: 270
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 4,
                 location: {
                     column: 4,
@@ -211,7 +211,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 5,
                 location: {
                     column: 5,
@@ -220,7 +220,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 6,
                 location: {
                     column: 6,
@@ -229,7 +229,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 7,
                 location: {
                     column: 0,
@@ -238,7 +238,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 8,
                 location: {
                     column: 1,
@@ -247,7 +247,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 9,
                 location: {
                     column: 2,
@@ -256,7 +256,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 10,
                 location: {
                     column: 3,
@@ -265,7 +265,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 11,
                 location: {
                     column: 4,
@@ -274,7 +274,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 12,
                 location: {
                     column: 5,
@@ -283,7 +283,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 13,
                 location: {
                     column: 6,
@@ -292,7 +292,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 14,
                 location: {
                     column: 0,
@@ -301,7 +301,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 15,
                 location: {
                     column: 1,
@@ -310,7 +310,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 16,
                 location: {
                     column: 2,
@@ -319,7 +319,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 17,
                 location: {
                     column: 3,
@@ -328,7 +328,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 18,
                 location: {
                     column: 4,
@@ -337,7 +337,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 19,
                 location: {
                     column: 5,
@@ -346,7 +346,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 20,
                 location: {
                     column: 6,
@@ -355,7 +355,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 21,
                 location: {
                     column: 0,
@@ -364,7 +364,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 22,
                 location: {
                     column: 1,
@@ -373,7 +373,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 23,
                 location: {
                     column: 2,
@@ -382,7 +382,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 24,
                 location: {
                     column: 3,
@@ -391,7 +391,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 25,
                 location: {
                     column: 4,
@@ -400,7 +400,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 26,
                 location: {
                     column: 5,
@@ -409,7 +409,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 27,
                 location: {
                     column: 6,
@@ -418,7 +418,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 28,
                 location: {
                     column: 0,
@@ -427,7 +427,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 29,
                 location: {
                     column: 1,
@@ -436,7 +436,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 30,
                 location: {
                     column: 2,
@@ -445,7 +445,7 @@ var state = {
                 rotation: 270
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 31,
                 location: {
                     column: 3,
@@ -454,7 +454,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 32,
                 location: {
                     column: 4,
@@ -463,7 +463,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 33,
                 location: {
                     column: 5,
@@ -472,7 +472,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 34,
                 location: {
                     column: 6,
@@ -481,7 +481,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 35,
                 location: {
                     column: 0,
@@ -490,7 +490,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 36,
                 location: {
                     column: 1,
@@ -499,7 +499,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 37,
                 location: {
                     column: 2,
@@ -508,7 +508,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 38,
                 location: {
                     column: 3,
@@ -517,7 +517,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 39,
                 location: {
                     column: 4,
@@ -526,7 +526,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 40,
                 location: {
                     column: 5,
@@ -535,7 +535,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NS",
+                outPaths: "NS",
                 id: 41,
                 location: {
                     column: 6,
@@ -544,7 +544,7 @@ var state = {
                 rotation: 90
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 42,
                 location: {
                     column: 0,
@@ -553,7 +553,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 43,
                 location: {
                     column: 1,
@@ -562,7 +562,7 @@ var state = {
                 rotation: 180
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 44,
                 location: {
                     column: 2,
@@ -571,7 +571,7 @@ var state = {
                 rotation: 270
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 45,
                 location: {
                     column: 3,
@@ -580,7 +580,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 46,
                 location: {
                     column: 4,
@@ -589,7 +589,7 @@ var state = {
                 rotation: 270
             },
             {
-                out_paths: "NES",
+                outPaths: "NES",
                 id: 47,
                 location: {
                     column: 5,
@@ -598,7 +598,7 @@ var state = {
                 rotation: 0
             },
             {
-                out_paths: "NE",
+                outPaths: "NE",
                 id: 48,
                 location: {
                     column: 6,

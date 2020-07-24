@@ -1,8 +1,8 @@
 export default class MazeCard {
-    constructor(id, row, column, out_paths, rotation) {
+    constructor(id, row, column, outPaths, rotation) {
         this.id = id;
         this.location = { row: row, column: column };
-        this.out_paths = out_paths;
+        this.outPaths = outPaths;
         this._rotation = rotation;
         this._players = [];
         this.hasObject = false;
@@ -17,21 +17,21 @@ export default class MazeCard {
             throw new Error(
                 "Invalid constructor argument for rotation, should be integer divisible by 90."
             );
-        if (typeof out_paths !== "string")
-            throw new Error("Invalid constructor argument for out_paths, should be string.");
-        if (!/^[NESW]{2,4}$/.test(out_paths))
+        if (typeof outPaths !== "string")
+            throw new Error("Invalid constructor argument for outPaths, should be string.");
+        if (!/^[NESW]{2,4}$/.test(outPaths))
             throw new Error(
-                "Invalid constructor argument for out_paths, should comply pattern '[NESW]{2,4}'."
+                "Invalid constructor argument for outPaths, should comply pattern '[NESW]{2,4}'."
             );
         if (
             Number(this.hasNorthOutPath()) +
                 Number(this.hasEastOutPath()) +
                 Number(this.hasWestOutPath()) +
                 Number(this.hasSouthOutPath()) !==
-            out_paths.length
+            outPaths.length
         )
             throw new Error(
-                "Invalid constructor argument for out_paths, should not include same out_path twice."
+                "Invalid constructor argument for outPaths, should not include same outPath twice."
             );
     }
 
@@ -71,18 +71,18 @@ export default class MazeCard {
         return this._hasOutPath("W");
     }
 
-    _hasOutPath(out_path) {
-        return this.out_paths.indexOf(out_path) != -1;
+    _hasOutPath(outPath) {
+        return this.outPaths.indexOf(outPath) != -1;
     }
 
     hasRotationAwareOutPath(outPath) {
         var unrotatedOutPath = MazeCard.rotatedOutPath(outPath, -this._rotation);
-        return this.out_paths.indexOf(unrotatedOutPath) != -1;
+        return this.outPaths.indexOf(unrotatedOutPath) != -1;
     }
 
     static rotatedOutPath(originalOutPath, rotation) {
-        return MazeCard.out_pathsRotation[
-            (MazeCard.out_pathsRotation.indexOf(originalOutPath) + rotation / 90 + 4) % 4
+        return MazeCard.outPathsRotation[
+            (MazeCard.outPathsRotation.indexOf(originalOutPath) + rotation / 90 + 4) % 4
         ];
     }
 
@@ -145,4 +145,4 @@ MazeCard.validCombinations = [
     "SW"
 ];
 
-MazeCard.out_pathsRotation = ["N", "E", "S", "W"];
+MazeCard.outPathsRotation = ["N", "E", "S", "W"];

@@ -98,10 +98,10 @@ export default class Graph {
         return result;
     }
 
-    _mirror(out_path) {
-        let out_paths = ["N", "E", "S", "W"];
-        let mirroredIndex = (out_paths.indexOf(out_path) + 2) % 4;
-        return out_paths[mirroredIndex];
+    _mirror(outPath) {
+        let outPaths = ["N", "E", "S", "W"];
+        let mirroredIndex = (outPaths.indexOf(outPath) + 2) % 4;
+        return outPaths[mirroredIndex];
     }
 
     _initReached() {

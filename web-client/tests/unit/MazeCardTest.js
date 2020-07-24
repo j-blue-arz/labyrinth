@@ -28,15 +28,15 @@ describe("MazeCard", () => {
             expect(() => new MazeCard(4, 1, [], "NS", 0)).toThrowError(Error);
         });
 
-        it("throws exception when out_paths is not string", () => {
+        it("throws exception when outPaths is not string", () => {
             expect(() => new MazeCard(4, 1, 4, ["N", "E"], 0)).toThrowError(Error);
         });
 
-        it("throws exception when out_paths has same out_path twice", () => {
+        it("throws exception when outPaths has same outPath twice", () => {
             expect(() => new MazeCard(4, 1, 4, "NNE", 0)).toThrowError(Error);
         });
 
-        it("throws exception when out_paths has less than two out_paths", () => {
+        it("throws exception when outPaths has less than two outPaths", () => {
             expect(() => new MazeCard(4, 1, 4, "N", 0)).toThrowError(Error);
         });
 
@@ -72,7 +72,7 @@ describe("MazeCard", () => {
         });
     });
 
-    describe("out_paths", () => {
+    describe("outPaths", () => {
         it("are set from constructor", () => {
             var mazeCard = new MazeCard(4, 1, 4, "NE", 0);
             expect(mazeCard.hasNorthOutPath()).toBe(true);
