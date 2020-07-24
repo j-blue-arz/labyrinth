@@ -7,7 +7,7 @@ from app import exceptions
 from app import database
 from app.model.exceptions import LabyrinthDomainException
 from app.model.game import Player
-from app.model.computer import ComputerPlayer
+from app.model.computer import create_computer_player
 
 
 def add_player(game_id, player_request_dto):
@@ -23,12 +23,14 @@ def add_player(game_id, player_request_dto):
     player_type = mapper.dto_to_type(player_request_dto)
     if player_type is None:
         player_type = "human"
-    player_id = None
+    player_id = _try(game.next_player_id)
+    player = None
     if player_type == "human":
-        player_id = _try(lambda: game.add_player(Player))
+        player = Player(player_id)
     else:
-        player_id = _try(lambda: game.add_player(
-            ComputerPlayer, algorithm_name=player_type, url_supplier=URLSupplier()))
+        player = _try(lambda: create_computer_player(compute_method=player_type, url_supplier=URLSupplier(),
+                                                     player_id=player_id))
+    _try(lambda: game.add_player(player))
     if len(game.players) == 1:
         _try(game.start_game)
     database.update_game(game_id, game)

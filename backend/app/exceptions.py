@@ -4,7 +4,8 @@ It also maps domain exceptions to these pre-defined factories. """
 
 from app.model.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
-    InvalidRotationException, TurnActionViolationException, GameFullException, InvalidSizeException
+    InvalidRotationException, TurnActionViolationException, GameFullException, InvalidSizeException, \
+    InvalidComputeMethodException
 from app.mapper.api import exception_to_dto
 
 
@@ -44,4 +45,8 @@ def domain_to_api_exception(domain_exception):
                                      InvalidRotationException,
                                      InvalidLocationException)):
         return ApiException("INVALID_ARGUMENTS", "The combination of arguments in this request is not supported.", 400)
+    if isinstance(domain_exception, InvalidComputeMethodException):
+        return ApiException("INVALID_ARGUMENTS",
+                            str(domain_exception),
+                            400)
     return ApiException("UNKNOWN_ERROR", "An unknown error has occurred.", 500)

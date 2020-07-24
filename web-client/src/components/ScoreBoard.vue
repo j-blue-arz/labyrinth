@@ -27,7 +27,7 @@ export default {
 
 <style lang="scss">
 .score-board {
-    width: 13rem;
+    width: 14rem;
     border-collapse: collapse;
     table-layout: fixed;
 }

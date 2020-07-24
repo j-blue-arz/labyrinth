@@ -94,7 +94,7 @@ export default {
     }
 
     &__player-name {
-        width: 5rem;
+        width: 6rem;
     }
 
     &__score-data {

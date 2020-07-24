@@ -28,43 +28,43 @@ MAZE_3BY3 = """
 """
 
 
-def test_3by3_single_player_with_direct_path(dll_path):
+def test_3by3_single_player_with_direct_path(library_path):
     test_setup = (MAZE_3BY3, "NE", [(0, 0)], (0, 2))
     previous_shift_location = BoardLocation(0, 1)
     board, piece = _create_board(test_setup)
 
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action = library_binding.find_optimal_action()
 
     _assert_valid_action(action, board, previous_shift_location, piece)
 
 
-def test_3by3_single_player_no_direct_path_without_previous_shift(dll_path):
+def test_3by3_single_player_no_direct_path_without_previous_shift(library_path):
     test_setup = (MAZE_3BY3, "NE", [(0, 0)], (2, 2))
     previous_shift_location = None
     board, piece = _create_board(test_setup)
 
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action = library_binding.find_optimal_action()
 
     _assert_valid_action(action, board, previous_shift_location, piece)
 
 
-def test_3by3_single_player_with_objective_on_leftover(dll_path):
+def test_3by3_single_player_with_objective_on_leftover(library_path):
     test_setup = (MAZE_3BY3, "NE", [(0, 0)], "leftover")
     previous_shift_location = BoardLocation(1, 2)
     board, piece = _create_board(test_setup)
 
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action = library_binding.find_optimal_action()
 
     _assert_valid_action(action, board, previous_shift_location, piece)
 
 
-def test_3by3_single_player_no_fresh_board(dll_path):
+def test_3by3_single_player_no_fresh_board(library_path):
     """ Creates a board and makes two shifts, so that the maze card ids
     are no longer regularly distributed row-first
     """
@@ -74,14 +74,14 @@ def test_3by3_single_player_no_fresh_board(dll_path):
     board.shift(BoardLocation(1, 2), 0)
     board.shift(BoardLocation(2, 1), 0)
 
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action = library_binding.find_optimal_action()
 
     _assert_valid_action(action, board, previous_shift_location, piece)
 
 
-def test_3by3_multiple_bindings_same_library(dll_path):
+def test_3by3_multiple_bindings_same_library(library_path):
     """ Binds three times to the same library """
     test_setup = (MAZE_3BY3, "NS", [(0, 0)], (0, 2))
     previous_shift_location = None
@@ -91,7 +91,7 @@ def test_3by3_multiple_bindings_same_library(dll_path):
         board, piece = _create_board(test_setup)
         boards.append(board)
 
-    bindings = [ExternalLibraryBinding(dll_path, board, board.pieces[0],
+    bindings = [ExternalLibraryBinding(library_path, board, board.pieces[0],
                                        previous_shift_location=previous_shift_location) for board in boards]
 
     actions = [library_binding.find_optimal_action() for library_binding in bindings]
@@ -100,7 +100,7 @@ def test_3by3_multiple_bindings_same_library(dll_path):
         _assert_valid_action(actions[i], boards[i], previous_shift_location, boards[i].pieces[0])
 
 
-def test_3by3_single_player_no_pushback_rule(dll_path):
+def test_3by3_single_player_no_pushback_rule(library_path):
     """ Performs two library calls: the first without previous shift,
     the second with a previous shift invalidating the shift result of the first call.
     """
@@ -108,7 +108,7 @@ def test_3by3_single_player_no_pushback_rule(dll_path):
     previous_shift_location = None
     board, piece = _create_board(test_setup)
 
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action_1 = library_binding.find_optimal_action()
     _assert_valid_action(action_1, board, previous_shift_location, piece)
@@ -116,7 +116,7 @@ def test_3by3_single_player_no_pushback_rule(dll_path):
     shift_location_1 = action_1[0][0]
     board, piece = _create_board(test_setup)
     previous_shift_location = board.opposing_border_location(shift_location_1)
-    library_binding = ExternalLibraryBinding(dll_path, board, piece,
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action_2 = library_binding.find_optimal_action()
     _assert_valid_action(action_2, board, previous_shift_location, piece)

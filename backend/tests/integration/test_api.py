@@ -2,16 +2,6 @@
 import json
 
 
-def test_post_players(client):
-    """ Tests POST for /api/games/0/players
-
-    Expects an OK response with a single int in the body.
-    """
-    response = _post_player(client, player_type="human")
-    assert response.content_type == "application/json"
-    _assert_ok_single_int(response)
-
-
 def test_post_players_four_times(client):
     """ Tests POST for /api/games/0/players
 
@@ -27,6 +17,50 @@ def test_post_players_four_times(client):
     response = _post_player(client, player_type="human")
     player_ids.add(_assert_ok_single_int(response))
     assert len(player_ids) == 4
+
+
+def test_post_players_backend_computer_player(client):
+    """ Tests POST for /api/games/0/players with computer player
+
+    Adds a human player and a computer player with compute method 'random'
+    Expects an OK response with a single int in the body.
+    Checks if the game state respects the added computer player.
+    """
+    _post_player(client, player_type="human")
+    response = _post_player(client, player_type="random")
+    assert response.content_type == "application/json"
+    _assert_ok_single_int(response)
+    response = _get_state(client)
+    state = response.get_json()
+    assert len(state["players"]) == 2
+    assert state["players"][1]["isComputerPlayer"] is True
+    assert state["players"][1]["algorithm"] == "random"
+
+
+def test_post_players_library_computer_player(client):
+    """ Tests POST for /api/games/0/players with computer player
+
+    Adds a human player and a computer player with compute method 'dynamic-libexhsearch'
+    Expects an OK response with a single int in the body.
+    Checks if the game state respects the added computer player.
+    """
+    _post_player(client, player_type="human")
+    response = _post_player(client, player_type="dynamic-libexhsearch")
+    assert response.content_type == "application/json"
+    _assert_ok_single_int(response)
+    response = _get_state(client)
+    state = response.get_json()
+    assert state["players"][1]["isComputerPlayer"] is True
+    assert state["players"][1]["algorithm"] == "dynamic-libexhsearch"
+
+
+def test_post_players_unknown_compute_method(client):
+    """ Tests POST for /api/games/0/players
+
+    Expects an 400 response with the requested compute method in the message.
+    """
+    response = _post_player(client, player_type="FOO")
+    _assert_error_response(response, user_message_contains="FOO", key="INVALID_ARGUMENTS", status=400)
 
 
 def test_post_players_five_times(client):
@@ -409,7 +443,7 @@ def _assert_ok_single_int(response):
         assert False
 
 
-def _assert_error_response(response, user_message, key, status):
+def _assert_error_response(response, key, status, user_message=None, user_message_contains=None):
     """ Asserts a certain error response
 
     :param response: the HTTP response object
@@ -420,7 +454,10 @@ def _assert_error_response(response, user_message, key, status):
     assert response.status_code == status
     assert response.content_type == "application/json"
     message = response.get_json()
-    assert message["userMessage"] == user_message
+    if user_message:
+        assert message["userMessage"] == user_message
+    if user_message_contains:
+        assert user_message_contains in message["userMessage"]
     assert message["key"] == key
 
 

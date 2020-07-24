@@ -454,6 +454,12 @@ class Player:
         """ Getter for board """
         return self._board
 
+    def set_game(self, game):
+        """ Sets the game this player is part of
+        Also sets the board and the player's piece """
+        self._game = game
+        self.set_board(game.board)
+
     def set_board(self, board: Board):
         """ Setter for board """
         self._board = board
@@ -629,21 +635,24 @@ class Game:
         """ Getter for identifier """
         return self._id
 
-    def add_player(self, player_class, **player_class_kwargs):
-        """Creates a player and adds it to the game. Throws if the game is full.
-
-        :param player: a class, descendant of Player
-        :param player_class_kwargs: a dictionary of keyword arguments for constructor of player_class
-        :return: the ID of the player
-        """
+    def next_player_id(self):
+        """ Returns an identifier which is currently unused
+        to set the id of a new player.
+        Throws GameFullException if there are no slots left."""
         if len(self._players) >= self.MAX_PLAYERS:
             raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
-        next_id = max((player.identifier for player in self._players), default=0) + 1
-        player = player_class(identifier=next_id, game=self, **player_class_kwargs)
-        player.set_board(self._board)
+        return max((player.identifier for player in self._players), default=0) + 1
+
+    def add_player(self, player: Player):
+        """ Adds a player to the current game, if he is not already one of the current players.
+        Throws GameFullException if there are no slots left. """
+        if len(self._players) >= self.MAX_PLAYERS:
+            raise exceptions.GameFullException("Already {} players playing the game.".format(self.MAX_PLAYERS))
+        if any(player.identifier == current_player.identifier for current_player in self._players):
+            return
+        player.set_game(self)
         player.register_in_turns(self._turns)
         self._players.append(player)
-        return player.identifier
 
     def get_player(self, player_id):
         """ Finds a player by ID

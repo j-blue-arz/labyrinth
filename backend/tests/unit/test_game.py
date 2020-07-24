@@ -8,10 +8,9 @@ from app.model.exceptions import PlayerNotFoundException, GameFullException
 def test_add_get_player():
     """ Tests add_player and get_player """
     game = Game(identifier=0)
-    player_id1 = game.add_player(Player)
-    player_id2 = game.add_player(Player)
-    assert game.get_player(player_id1).identifier == player_id1
-    assert game.get_player(player_id2).identifier == player_id2
+    player = Player(7)
+    game.add_player(player)
+    assert game.get_player(7) is player
 
 
 def test_get_player_raises_exception_for_unknown_id():
@@ -21,30 +20,34 @@ def test_get_player_raises_exception_for_unknown_id():
         game.get_player(0)
 
 
-def test_add_player_id_unique():
+def test_add_player_with_duplicate_id_does_not_add():
     """ Tests add_player """
     game = Game(identifier=0)
-    ids = set()
-    for _ in range(game.MAX_PLAYERS):
-        ids.add(game.add_player(Player))
-    assert len(ids) == game.MAX_PLAYERS
+    game.add_player(Player(1))
+    other_player = Player(1)
+    game.add_player(other_player)
+    assert len(game.players) == 1
+    assert other_player not in game.players
 
 
-def test_add_and_remove_player_id_unique():
-    """ Tests that after adding and removing players, the IDs are unique """
+def test_next_player_id_returns_new_id():
+    """ Tests next_player_id """
     game = Game(identifier=0)
-    player_id1 = game.add_player(Player)
-    player_id2 = game.add_player(Player)
-    player_id3 = game.add_player(Player)
-    game.remove_player(player_id2)
-    player_id4 = game.add_player(Player)
-    game.remove_player(player_id3)
-    player_id5 = game.add_player(Player)
-    game.remove_player(player_id1)
-    player_id6 = game.add_player(Player)
-    expected = set([player_id4, player_id5, player_id6])
-    actual = set(player.identifier for player in game.players)
-    assert actual == expected
+    game.add_player(Player(3))
+    game.add_player(Player(7))
+    game.add_player(Player(11))
+    player_id = game.next_player_id()
+    assert player_id not in [player.identifier for player in game.players]
+
+
+def test_next_player_id_raises_exception_on_full_game():
+    """ Tests next_player_id """
+    game = Game(identifier=0)
+    for _ in range(game.MAX_PLAYERS):
+        player_id = game.next_player_id()
+        game.add_player(Player(player_id))
+    with pytest.raises(GameFullException):
+        player_id = game.next_player_id()
 
 
 def test_add_player_start_game_calls_methods_on_board():
@@ -55,7 +58,8 @@ def test_add_player_start_game_calls_methods_on_board():
     with patch.object(board, 'create_piece',
                       wraps=board.create_piece) as board_create_piece:
         for _ in range(4):
-            game.add_player(Player)
+            player_id = game.next_player_id()
+            game.add_player(Player(player_id))
         game.start_game()
         expected_board_calls = [
             call.create_piece(),
@@ -71,37 +75,28 @@ def test_add_player_start_game_calls_methods_on_turns():
     turns = Mock()
     game = Game(identifier=0, board=board, turns=turns)
     for _ in range(4):
-        game.add_player(Player)
+        player_id = game.next_player_id()
+        game.add_player(Player(player_id))
     game.start_game()
     expected_turn_calls = [call.init(game.players)] + [call.start()]
     assert turns.mock_calls[-2:] == expected_turn_calls
-
-
-@patch("app.model.game.Player")
-def test_add_player_calls_constructor_with_correct_arguments(mock_player_class):
-    """ Tests add_player """
-    game = Game(identifier=7)
-    game.add_player(mock_player_class, param_name="value")
-    mock_player_class.assert_called_once()
-    assert mock_player_class.call_args[0] == ()
-    assert mock_player_class.call_args[1]["game"] == game
-    assert mock_player_class.call_args[1]["param_name"] == "value"
-    assert "identifier" in mock_player_class.call_args[1]
 
 
 def test_add_player_validation():
     """ Tests that adding more players than MAX_PLAYERS does not add another one """
     game = Game(identifier=0)
     for _ in range(game.MAX_PLAYERS):
-        game.add_player(Player)
+        player_id = game.next_player_id()
+        game.add_player(Player(player_id))
     with pytest.raises(GameFullException):
-        game.add_player(Player)
+        game.add_player(Player(42))
 
 
 def test_shift_raises_error_on_invalid_player_id():
     """ Tests shift validation """
     game = Game(identifier=0)
-    player_id = game.add_player(Player)
+    player_id = game.next_player_id()
+    game.add_player(Player(player_id))
     game.start_game()
     with pytest.raises(PlayerNotFoundException):
         game.shift(player_id + 1, BoardLocation(0, 1), 90)
@@ -110,7 +105,8 @@ def test_shift_raises_error_on_invalid_player_id():
 def test_move_raises_error_on_invalid_player_id():
     """ Tests move validation """
     game = Game(identifier=0)
-    player_id = game.add_player(Player)
+    player_id = game.next_player_id()
+    game.add_player(Player(player_id))
     game.start_game()
     with pytest.raises(PlayerNotFoundException):
         game.move(player_id - 1, BoardLocation(5, 5))
@@ -122,7 +118,8 @@ def test_move_raises_error_on_invalid_turn():
     turns = Mock()
     turns.is_action_possible.return_value = False
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.add_player(Player)
+    player_id = game.next_player_id()
+    game.add_player(Player(player_id))
     game.start_game()
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
@@ -136,7 +133,8 @@ def test_move_does_not_raise_error_after_shift():
     turns = Mock()
     turns.is_action_possible.return_value = True
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.add_player(Player)
+    player_id = game.next_player_id()
+    game.add_player(Player(player_id))
     game.start_game()
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
@@ -169,7 +167,8 @@ def test_player_reaches_objective_increase_score():
     turns.is_action_possible.return_value = True
     board.move.return_value = True
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.add_player(Player)
+    player_id = game.next_player_id()
+    game.add_player(Player(player_id))
     old_score = game.get_player(player_id).score
     game.move(player_id, BoardLocation(0, 1))
     assert game.get_player(player_id).score == old_score + 1
@@ -181,7 +180,11 @@ def test_replace_board():
     """
     turns = Mock()
     game = Game(identifier=0, turns=turns)
-    player_ids = [game.add_player(Player), game.add_player(Player)]
+    player_ids = []
+    for _ in range(2):
+        player_id = game.next_player_id()
+        game.add_player(Player(player_id))
+        player_ids.append(player_id)
     players = list(map(game.get_player, player_ids))
     players[0].score = 11
     players[1].score = 22

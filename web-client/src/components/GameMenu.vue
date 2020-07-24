@@ -59,7 +59,7 @@ export default {
                     new MenuItem(ADD_PREFIX + "exhaustive-search", "Exhaustive Search"),
                     new MenuItem(ADD_PREFIX + "minimax", "Minimax"),
                     new MenuItem(ADD_PREFIX + "alpha-beta", "Alpha-Beta"),
-                    new MenuItem(ADD_PREFIX + "library", "External library: libexhsearch")
+                    new MenuItem(ADD_PREFIX + "dynamic-libexhsearch", "Library: libexhsearch")
                 ]),
                 new MenuItem("remove", "Remove computer..", []),
                 new MenuItem("restart", "Restart with..", [

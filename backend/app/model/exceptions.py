@@ -68,3 +68,8 @@ class InvalidRotationException(LabyrinthDomainException, ValueError):
 class InvalidSizeException(LabyrinthDomainException, ValueError):
     """ If a requested maze size is not admissible """
     pass
+
+
+class InvalidComputeMethodException(LabyrinthDomainException):
+    """ If a requested compute method could not be found """
+    pass

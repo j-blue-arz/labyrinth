@@ -20,14 +20,14 @@ def game_state_to_dto(game: Game):
     :param game: an instance of model.Game
     :return: a structure whose JSON representation is valid for the API
     """
-    game_dto = dict()
-    game_dto[ID] = game.identifier
-    game_dto[OBJECTIVE] = _objective_to_dto(game.board.objective_maze_card)
-    game_dto[PLAYERS] = [_player_to_dto(player) for player in game.players]
-    game_dto[MAZE] = _board_to_dto(game.board)
-    game_dto[NEXT_ACTION] = _turns_to_next_player_action_dto(game.turns)
-    game_dto[ENABLED_SHIFT_LOCATIONS] = _enabled_shift_locations_to_dto(game)
-    return game_dto
+    return {
+        ID: game.identifier,
+        OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
+        PLAYERS: [_player_to_dto(player) for player in game.players],
+        MAZE: _board_to_dto(game.board),
+        NEXT_ACTION: _turns_to_next_player_action_dto(game.turns),
+        ENABLED_SHIFT_LOCATIONS: _enabled_shift_locations_to_dto(game)
+    }
 
 
 def dto_to_shift_action(shift_dto):
@@ -112,7 +112,7 @@ def _player_to_dto(player: Player):
                   PIECE_INDEX: player.piece.piece_index}
     if type(player) is app.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
-        player_dto[ALGORITHM] = player.algorithm.SHORT_NAME
+        player_dto[ALGORITHM] = player.compute_method_factory.SHORT_NAME
     else:
         player_dto[IS_COMPUTER] = False
     return player_dto

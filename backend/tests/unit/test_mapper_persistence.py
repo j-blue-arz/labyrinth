@@ -5,7 +5,7 @@ The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
 import app.mapper.persistence as mapper
 from app.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from app.model.computer import ComputerPlayer, RandomActionsAlgorithm
+from app.model.computer import create_computer_player, ComputerPlayer, RandomActionsAlgorithm
 from app.model.factories import MazeCardFactory
 
 
@@ -27,8 +27,8 @@ def _create_test_game(with_computer=False):
     players = [Player(identifier=player_id, game=None) for player_id in player_ids]
     if with_computer:
         player_ids.append(42)
-        players.append(ComputerPlayer(identifier=42, game=None,
-                                      algorithm_name="random", shift_url="shift-url", move_url="move-url"))
+        players.append(create_computer_player(player_id=42, compute_method="random",
+                                              shift_url="shift-url", move_url="move-url"))
     for player in players:
         player.set_board(board)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]
@@ -66,7 +66,7 @@ def test_mapping_for_computer_player():
     game = mapper.dto_to_game(game_dto)
     computer_player = game.get_player(player_ids[2])
     assert isinstance(computer_player, ComputerPlayer)
-    assert computer_player.algorithm == RandomActionsAlgorithm
+    assert computer_player.compute_method_factory == RandomActionsAlgorithm
     assert computer_player.shift_url == "shift-url"
     assert computer_player.move_url == "move-url"
 

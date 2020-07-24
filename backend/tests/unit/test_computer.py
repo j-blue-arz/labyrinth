@@ -1,39 +1,43 @@
 """ Tests for module computer in model. The classes contained in this are multithreaded.
 The tests only run these classes in a single thread, by calling run() directly. """
 import copy
-from unittest.mock import MagicMock, patch, PropertyMock
-from app.model.computer import ComputerPlayer, RandomActionsAlgorithm
+from unittest.mock import Mock, patch, PropertyMock
+from app.model.computer import ComputerPlayer, RandomActionsAlgorithm, create_computer_player
 from app.model.factories import create_maze, MazeCardFactory
 from app.model.game import Board, BoardLocation, Game
 
 
-def test_computer_player_fetches_urls_from_url_supplier():
-    """ Creates a ComputerPlayer with the url_supplier parameter, and expects
-    that the constructor calls methods on the url_supplier """
-    url_supplier = MagicMock()
+def test_create_computer_player_fetches_urls_from_url_supplier():
+    """ Uses the create_computer_player to create a ComputerPlayer
+    with the url_supplier parameter, and expects
+    that the factory method calls methods on the url_supplier """
+    url_supplier = Mock()
     url_supplier.get_shift_url.return_value = "shift-url"
     url_supplier.get_move_url.return_value = "move-url"
-    game = MagicMock()
+    game = Mock()
     type(game).identifier = PropertyMock(return_value=7)
-    player = ComputerPlayer(algorithm_name="random", url_supplier=url_supplier, game=game, identifier=9)
+    player = create_computer_player(player_id=9, compute_method="random", url_supplier=url_supplier, game=game)
     url_supplier.get_shift_url.assert_called_once_with(7, 9)
     url_supplier.get_move_url.assert_called_once_with(7, 9)
     assert player.shift_url == "shift-url"
     assert player.move_url == "move-url"
 
+    url_supplier.reset_mock()
+    player = create_computer_player(player_id=17, compute_method="random", url_supplier=url_supplier)
+    url_supplier.get_shift_url.assert_not_called()
+    url_supplier.get_move_url.assert_not_called()
 
-def test_computer_player_algorithm_name():
-    """ Tests that ComputerPlayer constructor chooses algorithm RandomActionsAlgorithm,
-    when algorithm_name is 'random' """
-    player = ComputerPlayer(algorithm_name="random", shift_url="shift-url",
-                            move_url="move-url", game=None, identifier=9)
-    assert player.algorithm is RandomActionsAlgorithm
+    player.set_game(game)
+    url_supplier.get_shift_url.assert_called_once_with(7, 17)
+    url_supplier.get_move_url.assert_called_once_with(7, 17)
+    assert player.shift_url == "shift-url"
+    assert player.move_url == "move-url"
 
 
 def test_computer_player_register_in_turns():
     """ Tests that register_in_turns calls method in turns with callback """
-    turns = MagicMock()
-    player = ComputerPlayer(algorithm_name="random", shift_url="shift-url",
+    turns = Mock()
+    player = ComputerPlayer(compute_method_factory=RandomActionsAlgorithm, shift_url="shift-url",
                             move_url="move-url", game=None, identifier=9)
     player.register_in_turns(turns)
     turns.add_player.assert_called_once_with(player, turn_callback=player.start)
@@ -50,10 +54,10 @@ def test_computer_player_starts_algorithm(post_move, post_shift, algorithm_start
     card_factory = MazeCardFactory()
     board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
-    game = MagicMock()
+    game = Mock()
     type(game).identifier = PropertyMock(return_value=7)
     game.get_enabled_shift_locations.return_value = board.shift_locations
-    player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
+    player = ComputerPlayer(compute_method_factory=RandomActionsAlgorithm, move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     player.run()
     algorithm_start.assert_called_once()
@@ -75,7 +79,7 @@ def test_random_actions_algorithm_computes_valid_actions():
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        game = MagicMock()
+        game = Mock()
         game.get_enabled_shift_locations.return_value = board.shift_locations
         algorithm = RandomActionsAlgorithm(board, piece, game)
         assert algorithm.shift_action is None
@@ -87,16 +91,19 @@ def test_random_actions_algorithm_computes_valid_actions():
         assert shift_location in board.shift_locations
         allowed_coordinates = [(0, 0)]
         if shift_location == BoardLocation(0, 1) and shift_rotation == 270:
-            allowed_coordinates = allowed_coordinates + [(0, 1)]
+            allowed_coordinates += [(0, 1)]
         elif shift_location == BoardLocation(0, 1) and shift_rotation == 180:
-            allowed_coordinates = allowed_coordinates + [(0, 1), (1, 1)]
+            allowed_coordinates += [(0, 1), (1, 1)]
         elif shift_location == BoardLocation(1, 0) and shift_rotation == 270:
-            allowed_coordinates = allowed_coordinates + [(1, 0)]
+            allowed_coordinates += [(1, 0)]
         elif shift_location == BoardLocation(1, 0) and shift_rotation == 0:
-            allowed_coordinates = allowed_coordinates + [(1, 0), (1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2)]
+            allowed_coordinates += [(1, 0), (1, 1), (1, 2), (2, 1), (2, 2), (3, 1), (3, 2)]
         elif shift_location == BoardLocation(6, 1):
-            allowed_coordinates = allowed_coordinates + [(0, 1), (0, 2), (1, 1), (2, 1)]
-        allowed_moves = set(BoardLocation(*coordinates) for coordinates in allowed_coordinates)
+            allowed_coordinates += [(0, 1), (0, 2), (1, 1), (2, 1)]
+        allowed_moves = {
+            BoardLocation(*coordinates) for coordinates in allowed_coordinates
+        }
+
         assert move_location in allowed_moves
 
 
@@ -112,7 +119,7 @@ def test_random_actions_algorithm_should_have_different_results():
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        game = MagicMock()
+        game = Mock()
         game.get_enabled_shift_locations.return_value = board.shift_locations
         algorithm = RandomActionsAlgorithm(board, piece, game)
         algorithm.run()
@@ -136,9 +143,9 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
-    game = MagicMock()
+    game = Mock()
     game.get_enabled_shift_locations.return_value = board.shift_locations
-    player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
+    player = ComputerPlayer(compute_method_factory=RandomActionsAlgorithm, move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     for _ in range(100):
         player.run()
@@ -149,7 +156,7 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
             allowed_coordinates = [(3, 5)]
         elif shift_location == BoardLocation(3, 0):
             allowed_coordinates = [(3, 0)]
-        allowed_moves = set(BoardLocation(*coordinates) for coordinates in allowed_coordinates)
+        allowed_moves = {BoardLocation(*coordinates) for coordinates in allowed_coordinates}
         assert move_location in allowed_moves
 
 
@@ -186,11 +193,11 @@ def test_computer_player_random_algorith_respects_no_pushback_rule(post_move, po
     board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
     piece = board.create_piece()
     previous_shift_location = BoardLocation(6, 1)
-    game = MagicMock()
+    game = Mock()
     game.get_enabled_shift_locations.return_value = board.shift_locations.difference({previous_shift_location})
     type(game).identifier = PropertyMock(return_value=7)
     piece.maze_card = board.maze[BoardLocation(3, 6)]
-    player = ComputerPlayer(algorithm_name="random", move_url="move-url", shift_url="shift-url",
+    player = ComputerPlayer(compute_method_factory=RandomActionsAlgorithm, move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     for _ in range(100):
         player.run()

@@ -6,7 +6,7 @@ import app.mapper.api as mapper
 import app.mapper.constants as keys
 from app.model.game import BoardLocation, Player
 from app.model.factories import create_game
-from app.model.computer import ComputerPlayer
+from app.model.computer import ComputerPlayer, RandomActionsAlgorithm
 
 
 def _create_test_game():
@@ -14,11 +14,11 @@ def _create_test_game():
     returns this instance and one of the player's identifier """
     game = create_game(game_id=3)
     game.previous_shift_location = BoardLocation(0, 1)
-    player_id = game.add_player(Player)
-    game.add_player(Player)
-    game.add_player(ComputerPlayer, algorithm_name="random", shift_url="shift-url",
-                    move_url="move-url")
-    game.get_player(player_id).score = 9
+    game.add_player(Player(identifier=0))
+    game.add_player(Player(identifier=1))
+    game.add_player(ComputerPlayer(identifier=2, compute_method_factory=RandomActionsAlgorithm,
+                                   shift_url="shift-url", move_url="move-url"))
+    game.get_player(0).score = 9
     game.start_game()
     return game
 

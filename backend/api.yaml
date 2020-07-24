@@ -138,7 +138,7 @@ components:
                         - "exhaustive-search"
                         - "minimax"
                         - "alpha-beta"
-                        - "library"
+                        - "dynamic-libexhsearch"
         errorObject:
             type: "object"
             properties:
