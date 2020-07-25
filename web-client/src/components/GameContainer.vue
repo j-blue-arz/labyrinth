@@ -154,7 +154,7 @@ export default {
         replaceWithWasm: function() {
             let player = this.game.getPlayer(this.userPlayerId);
             player.isComputer = true;
-            player.algorithm = "wasm";
+            player.type = "wasm";
         },
         addPlayer: function(apiResponse) {
             this.userPlayerId = parseInt(apiResponse.data);

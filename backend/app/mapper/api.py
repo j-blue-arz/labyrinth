@@ -9,7 +9,7 @@ import app.model.computer
 from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
                                   MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                  POST_PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
+                                  PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
 
 
 def game_state_to_dto(game: Game):
@@ -65,7 +65,7 @@ def dto_to_type(player_request_dto):
     """ Maps a DTO for the add player api method to the type of the player """
     if isinstance(player_request_dto, dict):
         return _value_or_none(
-            player_request_dto, POST_PLAYER_TYPE)
+            player_request_dto, PLAYER_TYPE)
     return None
 
 

@@ -4,7 +4,7 @@ export default class Player {
         this.mazeCard = null;
         this.colorIndex = colorIndex;
         this.isComputer = false;
-        this.algorithm = "";
+        this.type = "";
         this.isUser = false;
         this.turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
         this.score = 0;
@@ -33,20 +33,20 @@ export default class Player {
         this.colorIndex = apiPlayer.pieceIndex;
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
-            this.algorithm = apiPlayer.algorithm;
+            this.type = apiPlayer.algorithm;
             this.isUser = false;
         }
     }
 
-    algorithmDisplayName() {
-        if (this.algorithm === "exhaustive-search") {
+    computationMethodLabel() {
+        if (this.type === "exhaustive-search") {
             return "Exhaustive Search";
-        } else if (this.algorithm === "alpha-beta") {
+        } else if (this.type === "alpha-beta") {
             return "Alpha-Beta";
-        } else if (this.algorithm === "minimax") {
+        } else if (this.type === "minimax") {
             return "Minimax";
         } else {
-            return this.algorithm;
+            return this.type;
         }
     }
 }

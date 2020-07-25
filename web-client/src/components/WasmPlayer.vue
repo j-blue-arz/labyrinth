@@ -1,5 +1,5 @@
 <template>
-    <div>{{ playerAlgorithm }}</div>
+    <div>{{ playerType }}</div>
 </template>
 
 <script>
@@ -26,8 +26,8 @@ export default {
         };
     },
     watch: {
-        playerAlgorithm: function(newAlgorithm, oldAlgorithm) {
-            if (oldAlgorithm !== "wasm" && newAlgorithm === "wasm") {
+        playerType: function(newType, oldType) {
+            if (oldType !== "wasm" && newType === "wasm") {
                 if (!this.libexhsearch) {
                     this.loadLibexhsearch(() => {
                         if (this.playerTurnAction === SHIFT_ACTION) {
@@ -57,11 +57,11 @@ export default {
         }
     },
     computed: {
-        playerAlgorithm: function() {
+        playerType: function() {
             if (this.game.hasStarted()) {
                 let player = this.game.getPlayer(this.playerId);
                 if (player) {
-                    return player.algorithm;
+                    return player.type;
                 }
             }
             return "";

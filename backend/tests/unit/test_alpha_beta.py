@@ -1,4 +1,4 @@
-""" Tests for minimax algorithm.
+""" Tests for alpha-beta algorithm.
 Each testcase verifies the depth of the found solution,
 and asserts that the solution is valid.
 There are currently four types of test cases:

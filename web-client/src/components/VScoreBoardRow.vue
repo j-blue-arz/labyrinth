@@ -43,7 +43,7 @@ export default {
             } else if (!this.player.isComputer) {
                 return "";
             } else {
-                return this.player.algorithmDisplayName();
+                return this.player.computationMethodLabel();
             }
         },
         isTurn: function() {

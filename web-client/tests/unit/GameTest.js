@@ -341,7 +341,7 @@ describe("Game", () => {
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
             let computerPlayer = game.getPlayer(42);
             expect(computerPlayer.isComputer).toBe(true);
-            expect(computerPlayer.algorithm).toBe("random");
+            expect(computerPlayer.type).toBe("random");
             let player = game.getPlayer(17);
             expect(player.isComputer).toBe(false);
         });

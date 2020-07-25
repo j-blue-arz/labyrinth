@@ -77,11 +77,11 @@ export default {
     },
     methods: {
         updateRemoveMenuItems: function() {
-            var menuItemRemove = this.menuItems.find(item => item.key === "remove");
+            let menuItemRemove = this.menuItems.find(item => item.key === "remove");
             menuItemRemove.submenu = [];
-            for (var player of this.computerPlayers) {
+            for (let player of this.computerPlayers) {
                 let key = REMOVE_PREFIX + player.id;
-                let text = "" + player.colorIndex + " - " + player.algorithmDisplayName();
+                let text = "" + player.colorIndex + " - " + player.computationMethodLabel();
                 menuItemRemove.submenu.push(new MenuItem(key, text));
             }
         },
@@ -114,8 +114,8 @@ export default {
             } else if ($event === "replace-wasm") {
                 this.$emit("replace-wasm");
             } else if ($event.startsWith(ADD_PREFIX)) {
-                let algorithm = $event.substr(ADD_PREFIX.length);
-                this.addComputer(algorithm);
+                let computeMethod = $event.substr(ADD_PREFIX.length);
+                this.addComputer(computeMethod);
             } else if ($event.startsWith(REMOVE_PREFIX)) {
                 let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
                 this.removeComputer(playerId);
@@ -127,9 +127,9 @@ export default {
         closeMenu: function() {
             this.menuIsVisible = false;
         },
-        addComputer: function(algorithm) {
+        addComputer: function(computeMethod) {
             this.api
-                .doAddComputerPlayer(algorithm)
+                .doAddComputerPlayer(computeMethod)
                 .catch(this.handleError)
                 .then(this.calledApiMethod);
         },

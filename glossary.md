@@ -3,7 +3,8 @@
 #### action
 A shifting action or a move action.
 #### computer player
-An artificial player, who plays the game by finding shift actions and move actions according to the rules.
+An artificial player. Uses a computation method, e.g. a search algorithm, to compute shift and move actions, and plays
+the game with the computed actions.
 #### game board
 The set of all maze cards placed in a two-dimensional matrix of size 7x7
 #### insert location

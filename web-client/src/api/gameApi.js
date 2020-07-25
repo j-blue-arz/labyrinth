@@ -27,10 +27,10 @@ export default class GameApi {
         return axios.post(addPlayerPath);
     }
 
-    doAddComputerPlayer(algorithm) {
+    doAddComputerPlayer(computeMethod) {
         let addPlayerPath = this.apiPath + "/games/0/players";
         return axios.post(addPlayerPath, {
-            type: algorithm
+            type: computeMethod
         });
     }
 

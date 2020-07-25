@@ -8,7 +8,7 @@ import app.model.computer
 from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
                                   PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
-                                  PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
+                                  PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, PLAYER_TYPE)
 
 
 def game_to_dto(game: Game):
@@ -77,7 +77,7 @@ def _player_to_dto(player: Player):
                   PIECE_INDEX: player.piece.piece_index}
     if type(player) is app.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
-        player_dto[ALGORITHM] = player.compute_method_factory.SHORT_NAME
+        player_dto[PLAYER_TYPE] = player.compute_method_factory.SHORT_NAME
         player_dto[SHIFT_URL] = player.shift_url
         player_dto[MOVE_URL] = player.move_url
     return player_dto
@@ -107,7 +107,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     player = None
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
         player = app.model.computer.create_computer_player(
-            compute_method=player_dto[ALGORITHM],
+            compute_method=player_dto[PLAYER_TYPE],
             url_supplier=None,
             player_id=player_dto[ID],
             game=game,

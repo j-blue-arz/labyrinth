@@ -2,13 +2,13 @@
 
 ComputerPlayer is a subclass of model.game.Player, which handles board state and time-keeping.
 The other classes represent different methods of computing player actions. They either
-compute the action on their own (e.g. RandomActionsAlgorithm), or subclass an algorithm implementation
-from app.model.algorihm (e.g. AlphaBetaAlgorithm), or bind to an external library (LibraryBinding).
+compute the action on their own (e.g. RandomActionsMethod), or subclass an algorithm implementation
+from app.model.algorithm (e.g. AlphaBeta), or bind to an external library (LibraryBinding).
 
 Clients should use the factory method create_computer_player() to create a ComputerPlayer instance.
 
-The Algorithm classes are expected to have a getter for shift_action and move_action, with which they provide their
-solutions for the respective moves.
+The computation method classes are expected to have a getter for shift_action and move_action, 
+with which they provide their solutions for the respective moves.
 shift_action is expected to return a tuple of the form (<shift_location>, <shift_rotation>),
 where <shift_location> is a BoardLocation, <shift_rotation> is one of [0, 90, 270, 180]
 move_action should return a BoardLocation.  """
@@ -44,7 +44,7 @@ def create_computer_player(player_id, compute_method,
     :param player_id: the identifier of the player to create.
     :param compute_method: is used to determine the action computation method and its parameters.
         If this parameter starts with 'lib-', it is expected to denote a shared library.
-        Otherwise, it has to match one of the algorithms implemented in the backend currently
+        Otherwise, it has to match one of the computation methods implemented in the backend currently
         'random', 'exhaustive-search', 'minimax', or 'alpha-beta'.
     :param url_supplier: a supplier for the shift and move API URLs.
         This supplier is expected to have methods get_shift_url(game_id, player_id), and
@@ -107,27 +107,27 @@ class ComputerPlayer(Player, Thread):
     def run(self):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
-        algorithm = self._compute_method_factory(board, piece, self._game)
-        algorithm.start()
-        time.sleep(algorithm.SECONDS_TO_COMPUTE)
+        compute_method = self._compute_method_factory(board, piece, self._game)
+        compute_method.start()
+        time.sleep(compute_method.SECONDS_TO_COMPUTE)
         time.sleep(self._SECONDS_TO_ANSWER)
-        shift_action = algorithm.shift_action
-        move_action = algorithm.move_action
+        shift_action = compute_method.shift_action
+        move_action = compute_method.move_action
 
         if shift_action is None or move_action is None:
             board = copy.deepcopy(self._board)
             piece = self._find_equal_piece(board)
-            fallback_algorithm = RandomActionsAlgorithm(board, piece, self._game)
-            # Calling run directly, so that fallback waits for algorithm to finish before posting actions
-            fallback_algorithm.run()
-            shift_action = fallback_algorithm.shift_action
-            move_action = fallback_algorithm.move_action
+            fallback = RandomActionsMethod(board, piece, self._game)
+            # Calling run directly, so that fallback waits for computation to finish before posting actions
+            fallback.run()
+            shift_action = fallback.shift_action
+            move_action = fallback.move_action
 
         # self._validate(shift_action, move_action)
         self._post_shift(*shift_action)
         time.sleep(self._SECONDS_TO_ANSWER)
         self._post_move(move_action)
-        algorithm.abort_search()
+        compute_method.abort_search()
 
     @property
     def shift_url(self):
@@ -178,7 +178,7 @@ class ComputerPlayer(Player, Thread):
             print(maze_string)
 
 
-class RandomActionsAlgorithm(Thread):
+class RandomActionsMethod(Thread):
     """ Implements a computation method which performs a random shift action followed by a random, but valid
     move action """
 
@@ -217,7 +217,7 @@ class RandomActionsAlgorithm(Thread):
         self._move_action = choice(tuple(reachable_locations))
 
 
-class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
+class ExhaustiveSearch(Thread, exh.Optimizer):
     """ Uses an exhaustive search to compute best single-player solution to objective.
     abort_search() is already implemented in superclass, exh.Optimizer. """
     SHORT_NAME = "exhaustive-search"
@@ -246,7 +246,7 @@ class ExhaustiveSearchAlgorithm(Thread, exh.Optimizer):
             self._move_action = actions[1]
 
 
-class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
+class Minimax(Thread, mm.IterativeDeepening):
     """ Uses the minimax algorithm to determine an action in a two-player game. """
     SHORT_NAME = "minimax"
     SECONDS_TO_COMPUTE = 2.5
@@ -275,8 +275,8 @@ class MinimaxAlgorithm(Thread, mm.IterativeDeepening):
         self.start_iterating()
 
 
-class AlphaBetaAlgorithm(Thread, ab.IterativeDeepening):
-    """ Uses the minimax algorithm to determine an action in a two-player game. """
+class AlphaBeta(Thread, ab.IterativeDeepening):
+    """ Uses the alpha-beta algorithm to determine an action in a two-player game. """
     SHORT_NAME = "alpha-beta"
     SECONDS_TO_COMPUTE = 2.5
 
@@ -363,8 +363,8 @@ def _dynamic_compute_method_factory(compute_method):
 
 def _backend_compute_method_factory(compute_method):
     compute_method_factory = None
-    compute_method_classes = [RandomActionsAlgorithm, ExhaustiveSearchAlgorithm,
-                              MinimaxAlgorithm, AlphaBetaAlgorithm]
+    compute_method_classes = [RandomActionsMethod, ExhaustiveSearch,
+                              Minimax, AlphaBeta]
     for method_class in compute_method_classes:
         if method_class.SHORT_NAME == compute_method:
             compute_method_factory = method_class
