@@ -7,7 +7,7 @@ from app.model.algorithm (e.g. AlphaBeta), or bind to an external library (Libra
 
 Clients should use the factory method create_computer_player() to create a ComputerPlayer instance.
 
-The computation method classes are expected to have a getter for shift_action and move_action, 
+The computation method classes are expected to have a getter for shift_action and move_action,
 with which they provide their solutions for the respective moves.
 shift_action is expected to return a tuple of the form (<shift_location>, <shift_rotation>),
 where <shift_location> is a BoardLocation, <shift_rotation> is one of [0, 90, 270, 180]
