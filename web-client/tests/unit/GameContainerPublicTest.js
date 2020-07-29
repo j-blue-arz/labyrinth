@@ -16,6 +16,7 @@ var mockShift = jest.fn();
 var mockMove = jest.fn();
 var mockCancel = jest.fn();
 var mockErrorWasThrownByCancel = jest.fn();
+var mockFetchComputationMethods = jest.fn();
 jest.mock("@/api/gameApi.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
@@ -24,7 +25,8 @@ jest.mock("@/api/gameApi.js", () => {
             doShift: mockShift,
             doMove: mockMove,
             cancelAllFetches: mockCancel,
-            errorWasThrownByCancel: mockErrorWasThrownByCancel
+            errorWasThrownByCancel: mockErrorWasThrownByCancel,
+            fetchComputationMethods: mockFetchComputationMethods
         };
     });
 });
@@ -36,6 +38,7 @@ beforeEach(() => {
     mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
     mockMove.mockImplementation(() => Promise.resolve({ data: "" }));
     mockErrorWasThrownByCancel.mockReturnValue(true);
+    mockFetchComputationMethods.mockImplementation(() => Promise.resolve([]));
     GameApi.mockClear();
     mockFetchState.mockClear();
     mockAddPlayer.mockClear();

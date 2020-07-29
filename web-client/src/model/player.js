@@ -4,7 +4,7 @@ export default class Player {
         this.mazeCard = null;
         this.colorIndex = colorIndex;
         this.isComputer = false;
-        this.type = "";
+        this.computationMethod = "";
         this.isUser = false;
         this.turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
         this.score = 0;
@@ -33,20 +33,33 @@ export default class Player {
         this.colorIndex = apiPlayer.pieceIndex;
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
-            this.type = apiPlayer.algorithm;
+            this.computationMethod = apiPlayer.computationMethod;
             this.isUser = false;
         }
     }
 
-    computationMethodLabel() {
-        if (this.type === "exhaustive-search") {
+    getLabel() {
+        if (this.isUser) {
+            return "You";
+        } else if (this.isComputer) {
+            return Player.computationMethodLabel(this.computationMethod);
+        }
+        return "";
+    }
+
+    static computationMethodLabel(computationMethod) {
+        if (computationMethod === "exhaustive-search") {
             return "Exhaustive Search";
-        } else if (this.type === "alpha-beta") {
+        } else if (computationMethod === "alpha-beta") {
             return "Alpha-Beta";
-        } else if (this.type === "minimax") {
+        } else if (computationMethod === "minimax") {
             return "Minimax";
+        } else if (computationMethod === "random") {
+            return "Random actions";
+        } else if (computationMethod.startsWith("dynamic-")) {
+            return computationMethod.replace("dynamic-", "Library: ");
         } else {
-            return this.type;
+            return computationMethod;
         }
     }
 }

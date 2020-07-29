@@ -91,3 +91,9 @@ def post_move(game_id):
     request_body = request.get_json(force=True)
     service.perform_move(game_id, player_id, request_body)
     return ""
+
+
+@API.route('/computation-methods', methods=["GET"])
+def get_computation_methods():
+    """ Returns an array of available computation methods."""
+    return json.jsonify(service.get_computation_methods())

@@ -61,7 +61,7 @@ export default {
             if (this.game.hasStarted()) {
                 let player = this.game.getPlayer(this.playerId);
                 if (player) {
-                    return player.type;
+                    return player.computationMethod;
                 }
             }
             return "";

@@ -64,6 +64,23 @@ def create_computer_player(player_id, compute_method,
                           identifier=player_id, game=game, piece=piece)
 
 
+def get_available_computation_methods():
+    """ Returns the identifiers of the available computation methods.
+    The methods implemented in the backend are hard-coded.
+    For the dynamically loaded libraries, all base filenames (without extension) in the
+    library folder are returned, each prefixed with 'dynamic-'.
+    """
+    def extract_basename(filename):
+        basename, ext = os.path.splitext(os.path.basename(filename))
+        return basename
+
+    backend_computation_methods = [method.SHORT_NAME for method in _backend_computation_methods()]
+    filenames = _library_filenames()
+    prefix = LibraryBinding.LIBRARY_PREFIX
+    dynamic_computation_methods = [prefix + extract_basename(filename) for filename in filenames]
+    return backend_computation_methods + dynamic_computation_methods
+
+
 class ComputerPlayer(Player, Thread):
     """ This class represents a computer player.
 
@@ -338,15 +355,26 @@ class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
             self._move_action = action[1]
 
 
+def _library_extension():
+    extension = ".so"
+    if platform.system() == "Windows":
+        extension = ".dll"
+    return extension
+
+
+def _library_filenames():
+    library_folder = current_app.config['LIBRARY_PATH']
+    extension = _library_extension()
+    search_pattern = os.path.join(library_folder, '*' + extension)
+    return glob.glob(search_pattern)
+
+
 def _dynamic_compute_method_factory(compute_method):
     library_prefix = LibraryBinding.LIBRARY_PREFIX
     expected_library = compute_method[len(library_prefix):]
     library_folder = current_app.config['LIBRARY_PATH']
-    extension = ".so"
-    if platform.system() == "Windows":
-        extension = ".dll"
-    search_pattern = os.path.join(library_folder, '*' + extension)
-    filenames = glob.glob(search_pattern)
+    extension = _library_extension()
+    filenames = _library_filenames()
     full_library_path = None
     expected_filename = os.path.join(library_folder, expected_library + extension)
     for filename in filenames:
@@ -361,10 +389,14 @@ def _dynamic_compute_method_factory(compute_method):
         raise exceptions.InvalidComputeMethodException("Could not find library {}".format(expected_library))
 
 
+def _backend_computation_methods():
+    return [RandomActionsMethod, ExhaustiveSearch,
+            Minimax, AlphaBeta]
+
+
 def _backend_compute_method_factory(compute_method):
     compute_method_factory = None
-    compute_method_classes = [RandomActionsMethod, ExhaustiveSearch,
-                              Minimax, AlphaBeta]
+    compute_method_classes = _backend_computation_methods()
     for method_class in compute_method_classes:
         if method_class.SHORT_NAME == compute_method:
             compute_method_factory = method_class

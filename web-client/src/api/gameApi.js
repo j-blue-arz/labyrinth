@@ -30,7 +30,8 @@ export default class GameApi {
     doAddComputerPlayer(computeMethod) {
         let addPlayerPath = this.apiPath + "/games/0/players";
         return axios.post(addPlayerPath, {
-            type: computeMethod
+            isComputerPlayer: true,
+            computationMethod: computeMethod
         });
     }
 
@@ -51,6 +52,11 @@ export default class GameApi {
         return axios.get(getStatePath, {
             cancelToken: this.fetchSource.token
         });
+    }
+
+    fetchComputationMethods() {
+        let getComputationMethodsPath = this.apiPath + "/computation-methods";
+        return axios.get(getComputationMethodsPath);
     }
 
     CANCEL_MESSAGE = "fetchState cancelled by user.";

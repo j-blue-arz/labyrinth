@@ -4,19 +4,23 @@ import VMenu from "@/components/VMenu.vue";
 import GameApi from "@/api/gameApi.js";
 import Player from "@/model/player.js";
 import Vue from "vue";
+import flushPromises from "flush-promises";
 
 var mockAddComputerPlayer = jest.fn();
 var mockRemovePlayer = jest.fn();
+var mockFetchComputationMethods = jest.fn();
 jest.mock("@/api/gameApi.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
             doAddComputerPlayer: mockAddComputerPlayer,
-            removePlayer: mockRemovePlayer
+            removePlayer: mockRemovePlayer,
+            fetchComputationMethods: mockFetchComputationMethods
         };
     });
 });
 mockAddComputerPlayer.mockImplementation(() => Promise.resolve());
 mockRemovePlayer.mockImplementation(() => Promise.resolve());
+mockFetchComputationMethods.mockImplementation(() => Promise.resolve({ data: [] }));
 
 var mockGetComputerPlayers = jest.fn();
 var mockGame = {
@@ -43,6 +47,12 @@ const clickInMenu = function(gameMenu, ref) {
         .find(VMenu)
         .find({ ref: ref })
         .trigger("click");
+};
+
+const withComputationMethods = function(computationMethods) {
+    mockFetchComputationMethods.mockImplementation(() =>
+        Promise.resolve({ data: computationMethods })
+    );
 };
 
 beforeEach(() => {
@@ -133,25 +143,55 @@ describe("GameMenu", () => {
         });
     });
 
-    describe.each([["exhaustive-search", "minimax", "alpha-beta"]])("entry %s", entry => {
-        it("closes menu", done => {
+    describe("Add computer submenu", () => {
+        it("has entries corresponding to API computation methods", async () => {
+            withComputationMethods(["exhaustive-search", "dynamic-libexhsearch"]);
             let gameMenu = factory();
+            await flushPromises();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
-            clickInMenu(gameMenu, "add-" + entry);
+            let menu = gameMenu.find(VMenu);
+            expect(menu.findAll("li").length).toBe(3); // first entry is header
+            expect(menu.find({ ref: "add-exhaustive-search" }).exists()).toBe(true);
+            expect(menu.find({ ref: "add-dynamic-libexhsearch" }).exists()).toBe(true);
+            expect(menu.find({ ref: "add-alpha-beta" }).exists()).toBe(false);
+        });
+
+        it("closes menu", async done => {
+            withComputationMethods(["alpha-beta", "dynamic-libexhsearch"]);
+            let gameMenu = factory();
+            await flushPromises();
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "add");
+            clickInMenu(gameMenu, "add-alpha-beta");
             Vue.nextTick(() => {
                 expect(gameMenu.find(".menu").isVisible()).toBe(false);
                 done();
             });
         });
 
-        it("calls doAddComputerPlayer() on gameApi with argument '" + entry + "'", () => {
+        it("calls doAddComputerPlayer() on gameApi with computation method", async () => {
+            withComputationMethods(["exhaustive-search"]);
             let gameMenu = factory();
+            await flushPromises();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
-            clickInMenu(gameMenu, "add-" + entry);
+            clickInMenu(gameMenu, "add-exhaustive-search");
             expect(mockAddComputerPlayer).toHaveBeenCalledTimes(1);
-            expect(mockAddComputerPlayer).toHaveBeenCalledWith(entry);
+            expect(mockAddComputerPlayer).toHaveBeenCalledWith("exhaustive-search");
+        });
+
+        it("Displays readable labels", async () => {
+            withComputationMethods(["alpha-beta", "dynamic-libexhsearch"]);
+            let gameMenu = factory();
+            await flushPromises();
+            toggleMenu(gameMenu);
+            clickInMenu(gameMenu, "add");
+            let menu = gameMenu.find(VMenu);
+            let entries = menu.findAll("li");
+            let labels = entries.wrappers.map(wrapper => wrapper.text());
+            expect(entries.length).toBe(3); // first entry is header
+            expect(labels).toEqual(expect.arrayContaining(["Alpha-Beta", "Library: libexhsearch"]));
         });
     });
 
@@ -163,6 +203,7 @@ describe("GameMenu", () => {
             let menu = gameMenu.find(VMenu);
             expect(gameMenu.find(".menu").isVisible()).toBe(true);
             let entries = menu.findAll("li");
+            let labels = entries.wrappers.map(wrapper => wrapper.text());
             expect(entries.length).toBe(3); // first entry is header
             expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(
                 1

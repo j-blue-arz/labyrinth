@@ -17,6 +17,7 @@
 import Vue from "vue";
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
+import Player from "@/model/player.js";
 
 const NOT_PARTICIPATING = -1;
 const REMOVE_PREFIX = "remove-";
@@ -55,12 +56,7 @@ export default {
             menuItems: [
                 new MenuItem("leave", "Leave game"),
                 new MenuItem("replace-wasm", "Let WASM play for me"),
-                new MenuItem("add", "Add computer..", [
-                    new MenuItem(ADD_PREFIX + "exhaustive-search", "Exhaustive Search"),
-                    new MenuItem(ADD_PREFIX + "minimax", "Minimax"),
-                    new MenuItem(ADD_PREFIX + "alpha-beta", "Alpha-Beta"),
-                    new MenuItem(ADD_PREFIX + "dynamic-libexhsearch", "Library: libexhsearch")
-                ]),
+                new MenuItem("add", "Add computer..", []),
                 new MenuItem("remove", "Remove computer..", []),
                 new MenuItem("restart", "Restart with..", [
                     new MenuItem(RESTART_PREFIX + "7", "original size (7)"),
@@ -76,12 +72,31 @@ export default {
         }
     },
     methods: {
+        updateAddComputerMenuItems: function() {
+            let menuItemAddComputer = this.menuItems.find(item => item.key === "add");
+            menuItemAddComputer.submenu = [];
+            this.api
+                .fetchComputationMethods()
+                .then(function(methodsResult) {
+                    let methods = methodsResult.data;
+                    if (methods) {
+                        let menuItems = methods.map(method => {
+                            let key = ADD_PREFIX + method;
+                            let text = Player.computationMethodLabel(method);
+                            return new MenuItem(key, text);
+                        });
+                        menuItemAddComputer.submenu = menuItems;
+                    }
+                })
+                .catch(this.handleError);
+        },
         updateRemoveMenuItems: function() {
             let menuItemRemove = this.menuItems.find(item => item.key === "remove");
             menuItemRemove.submenu = [];
             for (let player of this.computerPlayers) {
                 let key = REMOVE_PREFIX + player.id;
-                let text = "" + player.colorIndex + " - " + player.computationMethodLabel();
+                let label = player.getLabel();
+                let text = "" + player.colorIndex + " - " + label;
                 menuItemRemove.submenu.push(new MenuItem(key, text));
             }
         },
@@ -154,6 +169,7 @@ export default {
     },
     mounted() {
         this.updateRemoveMenuItems();
+        this.updateAddComputerMenuItems();
         this.updateLeaveEnterMenuItem();
         this.updateReplaceWasmMenuItem();
     }

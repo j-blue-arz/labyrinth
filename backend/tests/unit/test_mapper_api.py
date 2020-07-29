@@ -47,10 +47,10 @@ def test_mapping_computer_player():
     game_dto = mapper.game_state_to_dto(game)
     computer_player_dto = game_dto[keys.PLAYERS][2]
     assert computer_player_dto[keys.IS_COMPUTER]
-    assert computer_player_dto[keys.ALGORITHM] == "random"
+    assert computer_player_dto[keys.COMPUTATION_METHOD] == "random"
     player_dto = game_dto[keys.PLAYERS][1]
     assert not player_dto[keys.IS_COMPUTER]
-    assert keys.ALGORITHM not in player_dto
+    assert keys.COMPUTATION_METHOD not in player_dto
 
 
 def test_mapping_leftover():
@@ -131,16 +131,18 @@ def test_dto_to_move_action():
 
 def test_dto_to_type():
     """ Tests dto_to_type """
-    player_request_dto = json.loads("""{"type": "normal"}""")
-    player_type = mapper.dto_to_type(player_request_dto)
-    assert player_type == "normal"
+    player_request_dto = json.loads("""{"isComputerPlayer": true, "computationMethod": "random"}""")
+    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
+    assert is_computer is True
+    assert computation_method == "random"
 
 
 def test_dto_to_type_with_none():
     """ Tests dto_to_type """
     player_request_dto = None
-    player_type = mapper.dto_to_type(player_request_dto)
-    assert player_type is None
+    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
+    assert is_computer is False
+    assert computation_method is None
 
 
 def test_shift_action_to_dto():

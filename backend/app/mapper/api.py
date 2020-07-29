@@ -9,7 +9,7 @@ import app.model.computer
 from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
                                   MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                  PLAYER_TYPE, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, ALGORITHM)
+                                  MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD)
 
 
 def game_state_to_dto(game: Game):
@@ -62,11 +62,15 @@ def dto_to_move_action(move_dto):
 
 
 def dto_to_type(player_request_dto):
-    """ Maps a DTO for the add player api method to the type of the player """
+    """ Maps a DTO for the add player api method to the type of the player.
+
+    More specifically, returns two values.  """
     if isinstance(player_request_dto, dict):
-        return _value_or_none(
-            player_request_dto, PLAYER_TYPE)
-    return None
+        is_computer = player_request_dto[COMPUTATION_METHOD] if COMPUTATION_METHOD in player_request_dto else False
+        is_computer = _value_or_false(player_request_dto, IS_COMPUTER)
+        computation_method = _value_or_none(player_request_dto, COMPUTATION_METHOD)
+        return is_computer, computation_method
+    return False, None
 
 
 def dto_to_maze_size(game_options_dto):
@@ -78,6 +82,12 @@ def _value_or_none(dto, key):
     if key in dto:
         return dto[key]
     return None
+
+
+def _value_or_false(dto, key):
+    if key in dto:
+        return dto[key]
+    return False
 
 
 def shift_action_to_dto(location, rotation):
@@ -112,7 +122,7 @@ def _player_to_dto(player: Player):
                   PIECE_INDEX: player.piece.piece_index}
     if type(player) is app.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
-        player_dto[ALGORITHM] = player.compute_method_factory.SHORT_NAME
+        player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME
     else:
         player_dto[IS_COMPUTER] = False
     return player_dto

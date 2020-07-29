@@ -341,7 +341,7 @@ describe("Game", () => {
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
             let computerPlayer = game.getPlayer(42);
             expect(computerPlayer.isComputer).toBe(true);
-            expect(computerPlayer.type).toBe("random");
+            expect(computerPlayer.computationMethod).toBe("random");
             let player = game.getPlayer(17);
             expect(player.isComputer).toBe(false);
         });
@@ -498,7 +498,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
     "mazeCardId": 16,
     "pieceIndex": 0,
     "isComputerPlayer": true,
-    "algorithm": "random"
+    "computationMethod": "random"
   },{
     "id": 17,
     "pieceIndex": 1,

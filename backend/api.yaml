@@ -9,6 +9,7 @@ info:
 paths:
     /games/{game_id}/players:
         post:
+            operationId: addPlayer
             tags:
                 - "players"
             summary: "Add a new player to a game"
@@ -18,12 +19,12 @@ paths:
                 - $ref: "#/components/parameters/gameId"
             requestBody:
                 description: "An optional request body specifies the type of player. 
-                    The type is required if the added player should be a computer player. By default, a human player is added."
+                    The body is required if the added player should be a computer player. Without a body, a human player is added."
                 required: false
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/playerObject'
+                            $ref: '#/components/schemas/addPlayerObject'
             responses:
                 200:
                     description: "If no error occurred, the body contains the identifier of the added player.
@@ -124,21 +125,38 @@ paths:
                     description: "OK"
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
+    /computation-methods:
+        get:
+            tags:
+                - "players"
+            summary: "Available computation methods for computer players."
+            operationId: "getComputationMethods"
+            responses:
+                200:
+                    description: "A list of possible computation methods. 
+                        Only these can be used as the `computationMethod` required for adding computer player with 
+                        `POST /games/{game_id}/players`."
+                    content:
+                        application/json:
+                            schema:
+                                type: "array"
+                                items:
+                                    type: "string"
+                                example: ["random", "exhaustive-search"]
 components:
     schemas:
-        playerObject:
+        addPlayerObject:
             type: "object"
             properties:
-                type:
+                isComputerPlayer:
+                    type: "boolean"
+                    required: false
+                    default: false
+                computationMethod:
                     type: "string"
-                    description: "Type of player. 'human' signifies a human player. All other values represent different computer player algorithms."
-                    enum:
-                        - "human"
-                        - "random"
-                        - "exhaustive-search"
-                        - "minimax"
-                        - "alpha-beta"
-                        - "dynamic-libexhsearch"
+                    description: "Method a computer player uses to determine game actions. 
+                                  The available computation methods can be fetched with `GET /computation-methods`."
+                    example: "exhaustive-search"
         errorObject:
             type: "object"
             properties:
@@ -577,14 +595,10 @@ components:
                     description: "A player's identifier, unique in the application. This identifier is used as path parameter `player_id` or the query parameter `p_id`."
                 isComputerPlayer:
                     type: "boolean"
-                algorithm:
+                computationMethod:
                     type: "string"
-                    description: "Only present if `isComputerPlayer` is true."
-                    enum:
-                        - "random"
-                        - "exhaustive-search"
-                        - "minimax"
-                        - "alpha-beta"
+                    description: "Only present if `isComputerPlayer` is true. This will be one of the available computation methods, 
+                                  which can be retrieved by `GET /computation-methods`."
                 mazeCardId:
                     type: "integer"
                     description: "Current location of the player's piece, as an identifier of a maze card."
@@ -644,4 +658,8 @@ components:
     responses:
         errorResponse:
             description: "Error response. If an error occurred, a code >= 400 is returned. 
-            Clients should check the `key` field in the response object, or directly display `userMessage` field to the user."
+                          Clients should check the `key` field in the response object, or directly display `userMessage` field to the user."
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/errorObject'  

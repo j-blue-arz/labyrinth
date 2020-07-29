@@ -38,13 +38,7 @@ export default {
             return "score-row--player-" + this.player.colorIndex;
         },
         playerName: function() {
-            if (this.player.isUser) {
-                return "You";
-            } else if (!this.player.isComputer) {
-                return "";
-            } else {
-                return this.player.computationMethodLabel();
-            }
+            return this.player.getLabel();
         },
         isTurn: function() {
             return this.player.hasToMove() || this.player.hasToShift();

@@ -7,7 +7,7 @@ from app import exceptions
 from app import database
 from app.model.exceptions import LabyrinthDomainException
 from app.model.game import Player
-from app.model.computer import create_computer_player
+from app.model import computer
 
 
 def add_player(game_id, player_request_dto):
@@ -20,16 +20,14 @@ def add_player(game_id, player_request_dto):
     :return: the id of the added player
     """
     game = _get_or_create_game(game_id)
-    player_type = mapper.dto_to_type(player_request_dto)
-    if player_type is None:
-        player_type = "human"
+    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
     player_id = _try(game.next_player_id)
     player = None
-    if player_type == "human":
+    if not is_computer:
         player = Player(player_id)
     else:
-        player = _try(lambda: create_computer_player(compute_method=player_type, url_supplier=URLSupplier(),
-                                                     player_id=player_id))
+        player = _try(lambda: computer.create_computer_player(compute_method=computation_method,
+                                                              url_supplier=URLSupplier(), player_id=player_id))
     _try(lambda: game.add_player(player))
     if len(game.players) == 1:
         _try(game.start_game)
@@ -83,6 +81,13 @@ def perform_move(game_id, player_id, move_dto):
     game = _load_game_or_throw(game_id)
     _try(lambda: game.move(player_id, location))
     database.update_game(game_id, game)
+
+
+def get_computation_methods():
+    """ Retrieves the available computation methods.
+    These are either methods implemented in the backend, i.e. those in app.model.computer,
+    or methods made available by dynamically loaded libraries """
+    return computer.get_available_computation_methods()
 
 
 def _get_or_create_game(game_id):
