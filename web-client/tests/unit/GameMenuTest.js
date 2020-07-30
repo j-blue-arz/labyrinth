@@ -203,7 +203,6 @@ describe("GameMenu", () => {
             let menu = gameMenu.find(VMenu);
             expect(gameMenu.find(".menu").isVisible()).toBe(true);
             let entries = menu.findAll("li");
-            let labels = entries.wrappers.map(wrapper => wrapper.text());
             expect(entries.length).toBe(3); // first entry is header
             expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(
                 1
