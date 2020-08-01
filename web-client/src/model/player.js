@@ -34,7 +34,6 @@ export default class Player {
         if (apiPlayer.isComputerPlayer) {
             this.isComputer = true;
             this.computationMethod = apiPlayer.computationMethod;
-            this.isUser = false;
         }
     }
 

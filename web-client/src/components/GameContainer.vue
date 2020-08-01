@@ -12,14 +12,14 @@
             @move-piece="onMovePlayerPiece"
             @perform-shift="onInsertCard"
             :game="game"
-            :player-id="userPlayerId"
+            :player-id="wasmPlayerId"
         />
         <score-board :players="players" class="game-container__score" />
         <game-menu
             v-if="isUsingApi"
             :api="api"
             :game="game"
-            :user-player-id="userPlayerId"
+            :player-manager="playerManager"
             @enter-game="enterGame"
             @leave-game="leaveGame"
             @replace-wasm="replaceWithWasm"
@@ -37,6 +37,7 @@ import WasmPlayer from "@/components/WasmPlayer.vue";
 import Game, * as actions from "@/model/game.js";
 import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
+import PlayerManager from "@/model/playerManager.js";
 import { setInterval, clearInterval } from "timers";
 
 export default {
@@ -62,7 +63,7 @@ export default {
     data() {
         return {
             game: new Game(),
-            clientPlayers: {},
+            playerManager: null,
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
         };
@@ -73,6 +74,12 @@ export default {
         },
         players: function() {
             return this.game.getPlayers();
+        },
+        userPlayerId: function() {
+            return this.playerManager.getUserPlayer();
+        },
+        wasmPlayerId: function() {
+            return this.playerManager.getWasmPlayer();
         }
     },
     methods: {
@@ -130,7 +137,11 @@ export default {
                 .catch(this.handleError);
         },
         createGameFromApi: function(apiResponse) {
-            this.game.createFromApi(apiResponse.data, this.userPlayerId);
+            this.game.createFromApi(apiResponse.data);
+            if (this.playerManager.hasUserPlayer) {
+                let userPlayerId = this.playerManager.getUserPlayer();
+                this.game.getPlayer(userPlayerId).isUser = true;
+            }
         },
         enterGame: function() {
             this.api
@@ -140,26 +151,18 @@ export default {
                 .then(this.startPolling);
         },
         leaveGame: function() {
-            this.api
-                .removePlayer(this.userPlayerId)
-                .catch(this.handleError)
-                .then(this.startPolling);
-            this.userPlayerId = NOT_PARTICIPATING;
-            if (this.useStorage()) {
-                sessionStorage.playerId = this.userPlayerId;
+            if (this.playerManager.hasUserPlayer()) {
+                let userPlayerId = this.playerManager.getUserPlayer();
+                this.api
+                    .removePlayer(userPlayerId)
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+                this.playerManager.removeUserPlayer();
             }
-        },
-        replaceWithWasm: function() {
-            let player = this.game.getPlayer(this.userPlayerId);
-            player.isComputer = true;
-            player.computationMethod = "wasm";
         },
         addUserPlayer: function(apiResponse) {
-            this.userPlayerId = parseInt(apiResponse.data);
-            this.api.playerId = this.userPlayerId;
-            if (this.useStorage()) {
-                sessionStorage.playerId = this.userPlayerId;
-            }
+            let userPlayerId = parseInt(apiResponse.data);
+            this.playerManager.addUserPlayer(userPlayerId);
         },
         useApi: function() {
             return process.env.NODE_ENV !== "development" && this.shouldUseApi;
@@ -169,25 +172,25 @@ export default {
         }
     },
     created: function() {
+        this.playerManager = new PlayerManager(this.api, this.useStorage());
         if (!this.useApi()) {
             let gameFactory = this.gameFactory;
             if (gameFactory === null) {
                 gameFactory = new GameFactory();
             }
             this.game = gameFactory.createGame();
-            this.userPlayerId = this.game.getPlayers()[0].id;
+            this.playerManager.addUserPlayer(this.game.getPlayers()[0].id);
         } else {
             if (this.useStorage() && sessionStorage.playerId) {
-                this.userPlayerId = parseInt(sessionStorage.playerId);
-                this.api.playerId = this.userPlayerId;
-                this.api
-                    .fetchState()
-                    .then(this.startPolling)
-                    .catch(error => {
-                        if (error.response.data.key === "PLAYER_NOT_IN_GAME") {
-                            this.enterGame();
-                        }
-                    });
+                let userPlayerId = parseInt(sessionStorage.playerId);
+                this.api.fetchState().then(() => {
+                    this.createGameFromApi();
+                    if (!this.game.hasPlayer(userPlayerId)) {
+                        this.enterGame();
+                    } else {
+                        this.playerManager.addUserPlayer(userPlayerId);
+                    }
+                });
             } else {
                 this.enterGame();
             }

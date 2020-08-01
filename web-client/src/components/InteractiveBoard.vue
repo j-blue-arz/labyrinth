@@ -170,7 +170,7 @@ export default {
                 let moveEvent = {
                     playerId: this.userPlayerId,
                     targetLocation: mazeCard.location
-                }
+                };
                 this.$emit("move-piece", moveEvent);
             }
         },

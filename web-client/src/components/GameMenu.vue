@@ -31,11 +31,11 @@ export default {
             required: true
         },
         game: {
-            require: true
+            required: true
         },
-        userPlayerId: {
-            type: Number,
-            require: true
+        playerManager: {
+            type: Object,
+            required: true
         }
     },
     components: {
@@ -69,6 +69,9 @@ export default {
     computed: {
         computerPlayers: function() {
             return this.game.getComputerPlayers();
+        },
+        userPlayerId: function() {
+            return this.playerManager.getUserPlayer();
         }
     },
     methods: {
