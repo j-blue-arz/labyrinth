@@ -81,27 +81,27 @@ export default {
             this.stopPolling();
             if (this.useApi()) {
                 this.api
-                    .doShift(this.userPlayerId, event.location, event.leftoverRotation)
+                    .doShift(event.playerId, event.location, event.leftoverRotation)
                     .then(() => this.game.shift(event.location))
                     .catch(this.handleError)
                     .then(this.startPolling);
             } else {
                 this.game.shift(event.location);
                 this.game.nextAction.action = actions.MOVE_ACTION;
-                this.game.getPlayer(this.userPlayerId).turnAction = actions.MOVE_ACTION;
+                this.game.getPlayer(event.playerId).turnAction = actions.MOVE_ACTION;
             }
         },
-        onMovePlayerPiece: function(targetLocation) {
-            this.game.move(this.userPlayerId, targetLocation);
+        onMovePlayerPiece: function(event) {
+            this.game.move(event.playerId, event.targetLocation);
             if (this.useApi()) {
                 this.stopPolling();
                 this.api
-                    .doMove(this.userPlayerId, targetLocation)
+                    .doMove(event.playerId, event.targetLocation)
                     .catch(this.handleError)
                     .then(this.startPolling);
             } else {
                 this.game.nextAction.action = actions.SHIFT_ACTION;
-                this.game.getPlayer(this.userPlayerId).turnAction = actions.SHIFT_ACTION;
+                this.game.getPlayer(event.playerId).turnAction = actions.SHIFT_ACTION;
             }
         },
         handleError: function(error) {

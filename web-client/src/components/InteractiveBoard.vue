@@ -156,6 +156,7 @@ export default {
         },
         onInsertPanelClick: function(shiftLocation) {
             let shiftEvent = {
+                playerId: this.userPlayerId,
                 location: shiftLocation,
                 leftoverRotation: this.leftoverMazeCard.rotation
             };
@@ -166,7 +167,11 @@ export default {
                 this.isMyTurnToMove &&
                 this.game.isMoveValid(this.userPlayerId, mazeCard.location)
             ) {
-                this.$emit("move-piece", mazeCard.location);
+                let moveEvent = {
+                    playerId: this.userPlayerId,
+                    targetLocation: mazeCard.location
+                }
+                this.$emit("move-piece", moveEvent);
             }
         },
         interactiveBoardSize: function() {
