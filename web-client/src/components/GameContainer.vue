@@ -16,7 +16,6 @@
         />
         <score-board :players="players" class="game-container__score" />
         <game-menu
-            v-if="isUsingApi"
             :api="api"
             :game="game"
             :player-manager="playerManager"
@@ -34,8 +33,7 @@ import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import WasmPlayer from "@/components/WasmPlayer.vue";
-import Game, * as actions from "@/model/game.js";
-import GameFactory from "@/model/gameFactory.js";
+import Game from "@/model/game.js";
 import GameApi from "@/api/gameApi.js";
 import PlayerManager from "@/model/playerManager.js";
 import { setInterval, clearInterval } from "timers";
@@ -48,18 +46,6 @@ export default {
         ScoreBoard,
         WasmPlayer
     },
-    props: {
-        gameFactory: {
-            type: GameFactory,
-            required: false,
-            default: null
-        },
-        shouldUseApi: {
-            type: Boolean,
-            required: false,
-            default: true
-        }
-    },
     data() {
         return {
             game: new Game(),
@@ -69,9 +55,6 @@ export default {
         };
     },
     computed: {
-        isUsingApi: function() {
-            return this.useApi();
-        },
         players: function() {
             return this.game.getPlayers();
         },
@@ -86,30 +69,19 @@ export default {
         onInsertCard: function(event) {
             this.game.leftoverMazeCard.rotation = event.leftoverRotation;
             this.stopPolling();
-            if (this.useApi()) {
-                this.api
-                    .doShift(event.playerId, event.location, event.leftoverRotation)
-                    .then(() => this.game.shift(event.location))
-                    .catch(this.handleError)
-                    .then(this.startPolling);
-            } else {
-                this.game.shift(event.location);
-                this.game.nextAction.action = actions.MOVE_ACTION;
-                this.game.getPlayer(event.playerId).turnAction = actions.MOVE_ACTION;
-            }
+            this.api
+                .doShift(event.playerId, event.location, event.leftoverRotation)
+                .then(() => this.game.shift(event.location))
+                .catch(this.handleError)
+                .then(this.startPolling);
         },
         onMovePlayerPiece: function(event) {
             this.game.move(event.playerId, event.targetLocation);
-            if (this.useApi()) {
-                this.stopPolling();
-                this.api
-                    .doMove(event.playerId, event.targetLocation)
-                    .catch(this.handleError)
-                    .then(this.startPolling);
-            } else {
-                this.game.nextAction.action = actions.SHIFT_ACTION;
-                this.game.getPlayer(event.playerId).turnAction = actions.SHIFT_ACTION;
-            }
+            this.stopPolling();
+            this.api
+                .doMove(event.playerId, event.targetLocation)
+                .catch(this.handleError)
+                .then(this.startPolling);
         },
         handleError: function(error) {
             if (!this.api.errorWasThrownByCancel(error)) {
@@ -125,7 +97,7 @@ export default {
         },
         startPolling() {
             this.stopPolling();
-            if (this.timer === 0 && this.useApi()) {
+            if (this.timer === 0) {
                 this.fetchApiState();
                 this.timer = setInterval(this.fetchApiState, 800);
             }
@@ -164,36 +136,24 @@ export default {
             let userPlayerId = parseInt(apiResponse.data);
             this.playerManager.addUserPlayer(userPlayerId);
         },
-        useApi: function() {
-            return process.env.NODE_ENV !== "development" && this.shouldUseApi;
-        },
         useStorage: function() {
             return process.env.NODE_ENV === "production";
         }
     },
     created: function() {
         this.playerManager = new PlayerManager(this.api, this.useStorage());
-        if (!this.useApi()) {
-            let gameFactory = this.gameFactory;
-            if (gameFactory === null) {
-                gameFactory = new GameFactory();
-            }
-            this.game = gameFactory.createGame();
-            this.playerManager.addUserPlayer(this.game.getPlayers()[0].id);
+        if (this.useStorage() && sessionStorage.playerId) {
+            let userPlayerId = parseInt(sessionStorage.playerId);
+            this.api.fetchState().then(() => {
+                this.createGameFromApi();
+                if (!this.game.hasPlayer(userPlayerId)) {
+                    this.enterGame();
+                } else {
+                    this.playerManager.addUserPlayer(userPlayerId);
+                }
+            });
         } else {
-            if (this.useStorage() && sessionStorage.playerId) {
-                let userPlayerId = parseInt(sessionStorage.playerId);
-                this.api.fetchState().then(() => {
-                    this.createGameFromApi();
-                    if (!this.game.hasPlayer(userPlayerId)) {
-                        this.enterGame();
-                    } else {
-                        this.playerManager.addUserPlayer(userPlayerId);
-                    }
-                });
-            } else {
-                this.enterGame();
-            }
+            this.enterGame();
         }
     },
     beforeDestroy() {
