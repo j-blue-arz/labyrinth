@@ -39,8 +39,6 @@ import GameFactory from "@/model/gameFactory.js";
 import GameApi from "@/api/gameApi.js";
 import { setInterval, clearInterval } from "timers";
 
-const NOT_PARTICIPATING = -1;
-
 export default {
     name: "game-container",
     components: {
@@ -64,7 +62,7 @@ export default {
     data() {
         return {
             game: new Game(),
-            userPlayerId: NOT_PARTICIPATING,
+            clientPlayers: {},
             timer: 0,
             api: new GameApi(location.protocol + "//" + location.host)
         };
@@ -83,7 +81,7 @@ export default {
             this.stopPolling();
             if (this.useApi()) {
                 this.api
-                    .doShift(event.location, event.leftoverRotation)
+                    .doShift(this.userPlayerId, event.location, event.leftoverRotation)
                     .then(() => this.game.shift(event.location))
                     .catch(this.handleError)
                     .then(this.startPolling);
@@ -98,7 +96,7 @@ export default {
             if (this.useApi()) {
                 this.stopPolling();
                 this.api
-                    .doMove(targetLocation)
+                    .doMove(this.userPlayerId, targetLocation)
                     .catch(this.handleError)
                     .then(this.startPolling);
             } else {
@@ -137,7 +135,7 @@ export default {
         enterGame: function() {
             this.api
                 .doAddPlayer()
-                .then(this.addPlayer)
+                .then(this.addUserPlayer)
                 .catch(this.handleError)
                 .then(this.startPolling);
         },
@@ -156,7 +154,7 @@ export default {
             player.isComputer = true;
             player.computationMethod = "wasm";
         },
-        addPlayer: function(apiResponse) {
+        addUserPlayer: function(apiResponse) {
             this.userPlayerId = parseInt(apiResponse.data);
             this.api.playerId = this.userPlayerId;
             if (this.useStorage()) {
