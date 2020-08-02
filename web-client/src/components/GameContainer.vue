@@ -21,7 +21,8 @@
             :player-manager="playerManager"
             @enter-game="enterGame"
             @leave-game="leaveGame"
-            @replace-wasm="replaceWithWasm"
+            @enter-wasm="addWasmPlayer"
+            @remove-wasm="removeWasmPlayer"
             @called-api-method="startPolling"
             class="game-container__menu"
         />
@@ -116,25 +117,48 @@ export default {
             }
         },
         enterGame: function() {
-            this.api
-                .doAddPlayer()
-                .then(this.addUserPlayer)
-                .catch(this.handleError)
-                .then(this.startPolling);
+            if (this.playerManager.canUserEnterGame()) {
+                this.api
+                    .doAddPlayer()
+                    .then(apiResponse => {
+                        let userPlayerId = parseInt(apiResponse.data);
+                        this.playerManager.addUserPlayer(userPlayerId);
+                    })
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+            }
         },
         leaveGame: function() {
             if (this.playerManager.hasUserPlayer()) {
-                let userPlayerId = this.playerManager.getUserPlayer();
+                let playerId = this.playerManager.getUserPlayer();
                 this.api
-                    .removePlayer(userPlayerId)
+                    .removePlayer(playerId)
                     .catch(this.handleError)
                     .then(this.startPolling);
                 this.playerManager.removeUserPlayer();
             }
         },
-        addUserPlayer: function(apiResponse) {
-            let userPlayerId = parseInt(apiResponse.data);
-            this.playerManager.addUserPlayer(userPlayerId);
+        addWasmPlayer: function() {
+            if (this.playerManager.canAddWasmPlayer()) {
+                this.api
+                    .doAddPlayer()
+                    .then(apiResponse => {
+                        let userPlayerId = parseInt(apiResponse.data);
+                        this.playerManager.addWasmPlayer(userPlayerId);
+                    })
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+            }
+        },
+        removeWasmPlayer: function() {
+            if (this.playerManager.hasWasmPlayer()) {
+                let playerId = this.playerManager.getWasmPlayer();
+                this.api
+                    .removePlayer(playerId)
+                    .catch(this.handleError)
+                    .then(this.startPolling);
+                this.playerManager.removeWasmPlayer();
+            }
         },
         useStorage: function() {
             return process.env.NODE_ENV === "production";

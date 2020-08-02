@@ -30,15 +30,11 @@ export default class PlayerManager {
         return this.userPlayer !== NOT_PARTICIPATING;
     }
 
-    hasWasmPlayer() {
-        return false;
-    }    
-
     canAddWasmPlayer() {
-        return false;
+        return this.wasmPlayer === NOT_PARTICIPATING;
     }
 
     canUserEnterGame() {
-        return false;
+        return this.userPlayer === NOT_PARTICIPATING;
     }
 }

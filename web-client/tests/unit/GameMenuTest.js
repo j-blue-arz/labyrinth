@@ -101,22 +101,6 @@ describe("GameMenu", () => {
         });
     });
 
-    describe("entry replace player (wasm)", () => {
-        it("emits 'replace-wasm' event", () => {
-            let gameMenu = factory();
-            toggleMenu(gameMenu);
-            clickInMenu(gameMenu, "replace-wasm");
-            expect(gameMenu.emitted("replace-wasm")).toBeTruthy();
-        });
-
-        it("is not visible if user is not participating", () => {
-            let gameMenu = factory(-1);
-            toggleMenu(gameMenu);
-            let entry = gameMenu.find(VMenu).find({ ref: "replace-wasm" });
-            expect(entry.exists()).toBe(false);
-        });
-    });
-
     describe("entry enter game", () => {
         it("closes menu", done => {
             let gameMenu = factory(-1);
