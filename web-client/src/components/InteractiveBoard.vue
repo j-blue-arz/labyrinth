@@ -46,7 +46,8 @@ import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
-import Game, * as action from "@/model/game.js";
+import Controller from "@/controllers/controller.js";
+import * as action from "@/model/game.js";
 import Graph from "@/model/mazeAlgorithm.js";
 
 export default {
@@ -61,12 +62,8 @@ export default {
         LeftoverMazeCard
     },
     props: {
-        game: {
-            type: Game,
-            required: true
-        },
-        userPlayerId: {
-            type: Number,
+        controller: {
+            type: Controller,
             required: true
         }
     },
@@ -87,8 +84,14 @@ export default {
         }
     },
     computed: {
+        game: function() {
+            return this.controller.game;
+        },
         mazeSize: function() {
             return this.game.n;
+        },
+        userPlayerId: function() {
+            return this.controller.playerManager.getUserPlayer();
         },
         interactiveMazeCards: function() {
             if (!this.isMyTurnToMove() || !this.game.hasStarted()) {
@@ -160,7 +163,7 @@ export default {
                 location: shiftLocation,
                 leftoverRotation: this.leftoverMazeCard.rotation
             };
-            this.$emit("perform-shift", shiftEvent);
+            this.controller.onInsertCard(shiftEvent);
         },
         onMazeCardClick: function(mazeCard) {
             if (
@@ -171,7 +174,7 @@ export default {
                     playerId: this.userPlayerId,
                     targetLocation: mazeCard.location
                 };
-                this.$emit("move-piece", moveEvent);
+                this.controller.onMovePlayerPiece(moveEvent);
             }
         },
         interactiveBoardSize: function() {

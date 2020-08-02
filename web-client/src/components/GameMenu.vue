@@ -18,6 +18,7 @@ import Vue from "vue";
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
 import Player from "@/model/player.js";
+import Controller from "@/controllers/controller.js";
 
 const REMOVE_PREFIX = "remove-";
 const ADD_PREFIX = "add-";
@@ -26,14 +27,8 @@ const RESTART_PREFIX = "restart-";
 export default {
     name: "game-menu",
     props: {
-        api: {
-            required: true
-        },
-        game: {
-            required: true
-        },
-        playerManager: {
-            type: Object,
+        controller: {
+            type: Controller,
             required: true
         }
     },
@@ -50,6 +45,9 @@ export default {
         hasWasmPlayer: function() {
             this.updateWasmMenuItem();
             this.updateRemoveMenuItems();
+        },
+        computationMethods: function() {
+            this.updateAddComputerMenuItems();
         }
     },
     data() {
@@ -69,33 +67,33 @@ export default {
     },
     computed: {
         computerPlayers: function() {
-            return this.game.getComputerPlayers();
+            return this.controller.game.getComputerPlayers();
+        },
+        playerManager: function() {
+            return this.controller.playerManager;
         },
         hasUserPlayer: function() {
             return this.playerManager.hasUserPlayer();
         },
         hasWasmPlayer: function() {
             return this.playerManager.hasWasmPlayer();
+        },
+        computationMethods: function() {
+            return this.controller.computationMethods;
         }
     },
     methods: {
-        initComputationMethods: function() {
+        updateAddComputerMenuItems: function() {
             let menuItemAddComputer = this.menuItems.find(item => item.key === "add");
             menuItemAddComputer.submenu = [];
-            this.api
-                .fetchComputationMethods()
-                .then(function(methodsResult) {
-                    let methods = methodsResult.data;
-                    if (methods) {
-                        methods.forEach(method => {
-                            let key = ADD_PREFIX + method;
-                            let text = Player.computationMethodLabel(method);
-                            menuItemAddComputer.submenu.push(new MenuItem(key, text));
-                        });
-                    }
-                    this.updateWasmMenuItem();
-                })
-                .catch(this.handleError);
+            if (this.computationMethods) {
+                this.computationMethods.forEach(method => {
+                    let key = ADD_PREFIX + method;
+                    let text = Player.computationMethodLabel(method);
+                    menuItemAddComputer.submenu.push(new MenuItem(key, text));
+                });
+            }
+            this.updateWasmMenuItem();
         },
         updateWasmMenuItem: function() {
             let addComputerMenu = this.menuItems.find(item => item.key === "add").submenu;
@@ -136,48 +134,24 @@ export default {
         onItemClick: function($event) {
             this.closeMenu();
             if ($event === "leave") {
-                this.$emit("leave-game");
+                this.controller.leaveGame();
             } else if ($event === "enter") {
-                this.$emit("enter-game");
+                this.controller.enterGame();
             } else if ($event === "wasm") {
-                this.$emit("enter-wasm");
+                this.controller.addWasmPlayer();
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let computeMethod = $event.substr(ADD_PREFIX.length);
-                this.addComputer(computeMethod);
+                this.controller.addComputer(computeMethod);
             } else if ($event.startsWith(REMOVE_PREFIX)) {
                 let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
-                this.removeComputer(playerId);
+                this.controller.removeComputer(playerId);
             } else if ($event.startsWith(RESTART_PREFIX)) {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
-                this.restartWithSize(size);
+                this.controller.restartWithSize(size);
             }
         },
         closeMenu: function() {
             this.menuIsVisible = false;
-        },
-        addComputer: function(computeMethod) {
-            this.api
-                .doAddComputerPlayer(computeMethod)
-                .catch(this.handleError)
-                .then(this.calledApiMethod);
-        },
-        removeComputer: function(playerId) {
-            this.api
-                .removePlayer(playerId)
-                .catch(this.handleError)
-                .then(this.calledApiMethod);
-        },
-        restartWithSize: function(size) {
-            this.api
-                .changeGame(size)
-                .catch(this.handleError)
-                .then(this.calledApiMethod);
-        },
-        handleError: function(error) {
-            console.error(error);
-        },
-        calledApiMethod: function() {
-            this.$emit("called-api-method");
         }
     },
     mounted() {

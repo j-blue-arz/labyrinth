@@ -1,12 +1,12 @@
 import WasmGateway from "@/api/wasmGateway.js";
 
 export default class WasmPlayer {
-    constructor(playerId, game, emitShiftEvent, emitMoveEvent) {
+    constructor(playerId, game, performShift, performMove) {
         this.playerId = playerId;
         this.game = game;
         this.wasmGateway = new WasmGateway();
-        this.emitShiftEvent = emitShiftEvent;
-        this.emitMoveEvent = emitMoveEvent;
+        this.performShift = performShift;
+        this.performMove = performMove;
     }
 
     onHasToShift() {
@@ -23,7 +23,7 @@ export default class WasmPlayer {
                 playerId: this.playerId,
                 targetLocation: this.computedAction.moveLocation
             };
-            this.emitMoveEvent(moveEvent);
+            this.performMove(moveEvent);
             this.computedAction = null;
         }
     }
@@ -35,6 +35,6 @@ export default class WasmPlayer {
             location: this.computedAction.shiftAction.location,
             leftoverRotation: this.computedAction.shiftAction.leftoverRotation
         };
-        this.emitShiftEvent(shiftEvent);
+        this.performShift(shiftEvent);
     }
 }
