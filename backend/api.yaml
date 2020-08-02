@@ -27,15 +27,12 @@ paths:
                             $ref: '#/components/schemas/addPlayerObject'
             responses:
                 200:
-                    description: "If no error occurred, the body contains the identifier of the added player.
-                    This identifier can then be used as the path parameter `player_id` or the query parameter `p_id`."
+                    description: "If no error occurred, the body contains the added player.
+                    The identifier in this player can then be used as the path parameter `player_id` or the query parameter `p_id`."
                     content:
                         application/json:
                             schema:
-                                type: integer
-                                minimum: 0
-                                example: 1
-                                description: "a positive integer"
+                                $ref: '#/components/schemas/player'
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
     /games/{game_id}/players/{player_id}:

@@ -17,7 +17,8 @@ const wrapperFactory = function(player) {
 describe("VPlayerPiece", () => {
     it("renders different classes for different values of colorIndex", () => {
         for (let index = 0; index < 4; index++) {
-            let player = new Player(index, index);
+            let player = new Player(index);
+            player.colorIndex = index;
             let playerPiece = wrapperFactory(player);
             let svgElement = playerPiece.find({ ref: "playerPiece" });
             let expectedClass = "player-piece__player-" + index;
@@ -26,7 +27,7 @@ describe("VPlayerPiece", () => {
     });
 
     it("assigns a class to the piece of the user", () => {
-        let player = new Player(0, 2);
+        let player = new Player(0);
         player.isUser = true;
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
@@ -35,7 +36,7 @@ describe("VPlayerPiece", () => {
     });
 
     it("does not assign user class to pieces who are not owned by the user", () => {
-        let player = new Player(0, 2);
+        let player = new Player(0);
         player.isUser = false;
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
@@ -45,7 +46,7 @@ describe("VPlayerPiece", () => {
     });
 
     it("assigns a class to the piece of the user, when it is his time to move", () => {
-        let player = new Player(0, 2);
+        let player = new Player(0);
         player.isUser = true;
         player.turnAction = "MOVE";
         let playerPiece = wrapperFactory(player);

@@ -35,7 +35,7 @@ jest.mock("@/api/gameApi.js", () => {
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
     mockFetchState.mockImplementation(() => Promise.resolve({ data: state }));
-    mockAddPlayer.mockImplementation(() => Promise.resolve({ data: 5 }));
+    mockAddPlayer.mockImplementation(() => Promise.resolve({ data: { id: 5, pieceIndex: 0 } }));
     mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
     mockMove.mockImplementation(() => Promise.resolve({ data: "" }));
     mockErrorWasThrownByCancel.mockReturnValue(true);

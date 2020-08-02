@@ -28,8 +28,8 @@ def post_player(game_id):
     Default: 'human'
     """
     request_body = request.get_json(silent=True, force=True)
-    player_id = service.add_player(game_id, request_body)
-    return json.jsonify(player_id)
+    player = service.add_player(game_id, request_body)
+    return player
 
 
 @API.route('/games/<int:game_id>/players/<int:player_id>', methods=["DELETE"])

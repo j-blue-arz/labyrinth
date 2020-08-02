@@ -23,7 +23,7 @@ def game_state_to_dto(game: Game):
     return {
         ID: game.identifier,
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
-        PLAYERS: [_player_to_dto(player) for player in game.players],
+        PLAYERS: [player_to_dto(player) for player in game.players],
         MAZE: _board_to_dto(game.board),
         NEXT_ACTION: _turns_to_next_player_action_dto(game.turns),
         ENABLED_SHIFT_LOCATIONS: _enabled_shift_locations_to_dto(game)
@@ -110,7 +110,7 @@ def exception_to_dto(api_exception):
     }
 
 
-def _player_to_dto(player: Player):
+def player_to_dto(player: Player):
     """Maps a player to a DTO
 
     :param piece: an instance of model.Piece

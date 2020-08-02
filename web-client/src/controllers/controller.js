@@ -2,6 +2,8 @@ import Game from "@/model/game.js";
 import GameApi from "@/api/gameApi.js";
 import PlayerManager from "@/model/playerManager.js";
 import { setInterval, clearInterval } from "timers";
+import Player from "@/model/player";
+import WasmPlayer from "@/model/wasmPlayer";
 
 export default class Controller {
     constructor(useStorage) {
@@ -97,11 +99,14 @@ export default class Controller {
 
     enterGame() {
         if (this.playerManager.canUserEnterGame()) {
+            this.stopPolling();
             this.api
                 .doAddPlayer()
                 .then(apiResponse => {
-                    let userPlayerId = parseInt(apiResponse.data);
-                    this.playerManager.addUserPlayer(userPlayerId);
+                    let userPlayer = Player.newFromApi(apiResponse.data);
+                    userPlayer.isUser = true;
+                    this.game.addPlayer(userPlayer);
+                    this.playerManager.addUserPlayer(userPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this.startPolling);
@@ -121,11 +126,20 @@ export default class Controller {
 
     addWasmPlayer() {
         if (this.playerManager.canAddWasmPlayer()) {
+            this.stopPolling();
             this.api
                 .doAddPlayer()
                 .then(apiResponse => {
-                    let userPlayerId = parseInt(apiResponse.data);
-                    this.playerManager.addWasmPlayer(userPlayerId);
+                    let playerId = parseInt(apiResponse.data);
+                    let wasmPlayer = new WasmPlayer(
+                        playerId,
+                        this.game,
+                        this.performShift,
+                        this.performMove
+                    );
+                    wasmPlayer.fillFromApi(apiResponse.data);
+                    this.game.addPlayer(wasmPlayer);
+                    this.playerManager.addWasmPlayer(wasmPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this.startPolling);

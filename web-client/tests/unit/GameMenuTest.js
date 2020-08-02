@@ -26,7 +26,7 @@ var mockGetComputerPlayers = jest.fn();
 var mockGame = {
     getComputerPlayers: mockGetComputerPlayers
 };
-mockGetComputerPlayers.mockImplementation(() => [new Player(4, 44), new Player(1, 11)]);
+mockGetComputerPlayers.mockImplementation(() => [new Player(4), new Player(1)]);
 
 const factory = function(userPlayerId = 7) {
     return mount(GameMenu, {
@@ -188,6 +188,7 @@ describe("GameMenu", () => {
             expect(gameMenu.find(".menu").isVisible()).toBe(true);
             let entries = menu.findAll("li");
             expect(entries.length).toBe(3); // first entry is header
+            // TODO: check something else instead of colorindex
             expect(entries.filter(entry => entry.element.textContent.includes("44")).length).toBe(
                 1
             );

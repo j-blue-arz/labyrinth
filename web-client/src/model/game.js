@@ -219,7 +219,7 @@ export default class Game {
         }
     }
 
-    createFromApi(apiState, userId = 0) {
+    createFromApi(apiState) {
         this.isLoading = true;
         var maze = apiState.maze;
         var apiMazeCards = maze.mazeCards;
@@ -230,7 +230,7 @@ export default class Game {
 
         this.n = maze.mazeSize;
         this._mazeCardsFromSortedApi(apiMazeCards);
-        this._playersFromApi(apiState, userId);
+        this._playersFromApi(apiState);
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
@@ -241,7 +241,7 @@ export default class Game {
         this.isLoading = false;
     }
 
-    _playersFromApi(apiState, userId) {
+    _playersFromApi(apiState) {
         let toRemove = new Set(this._players.map(player => player.id));
         apiState.players.sort(function(p1, p2) {
             return p1.id - p2.id;
@@ -255,9 +255,6 @@ export default class Game {
                 player.fillFromApi(apiPlayer);
             } else {
                 player = Player.newFromApi(apiPlayer);
-            }
-            if (userId === player.id && !player.isComputer) {
-                player.isUser = true;
             }
             player.mazeCard = playerCard;
             playerCard.addPlayer(player);

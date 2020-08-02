@@ -1,8 +1,9 @@
 import WasmGateway from "@/api/wasmGateway.js";
+import Player from "@/model/player.js";
 
-export default class WasmPlayer {
-    constructor(playerId, game, performShift, performMove) {
-        this.playerId = playerId;
+export default class WasmPlayer extends Player {
+    constructor(id, game, performShift, performMove) {
+        super(id);
         this.game = game;
         this.wasmGateway = new WasmGateway();
         this.performShift = performShift;

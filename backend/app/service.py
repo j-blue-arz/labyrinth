@@ -17,7 +17,7 @@ def add_player(game_id, player_request_dto):
 
     :param game_id: specifies the game
     :param player_request_dto: if this parameter is given, it contains information about the type of player to add
-    :return: the id of the added player
+    :return: the added player
     """
     game = _get_or_create_game(game_id)
     is_computer, computation_method = mapper.dto_to_type(player_request_dto)
@@ -32,7 +32,7 @@ def add_player(game_id, player_request_dto):
     if len(game.players) == 1:
         _try(game.start_game)
     database.update_game(game_id, game)
-    return player_id
+    return mapper.player_to_dto(player)
 
 
 def delete_player(game_id, player_id):
