@@ -41,21 +41,21 @@ export default class Controller {
             .catch(this.handleError);
     }
 
-    onInsertCard(event) {
-        this.game.leftoverMazeCard.rotation = event.leftoverRotation;
+    performShift(shiftAction) {
+        this.game.leftoverMazeCard.rotation = shiftAction.leftoverRotation;
         this.stopPolling();
         this.api
-            .doShift(event.playerId, event.location, event.leftoverRotation)
-            .then(() => this.game.shift(event.location))
+            .doShift(shiftAction.playerId, shiftAction.location, shiftAction.leftoverRotation)
+            .then(() => this.game.shift(shiftAction.location))
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
-    onMovePlayerPiece(event) {
-        this.game.move(event.playerId, event.targetLocation);
+    performMove(moveAction) {
+        this.game.move(moveAction.playerId, moveAction.targetLocation);
         this.stopPolling();
         this.api
-            .doMove(event.playerId, event.targetLocation)
+            .doMove(moveAction.playerId, moveAction.targetLocation)
             .catch(this.handleError)
             .then(this.startPolling);
     }

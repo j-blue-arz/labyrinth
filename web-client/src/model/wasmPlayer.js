@@ -20,22 +20,22 @@ export default class WasmPlayer extends Player {
 
     onHasToMove() {
         if (this.computedAction) {
-            let moveEvent = {
+            let moveAction = {
                 playerId: this.playerId,
                 targetLocation: this.computedAction.moveLocation
             };
-            this.performMove(moveEvent);
+            this.performMove(moveAction);
             this.computedAction = null;
         }
     }
 
     _performShift() {
         this.computedAction = this.wasmGateway.computeActions(this.game, this.playerId);
-        let shiftEvent = {
+        let shiftAction = {
             playerId: this.playerId,
             location: this.computedAction.shiftAction.location,
             leftoverRotation: this.computedAction.shiftAction.leftoverRotation
         };
-        this.performShift(shiftEvent);
+        this.performShift(shiftAction);
     }
 }

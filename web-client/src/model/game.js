@@ -295,9 +295,9 @@ export default class Game {
     setNextAction(nextAction) {
         for (let player of this._players) {
             if (nextAction && player.id === nextAction.playerId) {
-                player.turnAction = nextAction.action;
+                player.setTurnAction(nextAction.action);
             } else {
-                player.turnAction = NO_ACTION;
+                player.setTurnAction(NO_ACTION);
             }
         }
 

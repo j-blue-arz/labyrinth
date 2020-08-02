@@ -158,23 +158,23 @@ export default {
             }
         },
         onInsertPanelClick: function(shiftLocation) {
-            let shiftEvent = {
+            let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
                 leftoverRotation: this.leftoverMazeCard.rotation
             };
-            this.controller.onInsertCard(shiftEvent);
+            this.controller.performShift(shiftAction);
         },
         onMazeCardClick: function(mazeCard) {
             if (
                 this.isMyTurnToMove &&
                 this.game.isMoveValid(this.userPlayerId, mazeCard.location)
             ) {
-                let moveEvent = {
+                let moveAction = {
                     playerId: this.userPlayerId,
                     targetLocation: mazeCard.location
                 };
-                this.controller.onMovePlayerPiece(moveEvent);
+                this.controller.performMove(moveAction);
             }
         },
         interactiveBoardSize: function() {

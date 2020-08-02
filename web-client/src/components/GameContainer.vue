@@ -5,7 +5,6 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
-        <wasm-player :controller="controller" />
         <score-board :players="players" class="game-container__score" />
         <game-menu :controller="controller" class="game-container__menu" />
     </div>
@@ -15,7 +14,6 @@
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
-import WasmPlayer from "@/components/WasmPlayer.vue";
 import Controller from "@/controllers/controller.js";
 
 export default {
@@ -23,8 +21,7 @@ export default {
     components: {
         InteractiveBoard,
         GameMenu,
-        ScoreBoard,
-        WasmPlayer
+        ScoreBoard
     },
     data() {
         return {

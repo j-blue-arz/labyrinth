@@ -6,16 +6,32 @@ export default class Player {
         this.isComputer = false;
         this.computationMethod = "";
         this.isUser = false;
-        this.turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
+        this._turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
         this.score = 0;
     }
 
     hasToMove() {
-        return this.turnAction == "MOVE";
+        return this._turnAction == "MOVE";
     }
 
     hasToShift() {
-        return this.turnAction == "SHIFT";
+        return this._turnAction == "SHIFT";
+    }
+
+    getTurnAction() {
+        return this._turnAction;
+    }
+
+    setTurnAction(newTurnAction) {
+        let previousTurnAction = this._turnAction;
+        this._turnAction = newTurnAction;
+        if (previousTurnAction !== newTurnAction) {
+            if (newTurnAction === "SHIFT") {
+                this.onHasToShift();
+            } else if (newTurnAction === "MOVE") {
+                this.onHasToMove();
+            }
+        }
     }
 
     static withId(id) {
