@@ -10,9 +10,16 @@ export default class WasmPlayer extends Player {
         this.performMove = performMove;
     }
 
+    fillFromPlayer(player) {
+        this.mazeCard = player.mazeCard;
+        this.colorIndex = player.colorIndex;
+        this._turnAction = player._turnAction;
+        this.score = player.score;
+    }
+
     onHasToShift() {
-        if (!this.wasmGateway.libexhsearch) {
-            this.wasmGateway.loadLibexhsearch(this._performShift);
+        if (!this.wasmGateway.hasLibexhsearch()) {
+            this.wasmGateway.loadLibexhsearch(() => this._performShift());
         } else {
             this._performShift();
         }
@@ -21,7 +28,7 @@ export default class WasmPlayer extends Player {
     onHasToMove() {
         if (this.computedAction) {
             let moveAction = {
-                playerId: this.playerId,
+                playerId: this.id,
                 targetLocation: this.computedAction.moveLocation
             };
             this.performMove(moveAction);
@@ -30,12 +37,16 @@ export default class WasmPlayer extends Player {
     }
 
     _performShift() {
-        this.computedAction = this.wasmGateway.computeActions(this.game, this.playerId);
+        this.computedAction = this.wasmGateway.computeActions(this.game, this.id);
         let shiftAction = {
-            playerId: this.playerId,
+            playerId: this.id,
             location: this.computedAction.shiftAction.location,
             leftoverRotation: this.computedAction.shiftAction.leftoverRotation
         };
         this.performShift(shiftAction);
+    }
+
+    getLabel() {
+        return "WASM: Exhaustive Search";
     }
 }

@@ -60,7 +60,7 @@ export default {
     list-style: none;
     position: absolute;
     left: -11rem;
-    top: 0.5rem;
+    top: 3rem;
 
     &__item {
         display: flex;

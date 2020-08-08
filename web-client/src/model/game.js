@@ -19,13 +19,13 @@ export default class Game {
         this.leftoverMazeCard = {};
         this._players = [];
         this.nextAction = { playerId: 0, action: NO_ACTION };
-        this.isLoading = false;
+        this._hasStarted = false;
         this.isShifting = false;
         this.disabledShiftLocation = null;
     }
 
     hasStarted() {
-        return !this.isLoading && this.nextAction.action !== NO_ACTION;
+        return this._hasStarted;
     }
 
     mazeCardsAsList() {
@@ -35,12 +35,12 @@ export default class Game {
     mazeCardById(id) {
         for (var row = 0; row < this.mazeCards.length; row++) {
             for (var col = 0; col < this.mazeCards[row].length; col++) {
-                if (this.mazeCards[row][col].id == id) {
+                if (this.mazeCards[row][col].id === id) {
                     return this.mazeCards[row][col];
                 }
             }
         }
-        if (this.leftoverMazeCard.id == id) {
+        if (this.leftoverMazeCard.id === id) {
             return this.leftoverMazeCard;
         }
         return null;
@@ -123,12 +123,33 @@ export default class Game {
                 return player;
             }
         }
-        throw new ValueError("No player with id " + playerId);
+        return null;
     }
 
     addPlayer(player) {
         if (!this.hasPlayer(player.id)) {
             this._players.push(player);
+        }
+    }
+
+    addPlayerFromApi(apiPlayer, player = null) {
+        if (!player) {
+            player = new Player(apiPlayer.id);
+        }
+        player.id = apiPlayer.id;
+        player.fillFromApi(apiPlayer);
+        let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
+        if (playerCard) {
+            player.mazeCard = playerCard;
+            playerCard.addPlayer(player);
+        }
+        this.addPlayer(player);
+    }
+
+    replaceWithPlayer(player) {
+        let index = this._players.findIndex(p => p.id == player.id);
+        if (index > -1) {
+            this._players.splice(index, 1, player);
         }
     }
 
@@ -160,6 +181,9 @@ export default class Game {
 
     move(playerId, targetLocation) {
         var player = this.getPlayer(playerId);
+        if (!player) {
+            throw new ValueError("No player with id " + playerId);
+        }
         var targetMazeCard = this.getMazeCard(targetLocation);
         var sourceMazeCard = player.mazeCard;
         sourceMazeCard.removePlayer(player);
@@ -220,7 +244,6 @@ export default class Game {
     }
 
     createFromApi(apiState) {
-        this.isLoading = true;
         var maze = apiState.maze;
         var apiMazeCards = maze.mazeCards;
         this._sortApiMazeCards(apiMazeCards);
@@ -234,11 +257,11 @@ export default class Game {
 
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
-        this.setNextAction(apiState.nextAction);
 
         this.disabledShiftLocation = this._findMissingShiftLocation(apiState.enabledShiftLocations);
 
-        this.isLoading = false;
+        this.setNextAction(apiState.nextAction);
+        this._hasStarted = true;
     }
 
     _playersFromApi(apiState) {
@@ -252,10 +275,10 @@ export default class Game {
             let player;
             if (this.hasPlayer(apiPlayer.id)) {
                 player = this.getPlayer(apiPlayer.id);
-                player.fillFromApi(apiPlayer);
             } else {
-                player = Player.newFromApi(apiPlayer);
+                player = new Player(apiPlayer.id);
             }
+            player.fillFromApi(apiPlayer);
             player.mazeCard = playerCard;
             playerCard.addPlayer(player);
             toRemove.delete(player.id);

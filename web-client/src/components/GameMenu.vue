@@ -18,7 +18,6 @@ import Vue from "vue";
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
 import Player from "@/model/player.js";
-import Controller from "@/controllers/controller.js";
 
 const REMOVE_PREFIX = "remove-";
 const ADD_PREFIX = "add-";
@@ -28,7 +27,7 @@ export default {
     name: "game-menu",
     props: {
         controller: {
-            type: Controller,
+            type: Object,
             required: true
         }
     },
@@ -67,10 +66,10 @@ export default {
     },
     computed: {
         computerPlayers: function() {
-            return this.controller.game.getComputerPlayers();
+            return this.controller.getGame().getComputerPlayers();
         },
         playerManager: function() {
-            return this.controller.playerManager;
+            return this.controller.getPlayerManager();
         },
         hasUserPlayer: function() {
             return this.playerManager.hasUserPlayer();
@@ -79,7 +78,7 @@ export default {
             return this.playerManager.hasWasmPlayer();
         },
         computationMethods: function() {
-            return this.controller.computationMethods;
+            return this.controller.getComputationMethods();
         }
     },
     methods: {
@@ -97,10 +96,10 @@ export default {
         },
         updateWasmMenuItem: function() {
             let addComputerMenu = this.menuItems.find(item => item.key === "add").submenu;
-            let index = addComputerMenu.find(item => item.key === "enter-wasm");
+            let index = addComputerMenu.findIndex(item => item.key === "add-wasm");
             if (this.playerManager.canAddWasmPlayer()) {
                 if (index === -1) {
-                    addComputerMenu.push(new MenuItem("enter-wasm", "WASM: Exhaustive Search"));
+                    addComputerMenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search"));
                 }
             } else {
                 if (index > -1) {
@@ -118,7 +117,13 @@ export default {
                 menuItemRemove.submenu.push(new MenuItem(key, text));
             }
             if (this.playerManager.hasWasmPlayer()) {
-                menuItemRemove.submenu.push(new MenuItem("remove-wasm", "WASM: Exhaustive Search"));
+                let playerId = this.playerManager.getWasmPlayer();
+                let player = this.controller.getGame().getPlayer(playerId);
+                if (player) {
+                    let label = player.getLabel();
+                    let text = "" + player.colorIndex + " - " + label;
+                    menuItemRemove.submenu.push(new MenuItem("remove-wasm", text));
+                }
             }
         },
         updateLeaveEnterMenuItem: function() {
@@ -137,8 +142,10 @@ export default {
                 this.controller.leaveGame();
             } else if ($event === "enter") {
                 this.controller.enterGame();
-            } else if ($event === "wasm") {
+            } else if ($event === "add-wasm") {
                 this.controller.addWasmPlayer();
+            } else if ($event === "remove-wasm") {
+                this.controller.removeWasmPlayer();
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let computeMethod = $event.substr(ADD_PREFIX.length);
                 this.controller.addComputer(computeMethod);

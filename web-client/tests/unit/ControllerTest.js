@@ -1,201 +1,145 @@
-import { shallowMount, mount } from "@vue/test-utils";
-import InteractiveBoard from "@/components/InteractiveBoard.vue";
-import InsertPanels from "@/components/InsertPanels.vue";
-import VGameBoard from "@/components/VGameBoard.vue";
-import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
-import VMazeCard from "@/components/VMazeCard.vue";
+import { loc } from "@/model/game";
+import flushPromises from "flush-promises";
 import { copyObjectStructure } from "./testutils.js";
-import Game, { loc } from "@/model/game.js";
 import Controller from "@/controllers/controller.js";
-import PlayerManager from "../../src/model/playerManager.js";
+import GameApi from "@/api/gameApi.js";
 
-let mockGetGame = jest.fn();
-let mockGetPlayerManager = jest.fn();
-let mockPerformShift = jest.fn();
-let mockPerformMove = jest.fn();
-jest.mock("@/controllers/controller.js", () => {
+jest.useFakeTimers();
+
+var mockFetchState = jest.fn();
+var mockAddPlayer = jest.fn();
+var mockShift = jest.fn();
+var mockMove = jest.fn();
+var mockCancel = jest.fn();
+var mockErrorWasThrownByCancel = jest.fn();
+var mockFetchComputationMethods = jest.fn();
+jest.mock("@/api/gameApi.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
-            getGame: mockGetGame,
-            getPlayerManager: mockGetPlayerManager,
-            performShift: mockPerformShift,
-            performMove: mockPerformMove
+            fetchState: mockFetchState,
+            doAddPlayer: mockAddPlayer,
+            doShift: mockShift,
+            doMove: mockMove,
+            cancelAllFetches: mockCancel,
+            errorWasThrownByCancel: mockErrorWasThrownByCancel,
+            fetchComputationMethods: mockFetchComputationMethods
         };
     });
 });
-
-const createMockController = function(game) {
-    let controller = new Controller(false);
-    mockGetGame.mockReturnValue(game);
-    let playerManager = new PlayerManager();
-    playerManager.addUserPlayer(5);
-    mockGetPlayerManager.mockReturnValue(playerManager);
-    return controller;
-};
-
-const shallowFactory = function(game) {
-    let controller = createMockController(game);
-    return shallowMount(InteractiveBoard, {
-        propsData: {
-            controller: controller
-        }
-    });
-};
-
-const factory = function(game) {
-    let controller = createMockController(game);
-    return mount(InteractiveBoard, {
-        propsData: {
-            controller: controller
-        }
-    });
-};
-
-function fromStateWithShiftAction() {
-    let stateCopy = copyObjectStructure(API_STATE);
-    stateCopy.nextAction.action = "SHIFT";
-    let game = new Game();
-    game.createFromApi(stateCopy);
-    return game;
-}
-
-function fromStateWithMoveAction() {
-    let stateCopy = copyObjectStructure(API_STATE);
-    stateCopy.nextAction.action = "MOVE";
-    let game = new Game();
-    game.createFromApi(stateCopy);
-    return game;
-}
-
-function findLeftover(board) {
-    return board.find(LeftoverMazeCard).find(VMazeCard);
-}
 
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
-    Controller.mockClear();
-    mockGetGame.mockClear();
-    mockGetPlayerManager.mockClear();
-    mockPerformShift.mockClear();
-    mockPerformMove.mockClear();
+    mockFetchState.mockImplementation(() => Promise.resolve({ data: state }));
+    mockAddPlayer.mockImplementation(() =>
+        Promise.resolve({ data: { id: 5, pieceIndex: 0, mazeCardId: 0 } })
+    );
+    mockShift.mockImplementation(() => Promise.resolve({ data: "" }));
+    mockMove.mockImplementation(() => Promise.resolve({ data: "" }));
+    mockErrorWasThrownByCancel.mockReturnValue(true);
+    mockFetchComputationMethods.mockImplementation(() => Promise.resolve([]));
+    mockFetchState.mockClear();
+    mockAddPlayer.mockClear();
+    mockShift.mockClear();
+    mockMove.mockClear();
+    mockCancel.mockClear();
+    GameApi.mockClear();
 });
 
-describe("InteractiveBoard", () => {
-    it("rotates leftover maze card when clicked", () => {
-        let game = fromStateWithShiftAction();
-        let board = factory(game);
-        const rotateOperation = jest.spyOn(game.leftoverMazeCard, "rotateClockwise");
-        let leftoverVMazeCard = findLeftover(board);
-        let oldRotation = leftoverVMazeCard.props().mazeCard.rotation;
-        leftoverVMazeCard.trigger("click");
-        let newRotation = leftoverVMazeCard.props().mazeCard.rotation;
-        expect(newRotation).toBe((oldRotation + 90) % 360);
-        expect(rotateOperation).toHaveBeenCalledTimes(1);
+const factory = function() {
+    let controller = new Controller(false);
+    controller.initialize();
+    return controller;
+};
+
+describe("Controller", () => {
+    it("sets player id according to result of API call", async () => {
+        let controller = factory();
+        expect(mockAddPlayer).toHaveBeenCalledTimes(1);
+        await flushPromises();
+        expect(controller.getPlayerManager().getUserPlayer()).toBe(5);
     });
 
-    it("does not rotate leftover maze card when next action is move", () => {
-        let game = fromStateWithMoveAction();
-        let board = factory(game);
-        const rotateOperation = jest.spyOn(game.leftoverMazeCard, "rotateClockwise");
-        let leftoverVMazeCard = findLeftover(board);
-        leftoverVMazeCard.trigger("click");
-        expect(rotateOperation).toHaveBeenCalledTimes(0);
+    it("sets leftover maze card according to fetched state", async () => {
+        let controller = factory();
+        await flushPromises();
+        expect(mockFetchState).toHaveBeenCalled();
+        var leftOverRotation = controller.getGame().leftoverMazeCard.rotation;
+        expect(leftOverRotation).toBe(270);
     });
 
-    it("assigns class 'interaction' on leftover maze card if next action is shift", () => {
-        let board = factory(fromStateWithShiftAction());
-        let leftoverVMazeCard = findLeftover(board);
-        expect(leftoverVMazeCard.classes()).toContain("maze-card--interactive");
-    });
-
-    it("removes class 'interaction' on leftover maze card if next action is move", () => {
-        let board = factory(fromStateWithMoveAction());
-        let leftoverVMazeCard = findLeftover(board);
-        expect(leftoverVMazeCard.classes()).not.toContain("maze-card--interactive");
-    });
-
-    it("sets interaction class on reachable maze cards", () => {
-        let game = fromStateWithMoveAction();
-        let board = factory(game);
-        let reachableCardLocations = [loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)];
-        let reachableCardIds = reachableCardLocations.map(
-            location => game.getMazeCard(location).id
+    it("determines computation methods on startup", async () => {
+        mockFetchComputationMethods.mockImplementation(() =>
+            Promise.resolve({ data: ["a", "b", "d"] })
         );
-
-        let interactiveCardIds = fetchInteractiveCardIds(board);
-        expect(interactiveCardIds.length).toBe(reachableCardIds.length);
-        expect(interactiveCardIds).toEqual(expect.arrayContaining(reachableCardIds));
+        let controller = factory();
+        await flushPromises();
+        expect(controller.getComputationMethods()).toEqual(["a", "b", "d"]);
     });
 
-    it("does not set interaction class if shift is required", () => {
-        let board = factory(fromStateWithShiftAction());
-        let interactiveCardIds = fetchInteractiveCardIds(board);
-        expect(interactiveCardIds.length).toBe(1); // leftover
+    describe(".performShift", () => {
+        it("cancels all fetches", async () => {
+            let controller = factory();
+            await flushPromises();
+            controller.performShift(shiftEvent(0, 1, 90));
+            expect(mockCancel).toHaveBeenCalledTimes(1);
+        });
+
+        it("does not shift before API call returns", async () => {
+            var controller = factory();
+            const shiftOperation = jest.spyOn(controller._game, "shift");
+            await flushPromises();
+            controller.performShift(shiftEvent(0, 1, 90));
+            expect(mockShift).toHaveBeenCalledTimes(1);
+            expect(shiftOperation).toHaveBeenCalledTimes(0);
+        });
+
+        it("does shift after API call returns successfully", async () => {
+            var controller = factory();
+            const shiftOperation = jest.spyOn(controller._game, "shift");
+            await flushPromises();
+            controller.performShift(shiftEvent(0, 1, 90));
+            expect(mockShift).toHaveBeenCalledTimes(1);
+            expect(shiftOperation).toHaveBeenCalledTimes(0);
+            await flushPromises();
+            expect(shiftOperation).toHaveBeenCalledTimes(1);
+        });
     });
 
-    it("calls performMove() on controller when maze card is clicked", () => {
-        let game = fromStateWithMoveAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][2];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
-        expect(mockPerformMove).toHaveBeenCalled();
-    });
+    describe(".performMove", () => {
+        beforeEach(() => {
+            let stateWithMove = copyObjectStructure(state);
+            stateWithMove.nextAction.action = "MOVE";
+            mockFetchState.mockImplementation(() => Promise.resolve({ data: stateWithMove }));
+        });
 
-    it("does not call performMove() if shift is required", () => {
-        let game = fromStateWithShiftAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][2];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
-        expect(mockPerformMove).not.toHaveBeenCalled();
-    });
+        it("calls API on move", async () => {
+            var controller = factory();
+            await flushPromises();
+            controller.performMove(moveEvent(0, 3));
+            await flushPromises();
+            expect(mockMove).toHaveBeenCalledTimes(1);
+            let playerId = mockMove.mock.calls[0][0];
+            expect(playerId).toEqual(5);
+            let location = mockMove.mock.calls[0][1];
+            expect(location.row).toEqual(0);
+            expect(location.column).toEqual(3);
+        });
 
-    it("does not call performMove() if clicked maze card is not reachable", () => {
-        let game = fromStateWithShiftAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][0];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
-        expect(mockPerformMove).not.toHaveBeenCalled();
-    });
-
-    it("sets interaction on insert panels if shift is required", () => {
-        let board = shallowFactory(fromStateWithShiftAction());
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().interaction).toBeTruthy();
-    });
-
-    it("does not set interaction on insert panels if move is required", () => {
-        let board = shallowFactory(fromStateWithMoveAction());
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().interaction).toBeFalsy();
-    });
-
-    it("forwards disabled insert location from game to insert panels", () => {
-        let game = fromStateWithShiftAction();
-        game.disabledShiftLocation = {
-            row: 0,
-            column: 1
-        };
-        let board = shallowFactory(game);
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().disabledShiftLocation).toEqual(game.disabledShiftLocation);
+        it("moves players when maze card is clicked", async () => {
+            var controller = factory();
+            await flushPromises();
+            // player is on (0, 3)
+            controller.performMove(moveEvent(3, 3));
+            let playerLocation = controller.getGame().getPlayer(5).mazeCard.location;
+            expect(playerLocation.row).toEqual(3);
+            expect(playerLocation.column).toEqual(3);
+        });
     });
 });
-
-function fetchInteractiveCardIds(board) {
-    let mazeCards = board.findAll(".maze-card");
-    let interactiveCardIds = [];
-    for (var i = 0; i < mazeCards.length; i++) {
-        let card = mazeCards.at(i);
-        if (card.classes("maze-card--interactive")) {
-            interactiveCardIds.push(parseInt(card.attributes("id")));
-        }
-    }
-    return interactiveCardIds;
-}
 
 /* GENERATED_WITH_LINE_LEFTOVER =
 ###|#.#|###|#.#|###|###|###|
-#..|#.#|...|.o#|...|...|..#|
+#..|#.#|...|..#|...|...|..#|
 #.#|#.#|#.#|###|#.#|###|#.#|
 ---------------------------|
 ###|###|#.#|#.#|###|###|###|
@@ -223,7 +167,15 @@ function fetchInteractiveCardIds(board) {
 ###|#.#|###|###|###|#.#|###|
 ---------------------------* */
 
-var API_STATE = {
+const shiftEvent = function(row, column, rotation) {
+    return { playerId: 5, location: loc(row, column), leftoverRotation: rotation };
+};
+
+const moveEvent = function(row, column) {
+    return { playerId: 5, targetLocation: loc(row, column) };
+};
+
+var state = {
     maze: {
         mazeSize: 7,
         mazeCards: [
@@ -677,7 +629,7 @@ var API_STATE = {
         ]
     },
     nextAction: {
-        action: "MOVE",
+        action: "SHIFT",
         playerId: 5
     },
     objectiveMazeCardId: 34,

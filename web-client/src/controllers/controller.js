@@ -7,106 +7,136 @@ import WasmPlayer from "@/model/wasmPlayer";
 
 export default class Controller {
     constructor(useStorage) {
-        this.game = new Game();
-        this.playerManager = null;
-        this.timer = 0;
-        this.api = new GameApi(location.protocol + "//" + location.host);
-        this.playerManager = new PlayerManager(this.api, useStorage);
-        this.computationMethods = [];
+        this._game = new Game();
+        this._timer = 0;
+        this._api = new GameApi(location.protocol + "//" + location.host);
+        this._playerManager = new PlayerManager(useStorage);
+        this._computationMethods = [];
+
+        this.handleError = this.handleError.bind(this);
+        this.startPolling = this.startPolling.bind(this);
     }
 
-    initialize(useStorage) {
-        if (useStorage && sessionStorage.playerId) {
-            let userPlayerId = parseInt(sessionStorage.playerId);
-            this.api.fetchState().then(() => {
-                this.createGameFromApi();
-                if (!this.game.hasPlayer(userPlayerId)) {
-                    this.enterGame();
-                } else {
-                    this.playerManager.addUserPlayer(userPlayerId);
-                }
-            });
+    initialize() {
+        if (this._playerManager.hasAnyPlayer()) {
+            this._api
+                .fetchState() //
+                .then(state => {
+                    this.createGameFromApi(state);
+                    this._updateUserPlayer();
+                    this._updateWasmPlayer();
+                    if (!this._playerManager.hasAnyPlayer()) {
+                        this.enterGame();
+                    } else {
+                        this.startPolling();
+                    }
+                })
+                .catch(error => {
+                    if (error.response.data.key === "GAME_NOT_FOUND") {
+                        this.enterGame();
+                    } else {
+                        this.handleError(error);
+                    }
+                });
         } else {
             this.enterGame();
         }
         this._initComputationMethods();
     }
 
-    _initComputationMethods() {
-        this.api
-            .fetchComputationMethods()
-            .then(methodsResult => {
-                this.computationMethods = methodsResult.data;
-            })
-            .catch(this.handleError);
+    _updateUserPlayer() {
+        if (!this._game.hasPlayer(this._playerManager.getUserPlayer())) {
+            this._playerManager.removeUserPlayer();
+        } else {
+            let userPlayerId = this._playerManager.getUserPlayer();
+            this._game.getPlayer(userPlayerId).isUser = true;
+        }
+    }
+
+    _updateWasmPlayer() {
+        let wasmPlayerId = this._playerManager.getWasmPlayer();
+        if (!this._game.hasPlayer(wasmPlayerId)) {
+            this._playerManager.removeWasmPlayer();
+        } else {
+            let wasmPlayer = new WasmPlayer(
+                wasmPlayerId,
+                this._game,
+                shiftAction => this.performShift(shiftAction),
+                moveAction => this.performMove(moveAction)
+            );
+            let existingPlayer = this._game.getPlayer(wasmPlayerId);
+            wasmPlayer.fillFromPlayer(existingPlayer);
+            this._game.replaceWithPlayer(wasmPlayer);
+        }
     }
 
     performShift(shiftAction) {
-        this.game.leftoverMazeCard.rotation = shiftAction.leftoverRotation;
+        this._game.leftoverMazeCard.rotation = shiftAction.leftoverRotation;
         this.stopPolling();
-        this.api
+        this._api
             .doShift(shiftAction.playerId, shiftAction.location, shiftAction.leftoverRotation)
-            .then(() => this.game.shift(shiftAction.location))
+            .then(() => this._game.shift(shiftAction.location))
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
     performMove(moveAction) {
-        this.game.move(moveAction.playerId, moveAction.targetLocation);
+        // already validated, so we can alter the game state directly
+        this._game.move(moveAction.playerId, moveAction.targetLocation);
         this.stopPolling();
-        this.api
+        this._api
             .doMove(moveAction.playerId, moveAction.targetLocation)
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
     handleError(error) {
-        if (!this.api.errorWasThrownByCancel(error)) {
+        if (!this._api.errorWasThrownByCancel(error)) {
             console.error(error);
         }
     }
 
     stopPolling() {
-        if (this.timer !== 0) {
-            clearInterval(this.timer);
-            this.timer = 0;
-            this.api.cancelAllFetches();
+        if (this._timer !== 0) {
+            clearInterval(this._timer);
+            this._timer = 0;
+            this._api.cancelAllFetches();
         }
     }
 
     startPolling() {
         this.stopPolling();
-        if (this.timer === 0) {
+        if (this._timer === 0) {
             this.fetchApiState();
-            this.timer = setInterval(this.fetchApiState, 800);
+            this._timer = setInterval(() => this.fetchApiState(), 800);
         }
     }
 
     fetchApiState() {
-        this.api
+        this._api
             .fetchState()
-            .then(this.createGameFromApi)
+            .then(response => this.createGameFromApi(response))
             .catch(this.handleError);
     }
 
     createGameFromApi(apiResponse) {
-        this.game.createFromApi(apiResponse.data);
-        if (this.playerManager.hasUserPlayer) {
-            let userPlayerId = this.playerManager.getUserPlayer();
-            this.game.getPlayer(userPlayerId).isUser = true;
+        this._game.createFromApi(apiResponse.data);
+        if (this._playerManager.hasUserPlayer()) {
+            let userPlayerId = this._playerManager.getUserPlayer();
+            this._game.getPlayer(userPlayerId).isUser = true;
         }
     }
 
     enterGame() {
-        if (this.playerManager.canUserEnterGame()) {
+        if (this._playerManager.canUserEnterGame()) {
             this.stopPolling();
-            this.api
+            this._api
                 .doAddPlayer()
                 .then(apiResponse => {
-                    let userPlayer = Player.newFromApi(apiResponse.data);
+                    let userPlayer = new Player(apiResponse.data.id);
                     userPlayer.isUser = true;
-                    this.game.addPlayer(userPlayer);
-                    this.playerManager.addUserPlayer(userPlayer.id);
+                    this._game.addPlayerFromApi(apiResponse.data, userPlayer);
+                    this._playerManager.addUserPlayer(userPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this.startPolling);
@@ -114,32 +144,31 @@ export default class Controller {
     }
 
     leaveGame() {
-        if (this.playerManager.hasUserPlayer()) {
-            let playerId = this.playerManager.getUserPlayer();
-            this.api
+        if (this._playerManager.hasUserPlayer()) {
+            let playerId = this._playerManager.getUserPlayer();
+            this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this.startPolling);
-            this.playerManager.removeUserPlayer();
+            this._playerManager.removeUserPlayer();
         }
     }
 
     addWasmPlayer() {
-        if (this.playerManager.canAddWasmPlayer()) {
+        if (this._playerManager.canAddWasmPlayer()) {
             this.stopPolling();
-            this.api
+            this._api
                 .doAddPlayer()
                 .then(apiResponse => {
-                    let playerId = parseInt(apiResponse.data);
+                    let playerId = parseInt(apiResponse.data.id);
                     let wasmPlayer = new WasmPlayer(
                         playerId,
-                        this.game,
-                        this.performShift,
-                        this.performMove
+                        this._game,
+                        shiftAction => this.performShift(shiftAction),
+                        moveAction => this.performMove(moveAction)
                     );
-                    wasmPlayer.fillFromApi(apiResponse.data);
-                    this.game.addPlayer(wasmPlayer);
-                    this.playerManager.addWasmPlayer(wasmPlayer.id);
+                    this._game.addPlayerFromApi(apiResponse.data, wasmPlayer);
+                    this._playerManager.addWasmPlayer(wasmPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this.startPolling);
@@ -147,38 +176,59 @@ export default class Controller {
     }
 
     removeWasmPlayer() {
-        if (this.playerManager.hasWasmPlayer()) {
-            let playerId = this.playerManager.getWasmPlayer();
-            this.api
+        if (this._playerManager.hasWasmPlayer()) {
+            let playerId = this._playerManager.getWasmPlayer();
+            this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this.startPolling);
-            this.playerManager.removeWasmPlayer();
+            this._playerManager.removeWasmPlayer();
         }
     }
 
     addComputer(computeMethod) {
-        this.api
+        this._api
             .doAddComputerPlayer(computeMethod)
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
     removeComputer(playerId) {
-        this.api
+        this._api
             .removePlayer(playerId)
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
     restartWithSize(size) {
-        this.api
+        this._api
             .changeGame(size)
             .catch(this.handleError)
             .then(this.startPolling);
     }
 
     beforeDestroy() {
-        clearInterval(this.timer);
+        clearInterval(this._timer);
+    }
+
+    getGame() {
+        return this._game;
+    }
+
+    getPlayerManager() {
+        return this._playerManager;
+    }
+
+    getComputationMethods() {
+        return this._computationMethods;
+    }
+
+    _initComputationMethods() {
+        this._api
+            .fetchComputationMethods()
+            .then(methodsResult => {
+                this._computationMethods = methodsResult.data;
+            })
+            .catch(this.handleError);
     }
 }

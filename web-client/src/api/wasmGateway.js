@@ -1,8 +1,18 @@
+let instance = null;
+
 export default class WasmGateway {
     constructor() {
+        if (!instance) {
+            instance = this;
+        }
         this.libexhsearch = null;
         this.isLoading = false;
         this.publicPath = process.env.BASE_URL;
+        return instance;
+    }
+
+    hasLibexhsearch() {
+        return this.libexhsearch !== null;
     }
 
     loadLibexhsearch(callback) {

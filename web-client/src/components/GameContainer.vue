@@ -1,6 +1,7 @@
 <template>
     <div class="game-container">
         <interactive-board
+            v-if="hasStarted"
             :controller="controller"
             ref="interactive-board"
             class="game-container__main-content"
@@ -30,7 +31,14 @@ export default {
     },
     computed: {
         players: function() {
-            return this.controller.game.getPlayers();
+            return this.controller.getGame().getPlayers();
+        },
+        hasStarted: function() {
+            return (
+                this.controller &&
+                this.controller.getGame() &&
+                this.controller.getGame().hasStarted()
+            );
         }
     },
     created: function() {
@@ -51,8 +59,8 @@ export default {
     height: 100%;
     display: flex;
     position: relative;
-    justify-content: space-around;
-    align-items: flex-start;
+    justify-content: space-evenly;
+    align-items: center;
     align-content: flex-start;
 
     &__main-content {

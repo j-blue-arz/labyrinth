@@ -38,12 +38,6 @@ export default class Player {
         return new this(id, null);
     }
 
-    static newFromApi(apiPlayer) {
-        let player = new this(apiPlayer.id);
-        player.fillFromApi(apiPlayer);
-        return player;
-    }
-
     fillFromApi(apiPlayer) {
         this.score = apiPlayer.score;
         this.colorIndex = apiPlayer.pieceIndex;
@@ -77,4 +71,8 @@ export default class Player {
             return computationMethod;
         }
     }
+
+    onHasToShift() {}
+
+    onHasToMove() {}
 }

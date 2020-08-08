@@ -88,7 +88,7 @@ describe("VMazeCard", () => {
         expect(distance).toBeGreaterThan(radiusSums);
     });
 
-    it("renders an objective if MazeCard has one.", () => {
+    it("renders an objective if MazeCard has one", () => {
         let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
         mazeCard.hasObject = true;
         const wrapper = wrapperFactory({
@@ -98,7 +98,7 @@ describe("VMazeCard", () => {
         expect(wrapper.findAll(".objective").length).toBe(1);
     });
 
-    it("does not render an objective if MazeCard has none.", () => {
+    it("does not render an objective if MazeCard has none", () => {
         let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
         mazeCard.hasObject = false;
         const wrapper = wrapperFactory({

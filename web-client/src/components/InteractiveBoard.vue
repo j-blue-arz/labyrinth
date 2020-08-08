@@ -28,7 +28,6 @@
             :n="mazeSize"
         ></insert-panels>
         <leftover-maze-card
-            v-if="game.hasStarted()"
             :x="leftoverX"
             :y="leftoverY"
             :card-size="cardSize"
@@ -46,7 +45,6 @@ import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
-import Controller from "@/controllers/controller.js";
 import * as action from "@/model/game.js";
 import Graph from "@/model/mazeAlgorithm.js";
 
@@ -63,7 +61,7 @@ export default {
     },
     props: {
         controller: {
-            type: Controller,
+            type: Object,
             required: true
         }
     },
@@ -85,36 +83,36 @@ export default {
     },
     computed: {
         game: function() {
-            return this.controller.game;
+            return this.controller.getGame();
         },
         mazeSize: function() {
             return this.game.n;
         },
         userPlayerId: function() {
-            return this.controller.playerManager.getUserPlayer();
+            return this.controller.getPlayerManager().getUserPlayer();
         },
         interactiveMazeCards: function() {
-            if (!this.isMyTurnToMove() || !this.game.hasStarted()) {
-                return new Set([]);
-            } else {
+            if (this.isMyTurnToMove()) {
                 let player = this.game.getPlayer(this.userPlayerId);
-                return this.computeReachableMazeCards(player);
+                if (player) {
+                    return this.computeReachableMazeCards(player);
+                }
             }
+            return new Set([]);
         },
         reachableMazeCards: function() {
-            if (!this.game.hasStarted()) {
-                return new Set([]);
-            } else {
-                let player = this.game.getPlayer(this.game.nextAction.playerId);
+            let player = this.game.getPlayer(this.game.nextAction.playerId);
+            if (player) {
                 return this.computeReachableMazeCards(player);
             }
+            return new Set([]);
         },
         currentPlayerColor: function() {
-            if (this.game.hasStarted()) {
-                return this.game.getPlayer(this.game.nextAction.playerId).colorIndex;
-            } else {
-                return null;
+            let player = this.game.getPlayer(this.game.nextAction.playerId);
+            if (player) {
+                return player.colorIndex;
             }
+            return null;
         },
         isMyTurnToShift: function() {
             return (

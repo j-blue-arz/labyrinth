@@ -19,7 +19,7 @@ describe("Game", () => {
             }
         });
 
-        it("returns empty array for empty game.", () => {
+        it("returns empty array for empty game", () => {
             let game = new Game();
             let mazeCardList = game.mazeCardsAsList();
             expect(mazeCardList).toBeInstanceOf(Array);
@@ -45,7 +45,7 @@ describe("Game", () => {
     });
 
     describe(".mazeCardById()", () => {
-        it("returns correct maze card for given ID.", () => {
+        it("returns correct maze card for given ID", () => {
             let game = new Game();
             game.n = 3;
             let mazeCards = _buildMazeCardMatrix(game);
@@ -64,7 +64,7 @@ describe("Game", () => {
             expect(game.mazeCardById(leftover_card_id)).toBe(game.leftoverMazeCard);
         });
 
-        it("returns null for ID which is not in the game.", () => {
+        it("returns null for ID which is not in the game", () => {
             let game = new Game();
             expect(game.mazeCardById(0)).toBeNull();
         });
@@ -102,7 +102,7 @@ describe("Game", () => {
     });
 
     describe(".shift()", () => {
-        it("shifts correctly on valid location.", () => {
+        it("shifts correctly on valid location", () => {
             let game = new Game();
             game.n = 3;
             let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
@@ -124,7 +124,7 @@ describe("Game", () => {
             assertConsistentLocation(game, loc(1, 2));
         });
 
-        it("transfers players to pushed-in card.", () => {
+        it("transfers players to pushed-in card", () => {
             let game = new Game();
             game.n = 3;
             let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
@@ -141,7 +141,7 @@ describe("Game", () => {
             expect(pushedInCard.players).toEqual(expect.arrayContaining([player1, player2]));
         });
 
-        it("throws ValueError on board location which is not on the border.", () => {
+        it("throws ValueError on board location which is not on the border", () => {
             let game = new Game();
             game.n = 3;
             let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
@@ -150,7 +150,7 @@ describe("Game", () => {
             expect(() => game.shift(loc(1, 1))).toThrow(ValueError);
         });
 
-        it("throws RangeError on invalid shift location.", () => {
+        it("throws RangeError on invalid shift location", () => {
             let game = new Game();
             game.n = 3;
             let nextId = _maxId(_buildMazeCardMatrix(game)) + 1;
@@ -161,21 +161,21 @@ describe("Game", () => {
     });
 
     describe(".getPlayer()", () => {
-        it("returns previously added player.", () => {
+        it("returns previously added player", () => {
             let game = new Game();
             _buildMazeCardMatrix(game);
             let player = _addPlayer(game, loc(1, 1), 7);
             expect(game.getPlayer(7)).toBe(player);
         });
 
-        it(" throws ValueError for not added player.", () => {
+        it("returns null for not added player", () => {
             let game = new Game();
-            expect(() => game.getPlayer(7)).toThrow(ValueError);
+            expect(game.getPlayer(7)).toBe(null);
         });
     });
 
     describe(".getComputerPlayers()", () => {
-        it("returns all computer players.", () => {
+        it("returns all computer players", () => {
             let game = new Game();
             _buildMazeCardMatrix(game);
             _addPlayer(game, loc(1, 1), 7);
@@ -193,7 +193,7 @@ describe("Game", () => {
     });
 
     describe(".move()", () => {
-        it("moves player to correct location.", () => {
+        it("moves player to correct location", () => {
             let game = new Game();
             game.n = 3;
             _buildMazeCardMatrix(game);
@@ -210,7 +210,7 @@ describe("Game", () => {
             expect(game.getPlayer(42).mazeCard).toBe(targetMazeCard);
         });
 
-        it("throws RangeError on invalid location.", () => {
+        it("throws RangeError on invalid location", () => {
             let game = new Game();
             game.n = 3;
             _buildMazeCardMatrix(game);
@@ -219,7 +219,7 @@ describe("Game", () => {
             expect(() => game.move(42, loc(-1, 2))).toThrow(RangeError);
         });
 
-        it("throws ValueError on invalid playerId.", () => {
+        it("throws ValueError on invalid playerId", () => {
             let game = new Game();
             game.n = 3;
             _buildMazeCardMatrix(game);
@@ -247,7 +247,7 @@ describe("Game", () => {
             expect(game.n).toEqual(3);
         });
 
-        it("results in a game with two players.", () => {
+        it("results in a game with two players", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
@@ -255,7 +255,7 @@ describe("Game", () => {
             expect(game.getPlayer(17)).not.toBeNull();
         });
 
-        it("places players on correct location.", () => {
+        it("places players on correct location", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
@@ -263,7 +263,7 @@ describe("Game", () => {
             _assertPlayerLocation(game, 17, loc(2, 1), 15);
         });
 
-        it("creates maze card locations consistently.", () => {
+        it("creates maze card locations consistently", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
 
