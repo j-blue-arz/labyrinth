@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
     description: "This is the API of the Labyrinth application. You can find the project's github page at <https://github.com/j-blue-arz/labyrinth/>"
-    version: "0.1.5"
+    version: "0.1.6"
     title: "Labyrinth API"
     license:
         name: "GNU AGPLv3"
