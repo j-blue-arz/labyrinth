@@ -1,0 +1,6 @@
+-r requirements.in
+pytest
+pytest-cov
+flake8
+pip-tools
+rope
