@@ -1,0 +1,2 @@
+graft lib
+global-exclude *.pyc

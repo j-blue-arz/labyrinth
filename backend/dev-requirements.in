@@ -4,3 +4,5 @@ pytest-cov
 flake8
 pip-tools
 rope
+wheel
+black

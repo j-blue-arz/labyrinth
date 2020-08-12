@@ -96,3 +96,11 @@ jobs:
         - name: Run tests
           run: |
             pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
+        - name: Build wheel
+          run: |
+            python3 setup.py bdist_wheel
+        - name: Archive wheel
+          uses: actions/upload-artifact@v1
+          with:
+            name: wheel
+            path: backend/dist/
