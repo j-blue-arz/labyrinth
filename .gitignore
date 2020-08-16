@@ -1,6 +1,5 @@
 .DS_Store
 **/node_modules
-/dist
 /test-results
 
 # local env files
@@ -26,3 +25,6 @@ CMakeSettings.json
 
 # C++ build folders
 **/algolibs/build/
+
+# vue build output
+backend/static

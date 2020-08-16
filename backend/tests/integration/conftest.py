@@ -29,5 +29,5 @@ def pytest_generate_tests(metafunc):
         extension = "*.so"
         if platform.system() == "Windows":
             extension = "*.dll"
-        filenames = glob.glob("lib/" + extension)
+        filenames = glob.glob("instance/lib/" + extension)
         metafunc.parametrize("library_path", filenames)

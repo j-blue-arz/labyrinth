@@ -24,7 +24,7 @@ Now is a good time to create and activate a virtual environment, e.g. on Linux:
 
 install required packages:
 
-    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
     python -m pytest ./tests
 
 ## Running server  
@@ -55,16 +55,16 @@ Requires cmake version 3.13 or newer. Tested with gcc 7.4.0 and also MSVC 14.23.
     mkdir build
     cmake -S. -Bbuild/shared
     cmake --build build/shared
-    mkdir -p ../backend/lib/
-    cp build/shared/libexhsearch/libexhsearch.so ../backend/lib/
+    mkdir -p ../backend/instance/lib/
+    cp build/shared/libexhsearch/libexhsearch.so ../backend/instance/lib/
 
 ## WebAssembly
 The repository contains a precompiled WebAssembly binary and runtime. If you want to compile it yourself, you need the emsdk.
 
     cmake -S. -Bbuild/wasm -DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake -DCOMPILE_TO_WASM=ON
     cmake --build build/wasm
-    cp build/wasm/libexhsearch/libexhsearch.js ../dist/wasm/
-    cp build/wasm/libexhsearch/libexhsearch.wasm ../dist/wasm/
+    cp build/wasm/libexhsearch/libexhsearch.js ../backend/static/wasm/
+    cp build/wasm/libexhsearch/libexhsearch.wasm ../backend/static/wasm/
 
 The distribution folder is overwritten if you build the web-client. To keep your versions of the WebAssembly files, put them in 
 

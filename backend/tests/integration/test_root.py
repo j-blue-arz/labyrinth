@@ -14,5 +14,5 @@ def test_get_root(client):
     assert b'<!DOCTYPE html>' in response.get_data()
     assert b'<title>Labyrinth</title>' in response.get_data()
     assert b'<div id=app>' in response.get_data()
-    assert b'href=/static/js/' in response.get_data()
-    assert b'href=/static/css/' in response.get_data()
+    assert b'href=/assets/js/' in response.get_data()
+    assert b'href=/assets/css/' in response.get_data()

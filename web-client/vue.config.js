@@ -1,8 +1,8 @@
 const path = require("path");
 
 module.exports = {
-    outputDir: path.resolve(__dirname, "../dist"),
-    assetsDir: "static",
+    outputDir: path.resolve(__dirname, "../backend/static"),
+    assetsDir: "assets",
     configureWebpack: {
         devtool: "source-map"
     },

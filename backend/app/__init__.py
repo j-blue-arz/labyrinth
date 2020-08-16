@@ -15,13 +15,13 @@ def create_app(test_config=None):
     """ basic Flask app setup. Creates the instance folder if not existing """
     app = Flask(__name__,
                 instance_relative_config=True,
-                static_folder="../../dist",
+                static_folder="../static",
                 static_url_path="")
 
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
-        LIBRARY_PATH=os.path.join(os.path.dirname(app.instance_path), 'lib'),
+        LIBRARY_PATH=os.path.join(app.instance_path, 'lib'),
     )
 
     if test_config is None:
