@@ -9,9 +9,5 @@ instance/
 .coverage
 htmlcov/
 
-dist/
-build/
-*.egg-info/
-
-lib/*.dll
-lib/*.so
+**/lib/*.dll
+**/lib/*.so
