@@ -1,7 +1,7 @@
 """ All methods and constants which are shared in persistence and dto """
 
-from app.model.game import MazeCard, BoardLocation
-from app.mapper.constants import ROW, COLUMN, ID, OUT_PATHS, ROTATION, LOCATION, MAZE_SIZE, MAZE_CARDS
+from labyrinth.model.game import MazeCard, BoardLocation
+from labyrinth.mapper.constants import ROW, COLUMN, ID, OUT_PATHS, ROTATION, LOCATION, MAZE_SIZE, MAZE_CARDS
 
 
 def _objective_to_dto(maze_card: MazeCard):

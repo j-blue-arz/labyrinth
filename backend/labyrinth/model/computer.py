@@ -3,7 +3,7 @@
 ComputerPlayer is a subclass of model.game.Player, which handles board state and time-keeping.
 The other classes represent different methods of computing player actions. They either
 compute the action on their own (e.g. RandomActionsMethod), or subclass an algorithm implementation
-from app.model.algorithm (e.g. AlphaBeta), or bind to an external library (LibraryBinding).
+from labyrinth.model.algorithm (e.g. AlphaBeta), or bind to an external library (LibraryBinding).
 
 Clients should use the factory method create_computer_player() to create a ComputerPlayer instance.
 
@@ -25,12 +25,12 @@ import platform
 from flask import current_app
 import requests
 
-import app.mapper.api
-import app.model.algorithm.exhaustive_search as exh
-import app.model.algorithm.minimax as mm
-import app.model.algorithm.alpha_beta as ab
-import app.model.algorithm.external_library as extlib
-from app.model import exceptions
+import labyrinth.mapper.api
+import labyrinth.model.algorithm.exhaustive_search as exh
+import labyrinth.model.algorithm.minimax as mm
+import labyrinth.model.algorithm.alpha_beta as ab
+import labyrinth.model.algorithm.external_library as extlib
+from labyrinth.model import exceptions
 from .reachable import Graph
 from .game import Player, Turns
 
@@ -162,11 +162,11 @@ class ComputerPlayer(Player, Thread):
         return self._compute_method_factory
 
     def _post_shift(self, location, rotation):
-        dto = app.mapper.api.shift_action_to_dto(location, rotation)
+        dto = labyrinth.mapper.api.shift_action_to_dto(location, rotation)
         requests.post(self.shift_url, json=dto)
 
     def _post_move(self, move_location):
-        dto = app.mapper.api.move_action_to_dto(move_location)
+        dto = labyrinth.mapper.api.move_action_to_dto(move_location)
         requests.post(self.move_url, json=dto)
 
     def _find_equal_piece(self, board):

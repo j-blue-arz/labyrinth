@@ -17,9 +17,9 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 import itertools
 from random import choice
 
-from app.model import exceptions
-from app.model.reachable import Graph
-from app.model.algorithm import out_paths_dict
+from labyrinth.model import exceptions
+from labyrinth.model.reachable import Graph
+from labyrinth.model.algorithm import out_paths_dict
 
 _HASH_MAX = 31
 

@@ -2,9 +2,9 @@
 The tests only run these classes in a single thread, by calling run() directly. """
 import copy
 from unittest.mock import Mock, patch, PropertyMock
-from app.model.computer import ComputerPlayer, RandomActionsMethod, create_computer_player
-from app.model.factories import create_maze, MazeCardFactory
-from app.model.game import Board, BoardLocation, Game
+from labyrinth.model.computer import ComputerPlayer, RandomActionsMethod, create_computer_player
+from labyrinth.model.factories import create_maze, MazeCardFactory
+from labyrinth.model.game import Board, BoardLocation, Game
 
 
 def test_create_computer_player_fetches_urls_from_url_supplier():

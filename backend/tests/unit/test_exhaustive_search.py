@@ -2,8 +2,8 @@
 Each testcase verifies the precomputed depth of the found solution,
 and asserts that the solution is valid """
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
-from app.model.algorithm.exhaustive_search import Optimizer
-from app.model.game import BoardLocation
+from labyrinth.model.algorithm.exhaustive_search import Optimizer
+from labyrinth.model.game import BoardLocation
 from tests.unit.mazes import BIG_COMPONENT_MAZE, GENERATED_WITH_LINE_LEFTOVER, DIFFICULT_MAZE
 
 

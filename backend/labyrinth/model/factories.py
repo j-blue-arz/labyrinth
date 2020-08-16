@@ -4,8 +4,8 @@ There are two ways of creating these objects: either by fully specifying all det
 by randomly generating layouts based with certain restrictions, based on the original game. """
 import random
 import math
-from app.model.game import MazeCard, Maze, BoardLocation, Board, Game
-from app.model.exceptions import InvalidSizeException
+from labyrinth.model.game import MazeCard, Maze, BoardLocation, Board, Game
+from labyrinth.model.exceptions import InvalidSizeException
 
 
 class MazeCardFactory:

@@ -8,8 +8,8 @@ import timeit
 import sys
 from tests.unit.mazes import EXH_DEPTH_4_MAZE
 from tests.unit.test_exhaustive_search import CASES_PARAMS
-import app.model.algorithm.external_library as libexhsearch
-import app.model.algorithm.util as algo_util
+import labyrinth.model.algorithm.external_library as libexhsearch
+import labyrinth.model.algorithm.util as algo_util
 import tests.unit.factories as setup
 
 BENCH_CASES_PARAMS = {

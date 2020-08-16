@@ -1,6 +1,6 @@
 """ Tests player of game.py """
 from unittest.mock import MagicMock
-from app.model.game import Player, Piece, MazeCard
+from labyrinth.model.game import Player, Piece, MazeCard
 
 
 def test_set_board():

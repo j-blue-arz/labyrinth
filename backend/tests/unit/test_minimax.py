@@ -12,9 +12,9 @@ All others are based on d2_long_running.
 These types are implemented on two boards.
 """
 import pytest
-import app.model.algorithm.minimax as mm
+import labyrinth.model.algorithm.minimax as mm
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
-from app.model.game import BoardLocation
+from labyrinth.model.game import BoardLocation
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_DIFFICULT_MAZE
 
 

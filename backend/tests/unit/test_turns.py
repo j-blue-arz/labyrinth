@@ -1,8 +1,8 @@
 """ Tests Turns of game.py """
 from unittest.mock import Mock
 import pytest
-from app.model.exceptions import TurnActionViolationException
-from app.model.game import Turns, PlayerAction, Player
+from labyrinth.model.exceptions import TurnActionViolationException
+from labyrinth.model.game import Turns, PlayerAction, Player
 
 
 def test_next_player_action_should_be_none_without_players():

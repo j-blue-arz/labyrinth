@@ -1,7 +1,7 @@
 """ This module contains algorithms performing searches on a game tree. """
-from app.model.reachable import Graph
-from app.model.game import BoardLocation
-import app.model.algorithm.util as util
+from labyrinth.model.reachable import Graph
+from labyrinth.model.game import BoardLocation
+import labyrinth.model.algorithm.util as util
 
 
 class ReachedMazeCard:

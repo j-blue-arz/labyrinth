@@ -8,10 +8,10 @@ import timeit
 import cProfile
 import sys
 from random import randint
-import app.model.algorithm.exhaustive_search as exh
-from app.model.factories import create_maze_and_leftover, \
+import labyrinth.model.algorithm.exhaustive_search as exh
+from labyrinth.model.factories import create_maze_and_leftover, \
     maze_to_string
-from app.model.game import BoardLocation
+from labyrinth.model.game import BoardLocation
 from tests.unit.mazes import EXH_DEPTH_4_MAZE
 from tests.unit.test_exhaustive_search import CASES_PARAMS
 import tests.unit.factories as setup

@@ -1,6 +1,6 @@
 """ This module contains utility functions for the algorithms implemented in this package.
 """
-import app.model.game as game
+import labyrinth.model.game as game
 
 
 def other(player):

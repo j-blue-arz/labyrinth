@@ -1,9 +1,9 @@
 """ Tests for Game of game.py """
 import pytest
 from tests.unit.factories import create_random_maze, MazeCardFactory
-from app.model.game import Board, BoardLocation
-from app.model.factories import create_maze
-from app.model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
+from labyrinth.model.game import Board, BoardLocation
+from labyrinth.model.factories import create_maze
+from labyrinth.model.exceptions import InvalidShiftLocationException, InvalidRotationException, \
     MoveUnreachableException, InvalidLocationException
 
 

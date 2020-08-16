@@ -13,9 +13,9 @@ These types are implemented on two boards.
 """
 import copy
 import pytest
-import app.model.algorithm.alpha_beta as ab
-from app.model.factories import create_maze, MazeCardFactory
-from app.model.game import Board, BoardLocation, Piece
+import labyrinth.model.algorithm.alpha_beta as ab
+from labyrinth.model.factories import create_maze, MazeCardFactory
+from labyrinth.model.game import Board, BoardLocation, Piece
 from tests.unit.mazes import MINIMAX_BIG_COMPONENT_MAZE, MINIMAX_DIFFICULT_MAZE, GENERATED_WITH_LINE_LEFTOVER
 
 

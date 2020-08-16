@@ -2,11 +2,11 @@
 More specifically, it tests the method game_state_to_dto(),
 which maps a Game instance to an object used to transfer the state """
 import json
-import app.mapper.api as mapper
-import app.mapper.constants as keys
-from app.model.game import BoardLocation, Player
-from app.model.factories import create_game
-from app.model.computer import ComputerPlayer, RandomActionsMethod
+import labyrinth.mapper.api as mapper
+import labyrinth.mapper.constants as keys
+from labyrinth.model.game import BoardLocation, Player
+from labyrinth.model.factories import create_game
+from labyrinth.model.computer import ComputerPlayer, RandomActionsMethod
 
 
 def _create_test_game():

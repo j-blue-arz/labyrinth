@@ -3,10 +3,10 @@ Tests the main methods dto_to_game() and game_to_dto(), i.e.
 the methods used to persist a Game instance.
 The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
-import app.mapper.persistence as mapper
-from app.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from app.model.computer import create_computer_player, ComputerPlayer, RandomActionsMethod
-from app.model.factories import MazeCardFactory
+import labyrinth.mapper.persistence as mapper
+from labyrinth.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
+from labyrinth.model.computer import create_computer_player, ComputerPlayer, RandomActionsMethod
+from labyrinth.model.factories import MazeCardFactory
 
 
 def _create_test_game(with_computer=False):

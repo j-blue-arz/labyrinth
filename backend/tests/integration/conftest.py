@@ -5,7 +5,7 @@ import platform
 import tempfile
 import pytest
 
-from app import create_app
+from labyrinth import create_app
 
 
 @pytest.fixture

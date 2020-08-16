@@ -1,8 +1,8 @@
 """ Tests for Graph. A Board instance is created from a string representation of a labyrinth.
 Several validation tests are performed on this instance """
-from app.model.game import BoardLocation
-from app.model.reachable import RotatableMazeCardGraph
-from app.model.factories import create_maze
+from labyrinth.model.game import BoardLocation
+from labyrinth.model.reachable import RotatableMazeCardGraph
+from labyrinth.model.factories import create_maze
 
 
 def test_rotatable_unreached():

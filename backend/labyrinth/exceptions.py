@@ -2,11 +2,11 @@
 It defines a few exception factories.
 It also maps domain exceptions to these pre-defined factories. """
 
-from app.model.exceptions import InvalidStateException, PlayerNotFoundException, \
+from labyrinth.model.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
     InvalidRotationException, TurnActionViolationException, GameFullException, InvalidSizeException, \
     InvalidComputeMethodException
-from app.mapper.api import exception_to_dto
+from labyrinth.mapper.api import exception_to_dto
 
 
 class ApiException(Exception):

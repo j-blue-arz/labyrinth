@@ -1,5 +1,5 @@
 """ Tests for BoardLocation of game.py """
-from app.model.game import BoardLocation
+from labyrinth.model.game import BoardLocation
 
 
 def test_add_should_not_alter_current():

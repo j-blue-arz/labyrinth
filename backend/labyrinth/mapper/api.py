@@ -4,12 +4,12 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
-from app.model.game import Game, Turns, Player
-import app.model.computer
-from app.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
-from app.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
-                                  MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                  MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD)
+from labyrinth.model.game import Game, Turns, Player
+import labyrinth.model.computer
+from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
+from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
+                                        MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
+                                        MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD)
 
 
 def game_state_to_dto(game: Game):
@@ -120,7 +120,7 @@ def player_to_dto(player: Player):
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
                   PIECE_INDEX: player.piece.piece_index}
-    if type(player) is app.model.computer.ComputerPlayer:
+    if type(player) is labyrinth.model.computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME
     else:

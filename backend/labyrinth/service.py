@@ -1,13 +1,13 @@
 """ Service Layer """
 from flask import url_for
 
-import app.model.factories as factory
-import app.mapper.api as mapper
-from app import exceptions
-from app import database
-from app.model.exceptions import LabyrinthDomainException
-from app.model.game import Player
-from app.model import computer
+import labyrinth.model.factories as factory
+import labyrinth.mapper.api as mapper
+from labyrinth import exceptions
+from labyrinth import database
+from labyrinth.model.exceptions import LabyrinthDomainException
+from labyrinth.model.game import Player
+from labyrinth.model import computer
 
 
 def add_player(game_id, player_request_dto):
@@ -85,7 +85,7 @@ def perform_move(game_id, player_id, move_dto):
 
 def get_computation_methods():
     """ Retrieves the available computation methods.
-    These are either methods implemented in the backend, i.e. those in app.model.computer,
+    These are either methods implemented in the backend, i.e. those in labyrinth.model.computer,
     or methods made available by dynamically loaded libraries """
     return computer.get_available_computation_methods()
 
