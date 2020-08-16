@@ -31,7 +31,7 @@ jobs:
           uses: actions/upload-artifact@v1
           with:
             name: webClient
-            path: dist
+            path: backend/static
 
     algolibs:
         runs-on: ubuntu-latest
@@ -48,8 +48,8 @@ jobs:
             mkdir builds
             cmake -S. -Bbuilds/shared
             cmake --build builds/shared
-            mkdir -p ../backend/lib/
-            cp builds/shared/libexhsearch/libexhsearch.so ../backend/lib/
+            mkdir -p ../backend/instance/lib/
+            cp builds/shared/libexhsearch/libexhsearch.so ../backend/instance/lib/
         - name: Run tests
           run: |
             mkdir ../test-results
@@ -61,7 +61,7 @@ jobs:
           uses: actions/upload-artifact@v1
           with:
             name: sharedLib
-            path: backend/lib/
+            path: backend/instance/lib/
 
     backend:
         runs-on: ubuntu-latest
@@ -87,12 +87,20 @@ jobs:
           uses: actions/download-artifact@v1
           with:
             name: webClient
-            path: dist
+            path: backend/static
         - name: Restore shared library artifact
           uses: actions/download-artifact@v1
           with:
             name: sharedLib
-            path: backend/lib/
+            path: backend/instance/lib/
         - name: Run tests
           run: |
             pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
+        - name: Create tarball for deployment
+          run: |
+            tar zcf deployment.tar.gz instance static labyrinth requirements.txt labyrinth_main.py
+        - name: Archive deployment tarball
+          uses: actions/upload-artifact@v1
+          with:
+            name: deploymentTarball
+            path: backend/deployment.tar.gz
