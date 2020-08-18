@@ -99,8 +99,13 @@ jobs:
         - name: Create tarball for deployment
           run: |
             tar zcf deployment.tar.gz instance static labyrinth requirements.txt labyrinth_main.py
-        - name: Archive deployment tarball
+        - name: Archive deployment
           uses: actions/upload-artifact@v1
           with:
             name: deploymentTarball
-            path: backend/deployment.tar.gz
+            path: |
+              backend/instance
+              backend/static
+              backend/labyrinth
+              backend/requirements.txt
+              backend/labyrinth_main.py
