@@ -7,7 +7,7 @@ import os
 from flask import Flask
 
 
-version_info = (0, 1, 6)
+version_info = (0, 2, 0)
 __version__ = '.'.join(map(str, version_info))
 
 
