@@ -70,4 +70,24 @@ export default class PlayerManager {
     hasAnyPlayer() {
         return this.hasWasmPlayer() || this.hasUserPlayer();
     }
+
+    getManagedPlayers() {
+        let result = [];
+        if (this.hasWasmPlayer()) {
+            result.push(this.getWasmPlayer());
+        }
+        if (this.hasUserPlayer()) {
+            result.push(this.getUserPlayer());
+        }
+        return result;
+    }
+
+    removePlayer(playerId) {
+        if (this.getUserPlayer() === playerId) {
+            this.removeUserPlayer();
+        }
+        if (this.getWasmPlayer() === playerId) {
+            this.removeWasmPlayer();
+        }
+    }
 }

@@ -41,7 +41,7 @@ def delete_player(game_id, player_id):
     :param game_id: specifies the game
     :param player_id: specifies the player to remove
     """
-    game = _load_game_or_throw(game_id)
+    game = _load_game_or_throw(game_id, for_update=True)
     _try(lambda: game.remove_player(player_id))
     database.update_game(game_id, game)
     return ""
@@ -103,8 +103,8 @@ def _create_game(game_id):
     return game
 
 
-def _load_game_or_throw(game_id):
-    game = database.load_game(game_id)
+def _load_game_or_throw(game_id, for_update=False):
+    game = database.load_game(game_id, for_update=for_update)
     if game is None:
         raise exceptions.GAME_NOT_FOUND_API_EXCEPTION
     return game

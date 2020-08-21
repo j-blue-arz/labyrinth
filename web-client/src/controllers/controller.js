@@ -217,6 +217,10 @@ export default class Controller {
     }
 
     beforeDestroy() {
+        let playerIds = this._playerManager.getManagedPlayers();
+        for (let playerId of playerIds) {
+            this._api.removePlayer(playerId);
+        }
         clearInterval(this._timer);
     }
 

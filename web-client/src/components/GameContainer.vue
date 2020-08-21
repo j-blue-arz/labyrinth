@@ -44,6 +44,7 @@ export default {
     created: function() {
         let useStorage = process.env.NODE_ENV === "production";
         this.controller = new Controller(useStorage);
+        window.addEventListener("beforeunload", () => this.controller.beforeDestroy());
         this.controller.initialize();
     },
     beforeDestroy() {

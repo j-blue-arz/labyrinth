@@ -14,9 +14,9 @@ def create_game(game, game_id=0):
     _get_database().commit()
 
 
-def load_game(game_id):
+def load_game(game_id, for_update=False):
     """ Loads a game from the database """
-    game_row = _get_database().execute(
+    game_row = _get_database(exclusive=for_update).execute(
         "SELECT game_state FROM games WHERE id=?", (game_id,)
     ).fetchone()
     if game_row is None:
@@ -33,7 +33,7 @@ def update_game(game_id, game):
     _get_database().commit()
 
 
-def _get_database():
+def _get_database(exclusive=False):
     """ Returns the database. The first time this method is called during a request,
     a sqlite connection is opened and stores it in the global context """
     if 'db' not in g:
@@ -42,6 +42,9 @@ def _get_database():
             detect_types=sqlite3.PARSE_DECLTYPES
         )
         g.db.row_factory = sqlite3.Row
+        if exclusive:
+            g.db.isolation_level = None
+            g.db.execute("BEGIN EXCLUSIVE")
     return g.db
 
 
