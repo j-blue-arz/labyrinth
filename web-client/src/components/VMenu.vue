@@ -59,8 +59,8 @@ export default {
 .menu {
     list-style: none;
     position: absolute;
-    left: -11rem;
-    top: 3rem;
+    left: -3rem;
+    top: 2rem;
 
     &__item {
         display: flex;

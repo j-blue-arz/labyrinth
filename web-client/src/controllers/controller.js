@@ -31,13 +31,7 @@ export default class Controller {
                         this.startPolling();
                     }
                 })
-                .catch(error => {
-                    if (error.response.data.key === "GAME_NOT_FOUND") {
-                        this.enterGame();
-                    } else {
-                        this.handleError(error);
-                    }
-                });
+                .catch(this.handleError);
         } else {
             this.enterGame();
         }
@@ -92,7 +86,22 @@ export default class Controller {
 
     handleError(error) {
         if (!this._api.errorWasThrownByCancel(error)) {
-            console.error(error);
+            if (error.response) {
+                if (error.response.data.key === "GAME_NOT_FOUND") {
+                    console.log("Game not found, resetting.");
+                    this._playerManager.removeWasmPlayer();
+                    this._playerManager.removeUserPlayer();
+                    this._game.reset();
+                    this.stopPolling();
+                } else {
+                    console.error("Response error", error.response.data);
+                }
+            } else if (error.request) {
+                this.stopPolling();
+                console.error("Request error", error.request);
+            } else {
+                console.error("Error", error.message);
+            }
         }
     }
 

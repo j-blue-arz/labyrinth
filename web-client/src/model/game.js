@@ -24,6 +24,12 @@ export default class Game {
         this.disabledShiftLocation = null;
     }
 
+    reset() {
+        this._hasStarted = false;
+        this._players = [];
+        this.nextAction = { playerId: 0, action: NO_ACTION };
+    }
+
     hasStarted() {
         return this._hasStarted;
     }
