@@ -1,4 +1,7 @@
-""" Service Layer """
+""" Controller
+
+handles database access, calls functions on entities or use cases, performs exception mapping
+Should not contain business logic"""
 from flask import url_for
 
 import labyrinth.model.factories as factory

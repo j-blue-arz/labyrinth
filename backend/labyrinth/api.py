@@ -1,9 +1,9 @@
 """ This module builds a Blueprint for the game api. It defines the API methods.
 The module is responsible for request deserialization and result serialization, but
-leaves DTO mapping, database manipulation and and domain logic access to the Service Layer """
+leaves DTO mapping, database manipulation and and domain logic access to the Controller """
 
 from flask import Blueprint, request, json
-from . import service
+from . import controller
 from .exceptions import ApiException
 
 API = Blueprint('api', __name__, url_prefix='/api')
@@ -28,14 +28,14 @@ def post_player(game_id):
     Default: 'human'
     """
     request_body = request.get_json(silent=True, force=True)
-    player = service.add_player(game_id, request_body)
+    player = controller.add_player(game_id, request_body)
     return player
 
 
 @API.route('/games/<int:game_id>/players/<int:player_id>', methods=["DELETE"])
 def delete_player(game_id, player_id):
     """ Removes a player from a game. Game has to exist, player has to exist in game. """
-    service.delete_player(game_id, player_id)
+    controller.delete_player(game_id, player_id)
     return ""
 
 
@@ -48,14 +48,14 @@ def change_game(game_id):
     where size is the new size of the maze.
     """
     request_body = request.get_json(force=True)
-    service.change_game(game_id, request_body)
+    controller.change_game(game_id, request_body)
     return ""
 
 
 @API.route('/games/<int:game_id>/state', methods=["GET"])
 def get_state(game_id):
     """ Returns the state of the game """
-    return service.get_game_state(game_id)
+    return controller.get_game_state(game_id)
 
 
 @API.route('/games/<int:game_id>/shift', methods=["POST"])
@@ -72,7 +72,7 @@ def post_shift(game_id):
     }"""
     player_id = int(request.args["p_id"])
     request_body = request.get_json(force=True)
-    service.perform_shift(game_id, player_id, request_body)
+    controller.perform_shift(game_id, player_id, request_body)
     return ""
 
 
@@ -89,11 +89,11 @@ def post_move(game_id):
     }"""
     player_id = int(request.args["p_id"])
     request_body = request.get_json(force=True)
-    service.perform_move(game_id, player_id, request_body)
+    controller.perform_move(game_id, player_id, request_body)
     return ""
 
 
 @API.route('/computation-methods', methods=["GET"])
 def get_computation_methods():
     """ Returns an array of available computation methods."""
-    return json.jsonify(service.get_computation_methods())
+    return json.jsonify(controller.get_computation_methods())
