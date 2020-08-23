@@ -7,7 +7,7 @@ from flask import url_for
 import labyrinth.model.factories as factory
 import labyrinth.mapper.api as mapper
 from labyrinth import exceptions
-from labyrinth import database
+from labyrinth.database import DatabaseGateway
 from labyrinth.model.exceptions import LabyrinthDomainException
 from labyrinth.model.game import Player
 from labyrinth.model import computer
@@ -34,7 +34,7 @@ def add_player(game_id, player_request_dto):
     _try(lambda: game.add_player(player))
     if len(game.players) == 1:
         _try(game.start_game)
-    database.update_game(game_id, game)
+    DatabaseGateway.get_instance().update_game(game_id, game)
     return mapper.player_to_dto(player)
 
 
@@ -46,7 +46,7 @@ def delete_player(game_id, player_id):
     """
     game = _load_game_or_throw(game_id, for_update=True)
     _try(lambda: game.remove_player(player_id))
-    database.update_game(game_id, game)
+    DatabaseGateway.get_instance().update_game(game_id, game)
     return ""
 
 
@@ -61,7 +61,7 @@ def change_game(game_id, game_request_dto):
     game = _load_game_or_throw(game_id)
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
     _try(lambda: game.replace_board(new_board))
-    database.update_game(game_id, game)
+    DatabaseGateway.get_instance().update_game(game_id, game)
 
 
 def get_game_state(game_id):
@@ -75,7 +75,7 @@ def perform_shift(game_id, player_id, shift_dto):
     location, rotation = mapper.dto_to_shift_action(shift_dto)
     game = _load_game_or_throw(game_id)
     _try(lambda: game.shift(player_id, location, rotation))
-    database.update_game(game_id, game)
+    DatabaseGateway.get_instance().update_game(game_id, game)
 
 
 def perform_move(game_id, player_id, move_dto):
@@ -83,7 +83,7 @@ def perform_move(game_id, player_id, move_dto):
     location = mapper.dto_to_move_action(move_dto)
     game = _load_game_or_throw(game_id)
     _try(lambda: game.move(player_id, location))
-    database.update_game(game_id, game)
+    DatabaseGateway.get_instance().update_game(game_id, game)
 
 
 def get_computation_methods():
@@ -94,7 +94,7 @@ def get_computation_methods():
 
 
 def _get_or_create_game(game_id):
-    game = database.load_game(game_id)
+    game = DatabaseGateway.get_instance().load_game(game_id)
     if game is None:
         game = _create_game(game_id)
     return game
@@ -102,12 +102,12 @@ def _get_or_create_game(game_id):
 
 def _create_game(game_id):
     game = factory.create_game(game_id=game_id)
-    database.create_game(game, game_id)
+    DatabaseGateway.get_instance().create_game(game, game_id)
     return game
 
 
 def _load_game_or_throw(game_id, for_update=False):
-    game = database.load_game(game_id, for_update=for_update)
+    game = DatabaseGateway.get_instance().load_game(game_id, for_update=for_update)
     if game is None:
         raise exceptions.GAME_NOT_FOUND_API_EXCEPTION
     return game

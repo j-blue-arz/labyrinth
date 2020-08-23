@@ -37,9 +37,9 @@ def create_app(test_config=None):
     from . import api
     app.register_blueprint(api.API)
 
-    from . import database
-    app.before_first_request(database.init_database)
-    app.teardown_request(database.close_database)
+    from labyrinth.database import DatabaseGateway
+    app.before_first_request(lambda: DatabaseGateway.init_database())
+    app.teardown_request(lambda exc: DatabaseGateway.close_database())
 
     mimetypes.add_type('application/wasm', '.wasm')
 

@@ -5,65 +5,81 @@ from flask import current_app, g
 from .mapper.persistence import dto_to_game, game_to_dto
 
 
-def create_game(game, game_id=0):
-    """ Inserts a game into the database """
-    game_json = json.dumps(game_to_dto(game))
-    _get_database().execute(
-        "INSERT INTO games(id, game_state) VALUES (?, ?)", (game_id, game_json)
-    )
-    _get_database().commit()
+class DatabaseGateway:
+    """ This gateway manages a database connection and
+    encapsulates database access methods
 
+    The class is implemented as a singleton, clients should get an instance
+    via get_instance()."""
 
-def load_game(game_id, for_update=False):
-    """ Loads a game from the database """
-    game_row = _get_database(exclusive=for_update).execute(
-        "SELECT game_state FROM games WHERE id=?", (game_id,)
-    ).fetchone()
-    if game_row is None:
-        return None
-    return dto_to_game(json.loads(game_row["game_state"]))
+    def __init__(self):
+        self._db_connection = None
 
+    @classmethod
+    def get_instance(cls):
+        """ Returns an instance of the gateway.
 
-def update_game(game_id, game):
-    """ Updates a game in the database """
-    game_json = json.dumps(game_to_dto(game))
-    _get_database().execute(
-        "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
-    )
-    _get_database().commit()
+        The instance is stored in the global context """
+        if "db_gateway" not in g:
+            g.db_gateway = cls()
+        return g.db_gateway
 
-
-def _get_database(exclusive=False):
-    """ Returns the database. The first time this method is called during a request,
-    a sqlite connection is opened and stores it in the global context """
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            current_app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
+    def create_game(self, game, game_id=0):
+        """ Inserts a game into the database """
+        game_json = json.dumps(game_to_dto(game))
+        self._db().execute(
+            "INSERT INTO games(id, game_state) VALUES (?, ?)", (game_id, game_json)
         )
-        g.db.row_factory = sqlite3.Row
-        if exclusive:
-            g.db.isolation_level = None
-            g.db.execute("BEGIN EXCLUSIVE")
-    return g.db
+        self._db().commit()
 
+    def load_game(self, game_id, for_update=False):
+        """ Loads a game from the database """
+        game_row = (
+            self._db(exclusive=for_update)
+            .execute("SELECT game_state FROM games WHERE id=?", (game_id,))
+            .fetchone()
+        )
+        if game_row is None:
+            return None
+        return dto_to_game(json.loads(game_row["game_state"]))
 
-def init_database():
-    """ Executes the schema definition """
-    database = _get_database()
-    database.executescript("""
+    def update_game(self, game_id, game):
+        """ Updates a game in the database """
+        game_json = json.dumps(game_to_dto(game))
+        self._db().execute(
+            "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
+        )
+        self._db().commit()
+
+    def _db(self, exclusive=False):
+        """ Returns the database. The first time this method is called during a request,
+        a sqlite connection is opened and stored in the global context """
+        if not self._db_connection:
+            self._db_connection = sqlite3.connect(
+                current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
+            )
+            self._db_connection.row_factory = sqlite3.Row
+            if exclusive:
+                self._db_connection.isolation_level = None
+                self._db_connection.execute("BEGIN EXCLUSIVE")
+        return self._db_connection
+
+    @classmethod
+    def init_database(cls):
+        """ Executes the schema definition """
+        cls.get_instance()._db().executescript("""
         DROP TABLE IF EXISTS games;
 
         CREATE TABLE games (
             id INTEGER PRIMARY KEY,
             game_state TEXT NOT NULL
         );
-    """)
+        """)
 
-
-def close_database(exception=None):
-    """ Closes the database connection """
-    database = g.pop('db', None)
-
-    if database is not None:
-        database.close()
+    @classmethod
+    def close_database(cls):
+        """ Closes the database connection """
+        gateway = cls.get_instance()
+        if gateway._db_connection:
+            gateway._db_connection.close()
+            gateway._db_connection = None
