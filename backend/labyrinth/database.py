@@ -51,6 +51,10 @@ class DatabaseGateway:
         )
         self._db().commit()
 
+    def update_action_timestamp(self, game_id, timestamp):
+        """ Updates the player action timestamp for a game """
+        pass
+
     def _db(self, exclusive=False):
         """ Returns the database. The first time this method is called during a request,
         a sqlite connection is opened and stored in the global context """

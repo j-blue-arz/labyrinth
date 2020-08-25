@@ -8,7 +8,10 @@ __all__ = ["InvalidStateException",
            "InvalidRotationException",
            "MoveUnreachableException",
            "TurnActionViolationException",
-           "GameFullException"]
+           "GameFullException",
+           "InvalidSizeException",
+           "InvalidComputeMethodException",
+           "GameNotFoundException"]
 
 
 class LabyrinthDomainException(Exception):
@@ -72,4 +75,9 @@ class InvalidSizeException(LabyrinthDomainException, ValueError):
 
 class InvalidComputeMethodException(LabyrinthDomainException):
     """ If a requested compute method could not be found """
+    pass
+
+
+class GameNotFoundException(LabyrinthDomainException):
+    """ If a game could not be found in the game repository """
     pass
