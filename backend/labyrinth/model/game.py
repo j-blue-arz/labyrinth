@@ -635,7 +635,7 @@ class Game:
         """ Getter for identifier """
         return self._id
 
-    def next_player_id(self):
+    def unused_player_id(self):
         """ Returns an identifier which is currently unused
         to set the id of a new player.
         Throws GameFullException if there are no slots left."""

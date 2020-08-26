@@ -24,7 +24,7 @@ def add_player(game_id, player_request_dto):
     """
     game = _get_or_create_game(game_id)
     is_computer, computation_method = mapper.dto_to_type(player_request_dto)
-    player_id = _try(game.next_player_id)
+    player_id = _try(game.unused_player_id)
     player = None
     if not is_computer:
         player = Player(player_id)
