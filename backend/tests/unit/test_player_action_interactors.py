@@ -10,7 +10,7 @@ from labyrinth.model.game import BoardLocation, Game, Player
 
 
 @pytest.fixture()
-def player_action_interactor_test_setup():
+def test_setup():
     def _setup():
         game = Game(5)
         data_access_mock = when_data_access_load_game_then_return(game)
@@ -21,8 +21,8 @@ def player_action_interactor_test_setup():
     return _setup
 
 
-def test_perform_shift__calls_shift_on_game(player_action_interactor_test_setup):
-    game, player_action_interactor, _ = player_action_interactor_test_setup()
+def test_perform_shift__calls_shift_on_game(test_setup):
+    game, player_action_interactor, _ = test_setup()
     game.shift = Mock()
 
     player_action_interactor.perform_shift(game_id=5, player_id=7,
@@ -31,8 +31,8 @@ def test_perform_shift__calls_shift_on_game(player_action_interactor_test_setup)
     game.shift.assert_called_once_with(7, BoardLocation(1, 2), 90)
 
 
-def test_perform_shift__updates_game_with_new_state(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_shift__updates_game_with_new_state(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     when_game_shift_then_set_previous_shift_location(game)
 
     player_action_interactor.perform_shift(game_id=5, player_id=7,
@@ -41,8 +41,8 @@ def test_perform_shift__updates_game_with_new_state(player_action_interactor_tes
     data_access.update_game.assert_called_once_with(5, game_with_previous_shift_location(BoardLocation(1, 2)))
 
 
-def test_perform_shift__when_exception_raised_by_game__then_no_update(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_shift__when_exception_raised_by_game__then_no_update(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     when_game_shift_then_raise(game, InvalidShiftLocationException())
     with pytest.raises(InvalidShiftLocationException):
         player_action_interactor.perform_shift(game_id=5, player_id=7,
@@ -51,8 +51,8 @@ def test_perform_shift__when_exception_raised_by_game__then_no_update(player_act
     data_access.update_game.assert_not_called()
 
 
-def test_perform_shift__updates_player_action_timestamp(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_shift__updates_player_action_timestamp(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     game.shift = Mock()
 
     player_action_interactor.perform_shift(game_id=5, player_id=7,
@@ -61,8 +61,8 @@ def test_perform_shift__updates_player_action_timestamp(player_action_interactor
     data_access.update_action_timestamp.assert_called_once_with(5, timestamp_close_to(datetime.now()))
 
 
-def test_perform_move__calls_move_on_game(player_action_interactor_test_setup):
-    game, player_action_interactor, _ = player_action_interactor_test_setup()
+def test_perform_move__calls_move_on_game(test_setup):
+    game, player_action_interactor, _ = test_setup()
     game.move = Mock()
 
     player_action_interactor.perform_move(game_id=5, player_id=7, move_location=BoardLocation(3, 7))
@@ -70,8 +70,8 @@ def test_perform_move__calls_move_on_game(player_action_interactor_test_setup):
     game.move.assert_called_once_with(7, BoardLocation(3, 7))
 
 
-def test_perform_move__updates_game_with_new_state(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_move__updates_game_with_new_state(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     game.add_player(Player(7))
     when_game_move_then_increase_player_score(game)
 
@@ -80,8 +80,8 @@ def test_perform_move__updates_game_with_new_state(player_action_interactor_test
     data_access.update_game.assert_called_once_with(5, game_with_player_score(1))
 
 
-def test_perform_move__when_exception_raised_by_game__then_no_update(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_move__when_exception_raised_by_game__then_no_update(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     when_game_move_then_raise(game, TurnActionViolationException())
     with pytest.raises(TurnActionViolationException):
         player_action_interactor.perform_move(game_id=5, player_id=7, move_location=BoardLocation(3, 7))
@@ -89,8 +89,8 @@ def test_perform_move__when_exception_raised_by_game__then_no_update(player_acti
     data_access.update_game.assert_not_called()
 
 
-def test_perform_move__updates_player_action_timestamp(player_action_interactor_test_setup):
-    game, player_action_interactor, data_access = player_action_interactor_test_setup()
+def test_perform_move__updates_player_action_timestamp(test_setup):
+    game, player_action_interactor, data_access = test_setup()
     game.move = Mock()
 
     player_action_interactor.perform_move(game_id=5, player_id=7, move_location=BoardLocation(3, 7))
