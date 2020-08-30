@@ -55,12 +55,15 @@ class DatabaseGateway:
 
     def load_all_games_before_action_timestamp(self, timestamp):
         """ Loads games where the player_action_timestamp is older than the given requested timestamp """
-        game_rows = (
-            self._db(exclusive=True)
-            .execute("SELECT game_state FROM games WHERE player_action_timestamp<?", (timestamp,))
-            .fetchall()
-        )
-        return [self._game_row_to_game(game_row) for game_row in game_rows]
+        try:
+            game_rows = (
+                self._db(exclusive=True)
+                .execute("SELECT game_state FROM games WHERE player_action_timestamp<?", (timestamp,))
+                .fetchall()
+            )
+            return [self._game_row_to_game(game_row) for game_row in game_rows]
+        except sqlite3.OperationalError:
+            return []
 
     def _game_row_to_game(self, game_row):
         game = dto_to_game(json.loads(game_row["game_state"]))
