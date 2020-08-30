@@ -42,7 +42,6 @@ class DatabaseGateway:
         )
         self._notify_listeners(game)
 
-
     def load_game(self, game_id, for_update=False):
         """ Loads a game from the database """
         game_row = (
