@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 import pytest
@@ -51,16 +50,6 @@ def test_perform_shift__when_exception_raised_by_game__then_no_update(test_setup
     data_access.update_game.assert_not_called()
 
 
-def test_perform_shift__updates_player_action_timestamp(test_setup):
-    game, player_action_interactor, data_access = test_setup()
-    game.shift = Mock()
-
-    player_action_interactor.perform_shift(game_id=5, player_id=7,
-                                           shift_location=BoardLocation(1, 2), shift_rotation=90)
-
-    data_access.update_action_timestamp.assert_called_once_with(5, timestamp_close_to(datetime.now()))
-
-
 def test_perform_move__calls_move_on_game(test_setup):
     game, player_action_interactor, _ = test_setup()
     game.move = Mock()
@@ -89,15 +78,6 @@ def test_perform_move__when_exception_raised_by_game__then_no_update(test_setup)
     data_access.update_game.assert_not_called()
 
 
-def test_perform_move__updates_player_action_timestamp(test_setup):
-    game, player_action_interactor, data_access = test_setup()
-    game.move = Mock()
-
-    player_action_interactor.perform_move(game_id=5, player_id=7, move_location=BoardLocation(3, 7))
-
-    data_access.update_action_timestamp.assert_called_once_with(5, timestamp_close_to(datetime.now()))
-
-
 def game_with_previous_shift_location(expected_location):
     class Matcher:
         def __init__(self, expected_location):
@@ -106,21 +86,6 @@ def game_with_previous_shift_location(expected_location):
         def __eq__(self, game):
             return game.previous_shift_location == self.expected_location
     return Matcher(expected_location)
-
-
-def timestamp_close_to(expected_timestamp, delta_ms=500):
-    class Matcher:
-        def __init__(self, expected_timestamp, delta_ms):
-            self.expected_timestamp = expected_timestamp
-            self.delta = timedelta(milliseconds=delta_ms)
-
-        def __eq__(self, other_timestamp):
-            matches = self.expected_timestamp - other_timestamp < self.delta
-            if matches:
-                return True
-            else:
-                raise AssertionError(f"expected: timestamp close to {self.expected_timestamp}, got {other_timestamp}")
-    return Matcher(expected_timestamp, delta_ms)
 
 
 def game_with_player_score(expected_score):

@@ -14,6 +14,7 @@ class DatabaseGateway:
 
     def __init__(self):
         self._db_connection = None
+        self._game_created_listeners = []
 
     @classmethod
     def get_instance(cls):
@@ -24,12 +25,22 @@ class DatabaseGateway:
             g.db_gateway = cls()
         return g.db_gateway
 
+    def register_game_created_listener(self, listener):
+        """ Registers a callback, which is called everytime a game is created from the database.
+        The listener is called with the created game. """
+        self._game_created_listeners.append(listener)
+
+    def _notify_listeners(self, game):
+        for listener in self._game_created_listeners:
+            listener(game)
+
     def create_game(self, game, game_id=0):
         """ Inserts a game into the database """
         game_json = json.dumps(game_to_dto(game))
         self._db().execute(
             "INSERT INTO games(id, game_state) VALUES (?, ?)", (game_id, game_json)
         )
+        self._notify_listeners(game)
 
 
     def load_game(self, game_id, for_update=False):
@@ -41,7 +52,21 @@ class DatabaseGateway:
         )
         if game_row is None:
             return None
-        return dto_to_game(json.loads(game_row["game_state"]))
+        return self._game_row_to_game(game_row)
+
+    def load_all_games_before_action_timestamp(self, timestamp):
+        """ Loads games where the player_action_timestamp is older than the given requested timestamp """
+        game_rows = (
+            self._db(exclusive=True)
+            .execute("SELECT game_state FROM games WHERE player_action_timestamp<?", (timestamp,))
+            .fetchall()
+        )
+        return [self._game_row_to_game(game_row) for game_row in game_rows]
+
+    def _game_row_to_game(self, game_row):
+        game = dto_to_game(json.loads(game_row["game_state"]))
+        self._notify_listeners(game)
+        return game
 
     def update_game(self, game_id, game):
         """ Updates a game in the database """

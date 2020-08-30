@@ -168,3 +168,27 @@ def test_remove_second_player_next_player_action_should_be_remaining_player():
     assert turns.next_player_action() is not None
     assert turns.next_player_action().player is player1
     player1.callback.assert_called_once()
+
+
+def test_remove_player__with_only_one_player__no_callback_called():
+    turns = Turns()
+    player = Mock()
+    turns.add_player(player, turn_callback=player.callback)
+    turns.start()
+    player.callback.reset_mock()
+    turns.remove_player(player)
+    assert turns.next_player_action() is None
+    player.callback.assert_not_called()
+
+
+def test_add_player__with_no_remaining_player__sets_next_player_action_and_calls_callback():
+    turns = Turns()
+    player = Player(0)
+    turns.add_player(player)
+    turns.start()
+    turns.remove_player(player)
+    player = Mock()
+    turns.add_player(player, turn_callback=player.callback)
+    assert turns.next_player_action() is not None
+    assert turns.next_player_action().player is player
+    player.callback.assert_called_once()

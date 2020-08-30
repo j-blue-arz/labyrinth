@@ -37,6 +37,9 @@ def create_app(test_config=None):
     from . import api
     app.register_blueprint(api.API)
 
+    from . import game_management
+    app.register_blueprint(game_management.GAME_MANAGEMENT)
+
     from labyrinth.database import DatabaseGateway
     app.before_first_request(lambda: DatabaseGateway.init_database())
     app.teardown_request(lambda exc: DatabaseGateway.close_database())

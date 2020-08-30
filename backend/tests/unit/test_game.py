@@ -2,6 +2,7 @@
 from unittest.mock import Mock, patch, call, PropertyMock
 import pytest
 from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board
+from labyrinth.model import factories
 from labyrinth.model.exceptions import PlayerNotFoundException, GameFullException
 
 
@@ -201,3 +202,63 @@ def test_replace_board():
     turns.start.assert_called_once()
     assert players[0].score == 0
     assert players[1].score == 0
+
+
+def _turn_listener_test_setup(players):
+    game = factories.create_game(game_id=7)
+    listener = Mock()
+    game.register_turn_change_listener(listener)
+    for player in players:
+        game.add_player(player)
+    return game, listener
+
+
+def test_turn_listener__when_game_is_started__listener_is_notified():
+    player = Player(0)
+    game, listener = _turn_listener_test_setup([player])
+
+    listener.reset_mock()
+    game.start_game()
+    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.SHIFT_ACTION)
+
+
+def test_register_turn_listener__when_current_player_is_deleted__listener_is_notified():
+    players = [Player(0), Player(1)]
+    game, listener = _turn_listener_test_setup(players)
+    game.start_game()
+
+    listener.reset_mock()
+    game.remove_player(players[0].identifier)
+    listener.assert_called_once_with(game=game, player=players[1], next_action=PlayerAction.SHIFT_ACTION)
+
+
+def test_register_turn_listener__when_first_player_is_added__listener_is_notified():
+    game, listener = _turn_listener_test_setup([Player(0)])
+    game.start_game()
+    game.remove_player(0)
+    player = Player(1)
+
+    listener.reset_mock()
+    game.add_player(player)
+    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.SHIFT_ACTION)
+
+
+def test_register_turn_listener__when_player_shifts__listener_is_notified():
+    player = Player(0)
+    game, listener = _turn_listener_test_setup([player])
+    game.start_game()
+
+    listener.reset_mock()
+    game.shift(0, BoardLocation(0, 1), 0)
+    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.MOVE_ACTION)
+
+
+def test_register_turn_listener__when_player_moves__listener_is_notified():
+    players = [Player(0), Player(1)]
+    game, listener = _turn_listener_test_setup(players)
+    game.start_game()
+    game.shift(0, BoardLocation(0, 1), 0)
+
+    listener.reset_mock()
+    game.move(0, BoardLocation(0, 0))
+    listener.assert_called_once_with(game=game, player=players[1], next_action=PlayerAction.SHIFT_ACTION)

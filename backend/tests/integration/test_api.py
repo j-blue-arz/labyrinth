@@ -1,6 +1,7 @@
 """ Tests the api methods ( /api/ ) """
 import json
 import os
+import time
 
 
 def test_post_player_returns_player(client):
@@ -430,6 +431,18 @@ def test_get_computation_methods_contains_library(library_path, client):
     assert expected_name in computation_methods
 
 
+def test_remove_overdue_players__with_one_overdue_player__should_remove_player(client, cli_runner):
+    """ Tests the cli to remove overdue players.
+
+    Sets the overdue time to 3s and waits 5s before executing cli."""
+    player_id = _assert_ok_retrieve_id(_post_player(client))
+    _post_shift(client, player_id, 0, 1, 270)
+    time.sleep(2)
+    _cli_remove_overdue_players(cli_runner, 1)
+    state = _get_state(client).get_json()
+    assert len(state["players"]) == 0
+
+
 def _assert_invalid_argument_and_unchanged_state(client, action_callable):
     _assert_error_response_and_unchanged_state(
         client, action_callable, expected_user_message="The combination of arguments in this request is not supported.",
@@ -540,3 +553,7 @@ def _player_data(is_computer=False, computation_method=None):
     if data:
         data = json.dumps(data)
     return data
+
+
+def _cli_remove_overdue_players(cli_runner, seconds):
+    cli_runner.invoke(args=["game-management", "remove-overdue-players", "--seconds", str(seconds)])

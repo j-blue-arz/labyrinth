@@ -75,7 +75,6 @@ class MazeCard:
     T_JUNCT = "NES"
     CROSS = "NESW"
 
-    next_id = 0
     _DIRECTIONS_BY_OUT_PATHS_ROTATED = out_paths_dict.dictionary
 
     def __init__(self, identifier=0, out_paths=STRAIGHT, rotation=0):
@@ -524,15 +523,18 @@ class Turns:
     """
 
     def __init__(self, players=None, next_action=None):
+        self._turn_changed_listeners = []
         self._player_actions = []
-        self.init(players)
+        self._is_running = False
         self._next = 0
+        self.init(players)
         if next_action:
             self._next = self._player_actions.index(next_action)
 
     def init(self, players=None):
         """ clears turn progression, adds all players """
         self._player_actions = []
+        self._is_running = False
         if players:
             for player in players:
                 player.register_in_turns(self)
@@ -543,32 +545,36 @@ class Turns:
             player_action.player is player
             for player_action in self._player_actions
         )
-
         if not already_present:
             self._player_actions.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
             self._player_actions.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
+        if self._is_running and self.next_player_action().player is player:
+            self._notify_turn_changed_listeners()
 
-    def remove_player(self, player):
+    def remove_player(self, player_to_remove):
         """ Removes all PlayerActions with this player. If it was this player's turn to play, the next
-        Player has to play and is informed if available """
-        player_index = self._player_actions.index(PlayerAction(player, PlayerAction.MOVE_ACTION))
-        if player_index - 1 <= self._next <= player_index:
-            next_player_index = (self._next + 2) % len(self._player_actions)
-            next_player = self._player_actions[next_player_index].player
-            self._next = self._player_actions.index(PlayerAction(next_player, PlayerAction.SHIFT_ACTION))
-            if self.next_player_action().turn_callback:
-                self.next_player_action().turn_callback()
-        if self._next > player_index:
-            self._next -= 2
+        Player has to play and listeners have to be notified. """
+        old_next_player_action = self.next_player_action()
+        old_player_actions = self._player_actions
         self._player_actions = [player_action for player_action in self._player_actions
-                                if player_action.player is not player]
+                                if player_action.player is not player_to_remove]
+        if self._player_actions:
+            if old_next_player_action.player is player_to_remove:
+                next_player_index = (self._next + 2) % len(old_player_actions)
+                next_player = old_player_actions[next_player_index].player
+                new_next_player_action = PlayerAction(next_player, PlayerAction.SHIFT_ACTION)
+                self._next = self._player_actions.index(new_next_player_action)
+                self._notify_turn_changed_listeners()
+            else:
+                self._next = self._player_actions.index(old_next_player_action)
+        else:
+            self._next = 0
 
     def start(self):
         """ Starts the progression, informs player if necessary """
         self._next = 0
-        next_player = self._player_actions[self._next]
-        if next_player.turn_callback:
-            next_player.turn_callback()
+        self._is_running = True
+        self._notify_turn_changed_listeners()
 
     def is_action_possible(self, player, action):
         """ Checks if the action can be performed by the player
@@ -592,9 +598,7 @@ class Turns:
             raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
                 player.identifier, action))
         self._next = (self._next + 1) % len(self._player_actions)
-        player_action = self._player_actions[self._next]
-        if player_action.action is PlayerAction.SHIFT_ACTION and player_action.turn_callback:
-            player_action.turn_callback()
+        self._notify_turn_changed_listeners()
 
     def next_player_action(self):
         """ Returns the next PlayerAction in the turn progression """
@@ -602,6 +606,19 @@ class Turns:
             return self._player_actions[self._next]
         except IndexError:
             return None
+
+    def register_turn_changed_listener(self, listener):
+        """ Register a listener which is notified whenever the turn changes.
+
+        The listener will be called without an argument """
+        self._turn_changed_listeners.append(listener)
+
+    def _notify_turn_changed_listeners(self):
+        player_action = self.next_player_action()
+        if player_action and player_action.action is PlayerAction.SHIFT_ACTION and player_action.turn_callback:
+            player_action.turn_callback()
+        for listener in self._turn_changed_listeners:
+            listener()
 
 
 class Game:
@@ -613,7 +630,9 @@ class Game:
         self._players = players if players else []
         self._board = board if board else Board()
         self._turns = turns if turns else Turns()
+        self._turns.register_turn_changed_listener(self._notify_turn_listeners)
         self.previous_shift_location = None
+        self._turn_listeners = []
 
     @property
     def turns(self):
@@ -742,3 +761,22 @@ class Game:
         if shift_location == opposing_shift_location:
             raise exceptions.InvalidShiftLocationException(
                 "Location {} is not shiftable (no-pushback rule)".format(str(shift_location)))
+
+    def register_turn_change_listener(self, listener):
+        """ Register a listener which is notified whenever the turn changes.
+
+        The listener will be called with the game, the player to perform the next action and
+        the type of the expected action.
+        :param listener: a method with the parameters game, player and next_action"""
+        self._turn_listeners.append(listener)
+
+    def _notify_turn_listeners(self):
+        next_player_action = self._turns.next_player_action()
+        player = next_player_action.player
+        action = next_player_action.action
+        for listener in self._turn_listeners:
+            listener(game=self, player=player, next_action=action)
+
+    def next_player(self):
+        """ The player who is expected to perform the next action """
+        return self._turns.next_player_action().player

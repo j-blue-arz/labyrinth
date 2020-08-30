@@ -9,6 +9,7 @@ import labyrinth.mapper.api as mapper
 from labyrinth import exceptions
 from labyrinth.database import DatabaseGateway
 from labyrinth.model.exceptions import LabyrinthDomainException
+from labyrinth.model import interactors
 from labyrinth.model.game import Player
 from labyrinth.model import computer
 
@@ -22,6 +23,7 @@ def add_player(game_id, player_request_dto):
     :param player_request_dto: if this parameter is given, it contains information about the type of player to add
     :return: the added player
     """
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
     game = _get_or_create_game(game_id)
     is_computer, computation_method = mapper.dto_to_type(player_request_dto)
     player_id = _try(game.unused_player_id)
@@ -45,6 +47,7 @@ def delete_player(game_id, player_id):
     :param game_id: specifies the game
     :param player_id: specifies the player to remove
     """
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
     game = _load_game_or_throw(game_id, for_update=True)
     _try(lambda: game.remove_player(player_id))
     DatabaseGateway.get_instance().update_game(game_id, game)
@@ -60,6 +63,7 @@ def change_game(game_id, game_request_dto):
     :param game_id: specifies the game. Has to exist.
     :param game_request_dto: contains the new maze size."""
     new_size = mapper.dto_to_maze_size(game_request_dto)
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
     game = _load_game_or_throw(game_id)
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
     _try(lambda: game.replace_board(new_board))
@@ -69,6 +73,7 @@ def change_game(game_id, game_request_dto):
 
 def get_game_state(game_id):
     """ Returns the game state """
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
     game = _load_game_or_throw(game_id)
     return mapper.game_state_to_dto(game)
 
@@ -85,9 +90,10 @@ def perform_shift(game_id, player_id, shift_dto):
 def perform_move(game_id, player_id, move_dto):
     """Performs a move operation on the game."""
     location = mapper.dto_to_move_action(move_dto)
-    game = _load_game_or_throw(game_id)
-    _try(lambda: game.move(player_id, location))
-    DatabaseGateway.get_instance().update_game(game_id, game)
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
+    interactor = interactors.PlayerActionInteractor(DatabaseGateway.get_instance())
+    _try(lambda: interactor.perform_move(game_id, player_id, location))
+    DatabaseGateway.get_instance().commit()
 
 
 def get_computation_methods():
@@ -95,6 +101,13 @@ def get_computation_methods():
     These are either methods implemented in the backend, i.e. those in labyrinth.model.computer,
     or methods made available by dynamically loaded libraries """
     return computer.get_available_computation_methods()
+
+
+def remove_overdue_players(overdue_timedelta):
+    """ Uses OverduePlayerInteractor to remove players which block the game by not performing actions """
+    interactor = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
+    _try(lambda: interactor.remove_overdue_players(overdue_timedelta))
+    DatabaseGateway.get_instance().commit()
 
 
 def _get_or_create_game(game_id):

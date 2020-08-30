@@ -9,9 +9,9 @@ from labyrinth import create_app
 
 
 @pytest.fixture
-def client():
+def app():
     """ Creates the app in test mode with a temporary database
-    yields a test client, and
+    yields the app, and
     cleans up after the test
     """
     file_descriptor, db_path = tempfile.mkstemp()
@@ -19,9 +19,19 @@ def client():
         'TESTING': True,
         'DATABASE': db_path,
     })
-    yield app.test_client()
+    yield app
     os.close(file_descriptor)
     os.unlink(db_path)
+
+
+@pytest.fixture
+def client(app):
+    yield app.test_client()
+
+
+@pytest.fixture
+def cli_runner(app):
+    yield app.test_cli_runner()
 
 
 def pytest_generate_tests(metafunc):
