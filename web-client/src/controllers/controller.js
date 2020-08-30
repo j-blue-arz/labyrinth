@@ -132,7 +132,18 @@ export default class Controller {
         this._game.createFromApi(apiResponse.data);
         if (this._playerManager.hasUserPlayer()) {
             let userPlayerId = this._playerManager.getUserPlayer();
-            this._game.getPlayer(userPlayerId).isUser = true;
+            let userPlayer = this._game.getPlayer(userPlayerId);
+            if (userPlayer) {
+                userPlayer.isUser = true;
+            } else {
+                this._playerManager.removeUserPlayer();
+            }
+        }
+        if (this._playerManager.hasWasmPlayer()) {
+            let wasmPlayer = this._game.getPlayer(this._playerManager.getWasmPlayer());
+            if (!wasmPlayer) {
+                this._playerManager.removeWasmPlayer();
+            }
         }
     }
 
