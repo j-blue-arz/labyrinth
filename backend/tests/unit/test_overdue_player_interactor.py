@@ -7,11 +7,16 @@ from labyrinth.model import factories
 from labyrinth.model.game import Player
 
 
-def test_remove_overdue_players__with_one_blocking_player__removes_current_player():
+def setup_test():
     game = factories.create_game(game_id=5)
     player = Player(3)
     game.add_player(player)
     game.start_game()
+    return game, player
+
+
+def test_remove_overdue_players__with_one_blocking_player__removes_current_player():
+    game, player = setup_test()
     game.remove_player = Mock()
     data_access = when_data_access_load_all_games_before_action_timestamp_then_return([game])
 
@@ -21,10 +26,20 @@ def test_remove_overdue_players__with_one_blocking_player__removes_current_playe
     game.remove_player.assert_called_once_with(3)
 
 
+def test_remove_overdue_players__with_player_just_removed__does_not_raise_exception():
+    """ When the last remaining player was removed or has left the game,
+    the update timestamp will stay at its last value. Then, the interactor must not try to remove a player.
+    """
+    game, player = setup_test()
+    game.remove_player(player.identifier)
+    data_access = when_data_access_load_all_games_before_action_timestamp_then_return([game])
+
+    interactor = interactors.OverduePlayerInteractor(data_access)
+    interactor.remove_overdue_players()
+
+
 def test_interactor__when_game_notifies_turn_listeners__updates_player_action_timestamp():
-    game = factories.create_game(game_id=5)
-    game.add_player(Player(0))
-    game.start_game()
+    game, _ = setup_test()
     data_access = DatabaseGateway()
     data_access.update_action_timestamp = Mock()
     _ = interactors.OverduePlayerInteractor(data_access)
