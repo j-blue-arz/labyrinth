@@ -5,7 +5,7 @@ It also maps domain exceptions to these pre-defined factories. """
 from labyrinth.model.exceptions import InvalidStateException, PlayerNotFoundException, \
     InvalidLocationException, InvalidShiftLocationException, MoveUnreachableException, \
     InvalidRotationException, TurnActionViolationException, GameFullException, InvalidSizeException, \
-    InvalidComputeMethodException
+    InvalidComputeMethodException, GameNotFoundException
 from labyrinth.mapper.api import exception_to_dto
 
 
@@ -49,4 +49,6 @@ def domain_to_api_exception(domain_exception):
         return ApiException("INVALID_ARGUMENTS",
                             str(domain_exception),
                             400)
+    if isinstance(domain_exception, GameNotFoundException):
+        return GAME_NOT_FOUND_API_EXCEPTION
     return ApiException("UNKNOWN_ERROR", "An unknown error has occurred.", 500)

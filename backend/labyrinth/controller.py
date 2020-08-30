@@ -35,6 +35,7 @@ def add_player(game_id, player_request_dto):
     if len(game.players) == 1:
         _try(game.start_game)
     DatabaseGateway.get_instance().update_game(game_id, game)
+    DatabaseGateway.get_instance().commit()
     return mapper.player_to_dto(player)
 
 
@@ -47,6 +48,7 @@ def delete_player(game_id, player_id):
     game = _load_game_or_throw(game_id, for_update=True)
     _try(lambda: game.remove_player(player_id))
     DatabaseGateway.get_instance().update_game(game_id, game)
+    DatabaseGateway.get_instance().commit()
     return ""
 
 
@@ -62,6 +64,7 @@ def change_game(game_id, game_request_dto):
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
     _try(lambda: game.replace_board(new_board))
     DatabaseGateway.get_instance().update_game(game_id, game)
+    DatabaseGateway.get_instance().commit()
 
 
 def get_game_state(game_id):
@@ -73,9 +76,10 @@ def get_game_state(game_id):
 def perform_shift(game_id, player_id, shift_dto):
     """Performs a shift operation on the game."""
     location, rotation = mapper.dto_to_shift_action(shift_dto)
-    game = _load_game_or_throw(game_id)
-    _try(lambda: game.shift(player_id, location, rotation))
-    DatabaseGateway.get_instance().update_game(game_id, game)
+    _ = interactors.OverduePlayerInteractor(DatabaseGateway.get_instance())
+    interactor = interactors.PlayerActionInteractor(DatabaseGateway.get_instance())
+    _try(lambda: interactor.perform_shift(game_id, player_id, location, rotation))
+    DatabaseGateway.get_instance().commit()
 
 
 def perform_move(game_id, player_id, move_dto):

@@ -4,6 +4,11 @@ from labyrinth.model import exceptions
 
 
 class PlayerActionInteractor:
+    """ Interactor class which handles player actions (shift and move)
+
+    Both methods (perform_shift and perform_move) follow the same line:
+    load the game, perform the action, update the game state
+    """
     def __init__(self, game_repository):
         self._game_repository = game_repository
 

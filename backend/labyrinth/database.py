@@ -30,7 +30,7 @@ class DatabaseGateway:
         self._db().execute(
             "INSERT INTO games(id, game_state) VALUES (?, ?)", (game_id, game_json)
         )
-        self._db().commit()
+
 
     def load_game(self, game_id, for_update=False):
         """ Loads a game from the database """
@@ -49,11 +49,21 @@ class DatabaseGateway:
         self._db().execute(
             "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
         )
-        self._db().commit()
 
     def update_action_timestamp(self, game_id, timestamp):
-        """ Updates the player action timestamp for a game """
-        pass
+        """ Updates the player action timestamp for a game
+
+        :param timestamp: expected to be an instance of datetime.timestamp"""
+        self._db().execute(
+            "UPDATE games SET player_action_timestamp=? WHERE ID=?",
+            (timestamp, game_id),
+        )
+
+    def commit(self):
+        """ Commits the transaction.
+
+        If this method is not called (e.g. due to a prior exception), changes are lost. """
+        self._db().commit()
 
     def _db(self, exclusive=False):
         """ Returns the database. The first time this method is called during a request,
@@ -71,14 +81,17 @@ class DatabaseGateway:
     @classmethod
     def init_database(cls):
         """ Executes the schema definition """
-        cls.get_instance()._db().executescript("""
+        cls.get_instance()._db().executescript(
+            """
         DROP TABLE IF EXISTS games;
 
         CREATE TABLE games (
             id INTEGER PRIMARY KEY,
-            game_state TEXT NOT NULL
+            game_state TEXT NOT NULL,
+            player_action_timestamp timestamp
         );
-        """)
+        """
+        )
 
     @classmethod
     def close_database(cls):
