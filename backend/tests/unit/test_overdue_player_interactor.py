@@ -18,9 +18,9 @@ def setup_test():
 def test_remove_overdue_players__with_one_blocking_player__removes_current_player():
     game, player = setup_test()
     game.remove_player = Mock()
-    data_access = when_data_access_load_all_games_before_action_timestamp_then_return([game])
+    game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
-    interactor = interactors.OverduePlayerInteractor(data_access)
+    interactor = interactors.OverduePlayerInteractor(game_repository)
     interactor.remove_overdue_players()
 
     game.remove_player.assert_called_once_with(3)
@@ -32,27 +32,28 @@ def test_remove_overdue_players__with_player_just_removed__does_not_raise_except
     """
     game, player = setup_test()
     game.remove_player(player.identifier)
-    data_access = when_data_access_load_all_games_before_action_timestamp_then_return([game])
+    game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
-    interactor = interactors.OverduePlayerInteractor(data_access)
+    interactor = interactors.OverduePlayerInteractor(game_repository)
     interactor.remove_overdue_players()
 
 
 def test_interactor__when_game_notifies_turn_listeners__updates_player_action_timestamp():
     game, _ = setup_test()
     data_access = DatabaseGateway()
-    data_access.update_action_timestamp = Mock()
-    _ = interactors.OverduePlayerInteractor(data_access)
+    game_repository = interactors.GameRepository(data_access)
+    game_repository.update_action_timestamp = Mock()
+    _ = interactors.OverduePlayerInteractor(game_repository)
     data_access._notify_listeners(game)
     game._notify_turn_listeners()
 
-    data_access.update_action_timestamp.assert_called_once_with(5, timestamp_close_to(datetime.now()))
+    game_repository.update_action_timestamp.assert_called_once_with(game, timestamp_close_to(datetime.now()))
 
 
-def when_data_access_load_all_games_before_action_timestamp_then_return(games):
-    data_access_mock = Mock(spec=DatabaseGateway)
-    data_access_mock.load_all_games_before_action_timestamp = Mock(return_value=games)
-    return data_access_mock
+def when_game_repository_find_all_before_action_timestamp_then_return(games):
+    game_repository_mock = Mock(spec=interactors.GameRepository)
+    game_repository_mock.find_all_before_action_timestamp = Mock(return_value=games)
+    return game_repository_mock
 
 
 def timestamp_close_to(expected_timestamp, delta_ms=500):
