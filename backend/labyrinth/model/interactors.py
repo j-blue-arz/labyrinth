@@ -57,6 +57,25 @@ class OverduePlayerInteractor:
         self._game_repository.update_action_timestamp(game, datetime.now())
 
 
+class ObserveGameInteractor:
+    """ This interactor retrieves and returns the current game.
+
+    It updates the a timestamp on the game if the current one is old enough.
+    """
+    def __init__(self, game_repository, update_period=timedelta(minutes=15)):
+        self._game_repository = game_repository
+        self._update_period = update_period
+
+    def retrieve_game(self, game_id):
+        game, last_observed_timestamp = self._game_repository.find_by_id(game_id, with_last_observed=True)
+        if self._update_required(last_observed_timestamp):
+            self._game_repository.update_observed_timestamp(game, datetime.now())
+        return game
+
+    def _update_required(self, last_observed_timestamp):
+        return not last_observed_timestamp or last_observed_timestamp + self._update_period < datetime.now()
+
+
 class GameRepository:
     """ Object to retrieve game instances.
 
@@ -65,11 +84,8 @@ class GameRepository:
     def __init__(self, data_access):
         self._data_access = data_access
 
-    def update(self, game):
-        self._data_access.update_game(game.identifier, game)
-
-    def find_by_id(self, game_id):
-        game = self._data_access.load_game(game_id)
+    def find_by_id(self, game_id, with_last_observed=False):
+        game = self._data_access.load_game(game_id, with_last_observed=with_last_observed)
         if game is None:
             raise exceptions.GameNotFoundException
         return game
@@ -80,6 +96,12 @@ class GameRepository:
 
     def update_action_timestamp(self, game, timestamp):
         self._data_access.update_action_timestamp(game.identifier, timestamp)
+
+    def update_observed_timestamp(self, game, timestamp):
+        self._data_access.update_observed_timestamp(game.identifier, timestamp)
+
+    def update(self, game):
+        self._data_access.update_game(game.identifier, game)
 
     def register_game_created_listener(self, listener):
         self._data_access.register_game_created_listener(listener)

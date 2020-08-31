@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import Mock
 
 from labyrinth.database import DatabaseGateway
 from labyrinth.model import interactors
 from labyrinth.model import factories
 from labyrinth.model.game import Player
+from tests.unit import matchers
 
 
 def setup_test():
@@ -47,25 +48,10 @@ def test_interactor__when_game_notifies_turn_listeners__updates_player_action_ti
     data_access._notify_listeners(game)
     game._notify_turn_listeners()
 
-    game_repository.update_action_timestamp.assert_called_once_with(game, timestamp_close_to(datetime.now()))
+    game_repository.update_action_timestamp.assert_called_once_with(game, matchers.timestamp_close_to(datetime.now()))
 
 
 def when_game_repository_find_all_before_action_timestamp_then_return(games):
     game_repository_mock = Mock(spec=interactors.GameRepository)
     game_repository_mock.find_all_before_action_timestamp = Mock(return_value=games)
     return game_repository_mock
-
-
-def timestamp_close_to(expected_timestamp, delta_ms=500):
-    class Matcher:
-        def __init__(self, expected_timestamp, delta_ms):
-            self.expected_timestamp = expected_timestamp
-            self.delta = timedelta(milliseconds=delta_ms)
-
-        def __eq__(self, other_timestamp):
-            matches = self.expected_timestamp - other_timestamp < self.delta
-            if matches:
-                return True
-            else:
-                raise AssertionError(f"expected: timestamp close to {self.expected_timestamp}, got {other_timestamp}")
-    return Matcher(expected_timestamp, delta_ms)

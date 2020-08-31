@@ -42,16 +42,20 @@ class DatabaseGateway:
         )
         self._notify_listeners(game)
 
-    def load_game(self, game_id, for_update=False):
+    def load_game(self, game_id, for_update=False, with_last_observed=False):
         """ Loads a game from the database """
         game_row = (
             self._db(exclusive=for_update)
-            .execute("SELECT game_state FROM games WHERE id=?", (game_id,))
+            .execute("SELECT game_state, last_observed_timestamp FROM games WHERE id=?", (game_id,))
             .fetchone()
         )
         if game_row is None:
             return None
-        return self._game_row_to_game(game_row)
+        game = self._game_row_to_game(game_row)
+        if with_last_observed:
+            return game, game_row["last_observed_timestamp"]
+        else:
+            return game
 
     def load_all_games_before_action_timestamp(self, timestamp):
         """ Loads games where the player_action_timestamp is older than the given requested timestamp """
@@ -80,9 +84,20 @@ class DatabaseGateway:
     def update_action_timestamp(self, game_id, timestamp):
         """ Updates the player action timestamp for a game
 
-        :param timestamp: expected to be an instance of datetime.timestamp"""
+        :param timestamp: expected to be an instance of datetime.timestamp
+        """
         self._db().execute(
             "UPDATE games SET player_action_timestamp=? WHERE ID=?",
+            (timestamp, game_id),
+        )
+
+    def update_observed_timestamp(self, game_id, timestamp):
+        """ Updates the last observed timestamp for a game
+
+        :param timestamp: expected to be an instance of datetime.timestamp
+        """
+        self._db().execute(
+            "UPDATE games SET last_observed_timestamp=? WHERE ID=?",
             (timestamp, game_id),
         )
 
@@ -115,7 +130,8 @@ class DatabaseGateway:
         CREATE TABLE games (
             id INTEGER PRIMARY KEY,
             game_state TEXT NOT NULL,
-            player_action_timestamp timestamp
+            player_action_timestamp timestamp,
+            last_observed_timestamp timestamp
         );
         """
         )

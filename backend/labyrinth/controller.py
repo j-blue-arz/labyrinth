@@ -74,8 +74,11 @@ def change_game(game_id, game_request_dto):
 def get_game_state(game_id):
     """ Returns the game state """
     _ = interactors.OverduePlayerInteractor(game_repository())
-    game = _load_game_or_throw(game_id)
-    return mapper.game_state_to_dto(game)
+    interactor = interactors.ObserveGameInteractor(game_repository())
+    game = _try(lambda: interactor.retrieve_game(game_id))
+    game_state = mapper.game_state_to_dto(game)
+    DatabaseGateway.get_instance().commit()
+    return game_state
 
 
 def perform_shift(game_id, player_id, shift_dto):
