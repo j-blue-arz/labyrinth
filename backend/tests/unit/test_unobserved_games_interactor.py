@@ -16,8 +16,8 @@ def test_remove_unobserved__after_unobserved_period__deletes_game():
     games_by_timestamp = {ago(hours=2): game1, ago(minutes=30): game2}
     game_repository = when_game_repository__find_all_before_observed_timestamp__then_answer(games_by_timestamp)
 
-    interactors.UnobservedGamesInteractor(game_repository=game_repository)
-    interactors.remove_unobserved_games(unobserved_period=timedelta(hours=1))
+    interactor = interactors.UnobservedGamesInteractor(game_repository=game_repository)
+    interactor.remove_unobserved_games(unobserved_period=timedelta(hours=1))
 
     game_repository.remove.assert_called_once_with(game1)
 
@@ -33,4 +33,4 @@ def when_game_repository__find_all_before_observed_timestamp__then_answer(games_
 
 
 def ago(**kwargs):
-    return datetime.now() - timedelta(kwargs)
+    return datetime.now() - timedelta(**kwargs)
