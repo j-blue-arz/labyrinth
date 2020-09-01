@@ -60,7 +60,7 @@ class OverduePlayerInteractor:
 class ObserveGameInteractor:
     """ This interactor retrieves and returns the current game.
 
-    It updates the a timestamp on the game if the current one is old enough.
+    It updates a timestamp on the game if the current one is too old.
     """
     def __init__(self, game_repository, update_period=timedelta(minutes=15)):
         self._game_repository = game_repository
@@ -76,10 +76,22 @@ class ObserveGameInteractor:
         return not last_observed_timestamp or last_observed_timestamp + self._update_period < datetime.now()
 
 
-class GameRepository:
-    """ Object to retrieve game instances.
+class UnobservedGamesInteractor:
+    """ Removes games which have not been observed for a certain time period """
+    def __init__(self, game_repository):
+        self._game_repository = game_repository
 
-    Providing a domain-directed interface, detached from the intrinsics of the
+    def remove_unobserved_games(self, unobserved_period=timedelta(hours=1)):
+        threshold = datetime.now() - unobserved_period
+        games = self._game_repository.find_all_before_observed_timestamp(threshold)
+        for game in games:
+            self._game_repository.remove(game)
+
+
+class GameRepository:
+    """ Manages retrieval, deletion and updates of games
+
+    Provides a domain-directed interface, detached from the intrinsics of the
     underlying data access. """
     def __init__(self, data_access):
         self._data_access = data_access
@@ -94,6 +106,10 @@ class GameRepository:
         """ Retrieves games where the action timestamp is older than the given requested timestamp """
         return self._data_access.load_all_games_before_action_timestamp(timestamp)
 
+    def find_all_before_observed_timestamp(self, timestamp):
+        """ Retrieves games where the last-observed timestamp is older than the given requested timestamp """
+        return self._data_access.load_all_games_before_observed_timestamp(timestamp)
+
     def update_action_timestamp(self, game, timestamp):
         self._data_access.update_action_timestamp(game.identifier, timestamp)
 
@@ -102,6 +118,9 @@ class GameRepository:
 
     def update(self, game):
         self._data_access.update_game(game.identifier, game)
+
+    def remove(self, game):
+        self._data_access.delete_game(game.identifier)
 
     def register_game_created_listener(self, listener):
         self._data_access.register_game_created_listener(listener)

@@ -113,6 +113,13 @@ def remove_overdue_players(overdue_timedelta):
     DatabaseGateway.get_instance().commit()
 
 
+def remove_unobserved_games(unobserved_period):
+    """ Uses UnobservedGamesInteractor to remove games which have not been observed for the given period """
+    interactor = interactors.UnobservedGamesInteractor(game_repository())
+    _try(lambda: interactor.remove_unobserved_games(unobserved_period))
+    DatabaseGateway.get_instance().commit()
+
+
 def game_repository():
     return interactors.GameRepository(DatabaseGateway.get_instance())
 

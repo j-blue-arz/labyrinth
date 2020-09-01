@@ -69,6 +69,18 @@ class DatabaseGateway:
         except sqlite3.OperationalError:
             return []
 
+    def load_all_games_before_observed_timestamp(self, timestamp):
+        """ Loads games where the last_observed_timestamp is older than the given requested timestamp """
+        try:
+            game_rows = (
+                self._db(exclusive=True)
+                .execute("SELECT game_state FROM games WHERE last_observed_timestamp<?", (timestamp,))
+                .fetchall()
+            )
+            return [self._game_row_to_game(game_row) for game_row in game_rows]
+        except sqlite3.OperationalError:
+            return []
+
     def _game_row_to_game(self, game_row):
         game = dto_to_game(json.loads(game_row["game_state"]))
         self._notify_listeners(game)
@@ -80,6 +92,10 @@ class DatabaseGateway:
         self._db().execute(
             "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
         )
+
+    def delete_game(self, game_id):
+        """ Deletes a game from the database """
+        self._db().execute("DELETE FROM games WHERE ID=?", (game_id, ))
 
     def update_action_timestamp(self, game_id, timestamp):
         """ Updates the player action timestamp for a game

@@ -434,13 +434,28 @@ def test_get_computation_methods_contains_library(library_path, client):
 def test_remove_overdue_players__with_one_overdue_player__should_remove_player(client, cli_runner):
     """ Tests the cli to remove overdue players.
 
-    Sets the overdue time to 3s and waits 5s before executing cli."""
+    Sets the overdue time to 1s and waits 2s before executing cli."""
     player_id = _assert_ok_retrieve_id(_post_player(client))
     _post_shift(client, player_id, 0, 1, 270)
     time.sleep(2)
     _cli_remove_overdue_players(cli_runner, 1)
     state = _get_state(client).get_json()
     assert len(state["players"]) == 0
+
+
+def test_remove_unobserved_games__with_one_unobserved_game__should_remove_game(client, cli_runner):
+    """ Tests the cli to remove unobserved games.
+
+    Sets the max unobserved time to 1s and waits 2s before executing cli.
+    The initial observed timestamp will be set with the first GET state.
+    Only the updates to this timestamp are delayed."""
+    _post_player(client, game_id=7)
+    response = _get_state(client, game_id=7)
+    assert response.status_code == 200
+    time.sleep(2)
+    _cli_remove_unobserved_games(cli_runner, 1)
+    response = _get_state(client, game_id=7)
+    _assert_error_response(response, key="GAME_NOT_FOUND", status=404)
 
 
 def _assert_invalid_argument_and_unchanged_state(client, action_callable):
@@ -468,13 +483,13 @@ def _assert_error_response_and_unchanged_state(client, action_callable, expected
     assert old_data == new_data
 
 
-def _assert_ok_retrieve_id(postPlayerResponse):
+def _assert_ok_retrieve_id(post_player_response):
     """ Asserts that a response has a 200 OK status,
     and returns the identifier of the added player
     """
-    assert postPlayerResponse.status_code == 200
+    assert post_player_response.status_code == 200
     try:
-        return int(postPlayerResponse.get_json()["id"])
+        return int(post_player_response.get_json()["id"])
     except ValueError:
         assert False
 
@@ -557,3 +572,7 @@ def _player_data(is_computer=False, computation_method=None):
 
 def _cli_remove_overdue_players(cli_runner, seconds):
     cli_runner.invoke(args=["game-management", "remove-overdue-players", "--seconds", str(seconds)])
+
+
+def _cli_remove_unobserved_games(cli_runner, seconds):
+    cli_runner.invoke(args=["game-management", "remove-unobserved_games", "--seconds", str(seconds)])
