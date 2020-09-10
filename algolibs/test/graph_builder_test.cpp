@@ -29,6 +29,7 @@ protected:
             "------------"
         };
         builder.setMaze(maze);
+        builder.setLeftoverOutPaths("NES");
         graph_ = builder.buildGraph();
     }
 
@@ -73,6 +74,15 @@ TEST_F(GraphBuilderFromTextTest, neighbors_withRow2Column1_returnsNoNeighbors) {
 
 TEST_F(GraphBuilderFromTextTest, neighbors_withRow2Column2_returnsNoNeighbors) {
     EXPECT_TRUE(assertNumNeighbors(graph_, Location{2, 2}, 0));
+}
+
+TEST_F(GraphBuilderFromTextTest, leftover_outPaths_areCorrect) {
+    auto leftover_node = graph_.getLeftover();
+    EXPECT_EQ(leftover_node.rotation, 0);
+    EXPECT_TRUE(hasOutPath(leftover_node, OutPaths::North));
+    EXPECT_TRUE(hasOutPath(leftover_node, OutPaths::East));
+    EXPECT_TRUE(hasOutPath(leftover_node, OutPaths::South));
+    EXPECT_FALSE(hasOutPath(leftover_node, OutPaths::West));
 }
 
 TEST(GraphBuilderSnakeTest, OneNodeForExtentOfOne) {

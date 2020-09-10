@@ -2,6 +2,27 @@
 
 namespace labyrinth {
 
+GraphBuilder & GraphBuilder::setLeftoverOutPaths(const std::string & out_paths_string) noexcept {
+    if (out_paths_string.find('N') != std::string::npos) {
+        addOutPath(leftover_out_paths_, OutPathPosition::North);
+    }
+    if (out_paths_string.find('E') != std::string::npos) {
+        addOutPath(leftover_out_paths_, OutPathPosition::East);
+    }
+    if (out_paths_string.find('S') != std::string::npos) {
+        addOutPath(leftover_out_paths_, OutPathPosition::South);
+    }
+    if (out_paths_string.find('W') != std::string::npos) {
+        addOutPath(leftover_out_paths_, OutPathPosition::West);
+    }
+    return *this;
+}
+
+GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
+    standard_shift_locations_ = true;
+    return *this;
+}
+
 void GraphBuilder::addOutPath(OutPathBitset & out_paths, OutPathPosition out_path) {
     out_paths.set(static_cast<size_t>(out_path));
 }
@@ -14,11 +35,6 @@ void GraphBuilder::addOutPaths(const Location & location, std::vector<OutPathPos
     for (const auto & out_path : out_paths) {
         addOutPath(location, out_path);
     }
-}
-
-GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
-    standard_shift_locations_ = true;
-    return *this;
 }
 
 MazeGraph GraphBuilder::constructGraph() {
