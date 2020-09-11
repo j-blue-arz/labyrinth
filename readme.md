@@ -41,9 +41,7 @@ If you want the server to be visible in your local network:
     flask run --host=0.0.0.0 --port=5000
 
 ## Benchmarks
-    python -m benchmarking.bench_alpha_beta benchmark all
-
-See the modules in backend/benchmarking for further instructions.
+See readme in backend/experiments for further instructions.
 
 # Compiling algolibs
 Algolibs contains C++ implementations of search algorithms, determining moves for a computer player. They are not required, but have better performance than
