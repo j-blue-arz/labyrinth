@@ -133,32 +133,10 @@ def _even(number):
     return number % 2 == 0
 
 
-def create_fixed_board(maze_string, leftover_out_paths=None, start_locations=None, objective_location=None):
-    """ Creates a Board instance. Maze is given as a string. """
-    maze_card_factory = MazeCardFactory()
-    maze = create_maze(maze_string, maze_card_factory)
-    if start_locations:
-        Board.START_LOCATIONS = start_locations
-    if objective_location:
-        Board.OBJECTIVE_LOCATION = objective_location
-    return Board(maze=maze, leftover_card=maze_card_factory.create_random_maze_card(leftover_out_paths))
-
-
-def create_fixed_game(maze_string, game_id=0, leftover_out_paths=None,
-                      start_coordinates=None, objective_coordinates=None):
-    """ Creates a game with a well-defined board state. Maze, leftover,
-    starting coordinates of pieces and objective location can be specified
-    """
-    start_locations, objective_location = None, None
-    if start_coordinates:
-        start_locations = [BoardLocation(*coordinates) for coordinates in start_coordinates]
-    if objective_coordinates:
-        objective_location = BoardLocation(*objective_coordinates)
-    return Game(game_id, board=create_fixed_board(maze_string, leftover_out_paths, start_locations, objective_location))
-
-
 def create_board(maze_size=7):
-    """ Creates a board with a given maze size """
+    """ Creates a board with a given maze size.
+
+    The maze and the leftover obey the generalized original-game layout and maze card distribution rules """
     maze, leftover = create_maze_and_leftover(size=maze_size)
     return Board(maze=maze, leftover_card=leftover)
 
@@ -213,29 +191,3 @@ def create_maze(maze_string, maze_card_factory=None):
         maze[location] = create_maze_card(field(location.row, location.column))
 
     return maze
-
-
-def maze_to_string(maze):
-    """ Writes a maze as a multi-line string, as defined in create_maze() """
-    def as_multi_line_string(maze_card):
-        result = [
-            ["#", "N", "#", ],
-            ["W", ".", "E"],
-            ["#", "S", "#"]
-        ]
-        path_to_symbol = {True: ".", False: "#"}
-        result[0][1] = path_to_symbol[maze_card.has_rotated_out_path((-1, 0))]
-        result[1][0] = path_to_symbol[maze_card.has_rotated_out_path((0, -1))]
-        result[1][2] = path_to_symbol[maze_card.has_rotated_out_path((0, 1))]
-        result[2][1] = path_to_symbol[maze_card.has_rotated_out_path((1, 0))]
-        return list(map(lambda char_list: "".join(char_list), result))
-
-    result = []
-    for row in range(0, maze.maze_size):
-        string_arrays = [as_multi_line_string(maze[BoardLocation(row, column)]) for column in range(0, maze.maze_size)]
-        for line_part in zip(*string_arrays):
-            line = "|".join(line_part)
-            line = line + "|"
-            result.append(line)
-        result.append("-" * (maze.maze_size * 4 - 1) + "|")
-    return "\n".join(result)

@@ -34,8 +34,6 @@ from labyrinth.model import exceptions
 from .reachable import Graph
 from .game import Player, Turns
 
-from .factories import maze_to_string
-
 
 def create_computer_player(player_id, compute_method,
                            url_supplier=None, game=None, shift_url=None, move_url=None, piece=None):
@@ -176,7 +174,6 @@ class ComputerPlayer(Player, Thread):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
 
-        maze_string = maze_to_string(board.maze)
         piece_locations = [board.maze.maze_card_location(piece.maze_card) for piece in board.pieces]
         self_location = board.maze.maze_card_location(piece.maze_card)
         objective_location = board.maze.maze_card_location(board.objective_maze_card)
@@ -192,7 +189,6 @@ class ComputerPlayer(Player, Thread):
             print("self location: {}".format(self_location))
             print("objective location: {}".format(objective_location))
             print("shift_action: {}, move_action: {}".format(shift_action, move_action))
-            print(maze_string)
 
 
 class RandomActionsMethod(Thread):

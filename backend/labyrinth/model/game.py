@@ -54,7 +54,7 @@ class BoardLocation:
         return self.row*_HASH_MAX + self.column
 
     def __str__(self):
-        return "({}, {})".format(self.row, self.column)
+        return f"({self.row}, {self.column})"
 
     def __repr__(self):
         return self.__str__()
@@ -276,9 +276,6 @@ class Board:
     """
     The board state of a game of labyrinth, including the maze, the pieces, and the objective
     """
-    START_LOCATIONS = None
-    OBJECTIVE_LOCATION = None
-
     def __init__(self, maze=None, leftover_card=None, objective_maze_card=None):
         self._pieces = []
         if not maze:
@@ -334,15 +331,11 @@ class Board:
         return piece
 
     def _start_locations(self):
-        if not self.START_LOCATIONS:
-            maze_size = self.maze.maze_size
-            start_locations = [BoardLocation(0, 0),
-                               BoardLocation(0, maze_size - 1),
-                               BoardLocation(maze_size - 1, maze_size - 1),
-                               BoardLocation(maze_size - 1, 0)]
-        else:
-            start_locations = self.START_LOCATIONS
-        return start_locations
+        maze_size = self.maze.maze_size
+        return [BoardLocation(0, 0),
+                BoardLocation(0, maze_size - 1),
+                BoardLocation(maze_size - 1, maze_size - 1),
+                BoardLocation(maze_size - 1, 0)]
 
     def _next_free_piece_index(self):
         current_piece_indices = set(map(lambda piece: piece.piece_index, self._pieces))
@@ -419,13 +412,11 @@ class Board:
 
     def _find_new_objective_maze_card(self):
         """ Finds a random maze card not occupied by a player's piece """
-        if not self.OBJECTIVE_LOCATION:
-            maze_cards = set([self._maze[location]
-                              for location in self._maze.maze_locations] + [self._leftover_card])
-            for piece in self._pieces:
-                maze_cards.discard(piece.maze_card)
-            return choice(tuple(maze_cards))
-        return self._maze[self.OBJECTIVE_LOCATION]
+        maze_cards = set([self._maze[location]
+                          for location in self._maze.maze_locations] + [self._leftover_card])
+        for piece in self._pieces:
+            maze_cards.discard(piece.maze_card)
+        return choice(tuple(maze_cards))
 
 
 class Player:

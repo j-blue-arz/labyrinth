@@ -1,0 +1,4 @@
+-r dev-requirements.in
+tqdm
+pandas
+matplotlib
