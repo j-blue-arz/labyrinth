@@ -45,10 +45,10 @@ jobs:
           uses: lukka/get-cmake@latest
         - name: Run cmake and build shared library
           env:
-            COMPILER: gcc-8
+            CXX: gcc-8
           run: |
             mkdir builds
-            cmake -S. -Bbuilds/shared -DCMAKE_CXX_COMPILER={COMPILER}
+            cmake -S. -Bbuilds/shared
             cmake --build builds/shared
             mkdir -p ../backend/instance/lib/
             cp builds/shared/libexhsearch/libexhsearch.so ../backend/instance/lib/
