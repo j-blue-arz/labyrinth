@@ -44,10 +44,9 @@ jobs:
         - name: Setup cmake
           uses: lukka/get-cmake@latest
         - name: Run cmake and build shared library
-          env:
-            CC: gcc-8
-            CXX: gcc-8
           run: |
+            export CC=gcc-8
+            export CXX=gcc-8
             mkdir builds
             cmake -S. -Bbuilds/shared
             cmake --build builds/shared
