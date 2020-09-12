@@ -73,6 +73,7 @@ def plot(infile, outfile):
         ax.bar(x=percentages.index-leftmost+i*width, height=percentages["mazesize"], width=width,
                label=f"size: {maze_size}")
     ax.set_ylabel('%')
+    ax.set_xlabel("Search depth")
     ax.set_title('Distribution of exhaustive search depths')
     ax.set_xticks(depths)
     ax.set_xticklabels(depths)

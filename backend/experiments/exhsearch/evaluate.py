@@ -66,9 +66,9 @@ def plot(benchmark_csv, outimage, nrows, ncols, algo_name):
         values = [by_depth[d] for d in sorted(by_depth)]
         ax = plt.subplot(nrows, ncols, plot_num)
         ax.boxplot(values)
-        ax.set_ylabel("Search duration")
+        ax.set_ylabel("Search duration [s]")
         ax.set_title(f"Maze size {size}")
-        ax.set_xlabel("Search depths")
+        ax.set_xlabel("Search depth")
         ax.set_xticks(depths)
         ax.set_xticklabels(depths)
         ax.set_yticks(time_range)
