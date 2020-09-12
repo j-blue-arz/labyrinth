@@ -7,23 +7,20 @@ using namespace labyrinth;
 
 class GraphAlgorithmsTest : public ::testing::Test {
 protected:
-
     void SetUp() override {
         TextGraphBuilder builder{};
-        const std::vector<std::string> maze{
-            "###|###|#.#|",
-            "#..|...|..#|",
-            "#.#|#.#|###|",
-            "------------",
-            "#.#|###|###|",
-            "#..|...|...|",
-            "#.#|###|###|",
-            "------------",
-            "#.#|###|###|",
-            "#..|#..|#..|",
-            "###|#.#|#.#|",
-            "------------"
-        };
+        const std::vector<std::string> maze{"###|###|#.#|",
+                                            "#..|...|..#|",
+                                            "#.#|#.#|###|",
+                                            "------------",
+                                            "#.#|###|###|",
+                                            "#..|...|...|",
+                                            "#.#|###|###|",
+                                            "------------",
+                                            "#.#|###|###|",
+                                            "#..|#..|#..|",
+                                            "###|#.#|#.#|",
+                                            "------------"};
         graph_ = builder.setMaze(maze).buildGraph();
         graph_.setLeftoverOutPaths(OutPaths::North);
     }

@@ -1,6 +1,6 @@
 #pragma once
-#include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
+#include "libexhsearch/maze_graph.h"
 
 #include "graph_builder.h"
 
@@ -11,7 +11,6 @@ namespace labyrinth {
 
 class SnakeGraphBuilder : public GraphBuilder {
 public:
-
     /// Builds a StaticGraph which represents a long path without any branches, e.g.
     /// ###|###|###|
     /// ...|...|..#|
@@ -29,7 +28,8 @@ public:
     /// extent * extent, i.e. the number of nodes in the graph.
     MazeGraph buildGraph() override;
 
-    SnakeGraphBuilder & setExtent(size_t extent);
+    SnakeGraphBuilder& setExtent(size_t extent);
+
 private:
     static bool even(size_t x) noexcept { return x % 2 == 0; }
     static bool odd(size_t x) noexcept { return x % 2 == 1; }
@@ -38,4 +38,4 @@ private:
     void setLastColumn();
 };
 
-}
+} // namespace labyrinth

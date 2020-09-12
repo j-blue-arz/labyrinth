@@ -6,9 +6,9 @@
 
 namespace labyrinth {
 
-TreeGraphBuilder & TreeGraphBuilder::setExtent(size_t extent) {
+TreeGraphBuilder& TreeGraphBuilder::setExtent(size_t extent) {
     out_paths_.resize(extent);
-    for (auto & row : out_paths_) {
+    for (auto& row : out_paths_) {
         row.resize(extent);
     }
     return *this;
@@ -24,7 +24,7 @@ MazeGraph TreeGraphBuilder::buildGraph() {
 }
 
 // all names and comments assume rotation of 0
-void TreeGraphBuilder::recursivelyBuildTree(const Location & root, size_t size, RotationDegreeType rotation) {
+void TreeGraphBuilder::recursivelyBuildTree(const Location& root, size_t size, RotationDegreeType rotation) {
     if (size > 1) {
         // draw L rotated by 90 from root
         addLShapedPath(root, size, addRotations(rotation, 90));
@@ -54,12 +54,12 @@ void TreeGraphBuilder::recursivelyBuildTree(const Location & root, size_t size, 
     }
 }
 
-void TreeGraphBuilder::addLShapedPath(const Location & start, size_t size, RotationDegreeType rotation) {
+void TreeGraphBuilder::addLShapedPath(const Location& start, size_t size, RotationDegreeType rotation) {
     Location corner = addPath(start, size, rotateOutPath(OutPathPosition::South, rotation));
     addPath(corner, size - 1, rotateOutPath(OutPathPosition::East, rotation));
 }
 
-Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPathPosition direction) {
+Location TreeGraphBuilder::addPath(const Location& start, size_t length, OutPathPosition direction) {
     Location current = start;
     for (auto i = 0u; i < length - 1; ++i) {
         current = setNeighbor(current, direction);
@@ -67,7 +67,7 @@ Location TreeGraphBuilder::addPath(const Location & start, size_t length, OutPat
     return current;
 }
 
-Location TreeGraphBuilder::setNeighbor(const Location & location, OutPathPosition out_path) {
+Location TreeGraphBuilder::setNeighbor(const Location& location, OutPathPosition out_path) {
     addOutPath(location, out_path);
     Location neighborLocation = location + offsetFromOutPath(out_path);
     addOutPath(neighborLocation, mirrorOutPath(out_path));
@@ -97,9 +97,9 @@ TreeGraphBuilder::OutPathPosition TreeGraphBuilder::rotateOutPath(OutPathPositio
     return static_cast<TreeGraphBuilder::OutPathPosition>((static_cast<size_t>(out_path) + numRightAngleRotations) % 4);
 }
 
-TreeGraphBuilder::RotationDegreeType TreeGraphBuilder::addRotations(RotationDegreeType rotation1, RotationDegreeType rotation2) {
+TreeGraphBuilder::RotationDegreeType TreeGraphBuilder::addRotations(RotationDegreeType rotation1,
+                                                                    RotationDegreeType rotation2) {
     return (rotation1 + rotation2 + 360) % 360;
 }
 
-
-}
+} // namespace labyrinth

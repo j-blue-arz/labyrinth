@@ -9,37 +9,34 @@ namespace labyrinth {
 
 class GraphBuilder {
 public:
-    virtual ~GraphBuilder() {};
+    virtual ~GraphBuilder(){};
     virtual MazeGraph buildGraph() = 0;
 
     GraphBuilder() = default;
-    GraphBuilder(const GraphBuilder &) = default;
-    GraphBuilder & operator=(const GraphBuilder &) = default;
-    GraphBuilder(GraphBuilder &&) = default;
-    GraphBuilder & operator=(GraphBuilder &&) = default;
+    GraphBuilder(const GraphBuilder&) = default;
+    GraphBuilder& operator=(const GraphBuilder&) = default;
+    GraphBuilder(GraphBuilder&&) = default;
+    GraphBuilder& operator=(GraphBuilder&&) = default;
 
-    GraphBuilder & setLeftoverOutPaths(const std::string & out_paths_string) noexcept;
+    GraphBuilder& setLeftoverOutPaths(const std::string& out_paths_string) noexcept;
 
-    GraphBuilder & withStandardShiftLocations() noexcept;
+    GraphBuilder& withStandardShiftLocations() noexcept;
+
 protected:
-    enum class OutPathPosition : size_t {
-        North = 0,
-        East = 1,
-        South = 2,
-        West = 3
-    };
+    enum class OutPathPosition : size_t { North = 0, East = 1, South = 2, West = 3 };
     using OutPathBitset = std::bitset<4>;
     MazeGraph constructGraph();
 
-    void addOutPath(OutPathBitset & out_paths, OutPathPosition out_path);
-    void addOutPath(const Location & location, OutPathPosition out_path);
-    void addOutPaths(const Location & location, std::vector<OutPathPosition> out_paths);
+    void addOutPath(OutPathBitset& out_paths, OutPathPosition out_path);
+    void addOutPath(const Location& location, OutPathPosition out_path);
+    void addOutPaths(const Location& location, std::vector<OutPathPosition> out_paths);
 
     OutPathBitset leftover_out_paths_;
     bool standard_shift_locations_{false};
     std::vector<std::vector<OutPathBitset>> out_paths_;
+
 private:
     OutPaths outPathsForMazeGraph(OutPathBitset out_paths);
 };
 
-}
+} // namespace labyrinth

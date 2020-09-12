@@ -32,7 +32,7 @@ TEST(LocationTest, operatorPlusInplace_altersFirstOperand) {
 TEST(LocationTest, operatorPlusInplace_returnsFirstOperand) {
     Location origin{3, 4};
     Location::OffsetType offset{1, -5};
-    auto & new_location = origin += offset;
+    auto& new_location = origin += offset;
     EXPECT_EQ(&new_location, &origin) << "operator+= does not return *this.";
 }
 

@@ -2,7 +2,7 @@
 
 namespace labyrinth {
 
-GraphBuilder & GraphBuilder::setLeftoverOutPaths(const std::string & out_paths_string) noexcept {
+GraphBuilder& GraphBuilder::setLeftoverOutPaths(const std::string& out_paths_string) noexcept {
     if (out_paths_string.find('N') != std::string::npos) {
         addOutPath(leftover_out_paths_, OutPathPosition::North);
     }
@@ -18,21 +18,21 @@ GraphBuilder & GraphBuilder::setLeftoverOutPaths(const std::string & out_paths_s
     return *this;
 }
 
-GraphBuilder & GraphBuilder::withStandardShiftLocations() noexcept {
+GraphBuilder& GraphBuilder::withStandardShiftLocations() noexcept {
     standard_shift_locations_ = true;
     return *this;
 }
 
-void GraphBuilder::addOutPath(OutPathBitset & out_paths, OutPathPosition out_path) {
+void GraphBuilder::addOutPath(OutPathBitset& out_paths, OutPathPosition out_path) {
     out_paths.set(static_cast<size_t>(out_path));
 }
 
-void GraphBuilder::addOutPath(const Location & location, OutPathPosition out_path) {
+void GraphBuilder::addOutPath(const Location& location, OutPathPosition out_path) {
     addOutPath(out_paths_[location.getRow()][location.getColumn()], out_path);
 }
 
-void GraphBuilder::addOutPaths(const Location & location, std::vector<OutPathPosition> out_paths) {
-    for (const auto & out_path : out_paths) {
+void GraphBuilder::addOutPaths(const Location& location, std::vector<OutPathPosition> out_paths) {
+    for (const auto& out_path : out_paths) {
         addOutPath(location, out_path);
     }
 }
@@ -71,4 +71,4 @@ OutPaths GraphBuilder::outPathsForMazeGraph(GraphBuilder::OutPathBitset out_path
     return static_cast<OutPaths>(out_paths_int);
 }
 
-}
+} // namespace labyrinth

@@ -1,6 +1,6 @@
 #pragma once
-#include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
+#include "libexhsearch/maze_graph.h"
 
 #include "graph_builder.h"
 
@@ -17,7 +17,8 @@ class TextGraphBuilder : public GraphBuilder {
 public:
     /// Builds a StaticGraph from a text. See implementation file for an example.
     MazeGraph buildGraph() override;
-    TextGraphBuilder & setMaze(const std::vector<std::string> & lines);
+    TextGraphBuilder& setMaze(const std::vector<std::string>& lines);
+
 private:
     static const size_t lines_per_node = 4;
 
@@ -28,4 +29,4 @@ private:
     std::vector<std::string> lines_;
 };
 
-}
+} // namespace labyrinth

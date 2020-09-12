@@ -1,5 +1,5 @@
-#include "graphbuilder/text_graph_builder.h"
 #include "graphbuilder/snake_graph_builder.h"
+#include "graphbuilder/text_graph_builder.h"
 
 #include "util.h"
 
@@ -11,23 +11,20 @@ using namespace labyrinth::testutils;
 
 class GraphBuilderFromTextTest : public ::testing::Test {
 protected:
-
     void SetUp() override {
         TextGraphBuilder builder{};
-        const std::vector<std::string> maze{
-            "###|#.#|#.#|",
-            "#..|...|..#|",
-            "#.#|#.#|###|",
-            "------------",
-            "#.#|###|###|",
-            "#..|...|...|",
-            "#.#|###|###|",
-            "------------",
-            "#.#|#.#|###|",
-            "#..|#.#|..#|",
-            "###|#.#|#.#|",
-            "------------"
-        };
+        const std::vector<std::string> maze{"###|#.#|#.#|",
+                                            "#..|...|..#|",
+                                            "#.#|#.#|###|",
+                                            "------------",
+                                            "#.#|###|###|",
+                                            "#..|...|...|",
+                                            "#.#|###|###|",
+                                            "------------",
+                                            "#.#|#.#|###|",
+                                            "#..|#.#|..#|",
+                                            "###|#.#|#.#|",
+                                            "------------"};
         builder.setMaze(maze);
         builder.setLeftoverOutPaths("NES");
         graph_ = builder.buildGraph();
@@ -130,12 +127,10 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirty) {
             if (row == 0 && column == 0) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Top left corner does not have exactly one neighbor";
-            }
-            else if (row == extent - 1 && column == 0) {
+            } else if (row == extent - 1 && column == 0) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Bottom left corner does not have exactly one neighbor";
-            }
-            else {
+            } else {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 2))
                     << "Node at position " << Location{row, column} << " does not have exactly two neighbors";
             }
@@ -154,12 +149,10 @@ TEST(GraphBuilderSnakeTest, OpenEndedPathForExtentOfThirtyOne) {
             if (row == 0 && column == 0) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Top left corner does not have exactly one neighbor";
-            }
-            else if (row == extent - 1 && column == extent - 1) {
+            } else if (row == extent - 1 && column == extent - 1) {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 1))
                     << "Bottom right corner does not have exactly one neighbor";
-            }
-            else {
+            } else {
                 EXPECT_TRUE(assertNumNeighbors(graph, Location{row, column}, 2))
                     << "Node at position " << Location{row, column} << " does not have exactly two neighbors";
             }

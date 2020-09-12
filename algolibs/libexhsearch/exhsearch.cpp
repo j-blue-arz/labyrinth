@@ -2,8 +2,8 @@
 
 #include "graph_algorithms.h"
 
-#include "maze_graph.h"
 #include "location.h"
+#include "maze_graph.h"
 
 #include <algorithm>
 #include <memory>
@@ -29,15 +29,15 @@ struct GameStateNode;
 using StatePtr = std::shared_ptr<GameStateNode>;
 
 struct GameStateNode {
-    explicit GameStateNode(StatePtr parent, const ShiftAction& shift,
-        const std::vector<reachable::ReachableNode>& reached_nodes)
+    explicit GameStateNode(StatePtr parent,
+                           const ShiftAction& shift,
+                           const std::vector<reachable::ReachableNode>& reached_nodes)
         : parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
     explicit GameStateNode() noexcept : parent{nullptr} {}
 
     StatePtr parent{nullptr};
     ShiftAction shift{};
     std::vector<reachable::ReachableNode> reached_nodes;
-
 
     bool isRoot() noexcept { return parent == nullptr; }
 };
@@ -58,15 +58,17 @@ MazeGraph createGraphFromState(const MazeGraph& base_graph, StatePtr current_sta
     return graph;
 }
 
-std::vector<Location> determineReachedLocations(const GameStateNode& current_state, const MazeGraph& graph,
-    Location shift_location) {
+std::vector<Location> determineReachedLocations(const GameStateNode& current_state,
+                                                const MazeGraph& graph,
+                                                Location shift_location) {
     std::vector<Location> updated_player_locations;
     updated_player_locations.resize(current_state.reached_nodes.size());
-    std::transform(current_state.reached_nodes.begin(), current_state.reached_nodes.end(),
-        updated_player_locations.begin(),
-        [&graph, &shift_location](reachable::ReachableNode reached_node) {
-            return graph.getLocation(reached_node.reached_id, shift_location);
-        });
+    std::transform(current_state.reached_nodes.begin(),
+                   current_state.reached_nodes.end(),
+                   updated_player_locations.begin(),
+                   [&graph, &shift_location](reachable::ReachableNode reached_node) {
+                       return graph.getLocation(reached_node.reached_id, shift_location);
+                   });
     return updated_player_locations;
 }
 
@@ -75,9 +77,7 @@ StatePtr createNewState(const MazeGraph& graph, const ShiftAction& shift, StateP
     graph_copy.shift(shift.location, shift.rotation);
     auto updated_player_locations = determineReachedLocations(*current_state, graph_copy, shift.location);
     StatePtr new_state = std::make_shared<GameStateNode>(
-        current_state,
-        shift,
-        reachable::multiSourceReachableLocations(graph_copy, updated_player_locations));
+        current_state, shift, reachable::multiSourceReachableLocations(graph_copy, updated_player_locations));
     return new_state;
 }
 
@@ -106,14 +106,11 @@ Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType e
     const auto column = location.getColumn();
     if (column == 0) {
         return Location{row, extent - 1};
-    }
-    else if (row == 0) {
+    } else if (row == 0) {
         return Location{extent - 1, column};
-    }
-    else if (column == extent - 1) {
+    } else if (column == extent - 1) {
         return Location{row, 0};
-    }
-    else if (row == extent - 1) {
+    } else if (row == extent - 1) {
         return Location{0, column};
     }
     return location;
@@ -121,7 +118,7 @@ Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType e
 
 OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) {
     return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) |
-        static_cast<OutPathsIntegerType>(out_paths2));
+                                 static_cast<OutPathsIntegerType>(out_paths2));
 }
 
 std::vector<RotationDegreeType> determineRotations(const Node& node) {
@@ -129,18 +126,17 @@ std::vector<RotationDegreeType> determineRotations(const Node& node) {
     auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
     if (node.out_paths == north_south || node.out_paths == east_west) {
         return std::vector<RotationDegreeType>{0, 90};
-    }
-    else {
+    } else {
         return std::vector<RotationDegreeType>{0, 90, 180, 270};
     }
 }
 
-
-
 } // anonymous namespace
 
 std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
-    const Location& player_location, NodeId objective_id, const Location& previous_shift_location) {
+                                          const Location& player_location,
+                                          NodeId objective_id,
+                                          const Location& previous_shift_location) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
@@ -160,13 +156,14 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
             auto rotations = determineRotations(current_graph.getLeftover());
             for (RotationDegreeType rotation : rotations) {
                 auto new_state = createNewState(current_graph, ShiftAction{shift_location, rotation}, current_state);
-                auto found_objective = std::find_if(new_state->reached_nodes.begin(), new_state->reached_nodes.end(),
-                    [objective_id](auto& reached_node) {return reached_node.reached_id == objective_id; });
+                auto found_objective =
+                    std::find_if(new_state->reached_nodes.begin(),
+                                 new_state->reached_nodes.end(),
+                                 [objective_id](auto& reached_node) { return reached_node.reached_id == objective_id; });
                 if (found_objective != new_state->reached_nodes.end()) {
                     const size_t reachable_index = found_objective - new_state->reached_nodes.begin();
                     return reconstructActions(graph, new_state, reachable_index);
-                }
-                else {
+                } else {
                     state_queue.push(new_state);
                 }
             }
@@ -175,5 +172,5 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
     return std::vector<PlayerAction>{};
 }
 
-} // namespace algorithm
-} // namespace graph
+} // namespace exhsearch
+} // namespace labyrinth

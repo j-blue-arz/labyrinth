@@ -1,6 +1,6 @@
 #include "exhsearch.h"
-#include "maze_graph.h"
 #include "graph_algorithms.h"
+#include "maze_graph.h"
 
 #include <iostream>
 
@@ -26,17 +26,17 @@ struct LocationValueObject {
     Location::IndexType column;
 };
 
-exhsearch::PlayerAction findBestAction(const MazeGraph& graph, LocationValueObject player_location, NodeId objective_id,
-    LocationValueObject previous_shift_location) {
-    auto best_actions = exhsearch::findBestActions(
-        graph,
-        Location{player_location.row, player_location.column},
-        objective_id,
-        Location{previous_shift_location.row, previous_shift_location.column});
+exhsearch::PlayerAction findBestAction(const MazeGraph& graph,
+                                       LocationValueObject player_location,
+                                       NodeId objective_id,
+                                       LocationValueObject previous_shift_location) {
+    auto best_actions = exhsearch::findBestActions(graph,
+                                                   Location{player_location.row, player_location.column},
+                                                   objective_id,
+                                                   Location{previous_shift_location.row, previous_shift_location.column});
     if (best_actions.empty()) {
         return errorAction();
-    }
-    else {
+    } else {
         return best_actions[0];
     }
 }
@@ -64,7 +64,7 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
         .field("row", &LocationValueObject::row)
         .field("column", &LocationValueObject::column);
 
-    emscripten::class_<Node>("Node")
+    emscripten::class_<Node>("Node") //
         .constructor(&createNode);
 
     emscripten::register_vector<Node>("vectorOfNode");
@@ -76,4 +76,4 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
     emscripten::function("findBestAction", &findBestAction);
 }
 
-}
+} // namespace labyrinth

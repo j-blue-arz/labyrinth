@@ -1,9 +1,9 @@
-#include "libexhsearch/maze_graph.h"
 #include "libexhsearch/location.h"
+#include "libexhsearch/maze_graph.h"
 #include "util.h"
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include <set>
 
@@ -45,8 +45,6 @@ protected:
     }
 
     MazeGraph graph_;
-
-    
 };
 
 const size_t MazeGraphTest::extent;
@@ -81,7 +79,6 @@ TEST_F(MazeGraphTest, constructedGraph_withExtent7_assignsNodeId49toLeftover) {
     const MazeGraph graph{7};
     auto leftover_id = graph.getLeftover().node_id;
     EXPECT_EQ(leftover_id, 49u);
-
 }
 
 TEST_F(MazeGraphTest, neighbors_forCornerWithOneNeighbor) {
@@ -113,8 +110,7 @@ TEST_F(MazeGraphTest, neighbors_forBorderNodeWithThreeNeighbors_isIterable) {
     }
     EXPECT_THAT(neighbor_set, testing::SizeIs(3));
     auto expected = std::set<Location>{Location{0, 0}, Location{1, 1}, Location{2, 0}};
-    EXPECT_EQ(neighbor_set, expected) <<
-        "(1, 0) should have three neighbors, (0, 0), (1, 1), and (2, 0).";
+    EXPECT_EQ(neighbor_set, expected) << "(1, 0) should have three neighbors, (0, 0), (1, 1), and (2, 0).";
 }
 
 TEST_F(MazeGraphTest, getShiftLocations_withoutValidLocations_returnsEmptyCollection) {
@@ -139,7 +135,9 @@ TEST_F(MazeGraphTest, getShiftLocations_withAddingTwoEqualLocations_returnsOnlyO
 }
 
 TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectNodeIds) {
-    NodeId old_column_ids[] = {graph_.getNode(Location{0, 1}).node_id, graph_.getNode(Location{1, 1}).node_id, graph_.getNode(Location{2, 1}).node_id};
+    NodeId old_column_ids[] = {graph_.getNode(Location{0, 1}).node_id,
+                               graph_.getNode(Location{1, 1}).node_id,
+                               graph_.getNode(Location{2, 1}).node_id};
 
     graph_.shift(Location{0, 1}, 0);
 
@@ -174,7 +172,9 @@ TEST_F(MazeGraphTest, shift_alongColumn_updatesLeftover) {
 }
 
 TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectNodeIds) {
-    NodeId old_row_ids[] = {graph_.getNode(Location{1, 0}).node_id, graph_.getNode(Location{1, 1}).node_id, graph_.getNode(Location{1, 2}).node_id};
+    NodeId old_row_ids[] = {graph_.getNode(Location{1, 0}).node_id,
+                            graph_.getNode(Location{1, 1}).node_id,
+                            graph_.getNode(Location{1, 2}).node_id};
 
     graph_.shift(Location{1, 2}, 0);
 
@@ -330,8 +330,8 @@ TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_createsSameGraph) 
             for (auto out_path : all_out_paths) {
                 auto input_node = input_graph.getNode(location);
                 auto expected_node = graph_.getNode(location);
-                EXPECT_EQ(hasOutPath(input_node, out_path), hasOutPath(expected_node, out_path)) <<
-                    "Created graph differs at location " << location; 
+                EXPECT_EQ(hasOutPath(input_node, out_path), hasOutPath(expected_node, out_path))
+                    << "Created graph differs at location " << location;
             }
         }
     }

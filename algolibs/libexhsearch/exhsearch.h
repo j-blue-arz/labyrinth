@@ -1,7 +1,7 @@
 #pragma once
 
-#include "maze_graph.h"
 #include "graph_algorithms.h"
+#include "maze_graph.h"
 
 #include <queue>
 
@@ -19,11 +19,10 @@ struct PlayerAction {
     Location move_location;
 };
 
-std::vector<PlayerAction> findBestActions(
-    const MazeGraph & graph,
-    const Location & source,
-    NodeId objective_id,
-    const Location & previous_shift_location = Location{-1, -1});
+std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
+                                          const Location& source,
+                                          NodeId objective_id,
+                                          const Location& previous_shift_location = Location{-1, -1});
 
-} // namespace algorithm
-} // namespace graph
+} // namespace exhsearch
+} // namespace labyrinth

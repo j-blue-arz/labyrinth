@@ -5,22 +5,27 @@ using namespace labyrinth::testutils;
 
 std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location> locations) {
     std::stringstream stream;
-    for (const auto & location : locations) {
+    for (const auto& location : locations) {
         stream << location << ", ";
     }
     return stream.str();
 }
 
-::testing::AssertionResult labyrinth::testutils::hasNeighbors(const labyrinth::MazeGraph & graph, const labyrinth::Location & source, std::set<labyrinth::Location> expected) {
+::testing::AssertionResult labyrinth::testutils::hasNeighbors(const labyrinth::MazeGraph& graph,
+                                                              const labyrinth::Location& source,
+                                                              std::set<labyrinth::Location> expected) {
     auto neighbors = graph.neighbors(source);
     std::set<labyrinth::Location> actual{neighbors.begin(), neighbors.end()};
     if (actual == expected) {
         return ::testing::AssertionSuccess();
     }
-    return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected) << ", actual: " << locationsToString(actual);
+    return ::testing::AssertionFailure() << "Expected neighbors: " << locationsToString(expected)
+                                         << ", actual: " << locationsToString(actual);
 }
 
-::testing::AssertionResult labyrinth::testutils::assertNumNeighbors(const labyrinth::MazeGraph & g, const labyrinth::Location & source, size_t expected) {
+::testing::AssertionResult labyrinth::testutils::assertNumNeighbors(const labyrinth::MazeGraph& g,
+                                                                    const labyrinth::Location& source,
+                                                                    size_t expected) {
     const auto neighbors = g.neighbors(source);
     size_t actual = std::distance(std::cbegin(neighbors), std::cend(neighbors));
     if (actual == expected) {
@@ -29,13 +34,13 @@ std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location
     return ::testing::AssertionFailure() << "Expected neighbors: " << expected << ", actual: " << actual;
 }
 
-size_t labyrinth::testutils::numNeighbors(const labyrinth::MazeGraph & g, const labyrinth::Location & source) {
+size_t labyrinth::testutils::numNeighbors(const labyrinth::MazeGraph& g, const labyrinth::Location& source) {
     auto neighbors = g.neighbors(source);
     std::set<labyrinth::Location> actual{neighbors.begin(), neighbors.end()};
     return actual.size();
 }
 
-size_t labyrinth::testutils::countEdges(const labyrinth::MazeGraph & g) {
+size_t labyrinth::testutils::countEdges(const labyrinth::MazeGraph& g) {
     size_t count = 0;
     for (auto row = 0; row < g.getExtent(); row++) {
         for (auto column = 0; column < g.getExtent(); column++) {
@@ -62,9 +67,6 @@ labyrinth::OutPaths labyrinth::testutils::getBitmask(std::string out_paths_strin
     return getBitmask(std::begin(out_path_vector), std::end(out_path_vector));
 }
 
-labyrinth::OutPaths labyrinth::testutils::getBitmask(const std::vector<labyrinth::OutPaths> & out_paths) {
+labyrinth::OutPaths labyrinth::testutils::getBitmask(const std::vector<labyrinth::OutPaths>& out_paths) {
     return getBitmask(std::begin(out_paths), std::end(out_paths));
 }
-
-
-

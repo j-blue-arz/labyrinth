@@ -7,7 +7,7 @@
 namespace labyrinth {
 namespace reachable {
 
-bool isReachable(const MazeGraph & graph, const Location & source, const Location & target) {
+bool isReachable(const MazeGraph& graph, const Location& source, const Location& target) {
     std::queue<Location> q;
     std::vector<bool> visited(graph.getNumberOfNodes() + 1, false);
     q.push(source);
@@ -18,7 +18,7 @@ bool isReachable(const MazeGraph & graph, const Location & source, const Locatio
         }
         q.pop();
         visited[graph.getNode(location).node_id] = true;
-        for (const auto & neighbor_location : graph.neighbors(location)) {
+        for (const auto& neighbor_location : graph.neighbors(location)) {
             if (!visited[graph.getNode(neighbor_location).node_id]) {
                 q.push(neighbor_location);
             }
@@ -27,7 +27,7 @@ bool isReachable(const MazeGraph & graph, const Location & source, const Locatio
     return false;
 }
 
-std::vector<Location> reachableLocations(const MazeGraph & graph, const Location & source) {
+std::vector<Location> reachableLocations(const MazeGraph& graph, const Location& source) {
     std::queue<Location> q;
     std::vector<bool> visited(graph.getNumberOfNodes() + 1, false);
     q.push(source);
@@ -38,7 +38,7 @@ std::vector<Location> reachableLocations(const MazeGraph & graph, const Location
         result.push_back(location);
         q.pop();
         visited[graph.getNode(location).node_id] = true;
-        for (const auto & neighbor_location : graph.neighbors(location)) {
+        for (const auto& neighbor_location : graph.neighbors(location)) {
             if (!visited[graph.getNode(neighbor_location).node_id]) {
                 q.push(neighbor_location);
             }
@@ -47,7 +47,7 @@ std::vector<Location> reachableLocations(const MazeGraph & graph, const Location
     return result;
 }
 
-std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph, const std::vector<Location> & sources) {
+std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph& graph, const std::vector<Location>& sources) {
     constexpr size_t no_parent = std::numeric_limits<size_t>::max();
     std::queue<Location> q;
     std::vector<size_t> parent_index(graph.getNumberOfNodes() + 1, no_parent);
@@ -58,7 +58,7 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph
     while (!q.empty()) {
         auto location = q.front();
         q.pop();
-        for (const auto & neighbor_location : graph.neighbors(location)) {
+        for (const auto& neighbor_location : graph.neighbors(location)) {
             if (no_parent == parent_index[graph.getNode(neighbor_location).node_id]) {
                 parent_index[graph.getNode(neighbor_location).node_id] = parent_index[graph.getNode(location).node_id];
                 q.push(neighbor_location);
@@ -75,6 +75,5 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph & graph
     return result;
 }
 
-} // namespace algorithm
-} // namespace graph
-
+} // namespace reachable
+} // namespace labyrinth

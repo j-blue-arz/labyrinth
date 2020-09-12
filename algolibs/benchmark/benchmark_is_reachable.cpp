@@ -5,9 +5,9 @@
 #include "libexhsearch/location.h"
 #include "libexhsearch/maze_graph.h"
 
-#include <iostream>
 #include <chrono>
 #include <functional>
+#include <iostream>
 #include <random>
 
 using namespace labyrinth;
@@ -15,15 +15,14 @@ using namespace std::chrono;
 
 using QuerySupplier = std::function<std::vector<std::pair<Location, Location>>()>;
 
-void runQueries(const MazeGraph & graph, std::vector<std::pair<Location, Location>> & queries) {
+void runQueries(const MazeGraph& graph, std::vector<std::pair<Location, Location>>& queries) {
     volatile bool is_reachable = true;
-    for (const auto & pair : queries) {
+    for (const auto& pair : queries) {
         is_reachable &= reachable::isReachable(graph, pair.first, pair.second);
     }
 }
 
-
-void runBenchmark(const MazeGraph & graph, size_t runs, QuerySupplier query_supplier) {
+void runBenchmark(const MazeGraph& graph, size_t runs, QuerySupplier query_supplier) {
     // warmup
     std::vector<std::pair<Location, Location>> queries = query_supplier();
     const size_t number = queries.size();
@@ -69,27 +68,25 @@ std::vector<std::pair<Location, Location>> createTreeGraphQueries(size_t extent,
     return queries;
 }
 
-void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t> & extents = {7, 14, 28}) {
+void benchmarkSnakeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t>& extents = {7, 14, 28}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for snake graph with extent " << extent << ", "
-            << "running " << number << " queries, " << runs << " times." << std::endl;
+                  << "running " << number << " queries, " << runs << " times." << std::endl;
         SnakeGraphBuilder builder;
-        const MazeGraph & graph = builder.setExtent(extent).buildGraph();
-        runBenchmark(graph, runs, [extent, number]() {return createSnakeGraphQueries(extent, number); });
+        const MazeGraph& graph = builder.setExtent(extent).buildGraph();
+        runBenchmark(graph, runs, [extent, number]() { return createSnakeGraphQueries(extent, number); });
     }
 }
 
-void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t> & extents = {8, 16, 32}) {
+void benchmarkTreeGraph(size_t runs = 3, size_t number = 1000, const std::vector<size_t>& extents = {8, 16, 32}) {
     for (auto extent : extents) {
         std::cout << "Benchmarking isReachable() for tree graph with extent " << extent << ", "
-            << "running " << number << " queries, " << runs << " times." << std::endl;
+                  << "running " << number << " queries, " << runs << " times." << std::endl;
         TreeGraphBuilder builder;
-        const MazeGraph & graph = builder.setExtent(extent).buildGraph();
-        runBenchmark(graph, runs, [extent, number]() {return createTreeGraphQueries(extent, number); });
+        const MazeGraph& graph = builder.setExtent(extent).buildGraph();
+        runBenchmark(graph, runs, [extent, number]() { return createTreeGraphQueries(extent, number); });
     }
 }
-
-
 
 int main() {
     benchmarkSnakeGraph(10, 2000, {28});
