@@ -47,7 +47,7 @@ See readme in backend/experiments for further instructions.
 Algolibs contains C++ implementations of search algorithms, determining moves for a computer player. They are not required, but have better performance than
 the python-based implementations shipped with the backend.
 ## Shared library
-Requires cmake version 3.13 or newer. Tested with gcc 7.4.0 and also MSVC 14.23. The application loads .dll files on Windows, and .so files everywhere else.
+Requires cmake version 3.13 or newer. Tested with gcc 8.4.0. The backend application loads .dll files on Windows, and .so files everywhere else.
 
     cd algolibs
     mkdir build
