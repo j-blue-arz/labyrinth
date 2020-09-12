@@ -575,4 +575,4 @@ def _cli_remove_overdue_players(cli_runner, seconds):
 
 
 def _cli_remove_unobserved_games(cli_runner, seconds):
-    cli_runner.invoke(args=["game-management", "remove-unobserved_games", "--seconds", str(seconds)])
+    cli_runner.invoke(args=["game-management", "remove-unobserved-games", "--seconds", str(seconds)])
