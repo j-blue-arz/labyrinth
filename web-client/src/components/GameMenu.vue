@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import Vue from "vue";
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
 import Player from "@/model/player.js";
@@ -35,6 +34,9 @@ export default {
         VMenu
     },
     watch: {
+        players: function() {
+            this.updateAddComputerMenuItems();
+        },
         computerPlayers: function() {
             this.updateRemoveMenuItems();
         },
@@ -51,88 +53,73 @@ export default {
     },
     data() {
         return {
-            menuIsVisible: false,
-            menuItems: [
-                new MenuItem("leave", "Leave game"),
-                new MenuItem("add", "Add computer..", []),
-                new MenuItem("remove", "Remove computer..", []),
+            menuIsVisible: false
+        };
+    },
+    computed: {
+        menuItems: function() {
+            let menu = [];
+            if (this.playerManager.hasUserPlayer()) {
+                menu.push(new MenuItem("leave", "Leave game"));
+            } else {
+                menu.push(new MenuItem("enter", "Enter game"));
+            }
+            if (this.players.length < 4) {
+                let submenu = [];
+                if (this.computationMethods) {
+                    this.computationMethods.forEach(method => {
+                        let key = ADD_PREFIX + method;
+                        let text = Player.computationMethodLabel(method);
+                        submenu.push(new MenuItem(key, text));
+                    });
+                }
+                if (this.playerManager.canAddWasmPlayer()) {
+                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search"));
+                }
+                menu.push(new MenuItem("add", "Add computer..", submenu));
+            }
+            if (this.computerPlayers.length > 0 || this.playerManager.hasWasmPlayer()) {
+                let submenu = [];
+                for (let player of this.computerPlayers) {
+                    let key = REMOVE_PREFIX + player.id;
+                    let label = player.getLabel();
+                    let text = "" + player.colorIndex + " - " + label;
+                    submenu.push(new MenuItem(key, text));
+                }
+                if (this.playerManager.hasWasmPlayer()) {
+                    let playerId = this.playerManager.getWasmPlayer();
+                    let player = this.controller.getGame().getPlayer(playerId);
+                    if (player) {
+                        let label = player.getLabel();
+                        let text = "" + player.colorIndex + " - " + label;
+                        submenu.push(new MenuItem("remove-wasm", text));
+                    }
+                }
+                menu.push(new MenuItem("remove", "Remove computer..", submenu));
+            }
+            menu.push(
                 new MenuItem("restart", "Restart with..", [
                     new MenuItem(RESTART_PREFIX + "7", "original size (7)"),
                     new MenuItem(RESTART_PREFIX + "9", "large size (9)"),
                     new MenuItem(RESTART_PREFIX + "13", "huge size (13)")
                 ])
-            ]
-        };
-    },
-    computed: {
+            );
+            return menu;
+        },
         computerPlayers: function() {
             return this.controller.getGame().getComputerPlayers();
         },
+        players: function() {
+            return this.controller.getGame().getPlayers();
+        },
         playerManager: function() {
             return this.controller.getPlayerManager();
-        },
-        hasUserPlayer: function() {
-            return this.playerManager.hasUserPlayer();
-        },
-        hasWasmPlayer: function() {
-            return this.playerManager.hasWasmPlayer();
         },
         computationMethods: function() {
             return this.controller.getComputationMethods();
         }
     },
     methods: {
-        updateAddComputerMenuItems: function() {
-            let menuItemAddComputer = this.menuItems.find(item => item.key === "add");
-            menuItemAddComputer.submenu = [];
-            if (this.computationMethods) {
-                this.computationMethods.forEach(method => {
-                    let key = ADD_PREFIX + method;
-                    let text = Player.computationMethodLabel(method);
-                    menuItemAddComputer.submenu.push(new MenuItem(key, text));
-                });
-            }
-            this.updateWasmMenuItem();
-        },
-        updateWasmMenuItem: function() {
-            let addComputerMenu = this.menuItems.find(item => item.key === "add").submenu;
-            let index = addComputerMenu.findIndex(item => item.key === "add-wasm");
-            if (this.playerManager.canAddWasmPlayer()) {
-                if (index === -1) {
-                    addComputerMenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search"));
-                }
-            } else {
-                if (index > -1) {
-                    addComputerMenu.splice(index, 1);
-                }
-            }
-        },
-        updateRemoveMenuItems: function() {
-            let menuItemRemove = this.menuItems.find(item => item.key === "remove");
-            menuItemRemove.submenu = [];
-            for (let player of this.computerPlayers) {
-                let key = REMOVE_PREFIX + player.id;
-                let label = player.getLabel();
-                let text = "" + player.colorIndex + " - " + label;
-                menuItemRemove.submenu.push(new MenuItem(key, text));
-            }
-            if (this.playerManager.hasWasmPlayer()) {
-                let playerId = this.playerManager.getWasmPlayer();
-                let player = this.controller.getGame().getPlayer(playerId);
-                if (player) {
-                    let label = player.getLabel();
-                    let text = "" + player.colorIndex + " - " + label;
-                    menuItemRemove.submenu.push(new MenuItem("remove-wasm", text));
-                }
-            }
-        },
-        updateLeaveEnterMenuItem: function() {
-            if (this.playerManager.hasUserPlayer()) {
-                Vue.set(this.menuItems, 0, new MenuItem("leave", "Leave game"));
-            } else {
-                Vue.set(this.menuItems, 0, new MenuItem("enter", "Enter game"));
-            }
-        },
         onToggleMenu: function() {
             this.menuIsVisible = !this.menuIsVisible;
         },
@@ -160,11 +147,6 @@ export default {
         closeMenu: function() {
             this.menuIsVisible = false;
         }
-    },
-    mounted() {
-        this.updateRemoveMenuItems();
-        this.updateAddComputerMenuItems();
-        this.updateLeaveEnterMenuItem();
     }
 };
 </script>

@@ -13,6 +13,9 @@ beforeEach(() => {
     mockGetPlayerManager.mockReturnValue(playerManager);
     mockGetGame.mockReturnValue(mockGame);
     mockGetComputationMethods.mockReturnValue([]);
+    mockGetComputerPlayers.mockReturnValue([]);
+    mockGetPlayer.mockReturnValue(null);
+    mockGetPlayers.mockReturnValue([]);
     // Clear all instances and calls to constructor and all methods:
     Controller.mockClear();
     mockGetComputationMethods.mockClear();
@@ -25,6 +28,9 @@ beforeEach(() => {
     mockRemoveWasmPlayer.mockClear();
     mockRestartWithSize.mockClear();
     mockAddWasmPlayer.mockClear();
+    mockGetComputerPlayers.mockClear();
+    mockGetPlayer.mockClear();
+    mockGetPlayers.mockClear();
 });
 
 describe("GameMenu", () => {
@@ -173,6 +179,14 @@ describe("GameMenu", () => {
                 ])
             );
         });
+
+        it("is invisible if game is full", () => {
+            givenGameIsFull();
+            let gameMenu = factory();
+            toggleMenu(gameMenu);
+            let entry = gameMenu.find(VMenu).find({ ref: "add" });
+            expect(entry.exists()).toBe(false);
+        });
     });
 
     describe("Remove computer submenu", () => {
@@ -204,6 +218,22 @@ describe("GameMenu", () => {
             clickInMenu(gameMenu, "remove");
             clickInMenu(gameMenu, "remove-wasm");
             expect(mockRemoveWasmPlayer).toHaveBeenCalled();
+        });
+
+        it("is invisible if no computer exists", () => {
+            givenComputerPlayers([]);
+            let gameMenu = factory();
+            toggleMenu(gameMenu);
+            let entry = gameMenu.find(VMenu).find({ ref: "remove" });
+            expect(entry.exists()).toBe(false);
+        });
+
+        it("is visible if WASM player exists", () => {
+            givenWasmIsParticipating(new Player(4));
+            let gameMenu = factory();
+            toggleMenu(gameMenu);
+            let entry = gameMenu.find(VMenu).find({ ref: "remove" });
+            expect(entry.exists()).toBe(true);
         });
     });
 
@@ -255,11 +285,13 @@ const factory = function() {
     });
 };
 
-const mockGetComputerPlayers = jest.fn().mockReturnValue([]);
+const mockGetComputerPlayers = jest.fn();
 const mockGetPlayer = jest.fn();
+const mockGetPlayers = jest.fn();
 const mockGame = {
     getComputerPlayers: mockGetComputerPlayers,
-    getPlayer: mockGetPlayer
+    getPlayer: mockGetPlayer,
+    getPlayers: mockGetPlayers
 };
 
 const givenComputationMethods = function(computationMethods) {
@@ -281,6 +313,11 @@ const givenWasmIsParticipating = function(wasmPlayer) {
             return null;
         }
     });
+    mockGetPlayers.mockReturnValue([wasmPlayer]);
+};
+
+const givenGameIsFull = function() {
+    mockGetPlayers.mockReturnValue([new Player(0), new Player(1), new Player(2), new Player(3)]);
 };
 
 const givenWasmIsNotParticipating = function() {
@@ -290,6 +327,7 @@ const givenWasmIsNotParticipating = function() {
 
 const givenComputerPlayers = function(players) {
     mockGetComputerPlayers.mockReturnValue(players);
+    mockGetPlayers.mockReturnValue(players);
 };
 
 const createComputerPlayer = function(id, computationMethod) {
