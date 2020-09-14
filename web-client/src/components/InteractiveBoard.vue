@@ -117,8 +117,7 @@ export default {
         isMyTurnToShift: function() {
             return (
                 this.game.nextAction.playerId === this.userPlayerId &&
-                this.game.nextAction.action === action.SHIFT_ACTION &&
-                !this.game.getPlayer(this.userPlayerId).isComputer
+                this.game.nextAction.action === action.SHIFT_ACTION
             );
         },
         boardOffset: function() {
@@ -141,8 +140,7 @@ export default {
         isMyTurnToMove: function() {
             return (
                 this.game.nextAction.playerId === this.userPlayerId &&
-                this.game.nextAction.action === action.MOVE_ACTION &&
-                !this.game.getPlayer(this.userPlayerId).isComputer
+                this.game.nextAction.action === action.MOVE_ACTION
             );
         },
         computeReachableMazeCards: function(player) {

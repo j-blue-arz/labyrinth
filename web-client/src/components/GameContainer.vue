@@ -6,8 +6,17 @@
             ref="interactive-board"
             class="game-container__main-content"
         />
-        <score-board :players="players" class="game-container__score" />
-        <game-menu :controller="controller" class="game-container__menu" />
+        <div class="game-container__sidebar">
+            <div>
+                <timer :controller="controller" />
+            </div>
+            <div>
+                <score-board :players="players" />
+            </div>
+            <div>
+                <game-menu :controller="controller" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -15,6 +24,7 @@
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
+import Timer from "@/components/Timer.vue";
 import Controller from "@/controllers/controller.js";
 
 export default {
@@ -22,7 +32,8 @@ export default {
     components: {
         InteractiveBoard,
         GameMenu,
-        ScoreBoard
+        ScoreBoard,
+        Timer
     },
     data() {
         return {
@@ -39,6 +50,9 @@ export default {
                 this.controller.getGame() &&
                 this.controller.getGame().hasStarted()
             );
+        },
+        game: function() {
+            return this.controller.getGame();
         }
     },
     created: function() {
@@ -69,12 +83,16 @@ export default {
         order: 1;
     }
 
-    &__score {
+    &__sidebar {
+        flex-grow: 1;
         order: 2;
-    }
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
 
-    &__menu {
-        order: 3;
+        div {
+            flex: 1;
+        }
     }
 }
 
@@ -86,6 +104,10 @@ export default {
     .game-container__main-content {
         height: 100%;
     }
+
+    .game-container__sidebar {
+        flex-flow: column nowrap;
+    }
 }
 
 @media all and (orientation: portrait) {
@@ -95,6 +117,10 @@ export default {
 
     .game-container__main-content {
         width: 100%;
+    }
+
+    .game-container__sidebar {
+        flex-flow: row nowrap;
     }
 }
 </style>
