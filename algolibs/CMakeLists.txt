@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-set(PROJECT_VERSION "0.2.0")
+set(PROJECT_VERSION "0.2.1")
 project (algolibs VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
