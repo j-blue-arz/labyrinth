@@ -33,24 +33,6 @@ export default {
     components: {
         VMenu
     },
-    watch: {
-        players: function() {
-            this.updateAddComputerMenuItems();
-        },
-        computerPlayers: function() {
-            this.updateRemoveMenuItems();
-        },
-        hasUserPlayer: function() {
-            this.updateLeaveEnterMenuItem();
-        },
-        hasWasmPlayer: function() {
-            this.updateWasmMenuItem();
-            this.updateRemoveMenuItems();
-        },
-        computationMethods: function() {
-            this.updateAddComputerMenuItems();
-        }
-    },
     data() {
         return {
             menuIsVisible: false
