@@ -763,10 +763,11 @@ class Game:
 
     def _notify_turn_listeners(self):
         next_player_action = self._turns.next_player_action()
-        player = next_player_action.player
-        action = next_player_action.action
-        for listener in self._turn_listeners:
-            listener(game=self, player=player, next_action=action)
+        if next_player_action:
+            player = next_player_action.player
+            action = next_player_action.action
+            for listener in self._turn_listeners:
+                listener(game=self, player=player, next_action=action)
 
     def next_player(self):
         """ The player who is expected to perform the next action """
