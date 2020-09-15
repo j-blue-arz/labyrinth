@@ -5,6 +5,7 @@ import mimetypes
 import os
 
 from flask import Flask
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 
 version_info = (0, 2, 1)
@@ -20,6 +21,7 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         SECRET_KEY='dev',
+        PROFILE=False,
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
         LIBRARY_PATH=os.path.join(app.instance_path, 'lib'),
     )
@@ -28,6 +30,10 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
+
+    if app.config["PROFILE"]:
+        app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir=os.path.join(app.instance_path),
+                                          stream=None)
 
     try:
         os.makedirs(app.instance_path)
