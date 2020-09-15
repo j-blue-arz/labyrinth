@@ -35,3 +35,4 @@ Best run took 118us per query.
 Benchmarking isReachable() for tree graph with extent 32, running 2000 queries, 10 times.
 Best run took 135us per query.
 
+This benchmark is no longer supported. Results are kept for documentary purposes.

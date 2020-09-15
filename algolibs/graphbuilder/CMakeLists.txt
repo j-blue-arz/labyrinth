@@ -2,12 +2,8 @@ set(
     SOURCES 
 		"graph_builder.h"
 		"graph_builder.cpp"
-		"snake_graph_builder.h"
-		"snake_graph_builder.cpp"
 		"text_graph_builder.h"
 		"text_graph_builder.cpp"
-		"tree_graph_builder.h"
-		"tree_graph_builder.cpp"
 )
 
 add_library(BUILDER ${SOURCES})

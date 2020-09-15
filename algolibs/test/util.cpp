@@ -40,16 +40,6 @@ size_t labyrinth::testutils::numNeighbors(const labyrinth::MazeGraph& g, const l
     return actual.size();
 }
 
-size_t labyrinth::testutils::countEdges(const labyrinth::MazeGraph& g) {
-    size_t count = 0;
-    for (auto row = 0; row < g.getExtent(); row++) {
-        for (auto column = 0; column < g.getExtent(); column++) {
-            count += numNeighbors(g, labyrinth::Location{row, column});
-        }
-    }
-    return count / 2;
-}
-
 labyrinth::OutPaths labyrinth::testutils::getBitmask(std::string out_paths_string) {
     std::vector<labyrinth::OutPaths> out_path_vector;
     if (out_paths_string.find('N') != std::string::npos) {

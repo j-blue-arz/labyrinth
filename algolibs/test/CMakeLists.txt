@@ -15,7 +15,6 @@ set(
         "maze_graph_test.cpp"
         "graph_algorithms_test.cpp"
         "graph_builder_test.cpp"
-        "tree_graph_builder_test.cpp"
         "exhsearch_test.cpp"
 )
 
@@ -29,5 +28,4 @@ set_target_properties(all_tests PROPERTIES FOLDER tests)
 #package_add_test(maze_graph_test maze_graph_test.cpp)
 #package_add_test(graph_algorithms_test graph_algorithms_test.cpp)
 #package_add_test(graph_builder_test graph_builder_test.cpp)
-#package_add_test(tree_graph_builder_test tree_graph_builder_test.cpp)
 #package_add_test(exhsearch_test exhsearch_test.cpp)

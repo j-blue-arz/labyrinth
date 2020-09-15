@@ -4,8 +4,6 @@
 #include "libexhsearch/location.h"
 #include "libexhsearch/maze_graph.h"
 
-#include "test/mazes.h"
-
 #include <chrono>
 #include <filesystem>
 #include <fstream>
