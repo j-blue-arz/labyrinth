@@ -50,12 +50,9 @@ export default class WasmGateway {
         }
 
         let mazeGraph = new this.libexhsearch.MazeGraph(vectorNodes);
-        let border = game.n - 1;
-        for (var position = 1; position < border; position += 2) {
-            mazeGraph.addShiftLocation(this._loc(0, position));
-            mazeGraph.addShiftLocation(this._loc(position, 0));
-            mazeGraph.addShiftLocation(this._loc(position, border));
-            mazeGraph.addShiftLocation(this._loc(border, position));
+        let shiftLocations = game.getShiftLocations();
+        for (let location of shiftLocations) {
+            mazeGraph.addShiftLocation(location);
         }
 
         let previousShiftLocation = this._loc(-1, -1);

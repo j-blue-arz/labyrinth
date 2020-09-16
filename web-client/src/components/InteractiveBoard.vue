@@ -22,10 +22,9 @@
         ></v-move-animation>
         <insert-panels
             @insert-panel-clicked="onInsertPanelClick"
-            :disabledShiftLocation="disabledShiftLocation"
             :interaction="isMyTurnToShift"
             :card-size="cardSize"
-            :n="mazeSize"
+            :game="game"
         ></insert-panels>
         <leftover-maze-card
             :x="leftoverX"
@@ -67,7 +66,6 @@ export default {
     },
     data() {
         return {
-            insertPanels: [],
             interactionWidth: 900,
             interactionHeight: 900,
             leftoverX: 0,
@@ -131,9 +129,6 @@ export default {
         },
         players: function() {
             return this.game.getPlayers();
-        },
-        disabledShiftLocation: function() {
-            return this.game.disabledShiftLocation;
         }
     },
     methods: {

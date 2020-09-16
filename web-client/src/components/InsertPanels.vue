@@ -23,10 +23,9 @@ export default {
         VInsertPanel
     },
     props: {
-        disabledShiftLocation: {
+        game: {
             type: Object,
-            required: false,
-            default: null
+            required: true
         },
         interaction: {
             type: Boolean,
@@ -41,31 +40,20 @@ export default {
             type: Number,
             required: false,
             default: 100
-        },
-        n: {
-            type: Number,
-            required: false,
-            default: 7
         }
     },
     computed: {
         insertPanels: function() {
             let result = [];
             let id = 0;
-            let n = this.n;
-            let border = n - 1;
-            for (var position = 1; position < border; position += 2) {
-                result.push(new InsertPanel(id++, -1, position, n));
-                result.push(new InsertPanel(id++, position, -1, n));
-                result.push(new InsertPanel(id++, n, position, n));
-                result.push(new InsertPanel(id++, position, n, n));
-            }
-            for (var insertPanel of result) {
-                if (this.locationsEqual(insertPanel.shiftLocation, this.disabledShiftLocation)) {
+            let n = this.game.n;
+            let shiftLocations = this.game.getShiftLocations();
+            for (let location of shiftLocations) {
+                let insertPanel = new InsertPanel(id++, location, n);
+                if (this.locationsEqual(this.game.disabledShiftLocation, location)) {
                     insertPanel.enabled = false;
-                } else {
-                    insertPanel.enabled = true;
                 }
+                result.push(insertPanel);
             }
             return result;
         }

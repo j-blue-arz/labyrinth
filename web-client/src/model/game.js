@@ -114,6 +114,17 @@ export default class Game {
         return locA && locB && locA.row === locB.row && locA.column === locB.column;
     }
 
+    getShiftLocations() {
+        let allShiftLocations = [];
+        for (let position = 1; position < this.n - 1; position += 2) {
+            allShiftLocations.push({ row: 0, column: position });
+            allShiftLocations.push({ row: position, column: 0 });
+            allShiftLocations.push({ row: this.n - 1, column: position });
+            allShiftLocations.push({ row: position, column: this.n - 1 });
+        }
+        return allShiftLocations;
+    }
+
     hasPlayer(playerId) {
         for (let player of this._players) {
             if (player.id === playerId) {
@@ -302,13 +313,7 @@ export default class Game {
         for (let location of apiShiftLocations) {
             enabledShiftLocations.add(this._key(location));
         }
-        let allShiftLocations = [];
-        for (let position = 1; position < this.n - 1; position += 2) {
-            allShiftLocations.push({ row: 0, column: position });
-            allShiftLocations.push({ row: position, column: 0 });
-            allShiftLocations.push({ row: this.n - 1, column: position });
-            allShiftLocations.push({ row: position, column: this.n - 1 });
-        }
+        let allShiftLocations = this.getShiftLocations();
         for (let location of allShiftLocations) {
             if (!enabledShiftLocations.has(this._key(location))) {
                 return location;

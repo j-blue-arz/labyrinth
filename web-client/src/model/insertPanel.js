@@ -1,34 +1,25 @@
-function inside(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-
-function panelToShiftLocation(location, mazeSize) {
-    return {
-        row: inside(location.row, 0, mazeSize - 1),
-        column: inside(location.column, 0, mazeSize - 1)
-    };
-}
-
-function panelToDirection(location, mazeSize) {
-    let limit = mazeSize - 1;
-    if (location.row === 0) {
-        return "S";
-    } else if (location.row === limit) {
-        return "N";
-    } else if (location.column === 0) {
-        return "E";
-    } else if (location.column === limit) {
-        return "W";
-    }
-    return "";
-}
-
 export default class InsertPanel {
-    constructor(id, row, column, mazeSize = 7) {
+    constructor(id, shiftLocation, mazeSize = 7) {
         this.id = id;
-        this.displayLocation = { row: row, column: column };
-        this.shiftLocation = panelToShiftLocation(this.displayLocation, mazeSize);
+        this.shiftLocation = shiftLocation;
         this.enabled = true;
-        this.direction = panelToDirection(this.shiftLocation, mazeSize);
+        this.displayLocation = null;
+        this.direction = null;
+        let limit = mazeSize - 1;
+        let row = shiftLocation.row;
+        let column = shiftLocation.column;
+        if (this.shiftLocation.row === 0) {
+            this.direction = "S";
+            this.displayLocation = { row: -1, column: column };
+        } else if (this.shiftLocation.row === limit) {
+            this.direction = "N";
+            this.displayLocation = { row: mazeSize, column: column };
+        } else if (this.shiftLocation.column === 0) {
+            this.direction = "E";
+            this.displayLocation = { row: row, column: -1 };
+        } else if (this.shiftLocation.column === limit) {
+            this.direction = "W";
+            this.displayLocation = { row: row, column: mazeSize };
+        }
     }
 }
