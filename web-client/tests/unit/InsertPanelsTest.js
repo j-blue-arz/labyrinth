@@ -1,11 +1,15 @@
 import { mount } from "@vue/test-utils";
 import InsertPanels from "@/components/InsertPanels.vue";
+import Game from "../../src/model/game";
 
 const factory = function(interaction, disabledShiftLocation = null) {
+    let game = new Game();
+    game.disabledShiftLocation = disabledShiftLocation;
+
     return mount(InsertPanels, {
         propsData: {
             interaction: interaction,
-            disabledShiftLocation: disabledShiftLocation
+            game: game
         }
     });
 };
@@ -26,7 +30,7 @@ describe("InsertPanels", () => {
         expect(insertPanelsWithInteraction.length).toBe(0);
     });
 
-    it("enables all insert panels but the one which is disabled in props: disabledShiftLocation", () => {
+    it("enables all insert panels but the one which is disabled in game", () => {
         let insertPanels = factory(true, { row: 0, column: 1 });
         let insertPanelsHtml = insertPanels.findAll(".insert-panel--disabled");
         expect(insertPanelsHtml.length).toBe(1);

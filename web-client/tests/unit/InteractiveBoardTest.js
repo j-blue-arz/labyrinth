@@ -169,7 +169,7 @@ describe("InteractiveBoard", () => {
         expect(insertPanels.props().interaction).toBeFalsy();
     });
 
-    it("forwards disabled insert location from game to insert panels", () => {
+    it("forwards game to insert panels", () => {
         let game = fromStateWithShiftAction();
         game.disabledShiftLocation = {
             row: 0,
@@ -177,7 +177,7 @@ describe("InteractiveBoard", () => {
         };
         let board = shallowFactory(game);
         let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().disabledShiftLocation).toEqual(game.disabledShiftLocation);
+        expect(insertPanels.props().game).toEqual(game);
     });
 });
 
