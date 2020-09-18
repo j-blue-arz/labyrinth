@@ -20,7 +20,7 @@ struct PlayerAction {
 };
 
 std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
-                                          const Location& source,
+                                          const Location& player_location,
                                           NodeId objective_id,
                                           const Location& previous_shift_location = Location{-1, -1});
 

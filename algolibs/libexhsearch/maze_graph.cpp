@@ -62,9 +62,8 @@ MazeGraph::MazeGraph(ExtentType extent) : size_{static_cast<SizeType>(extent * e
     leftover_.node_id = current;
 }
 
-MazeGraph::MazeGraph(const std::vector<Node>& nodes) {
-    extent_ = static_cast<ExtentType>(integerSquareRoot(nodes.size()));
-    size_ = static_cast<SizeType>(extent_) * static_cast<SizeType>(extent_);
+MazeGraph::MazeGraph(const std::vector<Node>& nodes)
+    : size_{nodes.size() - 1}, extent_{static_cast<ExtentType>(integerSquareRoot(nodes.size()))} {
     auto current_input = nodes.begin();
     node_matrix_.resize(size_);
     for (auto row = 0; row < extent_; row++) {

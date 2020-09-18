@@ -21,8 +21,6 @@ std::string locationsToString(std::set<labyrinth::Location> locations);
                                               const labyrinth::Location& source,
                                               size_t expected);
 
-size_t numNeighbors(const labyrinth::MazeGraph& g, const labyrinth::Location& source);
-
 template <class It>
 labyrinth::OutPaths getBitmask(It first, It last) {
     labyrinth::OutPathsIntegerType result{0};

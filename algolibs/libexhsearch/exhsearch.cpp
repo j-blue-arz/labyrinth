@@ -39,7 +39,7 @@ struct GameStateNode {
     ShiftAction shift{};
     std::vector<reachable::ReachableNode> reached_nodes;
 
-    bool isRoot() noexcept { return parent == nullptr; }
+    bool isRoot() const noexcept { return parent == nullptr; }
 };
 
 using QueueType = std::queue<std::shared_ptr<GameStateNode>>;

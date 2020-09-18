@@ -34,12 +34,6 @@ std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location
     return ::testing::AssertionFailure() << "Expected neighbors: " << expected << ", actual: " << actual;
 }
 
-size_t labyrinth::testutils::numNeighbors(const labyrinth::MazeGraph& g, const labyrinth::Location& source) {
-    auto neighbors = g.neighbors(source);
-    std::set<labyrinth::Location> actual{neighbors.begin(), neighbors.end()};
-    return actual.size();
-}
-
 labyrinth::OutPaths labyrinth::testutils::getBitmask(std::string out_paths_string) {
     std::vector<labyrinth::OutPaths> out_path_vector;
     if (out_paths_string.find('N') != std::string::npos) {

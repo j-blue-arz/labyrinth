@@ -31,12 +31,6 @@ void GraphBuilder::addOutPath(const Location& location, OutPathPosition out_path
     addOutPath(out_paths_[location.getRow()][location.getColumn()], out_path);
 }
 
-void GraphBuilder::addOutPaths(const Location& location, std::vector<OutPathPosition> out_paths) {
-    for (const auto& out_path : out_paths) {
-        addOutPath(location, out_path);
-    }
-}
-
 MazeGraph GraphBuilder::constructGraph() {
     MazeGraph::ExtentType extent = out_paths_.size();
     MazeGraph graph{extent};

@@ -27,16 +27,15 @@ protected:
     using OutPathBitset = std::bitset<4>;
     MazeGraph constructGraph();
 
-    void addOutPath(OutPathBitset& out_paths, OutPathPosition out_path);
+    static void addOutPath(OutPathBitset& out_paths, OutPathPosition out_path);
     void addOutPath(const Location& location, OutPathPosition out_path);
-    void addOutPaths(const Location& location, std::vector<OutPathPosition> out_paths);
 
     OutPathBitset leftover_out_paths_;
     bool standard_shift_locations_{false};
     std::vector<std::vector<OutPathBitset>> out_paths_;
 
 private:
-    OutPaths outPathsForMazeGraph(OutPathBitset out_paths);
+    static OutPaths outPathsForMazeGraph(OutPathBitset out_paths);
 };
 
 } // namespace labyrinth

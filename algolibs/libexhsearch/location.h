@@ -15,7 +15,7 @@ public:
         OffsetValueType column_offset{0};
 
         template <typename T>
-        const OffsetType operator*(T scalar) {
+        const OffsetType operator*(T scalar) const {
             return OffsetType{static_cast<OffsetValueType>(row_offset * scalar),
                               static_cast<OffsetValueType>(column_offset * scalar)};
         }

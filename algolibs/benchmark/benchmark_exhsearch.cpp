@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 
 using FracSeconds = std::chrono::duration<double>;
 
-static void show_usage(std::string name) {
+static void show_usage(const std::string& name) {
     std::cerr << "Usage: " << name << " INSTANCE_FOLDER OUT_CSV" << std::endl
               << "Where: " << std::endl
               << "\tINSTANCE_FOLDER\t\tcontains files ending with .txt in a specific format." << std::endl
