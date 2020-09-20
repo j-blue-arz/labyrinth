@@ -22,6 +22,7 @@ export default class Game {
         this._hasStarted = false;
         this.isShifting = false;
         this.disabledShiftLocation = null;
+        this.objectiveId = -1;
     }
 
     reset() {
@@ -272,6 +273,7 @@ export default class Game {
         this._mazeCardsFromSortedApi(apiMazeCards);
         this._playersFromApi(apiState);
 
+        this.objectiveId = apiState.objectiveMazeCardId;
         let objectiveCard = this.mazeCardById(apiState.objectiveMazeCardId);
         objectiveCard.hasObject = true;
 

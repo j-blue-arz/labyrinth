@@ -23,13 +23,31 @@ export default {
     },
     watch: {
         userTurn: function(newValue) {
-            console.log(newValue);
             if (newValue !== "NONE") {
                 this.visible = true;
                 this.restartTimer();
             } else {
                 this.visible = false;
                 this.stopTimer();
+            }
+        },
+        gameSize: function() {
+            // this is a heuristic to detect a game restart
+            // For the case where a game is restarted with a different size,
+            // but the user turn does not change
+            if (this.userTurn !== "NONE") {
+                this.visible = true;
+                this.restartTimer();
+            }
+        },
+        objectiveId: function() {
+            // this is a heuristic to detect a game restart
+            // For the case where a game is restarted with the same size,
+            // but the user turn does not change
+            // This heuristic might fail!
+            if (this.userTurn !== "NONE") {
+                this.visible = true;
+                this.restartTimer();
             }
         }
     },
@@ -42,6 +60,12 @@ export default {
             } else {
                 return "NONE";
             }
+        },
+        gameSize: function() {
+            return this.controller.getGame().n;
+        },
+        objectiveId: function() {
+            return this.controller.getGame().objectiveId;
         }
     },
     methods: {
@@ -56,6 +80,7 @@ export default {
         countDown: function() {
             this.remainingSeconds--;
             if (this.remainingSeconds <= 0) {
+                this.removeCurrentPlayer();
                 this.stopTimer();
             }
         },
@@ -64,6 +89,10 @@ export default {
                 clearInterval(this.timer);
                 this.timer = 0;
             }
+        },
+        removeCurrentPlayer: function() {
+            let currentPlayerId = this.controller.getGame().nextAction.playerId;
+            this.controller.removeManagedPlayer(currentPlayerId);
         }
     }
 };

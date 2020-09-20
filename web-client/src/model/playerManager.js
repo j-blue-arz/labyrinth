@@ -82,6 +82,10 @@ export default class PlayerManager {
         return result;
     }
 
+    hasPlayer(playerId) {
+        return this.getUserPlayer() === playerId || this.getWasmPlayer() === playerId;
+    }
+
     removePlayer(playerId) {
         if (this.getUserPlayer() === playerId) {
             this.removeUserPlayer();

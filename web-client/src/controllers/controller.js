@@ -206,6 +206,16 @@ export default class Controller {
         }
     }
 
+    removeManagedPlayer(playerId) {
+        if (this._playerManager.hasPlayer(playerId)) {
+            this._api
+                .removePlayer(playerId)
+                .catch(this.handleError)
+                .then(this.startPolling);
+            this._playerManager.removePlayer(playerId);
+        }
+    }
+
     addComputer(computeMethod) {
         this._api
             .doAddComputerPlayer(computeMethod)
