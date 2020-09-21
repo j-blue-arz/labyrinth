@@ -16,6 +16,7 @@ move_action should return a BoardLocation.  """
 import copy
 import functools
 import glob
+from datetime import timedelta
 import os
 from random import choice
 import time
@@ -83,14 +84,18 @@ class ComputerPlayer(Player, Thread):
     """ This class represents a computer player.
 
     If the player is requested to make its action, it starts a thread for time keeping,
-    and a thread for letting the compute method determinethe next shift and move action.
+    and a thread for letting the compute method determine the next shift and move action.
+    Computation methods are time-restricted. After the computation timeout, they will be asked to abort.
+    They will then receive a short grace period to finish their current work and return a result.
     :param compute_method_factory: a method creating a computation method,
         i.e. one of the other classes in this module.
         It is expected to take a board, a piece, and a game as its parameters.
     :param kwargs: keyword arguments, which are passed to the Player initializer.
      """
 
-    _SECONDS_TO_ANSWER = 1.5
+    COMPUTATION_TIMEOUT = timedelta(seconds=3)
+    WAIT_FOR_RESULT = timedelta(milliseconds=100)
+    MOVE_ACTION_IDLE_TIME = timedelta(seconds=2)
 
     def __init__(self, compute_method_factory, url_supplier=None, shift_url=None, move_url=None, **kwargs):
         Player.__init__(self, **kwargs)
@@ -124,8 +129,9 @@ class ComputerPlayer(Player, Thread):
         piece = self._find_equal_piece(board)
         compute_method = self._compute_method_factory(board, piece, self._game)
         compute_method.start()
-        time.sleep(compute_method.SECONDS_TO_COMPUTE)
-        time.sleep(self._SECONDS_TO_ANSWER)
+        time.sleep(self.COMPUTATION_TIMEOUT.total_seconds())
+        compute_method.abort_search()
+        time.sleep(self.WAIT_FOR_RESULT.total_seconds())
         shift_action = compute_method.shift_action
         move_action = compute_method.move_action
 
@@ -140,9 +146,8 @@ class ComputerPlayer(Player, Thread):
 
         # self._validate(shift_action, move_action)
         self._post_shift(*shift_action)
-        time.sleep(self._SECONDS_TO_ANSWER)
+        time.sleep(self.MOVE_ACTION_IDLE_TIME.total_seconds())
         self._post_move(move_action)
-        compute_method.abort_search()
 
     @property
     def shift_url(self):
@@ -169,7 +174,7 @@ class ComputerPlayer(Player, Thread):
 
     def _find_equal_piece(self, board):
         return next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
-
+    
     def _validate(self, shift_action, move_action):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
@@ -196,7 +201,6 @@ class RandomActionsMethod(Thread):
     move action """
 
     SHORT_NAME = "random"
-    SECONDS_TO_COMPUTE = 0.5
 
     def __init__(self, board, piece, game, **kwargs):
         super().__init__()
@@ -234,7 +238,6 @@ class ExhaustiveSearch(Thread, exh.Optimizer):
     """ Uses an exhaustive search to compute best single-player solution to objective.
     abort_search() is already implemented in superclass, exh.Optimizer. """
     SHORT_NAME = "exhaustive-search"
-    SECONDS_TO_COMPUTE = 1.5
 
     def __init__(self, board, piece, game, **kwargs):
         exh.Optimizer.__init__(self, board, piece, game.previous_shift_location)
@@ -262,7 +265,6 @@ class ExhaustiveSearch(Thread, exh.Optimizer):
 class Minimax(Thread, mm.IterativeDeepening):
     """ Uses the minimax algorithm to determine an action in a two-player game. """
     SHORT_NAME = "minimax"
-    SECONDS_TO_COMPUTE = 2.5
 
     def __init__(self, board, player_piece, game, **kwargs):
         other_piece = next(piece for piece in board.pieces if piece is not player_piece)
@@ -291,7 +293,6 @@ class Minimax(Thread, mm.IterativeDeepening):
 class AlphaBeta(Thread, ab.IterativeDeepening):
     """ Uses the alpha-beta algorithm to determine an action in a two-player game. """
     SHORT_NAME = "alpha-beta"
-    SECONDS_TO_COMPUTE = 2.5
 
     def __init__(self, board, player_piece, game, **kwargs):
         self._board = board
@@ -322,7 +323,6 @@ class AlphaBeta(Thread, ab.IterativeDeepening):
 class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
     """ Calls an external library to perform the move. Random move as fallback """
     LIBRARY_PREFIX = "dynamic-"
-    SECONDS_TO_COMPUTE = 1.5
 
     def __init__(self, board, piece, game, full_library_path):
         extlib.ExternalLibraryBinding.__init__(self, full_library_path,
