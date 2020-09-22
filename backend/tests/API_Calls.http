@@ -2,7 +2,8 @@ POST http://localhost:5000/api/games/0/players
 content-type: application/json
 
 {
-    "type": "dynamic-libexhsearch"
+    "isComputerPlayer": true,
+    "computationMethod": "dynamic-libexhsearch"
 }
 
 ###
@@ -17,6 +18,8 @@ content-type: application/json
 {
     "mazeSize": 9
 }
+
+###
 
 POST http://localhost:5000/api/games/0/shift?p_id=1
 content-type: application/json
@@ -40,4 +43,9 @@ content-type: application/json
         "column": 0
     }
 }
+
+###
+
+GET http://localhost:5000/api/computation-methods
+content-type: application/json
 

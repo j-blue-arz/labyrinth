@@ -66,7 +66,6 @@ def dto_to_type(player_request_dto):
 
     More specifically, returns two values.  """
     if isinstance(player_request_dto, dict):
-        is_computer = player_request_dto[COMPUTATION_METHOD] if COMPUTATION_METHOD in player_request_dto else False
         is_computer = _value_or_false(player_request_dto, IS_COMPUTER)
         computation_method = _value_or_none(player_request_dto, COMPUTATION_METHOD)
         return is_computer, computation_method

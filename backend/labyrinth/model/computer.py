@@ -42,7 +42,7 @@ def create_computer_player(player_id, compute_method,
 
     :param player_id: the identifier of the player to create.
     :param compute_method: is used to determine the action computation method and its parameters.
-        If this parameter starts with 'lib-', it is expected to denote a shared library.
+        If this parameter starts with 'dynamic-', it is expected to denote a shared library.
         Otherwise, it has to match one of the computation methods implemented in the backend currently
         'random', 'exhaustive-search', 'minimax', or 'alpha-beta'.
     :param url_supplier: a supplier for the shift and move API URLs.

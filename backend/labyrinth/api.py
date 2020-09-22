@@ -20,12 +20,9 @@ def post_player(game_id):
     """ Adds a player to an existing game. Creates the game if it does not exist.
     The request can contain a body of the form
     {
-        'type': <string>,
+        'isComputerPlayer': <boolean>,
+        'computationMethod': <string>
     },
-    where type can be 'human', 'random', 'exhaustive-search', 'minimax', or 'alpha-beta'.
-    If 'type' is 'human', a human player is added.
-    'random', 'exhaustive-search', 'alpha-beta', and 'minimax' are three types of computer players.
-    Default: 'human'
     """
     request_body = request.get_json(silent=True, force=True)
     player = controller.add_player(game_id, request_body)
@@ -43,9 +40,9 @@ def delete_player(game_id, player_id):
 def change_game(game_id):
     """ Changes game setup. The request has to contain a body of the form
     {
-        'size': <number>
+        'mazeSize': <number>
     },
-    where size is the new size of the maze.
+    where mazeSize is the new size of the maze.
     """
     request_body = request.get_json(force=True)
     controller.change_game(game_id, request_body)
