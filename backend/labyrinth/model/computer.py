@@ -174,7 +174,7 @@ class ComputerPlayer(Player, Thread):
 
     def _find_equal_piece(self, board):
         return next(piece for piece in board.pieces if piece.maze_card.identifier == self._piece.maze_card.identifier)
-    
+
     def _validate(self, shift_action, move_action):
         board = copy.deepcopy(self._board)
         piece = self._find_equal_piece(board)
@@ -347,7 +347,7 @@ class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
         if action:
             self._shift_action = action[0]
             self._move_action = action[1]
-    
+
 
 def _library_extension():
     extension = ".so"
