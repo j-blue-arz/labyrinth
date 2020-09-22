@@ -40,9 +40,12 @@ class ExternalLibraryBinding:
     Translates the game datastructures to the ctypes structures and back """
     _OUT_PATH_TO_BIT = {"N": 1, "E": 2, "S": 4, "W": 8}
 
+    _ERROR_LOCATION = BoardLocation(-1, -1)
+
     def __init__(self, path, board, piece, previous_shift_location=None):
         self._library = ctypes.cdll.LoadLibrary(path)
         self._library.find_action.restype = ACTION
+        self._library.abort_search.restype = None
         self._board = board
         self._board.clear_pieces()
         self._board.pieces.append(piece)
@@ -61,6 +64,9 @@ class ExternalLibraryBinding:
         action = self._library.find_action(ctypes.byref(graph), ctypes.byref(start_location), objective_id,
                                            ctypes.byref(previous_shift_location))
         return self._map_returned_action(action)
+
+    def abort_search(self):
+        self._library.abort_search()
 
     @staticmethod
     def _create_node(maze_card):
@@ -88,8 +94,12 @@ class ExternalLibraryBinding:
         """ creates a LOCATION from a BoardLocation """
         return LOCATION(board_location.row, board_location.column)
 
-    @staticmethod
-    def _map_returned_action(action):
+    @classmethod
+    def _map_returned_action(cls, action):
         """ creates an action tuple (shift_location, rotation), move_location from an ACTION """
-        return (BoardLocation(action.shift_location.row, action.shift_location.column), action.rotation), \
-            BoardLocation(action.move_location.row, action.move_location.column)
+        shift_location = BoardLocation(action.shift_location.row, action.shift_location.column)
+        move_location = BoardLocation(action.move_location.row, action.move_location.column)
+        if shift_location != cls._ERROR_LOCATION and move_location != cls._ERROR_LOCATION:
+            return (shift_location, action.rotation), move_location
+        else:
+            return None

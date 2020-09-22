@@ -8,7 +8,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <chrono>
+#include <future>
 #include <set>
+#include <thread>
 
 using namespace labyrinth;
 using namespace labyrinth::testutils;
@@ -221,4 +224,38 @@ TEST_F(ExhaustiveSearchTest, withThreeByThree_shouldReturnOneMove) {
     Location player_location{0, 0};
 
     performTest(graph_, player_location, objective_id, 1);
+}
+
+TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_shouldReturnQuicklyWithoutResult) {
+    SCOPED_TRACE("depth4Instance_whenAborted_shouldReturnQuicklyWithoutResult");
+    using namespace std::chrono_literals;
+    buildGraph(mazes::exh_depth_4_maze, {OutPaths::North, OutPaths::East});
+    auto objective_id = graph_.getNode(Location{6, 7}).node_id;
+    Location player_location{4, 2};
+    Location previous_shift{-1, -1};
+
+    const auto start = std::chrono::steady_clock::now();
+    auto future_actions = std::async(labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
+    std::this_thread::sleep_for(1ms);
+    labyrinth::exhsearch::abortComputation();
+    auto actions = future_actions.get();
+    const auto stop = std::chrono::steady_clock::now();
+    const std::chrono::duration<double> duration = std::chrono::duration<double>(stop - start);
+
+    ASSERT_THAT(duration.count(), testing::Lt(0.01));
+    ASSERT_THAT(actions, testing::IsEmpty());
+}
+
+TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_runsFineAftewards) {
+    SCOPED_TRACE("depth4Instance_whenAborted_runsFineAftewards");
+    buildGraph(mazes::exh_depth_4_maze, {OutPaths::North, OutPaths::East});
+    auto objective_id = graph_.getNode(Location{6, 7}).node_id;
+    Location player_location{4, 2};
+    Location previous_shift{-1, -1};
+
+    auto future_actions = std::async(labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
+    labyrinth::exhsearch::abortComputation();
+    auto actions = future_actions.get();
+    
+    performTest(graph_, player_location, objective_id, 4);
 }

@@ -321,7 +321,8 @@ class AlphaBeta(Thread, ab.IterativeDeepening):
 
 
 class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
-    """ Calls an external library to perform the move. Random move as fallback """
+    """ Calls an external library to perform the move. The abort_search method is already
+    implemented in the superclass. """
     LIBRARY_PREFIX = "dynamic-"
 
     def __init__(self, board, piece, game, full_library_path):
@@ -341,15 +342,12 @@ class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
         """ Getter for move_action """
         return self._move_action
 
-    def abort_search(self):
-        """ not abortable, hence pass """
-
     def run(self):
         action = self.find_optimal_action()
         if action:
             self._shift_action = action[0]
             self._move_action = action[1]
-
+    
 
 def _library_extension():
     extension = ".so"

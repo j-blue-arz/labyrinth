@@ -41,4 +41,6 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
                                       struct CLocation* c_player_location,
                                       unsigned int objective_id,
                                       struct CLocation* c_previous_shift_location);
+                                    
+PUBLIC_API void abort_search();
 }

@@ -5,27 +5,14 @@ It does not test the libraries for quality, but only for correctness. For exampl
 library, it will not check if the returned actions are optimal. Instead, it checks that the returned actions are valid
 shifts and moves.
 """
-# import pytest
+from datetime import timedelta
+import time
+import threading
 
 from labyrinth.model.algorithm.external_library import ExternalLibraryBinding
 from labyrinth.model.reachable import Graph
 from labyrinth.model.game import BoardLocation
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces
-
-MAZE_3BY3 = """
-###|#.#|#.#|
-#..|...|..#|
-#.#|#.#|###|
-------------
-#.#|###|###|
-#..|...|...|
-#.#|###|###|
-------------
-#.#|###|#.#|
-#..|#..|..#|
-###|#.#|###|
------------*
-"""
 
 
 def test_3by3_single_player_with_direct_path(library_path):
@@ -124,6 +111,44 @@ def test_3by3_single_player_no_pushback_rule(library_path):
     assert shift_location_2 != shift_location_1
 
 
+def test_abort_search__with_long_running_instance__returns_quickly(library_path):
+    """ Performs a library call on a long running instance, and aborts after a short time.
+    The time between the abort and the return should not exceed 100ms.
+    To measure this time, the ExternalLibraryBinding is wrapped in a Thread which signals an Event
+    once the computation has finished.
+    """
+    test_setup = (LONG_RUNNING_EXHSEARCH_INSTANCE, "NE", [(7, 6)], (3, 2))
+    previous_shift_location = None
+    board, piece = _create_board(test_setup)
+
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
+                                             previous_shift_location=previous_shift_location)
+
+    search_ended_event = threading.Event()
+    concurrent_library_binding = ConcurrentExternalLibraryBinding(library_binding, search_ended_event)
+    concurrent_library_binding.start()
+    time.sleep(timedelta(milliseconds=50).total_seconds())
+    assert not search_ended_event.is_set()
+    start = time.time()
+    library_binding.abort_search()
+    search_ended_event.wait()
+    stop = time.time()
+    assert (stop - start) < 0.1
+    assert concurrent_library_binding.action is None
+
+
+class ConcurrentExternalLibraryBinding(threading.Thread):
+    def __init__(self, external_binding, search_ended_event):
+        threading.Thread.__init__(self)
+        self._external_binding = external_binding
+        self._search_ended_event = search_ended_event
+        self.action = None
+
+    def run(self):
+        self.action = self._external_binding.find_optimal_action()
+        self._search_ended_event.set()
+
+
 def _assert_valid_action(action, board, previous_shift_location, piece):
     shift, move_location = action
     shift_location, shift_rotation = shift
@@ -142,3 +167,59 @@ def _create_board(test_setup):
     board = create_board_and_pieces(**param_dict)
     piece = board.pieces[0]
     return board, piece
+
+
+MAZE_3BY3 = """
+###|#.#|#.#|
+#..|...|..#|
+#.#|#.#|###|
+------------
+#.#|###|###|
+#..|...|...|
+#.#|###|###|
+------------
+#.#|###|#.#|
+#..|#..|..#|
+###|#.#|###|
+-----------*
+"""
+
+# equal to exhsearch_s9_d4_num9.json
+LONG_RUNNING_EXHSEARCH_INSTANCE = """
+###|#.#|###|#.#|###|###|###|#.#|###|
+#..|#..|...|#.#|...|...|...|#..|..#|
+#.#|###|#.#|#.#|#.#|###|#.#|###|#.#|
+-----------------------------------|
+###|#.#|#.#|###|###|#.#|###|###|#.#|
+...|#.#|#.#|..#|#..|#..|..#|...|#..|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|###|#.#|
+-----------------------------------|
+#.#|###|#.#|###|###|#.#|###|###|#.#|
+#..|...|#..|..#|...|#..|...|#..|..#|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+-----------------------------------|
+#.#|#.#|###|###|#.#|###|###|###|###|
+..#|#..|...|#..|#.#|...|...|...|#..|
+###|###|###|#.#|#.#|###|###|#.#|#.#|
+-----------------------------------|
+#.#|###|#.#|###|#.#|###|#.#|#.#|#.#|
+#..|...|#..|#..|...|..#|..#|...|..#|
+#.#|#.#|#.#|#.#|#.#|#.#|#.#|###|#.#|
+-----------------------------------|
+###|###|###|###|###|###|#.#|###|###|
+#..|...|..#|..#|...|#..|#..|...|...|
+#.#|###|#.#|#.#|###|#.#|###|###|###|
+-----------------------------------|
+#.#|###|#.#|#.#|#.#|#.#|#.#|#.#|#.#|
+#..|..#|...|..#|...|..#|..#|#.#|..#|
+#.#|#.#|###|###|###|#.#|#.#|#.#|#.#|
+-----------------------------------|
+###|###|#.#|#.#|#.#|###|#.#|###|#.#|
+..#|...|#.#|..#|#.#|...|..#|...|#..|
+#.#|###|#.#|#.#|#.#|###|###|###|###|
+-----------------------------------|
+#.#|###|#.#|###|#.#|#.#|#.#|#.#|#.#|
+#..|...|...|..#|...|..#|...|#.#|..#|
+###|###|###|#.#|###|###|###|#.#|###|
+-----------------------------------*
+"""

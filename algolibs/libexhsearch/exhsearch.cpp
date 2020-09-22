@@ -133,17 +133,22 @@ std::vector<RotationDegreeType> determineRotations(const Node& node) {
 
 } // anonymous namespace
 
+void abortComputation() {
+    is_aborted = true;
+}
+
 std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
                                           const Location& player_location,
                                           NodeId objective_id,
                                           const Location& previous_shift_location) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
+    is_aborted = false;
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
     root->reached_nodes.emplace_back(0, graph.getNode(player_location).node_id);
     root->shift = ShiftAction{previous_shift_location, 0};
     state_queue.push(root);
-    while (!state_queue.empty()) {
+    while (!state_queue.empty() && !is_aborted) {
         auto current_state = state_queue.front();
         state_queue.pop();
         MazeGraph current_graph = createGraphFromState(graph, current_state);

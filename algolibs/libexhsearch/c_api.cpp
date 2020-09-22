@@ -61,3 +61,7 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
         return actionToCAction(best_actions[0]);
     }
 }
+
+PUBLIC_API void abort_search() {
+    labyrinth::exhsearch::abortComputation();
+}
