@@ -1,3 +1,9 @@
+""" Provides commands to evaluate the results of one or multiple benchmarks.
+
+There are two commands:
+- combine takes multiple benchmark results (csv-files) and merges them based on the instance names.
+- plot will read a benchmark result and create a boxplot, grouped by maze size and search depth.
+"""
 import math
 import re
 

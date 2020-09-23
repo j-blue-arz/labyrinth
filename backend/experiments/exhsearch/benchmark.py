@@ -1,8 +1,8 @@
-""" Usage:
-bench_libexhsearch <task> <case>
-where task is either 'profile' or 'result'
-and 'case' is either the name of a specific test case, or
-'all' for all test cases defined in test_exhaustive_search
+""" This module runs benchmarks for an external library.
+
+There are two commands:
+- testcases runs the instances defined in the tests,
+- instances runs the instances from a given folder, defined by a json-format.
 """
 import csv
 import glob
