@@ -40,5 +40,6 @@ I improved the bfs in libexhsearch. It now returns locations instead of node ids
 Results see: speedup_bfs_returns_locations.png
 The depth 1 and the size 7 instances have not improved, but the greater the depth and the maze size, the higher the improvement, up to a factor of 1.55.
 The average improvement is 12%, and 19% for the size 13 instances.
-I will use valgrind on exhsearch_s13_d3_num3 and exhsearch_s11_d4_num3. 
+I used valgrind on exhsearch_s13_d3_num3 and exhsearch_s11_d4_num3. 
 They have about equal running times, but different speedup factors for this improvement, 1.57 and 1.13, respectively.
+The examination showed that the improvement did not add any other overheads. It is rather difference in the number of shifts vs. the number of breadth-first searches which leads to the different speedups. 
