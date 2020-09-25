@@ -52,7 +52,7 @@ def combine(benchmark_files, outfile, names):
     dfs = [pd.read_csv(infile) for infile in benchmark_files]
     dfs = [clean_times(df, name) for df, name in zip(dfs, names)]
     df = combine_benchmark_results(dfs)
-    df[["size", "depth"]] = df["instance"].str.extract(".*_s([0-9]+).*_d([0-9]+).*")
+    df[["size", "depth", "num"]] = df["instance"].str.extract(".*_s([0-9]+).*_d([0-9]+).*_num([0-9]+).*")
     df.to_csv(outfile)
 
 
@@ -102,7 +102,10 @@ def plot(benchmark_file, outimage, nrows, ncols, algo_name):
                   The speedup of the first column relative to the second one will be plotted.")
 @click.option("--depths", default=None, type=str,
               help="A list of depths, comma-separated. If not provided, all depths are included.")
-def compare(benchmark_file, outimage, names, depths):
+@click.option("--normalize", type=click.Choice(["none", "all"], case_sensitive=False), required=False, default="none",
+              help="Denotes which of the plots should be normalized to a common scale.\
+                If 'none', all plots have a scale of their own.")
+def compare(benchmark_file, outimage, names, depths, normalize):
     """ Reads a benchmark result file BENCHMARK_FILE containing at least two time columns
     and creates a plot showing the speedup, grouped by maze size and depth.
     """
@@ -112,42 +115,52 @@ def compare(benchmark_file, outimage, names, depths):
         depths = [int(depth) for depth in depths.split(",")]
     else:
         depths = np.arange(df["depth"].min(), df["depth"].max() + 1)
-
     sizes = np.sort(df["size"].unique())
     ncols = len(depths)
     nrows = len(sizes)
     fig = plt.figure(figsize=(ncols*8, nrows*4))
     fig.suptitle(f"Speedup: $t_{{{names[1]}}}/t_{{{names[0]}}}$", fontsize=20)
+    speedup_limits = [min(0.5, df["speedup"].min()), df["speedup"].max()]
     plot_num = 1
     for size in sizes:
         for depth in depths:
             speedup_data = df[(df["depth"] == depth) & (df["size"] == size)]
             ax = plt.subplot(nrows, ncols, plot_num)
             if not speedup_data.empty:
-                speedup_data = speedup_data.sort_values("instance")
-                x, y = list(zip(*enumerate(speedup_data["speedup"])))
-                colors = [_color(value) for value in y]
-                chart = ax.bar(x, y, width=0.9, color=colors)
-                _label(ax, chart)
-                speedup_limits = [0, df[(df["depth"] == depth) & (df["size"] == size)]["speedup"].max()]
+                speedup_data = speedup_data.sort_values("num")
+                x = speedup_data["num"]
+                values = speedup_data["speedup"]
+                _basis_barchart(ax, x, values)
+                if normalize == "none":
+                    speedup_limits = [0, df[(df["depth"] == depth) & (df["size"] == size)]["speedup"].max()]
                 ax.set_ylim(speedup_limits)
-                ax.set_xticks([])
+                ax.set_xticks(x)
+                ax.set_xticklabels(x)
             plot_num += 1
+    _label_depths(fig, depths)
+    _label_maze_sizes(fig, sizes)
+    fig.tight_layout()
+    fig.subplots_adjust(left=0.05, top=0.9)
+    plt.savefig(outimage)
+
+
+def _label_depths(fig, depths):
     all_axes = fig.get_axes()
     first_row = [ax for ax in all_axes if ax.is_first_row()]
     for depth, ax in zip(depths, first_row):
         ax.annotate(f"Search depth {depth}", xy=(0.5, 1), xytext=(0, 5),
                     xycoords='axes fraction', textcoords='offset points',
                     fontsize=16, ha='center', va='baseline')
+
+
+def _label_maze_sizes(fig, sizes):
+    all_axes = fig.get_axes()
     first_column = [ax for ax in all_axes if ax.is_first_col()]
     for size, ax in zip(sizes, first_column):
         ax.annotate(f"Maze size {size}", xy=(0, 0.5), xytext=(-ax.yaxis.labelpad - 5, 0),
                     xycoords=ax.yaxis.label, textcoords='offset points',
                     fontsize=16, ha='right', va='center',
                     rotation=90)
-    fig.tight_layout()
-    fig.subplots_adjust(left=0.05, top=0.9)
-    plt.savefig(outimage)
 
 
 def _color(value):
@@ -157,25 +170,30 @@ def _color(value):
         return "red"
 
 
-def _label(ax, bar_chart):
-    """Attach a text label above each bar in *rects*, displaying its height."""
-    max_height = max(rect.get_height() for rect in bar_chart)
-    threshold = max_height / 2
-    for rect in bar_chart:
+def _basis_barchart(ax, x, values, basis=1.0):
+    """ A bar charts which is based not at 0 but at a different basis.
+
+    Values lower than basis are depicted as bars stretching downwards,
+    value higher than basis are depicted as bars stretching upwards. """
+    colors = [_color(value) for value in values]
+    bottoms = [basis if value > basis else value for value in values]
+    heights = [value - basis if value > basis else basis - value for value in values]
+    chart = ax.bar(x, heights, width=0.9, color=colors, bottom=bottoms)
+    _label_basis_barchart(ax, chart, values)
+    ax.axhline(basis, color="black", ls="--")
+
+
+def _label_basis_barchart(ax, bar_chart, values):
+    """Attach a text label to each bar, displaying its value."""
+    for rect, value in zip(bar_chart, values):
         width = rect.get_width()
-        height = rect.get_height()
         x = rect.get_x()
         x_text_pos = x + width / 2
-        if height > threshold:
-            y_text_pos = height * 0.95
-            color = "white"
-        else:
-            y_text_pos = height * 1.05
-            color = "black"
-        text = f"{height:.2f}" if height < 10 else f"{height:.1f}"
+        y_text_pos = 0.95 if value > 1.0 else 1.05
+        text = f"{value:.2f}" if value < 10 else f"{value:.1f}"
         ax.annotate(text,
                     xy=(x_text_pos, y_text_pos),
-                    ha="center", va="center", color=color)
+                    ha="center", va="center", color="black")
 
 
 if __name__ == "__main__":

@@ -34,3 +34,11 @@ September 11th, 2020
 Comparison between library call and benchmark of algolibs in c++ showed that the latter is always faster.
 The difference can neither be explained with only a constant factor, nor with a relative factor. It may be a combination of the two.
 I am planning to profile the ctypes library call.
+
+September 25th, 2020
+I improved the bfs in libexhsearch. It now returns locations instead of node ids. This removes the need to translate the ids into locations for the next bfs.
+Results see: speedup_bfs_returns_locations.png
+The depth 1 and the size 7 instances have not improved, but the greater the depth and the maze size, the higher the improvement, up to a factor of 1.55.
+The average improvement is 12%, and 19% for the size 13 instances.
+I will use valgrind on exhsearch_s13_d3_num3 and exhsearch_s11_d4_num3. 
+They have about equal running times, but different speedup factors for this improvement, 1.57 and 1.13, respectively.
