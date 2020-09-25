@@ -246,8 +246,8 @@ TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_shouldReturnQuicklyWitho
     ASSERT_THAT(actions, testing::IsEmpty());
 }
 
-TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_runsFineAftewards) {
-    SCOPED_TRACE("depth4Instance_whenAborted_runsFineAftewards");
+TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_runsFineAfterwards) {
+    SCOPED_TRACE("depth4Instance_whenAborted_runsFineAfterwards");
     buildGraph(mazes::exh_depth_4_maze, {OutPaths::North, OutPaths::East});
     auto objective_id = graph_.getNode(Location{6, 7}).node_id;
     Location player_location{4, 2};

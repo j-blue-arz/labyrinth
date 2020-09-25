@@ -107,25 +107,29 @@ MazeGraph::Neighbors MazeGraph::neighbors(const Location& location) const {
 }
 
 MazeGraph::SizeType MazeGraph::getNumberOfNodes() const noexcept {
-    return size_;
+    return size_ + 1;
 }
 
 MazeGraph::ExtentType MazeGraph::getExtent() const noexcept {
     return extent_;
 }
 
-void MazeGraph::shift(const Location& location, RotationDegreeType leftoverRotation) {
+Location::OffsetType MazeGraph::getOffsetByShiftLocation(const Location& shift_location) const noexcept {
     OffsetType::OffsetValueType row_offset{0}, column_offset{0};
-    if (location.getRow() == 0) {
+    if (shift_location.getRow() == 0) {
         row_offset = 1;
-    } else if (location.getRow() == extent_ - 1) {
+    } else if (shift_location.getRow() == extent_ - 1) {
         row_offset = -1;
-    } else if (location.getColumn() == 0) {
+    } else if (shift_location.getColumn() == 0) {
         column_offset = 1;
-    } else if (location.getColumn() == extent_ - 1) {
+    } else if (shift_location.getColumn() == extent_ - 1) {
         column_offset = -1;
     }
-    const OffsetType offset{row_offset, column_offset};
+    return OffsetType{row_offset, column_offset};
+}
+
+void MazeGraph::shift(const Location& location, RotationDegreeType leftoverRotation) {
+    const OffsetType offset = getOffsetByShiftLocation(location);
     std::vector<Location> line{};
     line.reserve(extent_);
     Location current = location;

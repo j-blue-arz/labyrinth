@@ -33,7 +33,7 @@ protected:
 };
 
 TEST_F(GraphBuilderFromTextTest, getNumberOfNodes_returnsCorrectValue) {
-    EXPECT_EQ(graph_.getNumberOfNodes(), 9);
+    EXPECT_EQ(graph_.getNumberOfNodes(), 10);
 }
 
 TEST_F(GraphBuilderFromTextTest, neighbors_withRow0Column0_returnsCorrectNeighbors) {

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 // The algorithm searches for a path reaching the objective in a tree of game states.
 // For each analyzed succession of shift actions, it keeps track of all reachable locations.
@@ -63,41 +64,50 @@ std::vector<Location> determineReachedLocations(const GameStateNode& current_sta
                                                 Location shift_location) {
     std::vector<Location> updated_player_locations;
     updated_player_locations.resize(current_state.reached_nodes.size());
-    std::transform(current_state.reached_nodes.begin(),
-                   current_state.reached_nodes.end(),
-                   updated_player_locations.begin(),
-                   [&graph, &shift_location](reachable::ReachableNode reached_node) {
-                       return graph.getLocation(reached_node.reached_id, shift_location);
-                   });
+    std::transform(
+        current_state.reached_nodes.begin(),
+        current_state.reached_nodes.end(),
+        updated_player_locations.begin(),
+        [&graph, &shift_location](reachable::ReachableNode reached_node) {
+            const Location& reached_location = reached_node.reached_location;
+            const Location::OffsetType offset = graph.getOffsetByShiftLocation(shift_location);
+            if (0 != offset.row_offset) { // shift in direction N or S
+                if (reached_location.getColumn() == shift_location.getColumn()) {
+                    const Location::IndexType row =
+                        (reached_location.getRow() + offset.row_offset + graph.getExtent()) % graph.getExtent();
+                    const Location::IndexType column = reached_location.getColumn();
+                    return Location{row, column};
+                }
+            } else { // shift in direction E or W
+                if (reached_location.getRow() == shift_location.getRow()) {
+                    const Location::IndexType row = reached_location.getRow();
+                    const Location::IndexType column =
+                        (reached_location.getColumn() + offset.column_offset + graph.getExtent()) % graph.getExtent();
+                    return Location{row, column};
+                }
+            }
+            return reached_node.reached_location;
+        });
     return updated_player_locations;
 }
 
-StatePtr createNewState(const MazeGraph& graph, const ShiftAction& shift, StatePtr current_state) {
-    MazeGraph graph_copy{graph};
-    graph_copy.shift(shift.location, shift.rotation);
-    auto updated_player_locations = determineReachedLocations(*current_state, graph_copy, shift.location);
+StatePtr createNewState(const MazeGraph& shifted_graph, const ShiftAction& shift, StatePtr current_state) {
+    auto updated_player_locations = determineReachedLocations(*current_state, shifted_graph, shift.location);
     StatePtr new_state = std::make_shared<GameStateNode>(
-        current_state, shift, reachable::multiSourceReachableLocations(graph_copy, updated_player_locations));
+        current_state, shift, reachable::multiSourceReachableLocations(shifted_graph, updated_player_locations));
     return new_state;
 }
 
-std::vector<PlayerAction> reconstructActions(const MazeGraph& base_graph, StatePtr new_state, size_t reachable_index) {
+std::vector<PlayerAction> reconstructActions(StatePtr new_state, size_t reachable_index) {
     auto cur = new_state;
     auto index = reachable_index;
-    std::vector<std::pair<ShiftAction, NodeId>> id_actions;
+    std::vector<PlayerAction> actions;
     while (!cur->isRoot()) {
-        id_actions.push_back(std::make_pair(cur->shift, cur->reached_nodes[index].reached_id));
+        actions.push_back(PlayerAction{cur->shift, cur->reached_nodes[index].reached_location});
         index = cur->reached_nodes[index].parent_source_index;
         cur = cur->parent;
     }
-    std::vector<PlayerAction> actions;
-    MazeGraph reconstruction_graph{base_graph};
-    for (auto id_based_action = id_actions.rbegin(); id_based_action != id_actions.rend(); ++id_based_action) {
-        ShiftAction shift = id_based_action->first;
-        reconstruction_graph.shift(shift.location, shift.rotation);
-        Location move_location = reconstruction_graph.getLocation(id_based_action->second, Location(-1, -1));
-        actions.push_back(PlayerAction{shift, move_location});
-    }
+    std::reverse(actions.begin(), actions.end());
     return actions;
 }
 
@@ -131,6 +141,12 @@ std::vector<RotationDegreeType> determineRotations(const Node& node) {
     }
 }
 
+MazeGraph shiftedGraph(const MazeGraph& base_graph, const ShiftAction& shift_action) {
+    MazeGraph graph{base_graph};
+    graph.shift(shift_action.location, shift_action.rotation);
+    return graph;
+}
+
 } // anonymous namespace
 
 void abortComputation() {
@@ -145,7 +161,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
     is_aborted = false;
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
-    root->reached_nodes.emplace_back(0, graph.getNode(player_location).node_id);
+    root->reached_nodes.emplace_back(0, player_location);
     root->shift = ShiftAction{previous_shift_location, 0};
     state_queue.push(root);
     while (!state_queue.empty() && !is_aborted) {
@@ -160,14 +176,18 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
             }
             auto rotations = determineRotations(current_graph.getLeftover());
             for (RotationDegreeType rotation : rotations) {
-                auto new_state = createNewState(current_graph, ShiftAction{shift_location, rotation}, current_state);
+                const ShiftAction shift_action{shift_location, rotation};
+                const MazeGraph shifted_graph = shiftedGraph(current_graph, shift_action);
+                auto new_state = createNewState(shifted_graph, shift_action, current_state);
                 auto found_objective =
                     std::find_if(new_state->reached_nodes.begin(),
                                  new_state->reached_nodes.end(),
-                                 [objective_id](auto& reached_node) { return reached_node.reached_id == objective_id; });
+                                 [objective_id, &shifted_graph](auto& reached_node) {
+                                     return shifted_graph.getNode(reached_node.reached_location).node_id == objective_id;
+                                 });
                 if (found_objective != new_state->reached_nodes.end()) {
                     const size_t reachable_index = found_objective - new_state->reached_nodes.begin();
-                    return reconstructActions(graph, new_state, reachable_index);
+                    return reconstructActions(new_state, reachable_index);
                 } else {
                     state_queue.push(new_state);
                 }

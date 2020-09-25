@@ -55,9 +55,11 @@ public:
 
     const Node& getLeftover() const { return leftover_; }
 
+    void shift(const Location& location, RotationDegreeType leftoverRotation);
+
     const std::vector<Location>& getShiftLocations() const noexcept { return shift_locations_; };
 
-    void shift(const Location& location, RotationDegreeType leftoverRotation);
+    Location::OffsetType getOffsetByShiftLocation(const Location& shift_location) const noexcept;
 
     /// Returns the location of a given node identifier.
     /// If the location cannot be found in the maze, the second parameter is returned.

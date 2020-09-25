@@ -42,6 +42,8 @@ protected:
         graph_.setOutPaths(Location{2, 0}, getBitmask("NE"));
         graph_.setOutPaths(Location{2, 1}, getBitmask("NS"));
         graph_.setOutPaths(Location{2, 2}, getBitmask("WS"));
+
+        graph_.setLeftoverOutPaths(getBitmask("NE"));
     }
 
     MazeGraph graph_;
@@ -50,7 +52,7 @@ protected:
 const size_t MazeGraphTest::extent;
 
 TEST_F(MazeGraphTest, constructedGraph_hasCorrectNumberOfNodes) {
-    EXPECT_EQ(graph_.getNumberOfNodes(), 9);
+    EXPECT_EQ(graph_.getNumberOfNodes(), 10);
 }
 
 TEST_F(MazeGraphTest, constructedGraph_hasUniqueNodeIds) {
@@ -60,6 +62,7 @@ TEST_F(MazeGraphTest, constructedGraph_hasUniqueNodeIds) {
             ids.insert(graph_.getNode(Location{row, column}).node_id);
         }
     }
+    ids.insert(graph_.getLeftover().node_id);
     EXPECT_EQ(ids.size(), graph_.getNumberOfNodes()) << "duplicate node ids detected";
 }
 
@@ -70,6 +73,7 @@ TEST_F(MazeGraphTest, constructedGraph_hasConsecutiveNodeIdsStartingWith0) {
             ids.insert(graph_.getNode(Location{row, column}).node_id);
         }
     }
+    ids.insert(graph_.getLeftover().node_id);
     for (NodeId id = 0; id < ids.size(); id++) {
         EXPECT_TRUE(ids.find(id) != ids.end()) << "Node id " << id << " is not contained in the graph.";
     }
