@@ -42,4 +42,6 @@ The depth 1 and the size 7 instances have not improved, but the greater the dept
 The average improvement is 12%, and 19% for the size 13 instances.
 I used valgrind on exhsearch_s13_d3_num3 and exhsearch_s11_d4_num3. 
 They have about equal running times, but different speedup factors for this improvement, 1.57 and 1.13, respectively.
-The examination showed that the improvement did not add any other overheads. It is rather difference in the number of shifts vs. the number of breadth-first searches which leads to the different speedups. 
+The examination showed that the improvement did not add any other overheads.
+It is rather difference in the number of shifts vs. the number of breadth-first searches which leads to the different speedups. 
+The next focus of improvement has to be the neighbor search.
