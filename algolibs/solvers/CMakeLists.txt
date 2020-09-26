@@ -6,6 +6,7 @@ set(
 		"location.cpp"
 		"maze_graph.h"
 		"maze_graph.cpp"
+        "solvers.h"
 		"exhsearch.h"
 		"exhsearch.cpp"
 )

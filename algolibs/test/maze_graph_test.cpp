@@ -1,5 +1,5 @@
-#include "libexhsearch/location.h"
-#include "libexhsearch/maze_graph.h"
+#include "solvers/location.h"
+#include "solvers/maze_graph.h"
 #include "util.h"
 
 #include "gmock/gmock.h"

@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <queue>
 #include <vector>
 
 // The algorithm searches for a path reaching the objective in a tree of game states.

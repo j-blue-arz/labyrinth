@@ -3,7 +3,6 @@
 #include "location.h"
 
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 namespace labyrinth {

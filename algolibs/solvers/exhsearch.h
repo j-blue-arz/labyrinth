@@ -1,24 +1,12 @@
 #pragma once
 
-#include "graph_algorithms.h"
-#include "maze_graph.h"
+#include "solvers.h"
 
 #include <future>
-#include <queue>
 
 namespace labyrinth {
 
 namespace exhsearch {
-
-struct ShiftAction {
-    Location location{0, 0};
-    RotationDegreeType rotation{0};
-};
-
-struct PlayerAction {
-    ShiftAction shift;
-    Location move_location;
-};
 
 static std::atomic_bool is_aborted = false;
 

@@ -1,7 +1,7 @@
 #include "graphbuilder/text_graph_builder.h"
-#include "libexhsearch/exhsearch.h"
-#include "libexhsearch/graph_algorithms.h"
-#include "libexhsearch/maze_graph.h"
+#include "solvers/exhsearch.h"
+#include "solvers/graph_algorithms.h"
+#include "solvers/maze_graph.h"
 #include "mazes.h"
 #include "util.h"
 
@@ -31,7 +31,7 @@ protected:
     MazeGraph graph_{0};
 };
 
-::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::exhsearch::PlayerAction>& actions,
+::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::PlayerAction>& actions,
                                                          const labyrinth::MazeGraph& original_graph,
                                                          const Location& player_start_location) {
     std::set<labyrinth::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
@@ -69,7 +69,7 @@ bool isOpposing(const Location& location1, const Location& location2, size_t ext
     return false;
 }
 
-::testing::AssertionResult respectPushbackRule(const std::vector<labyrinth::exhsearch::PlayerAction>& actions,
+::testing::AssertionResult respectPushbackRule(const std::vector<labyrinth::PlayerAction>& actions,
                                                size_t extent,
                                                const Location& previous_shift_location) {
     std::vector<Location> shift_locations;
@@ -88,7 +88,7 @@ bool isOpposing(const Location& location1, const Location& location2, size_t ext
     return ::testing::AssertionSuccess();
 }
 
-::testing::AssertionResult playerActionsReachObjective(const std::vector<labyrinth::exhsearch::PlayerAction>& actions,
+::testing::AssertionResult playerActionsReachObjective(const std::vector<labyrinth::PlayerAction>& actions,
                                                        labyrinth::MazeGraph& original_graph,
                                                        const Location& player_start_location,
                                                        labyrinth::NodeId objective_id) {

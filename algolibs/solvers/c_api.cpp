@@ -33,7 +33,7 @@ struct CLocation locationToCLocation(const labyrinth::Location& location) noexce
     return c_location;
 }
 
-struct CAction actionToCAction(const labyrinth::exhsearch::PlayerAction& action) {
+struct CAction actionToCAction(const labyrinth::PlayerAction& action) {
     struct CAction c_action = {
         locationToCLocation(action.shift.location), action.shift.rotation, locationToCLocation(action.move_location)};
     return c_action;

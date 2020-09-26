@@ -1,6 +1,6 @@
-#include "libexhsearch/exhsearch.h"
-#include "libexhsearch/location.h"
-#include "libexhsearch/maze_graph.h"
+#include "solvers/exhsearch.h"
+#include "solvers/location.h"
+#include "solvers/maze_graph.h"
 
 #include "benchmark/benchmark_reader.h"
 

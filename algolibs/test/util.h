@@ -1,6 +1,6 @@
 #pragma once
-#include "libexhsearch/location.h"
-#include "libexhsearch/maze_graph.h"
+#include "solvers/location.h"
+#include "solvers/maze_graph.h"
 
 #include <iterator>
 #include <set>

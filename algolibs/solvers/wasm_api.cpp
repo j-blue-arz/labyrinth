@@ -16,9 +16,9 @@ Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, Rotation
     return node;
 }
 
-exhsearch::PlayerAction errorAction() {
+PlayerAction errorAction() {
     Location errorLocation{-1, -1};
-    return exhsearch::PlayerAction{exhsearch::ShiftAction{errorLocation, 0}, errorLocation};
+    return PlayerAction{exhsearch::ShiftAction{errorLocation, 0}, errorLocation};
 }
 
 struct LocationValueObject {
@@ -26,7 +26,7 @@ struct LocationValueObject {
     Location::IndexType column;
 };
 
-exhsearch::PlayerAction findBestAction(const MazeGraph& graph,
+PlayerAction findBestAction(const MazeGraph& graph,
                                        LocationValueObject player_location,
                                        NodeId objective_id,
                                        LocationValueObject previous_shift_location) {
@@ -56,9 +56,9 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
         .field("location", &exhsearch::ShiftAction::location)
         .field("rotation", &exhsearch::ShiftAction::rotation);
 
-    emscripten::value_object<exhsearch::PlayerAction>("PlayerAction")
-        .field("shift", &exhsearch::PlayerAction::shift)
-        .field("move_location", &exhsearch::PlayerAction::move_location);
+    emscripten::value_object<PlayerAction>("PlayerAction")
+        .field("shift", &PlayerAction::shift)
+        .field("move_location", &PlayerAction::move_location);
 
     emscripten::value_object<LocationValueObject>("LocationValueObject")
         .field("row", &LocationValueObject::row)

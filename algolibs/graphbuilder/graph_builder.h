@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libexhsearch/maze_graph.h"
+#include "solvers/maze_graph.h"
 
 #include <bitset>
 #include <vector>

@@ -2,7 +2,7 @@
 
 #include "graphbuilder/text_graph_builder.h"
 
-#include "libexhsearch/location.h"
+#include "solvers/location.h"
 
 #include <filesystem>
 #include <fstream>

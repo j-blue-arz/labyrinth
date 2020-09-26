@@ -49,5 +49,5 @@ if(NOT COMPILE_TO_WASM)
     add_subdirectory(benchmark)
 endif(NOT COMPILE_TO_WASM)
 
-add_subdirectory(libexhsearch)
+add_subdirectory(solvers)
 

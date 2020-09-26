@@ -1,7 +1,7 @@
 #include <algorithm>
 
 #include "graphbuilder/text_graph_builder.h"
-#include "libexhsearch/graph_algorithms.h"
+#include "solvers/graph_algorithms.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
