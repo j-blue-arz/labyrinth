@@ -15,3 +15,5 @@ PenaltyExcessCharacter: 10
 PenaltyBreakBeforeFirstCallParameter: 3
 AllowShortFunctionsOnASingleLine: Inline
 AlwaysBreakTemplateDeclarations: Yes
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true

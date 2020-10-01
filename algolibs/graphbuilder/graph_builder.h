@@ -18,7 +18,7 @@ public:
     GraphBuilder(GraphBuilder&&) = default;
     GraphBuilder& operator=(GraphBuilder&&) = default;
 
-    GraphBuilder& setLeftoverOutPaths(const std::string& out_paths_string) noexcept;
+    GraphBuilder& withLeftoverOutPaths(const std::string& out_paths_string) noexcept;
 
     GraphBuilder& withStandardShiftLocations() noexcept;
 

@@ -2,7 +2,7 @@
 #include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
 #include "solvers/maze_graph.h"
-#include "mazes.h"
+#include "exhsearch_test.h"
 #include "util.h"
 
 #include "gmock/gmock.h"
@@ -37,7 +37,7 @@ protected:
     std::set<labyrinth::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
     labyrinth::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
-    auto player_location_id = graph.getNode(player_start_location).node_id;
+    auto player_location = player_start_location;
     for (const auto& action : actions) {
         if (std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
             return ::testing::AssertionFailure() << "Invalid shift location: " << action.shift.location;
@@ -46,12 +46,12 @@ protected:
             return ::testing::AssertionFailure() << "Invalid shift rotation: " << action.shift.rotation;
         }
         graph.shift(action.shift.location, action.shift.rotation);
-        auto player_location = graph.getLocation(player_location_id, action.shift.location);
+        player_location = translateLocationByShift(player_location, action.shift.location, graph.getExtent());
         if (!reachable::isReachable(graph, player_location, action.move_location)) {
             return ::testing::AssertionFailure()
                    << "Invalid move: " << action.move_location << " is not reachable from " << player_location;
         }
-        player_location_id = graph.getNode(action.move_location).node_id;
+        player_location = action.move_location;
     }
     return ::testing::AssertionSuccess();
 }
@@ -235,7 +235,7 @@ TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_shouldReturnQuicklyWitho
     Location previous_shift{-1, -1};
 
     const auto start = std::chrono::steady_clock::now();
-    auto future_actions = std::async(labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
+    auto future_actions = std::async(std::launch::async, labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
     std::this_thread::sleep_for(1ms);
     labyrinth::exhsearch::abortComputation();
     auto actions = future_actions.get();

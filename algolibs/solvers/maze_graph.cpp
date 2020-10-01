@@ -114,22 +114,8 @@ MazeGraph::ExtentType MazeGraph::getExtent() const noexcept {
     return extent_;
 }
 
-Location::OffsetType MazeGraph::getOffsetByShiftLocation(const Location& shift_location) const noexcept {
-    OffsetType::OffsetValueType row_offset{0}, column_offset{0};
-    if (shift_location.getRow() == 0) {
-        row_offset = 1;
-    } else if (shift_location.getRow() == extent_ - 1) {
-        row_offset = -1;
-    } else if (shift_location.getColumn() == 0) {
-        column_offset = 1;
-    } else if (shift_location.getColumn() == extent_ - 1) {
-        column_offset = -1;
-    }
-    return OffsetType{row_offset, column_offset};
-}
-
 void MazeGraph::shift(const Location& location, RotationDegreeType leftoverRotation) {
-    const OffsetType offset = getOffsetByShiftLocation(location);
+    const OffsetType offset = getOffsetByShiftLocation(location, extent_);
     std::vector<Location> line{};
     line.reserve(extent_);
     Location current = location;
@@ -217,6 +203,56 @@ MazeGraph::NeighborIterator MazeGraph::Neighbors::cbegin() const {
 
 MazeGraph::NeighborIterator MazeGraph::Neighbors::cend() const {
     return MazeGraph::NeighborIterator::end(graph_, location_, node_);
+}
+
+Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType extent) noexcept {
+    const auto row = location.getRow();
+    const auto column = location.getColumn();
+    MazeGraph::ExtentType border = extent - 1;
+    if (column == 0) {
+        return Location{row, border};
+    } else if (row == 0) {
+        return Location{border, column};
+    } else if (column == border) {
+        return Location{row, 0};
+    } else if (row == border) {
+        return Location{0, column};
+    }
+    return location;
+}
+
+Location translateLocationByShift(const Location& location, const Location& shift_location, MazeGraph::ExtentType extent) noexcept {
+    const Location::OffsetType offset = getOffsetByShiftLocation(shift_location, extent);
+    if (0 != offset.row_offset) { // shift in direction N or S
+        if (location.getColumn() == shift_location.getColumn()) {
+            const Location::IndexType row =
+                (location.getRow() + offset.row_offset + extent) % extent;
+            const Location::IndexType column = location.getColumn();
+            return Location{row, column};
+        }
+    } else { // shift in direction E or W
+        if (location.getRow() == shift_location.getRow()) {
+            const Location::IndexType row = location.getRow();
+            const Location::IndexType column =
+                (location.getColumn() + offset.column_offset + extent) % extent;
+            return Location{row, column};
+        }
+    }
+    return location;
+}
+
+Location::OffsetType getOffsetByShiftLocation(const Location& shift_location, MazeGraph::ExtentType extent) noexcept {
+    Location::OffsetType::OffsetValueType row_offset{0}, column_offset{0};
+    if (shift_location.getRow() == 0) {
+        row_offset = 1;
+    } else if (shift_location.getRow() == extent - 1) {
+        row_offset = -1;
+    } else if (shift_location.getColumn() == 0) {
+        column_offset = 1;
+    } else if (shift_location.getColumn() == extent - 1) {
+        column_offset = -1;
+    }
+    return Location::OffsetType{row_offset, column_offset};
 }
 
 } // namespace labyrinth

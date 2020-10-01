@@ -2,7 +2,7 @@
 
 namespace labyrinth {
 
-GraphBuilder& GraphBuilder::setLeftoverOutPaths(const std::string& out_paths_string) noexcept {
+GraphBuilder& GraphBuilder::withLeftoverOutPaths(const std::string& out_paths_string) noexcept {
     if (out_paths_string.find('N') != std::string::npos) {
         addOutPath(leftover_out_paths_, OutPathPosition::North);
     }

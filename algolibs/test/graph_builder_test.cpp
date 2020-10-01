@@ -25,7 +25,7 @@ protected:
                                             "###|#.#|#.#|",
                                             "------------"};
         builder.setMaze(maze);
-        builder.setLeftoverOutPaths("NES");
+        builder.withLeftoverOutPaths("NES");
         graph_ = builder.buildGraph();
     }
 

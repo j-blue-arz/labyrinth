@@ -9,10 +9,6 @@
 
 namespace labyrinth {
 
-namespace mazes {
-extern std::vector<std::string> big_component_maze_9;
-} // namespace mazes
-
 class TextGraphBuilder : public GraphBuilder {
 public:
     /// Builds a StaticGraph from a text. See implementation file for an example.

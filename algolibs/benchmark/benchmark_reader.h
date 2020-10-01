@@ -74,6 +74,6 @@ labyrinth::MazeGraph buildMazeGraph(const BenchmarkInstance& benchmark_instance)
     labyrinth::TextGraphBuilder builder{};
     return builder.setMaze(benchmark_instance.maze_text)
         .withStandardShiftLocations()
-        .setLeftoverOutPaths(benchmark_instance.leftover_outpath_string)
+        .withLeftoverOutPaths(benchmark_instance.leftover_outpath_string)
         .buildGraph();
 }

@@ -15,4 +15,6 @@ struct PlayerAction {
     Location move_location;
 };
 
+static const PlayerAction error_player_action = PlayerAction{ShiftAction{}, Location{-1, -1}};
+
 } // namespace labyrinth

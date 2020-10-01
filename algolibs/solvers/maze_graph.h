@@ -58,8 +58,6 @@ public:
 
     const std::vector<Location>& getShiftLocations() const noexcept { return shift_locations_; };
 
-    Location::OffsetType getOffsetByShiftLocation(const Location& shift_location) const noexcept;
-
     /// Returns the location of a given node identifier.
     /// If the location cannot be found in the maze, the second parameter is returned.
     Location getLocation(NodeId node_id, const Location& leftover_location) const;
@@ -139,6 +137,12 @@ private:
     std::vector<Node> node_matrix_;
     std::vector<Location> shift_locations_;
 };
+
+Location::OffsetType getOffsetByShiftLocation(const Location& shift_location, MazeGraph::ExtentType extent) noexcept;
+
+Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType extent) noexcept;
+
+Location translateLocationByShift(const Location& location, const Location& shift_location, MazeGraph::ExtentType extent) noexcept;
 
 } // namespace labyrinth
 

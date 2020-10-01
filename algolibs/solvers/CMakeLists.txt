@@ -7,13 +7,11 @@ set(
 		"maze_graph.h"
 		"maze_graph.cpp"
         "solvers.h"
-		"exhsearch.h"
-		"exhsearch.cpp"
 )
 
 
 if(COMPILE_TO_WASM)
-	add_executable(libexhsearch ${SOURCES} wasm_api.cpp)
+	add_executable(libexhsearch ${SOURCES} exhsearch.h exhsearch.cpp wasm_api.cpp)
     string(CONCAT EXHSEARCH_LINK_FLAGS
                              " -s WASM=1"
                              " -o libexhsearch.js"
@@ -27,13 +25,16 @@ if(COMPILE_TO_WASM)
             LINK_FLAGS ${EXHSEARCH_LINK_FLAGS}
             COMPILE_FLAGS " -fno-exceptions")
 elseif(NOT COMPILE_TO_WASM)
-    add_library(exhsearch STATIC ${SOURCES})
+    add_library(exhsearch STATIC ${SOURCES} exhsearch.h exhsearch.cpp)
     set_target_properties(exhsearch PROPERTIES OUTPUT_NAME exhsearch)
-    add_library(libexhsearch SHARED ${SOURCES} c_api.h c_api.cpp)
+    add_library(libexhsearch SHARED ${SOURCES} exhsearch.h exhsearch.cpp c_api.h c_api.cpp)
     set_target_properties(libexhsearch PROPERTIES OUTPUT_NAME exhsearch)
     install(TARGETS libexhsearch
         ARCHIVE DESTINATION lib/static
         RUNTIME DESTINATION bin)
+    
+    add_library(minimax STATIC ${SOURCES} minimax.h minimax.cpp)
+    set_target_properties(minimax PROPERTIES OUTPUT_NAME minimax)
 endif(COMPILE_TO_WASM)
 
 

@@ -71,23 +71,7 @@ std::vector<Location> determineReachedLocations(const GameStateNode& current_sta
         updated_player_locations.begin(),
         [&graph, &shift_location](reachable::ReachableNode reached_node) {
             const Location& reached_location = reached_node.reached_location;
-            const Location::OffsetType offset = graph.getOffsetByShiftLocation(shift_location);
-            if (0 != offset.row_offset) { // shift in direction N or S
-                if (reached_location.getColumn() == shift_location.getColumn()) {
-                    const Location::IndexType row =
-                        (reached_location.getRow() + offset.row_offset + graph.getExtent()) % graph.getExtent();
-                    const Location::IndexType column = reached_location.getColumn();
-                    return Location{row, column};
-                }
-            } else { // shift in direction E or W
-                if (reached_location.getRow() == shift_location.getRow()) {
-                    const Location::IndexType row = reached_location.getRow();
-                    const Location::IndexType column =
-                        (reached_location.getColumn() + offset.column_offset + graph.getExtent()) % graph.getExtent();
-                    return Location{row, column};
-                }
-            }
-            return reached_node.reached_location;
+            return translateLocationByShift(reached_location, shift_location, graph.getExtent());
         });
     return updated_player_locations;
 }
@@ -110,21 +94,6 @@ std::vector<PlayerAction> reconstructActions(StatePtr new_state, size_t reachabl
     }
     std::reverse(actions.begin(), actions.end());
     return actions;
-}
-
-Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType extent) noexcept {
-    const auto row = location.getRow();
-    const auto column = location.getColumn();
-    if (column == 0) {
-        return Location{row, extent - 1};
-    } else if (row == 0) {
-        return Location{extent - 1, column};
-    } else if (column == extent - 1) {
-        return Location{row, 0};
-    } else if (row == extent - 1) {
-        return Location{0, column};
-    }
-    return location;
 }
 
 OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) {
@@ -170,7 +139,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
         state_queue.pop();
         MazeGraph current_graph = createGraphFromState(graph, current_state);
         auto shift_locations = current_graph.getShiftLocations();
-        auto invalid_shift_location = opposingShiftLocation(current_state->shift.location, graph.getExtent());
+        auto invalid_shift_location = opposingShiftLocation(current_state->shift.location, current_graph.getExtent());
         for (const auto& shift_location : shift_locations) {
             if (shift_location == invalid_shift_location) {
                 continue;
