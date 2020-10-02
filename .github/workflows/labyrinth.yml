@@ -51,7 +51,7 @@ jobs:
             cmake -S. -Bbuilds/shared
             cmake --build builds/shared
             mkdir -p ../backend/instance/lib/
-            cp builds/shared/libexhsearch/*.so ../backend/instance/lib/
+            cp builds/shared/solvers/*.so ../backend/instance/lib/
         - name: Run tests
           run: |
             mkdir ../test-results
