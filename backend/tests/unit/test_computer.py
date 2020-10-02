@@ -19,14 +19,14 @@ def test_create_computer_player_fetches_urls_from_url_supplier():
     url_supplier.get_move_url.return_value = "move-url"
     game = Mock()
     type(game).identifier = PropertyMock(return_value=7)
-    player = create_computer_player(player_id=9, compute_method="random", url_supplier=url_supplier, game=game)
+    player = create_computer_player(player_id=9, compute_method="alpha-beta", url_supplier=url_supplier, game=game)
     url_supplier.get_shift_url.assert_called_once_with(7, 9)
     url_supplier.get_move_url.assert_called_once_with(7, 9)
     assert player.shift_url == "shift-url"
     assert player.move_url == "move-url"
 
     url_supplier.reset_mock()
-    player = create_computer_player(player_id=17, compute_method="random", url_supplier=url_supplier)
+    player = create_computer_player(player_id=17, compute_method="alpha-beta", url_supplier=url_supplier)
     url_supplier.get_shift_url.assert_not_called()
     url_supplier.get_move_url.assert_not_called()
 

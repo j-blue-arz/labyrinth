@@ -35,36 +35,36 @@ def test_post_players_four_times(client):
 def test_post_players_backend_computer_player(client):
     """ Tests POST for /api/games/0/players with computer player
 
-    Adds a human player and a computer player with compute method 'random'
+    Adds a human player and a computer player with compute method 'alpha-beta'
     Expects an OK response with a single int in the body.
     Checks if the game state respects the added computer player.
     """
     _post_player(client)
-    response = _post_player(client, is_computer=True, computation_method="random")
+    response = _post_player(client, is_computer=True, computation_method="alpha-beta")
     assert response.content_type == "application/json"
     _assert_ok_retrieve_id(response)
     response = _get_state(client)
     state = response.get_json()
     assert len(state["players"]) == 2
     assert state["players"][1]["isComputerPlayer"] is True
-    assert state["players"][1]["computationMethod"] == "random"
+    assert state["players"][1]["computationMethod"] == "alpha-beta"
 
 
 def test_post_players_library_computer_player(client):
     """ Tests POST for /api/games/0/players with computer player
 
-    Adds a human player and a computer player with compute method 'random'
+    Adds a human player and a computer player with compute method 'dynamic-libexhsearch'
     Expects an OK response with a single int in the body.
     Checks if the game state respects the added computer player.
     """
     _post_player(client)
-    response = _post_player(client, is_computer=True, computation_method="random")
+    response = _post_player(client, is_computer=True, computation_method="dynamic-libexhsearch")
     assert response.content_type == "application/json"
     _assert_ok_retrieve_id(response)
     response = _get_state(client)
     state = response.get_json()
     assert state["players"][1]["isComputerPlayer"] is True
-    assert state["players"][1]["computationMethod"] == "random"
+    assert state["players"][1]["computationMethod"] == "dynamic-libexhsearch"
 
 
 def test_post_players_unknown_compute_method(client):
