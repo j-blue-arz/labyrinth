@@ -139,7 +139,7 @@ paths:
                                 type: "array"
                                 items:
                                     type: "string"
-                                example: ["random", "exhaustive-search"]
+                                example: ["exhaustive-search", "alpha-beta"]
 components:
     schemas:
         addPlayerObject:

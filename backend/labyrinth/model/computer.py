@@ -384,7 +384,7 @@ def _dynamic_compute_method_factory(compute_method):
 
 
 def _backend_computation_methods():
-    return [RandomActionsMethod, ExhaustiveSearch,
+    return [ExhaustiveSearch,
             Minimax, AlphaBeta]
 
 
