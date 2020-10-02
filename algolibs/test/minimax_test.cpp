@@ -7,6 +7,7 @@
  */
 #include "minimax_test.h"
 #include "graphbuilder/text_graph_builder.h"
+#include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
 #include "solvers/maze_graph.h"
 #include "solvers/minimax.h"
@@ -87,11 +88,19 @@ protected:
 
     void thenShiftLocationIsNot(const Location& location) { EXPECT_NE(result.shift.location, location); }
 
+    void thenShiftRotationIsOneOf(const std::vector<labyrinth::RotationDegreeType>& rotations) {
+        ASSERT_THAT(rotations, testing::Contains(result.shift.rotation));
+    };
+
     void thenMoveLocationIs(const Location& location) { EXPECT_EQ(result.move_location, location); }
 
     void thenComputationRanForLessThan(duration_clock::duration expected_duration) {
         const std::chrono::duration<double> duration = std::chrono::duration<double>(stop - start);
         ASSERT_THAT(duration, testing::Lt(expected_duration));
+    }
+
+    void thenOpponentCannotReachObjective() {
+        ASSERT_TRUE(opponentCannotReachAfterPlayerAction(result, graph, opponent_location, objective_id));
     }
 
     ::testing::AssertionResult isValidPlayerAction(const PlayerAction& action,
@@ -127,6 +136,22 @@ protected:
                    << "Move to " << action.move_location << " does not reach objective at " << objective_location;
         }
 
+        return ::testing::AssertionSuccess();
+    }
+
+    ::testing::AssertionResult opponentCannotReachAfterPlayerAction(const PlayerAction& action,
+                                                                    const labyrinth::MazeGraph& graph,
+                                                                    Location opponent_location,
+                                                                    const labyrinth::NodeId objective_id) {
+        labyrinth::MazeGraph graph_copy{graph};
+        graph_copy.shift(result.shift.location, result.shift.rotation);
+        opponent_location = translateLocationByShift(opponent_location, result.shift.location, graph_copy.getExtent());
+        auto actions =
+            labyrinth::exhsearch::findBestActions(graph, opponent_location, objective_id, result.shift.location);
+        if (actions.size() == 1) {
+            return ::testing::AssertionFailure()
+                   << "Player action " << action << " lets opponent reach objective afterwards with " << actions[0];
+        }
         return ::testing::AssertionSuccess();
     }
 
@@ -198,6 +223,7 @@ TEST_F(MinimaxTest, findBestAction__preventOpponent__returnsExpectedShift) {
 
     thenActionIsValid();
     thenShiftLocationIs(Location{1, 6});
+    thenShiftRotationIsOneOf({90, 180, 270});
 }
 
 TEST_F(MinimaxTest, findBestAction__bestActionViolatesPreviousShift__doesReturnDifferentShift) {
@@ -223,4 +249,15 @@ TEST_F(MinimaxTest, findBestAction__whenAborted__shouldReturnQuicklyWithResult) 
 
     thenComputationRanForLessThan(30ms);
     thenActionIsValid();
+}
+
+TEST_F(MinimaxTest, findBestAction__opponentAndObjectiveOppositeOfBoardButPreventPossible__shouldPreventOpponent) {
+    givenGraph(mazes::difficult_maze, {OutPaths::North, OutPaths::East});
+    givenPlayerLocations(Location{0, 0}, Location{5, 6});
+    givenObjectiveAt(Location{5, 0});
+
+    whenFindBestActionWithDepth(2);
+
+    thenActionIsValid();
+    thenOpponentCannotReachObjective();
 }

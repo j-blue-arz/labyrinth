@@ -87,6 +87,24 @@ def test_3by3_multiple_bindings_same_library(library_path):
         _assert_valid_action(actions[i], boards[i], previous_shift_location, boards[i].pieces[0])
 
 
+def test_3by3_single_player_with_direct_path_concurrent(library_path):
+    test_setup = (MAZE_3BY3, "NE", [(0, 0)], (0, 2))
+    previous_shift_location = BoardLocation(0, 1)
+    board, piece = _create_board(test_setup)
+
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
+                                             previous_shift_location=previous_shift_location)
+
+    search_ended_event = threading.Event()
+    concurrent_library_binding = ConcurrentExternalLibraryBinding(library_binding, search_ended_event)
+    concurrent_library_binding.start()
+    search_ended_event.wait()
+    if concurrent_library_binding.action:
+        _assert_valid_action(concurrent_library_binding.action, board, previous_shift_location, piece)
+    else:
+        assert concurrent_library_binding.action is None
+
+
 def test_3by3_single_player_no_pushback_rule(library_path):
     """ Performs two library calls: the first without previous shift,
     the second with a previous shift invalidating the shift result of the first call.
@@ -111,6 +129,21 @@ def test_3by3_single_player_no_pushback_rule(library_path):
     assert shift_location_2 != shift_location_1
 
 
+def test_second_player_to_play__performs_valid_action(library_path):
+    test_setup = (MAZE_3BY3, "NS", [(0, 0), (2, 2)], (2, 1))
+    previous_shift_location = None
+    board, _ = _create_board(test_setup)
+    piece = board.pieces[1]
+
+    library_binding = ExternalLibraryBinding(library_path, board, piece,
+                                             previous_shift_location=previous_shift_location)
+    action = library_binding.find_optimal_action()
+    print(action)
+
+    _assert_valid_action(action, board, previous_shift_location, piece)
+    _assert_reaches_objective(action, board, piece)
+
+
 def test_abort_search__with_long_running_instance__returns_quickly(library_path):
     """ Performs a library call on a long running instance, and aborts after a short time.
     The time between the abort and the return should not exceed 100ms.
@@ -127,14 +160,17 @@ def test_abort_search__with_long_running_instance__returns_quickly(library_path)
     search_ended_event = threading.Event()
     concurrent_library_binding = ConcurrentExternalLibraryBinding(library_binding, search_ended_event)
     concurrent_library_binding.start()
-    time.sleep(timedelta(milliseconds=50).total_seconds())
+    time.sleep(timedelta(milliseconds=10).total_seconds())
     assert not search_ended_event.is_set()
     start = time.time()
     library_binding.abort_search()
     search_ended_event.wait()
     stop = time.time()
     assert (stop - start) < 0.1
-    assert concurrent_library_binding.action is None
+    if concurrent_library_binding.action:
+        _assert_valid_action(concurrent_library_binding.action, board, previous_shift_location, piece)
+    else:
+        assert concurrent_library_binding.action is None
 
 
 class ConcurrentExternalLibraryBinding(threading.Thread):
@@ -162,6 +198,14 @@ def _assert_valid_action(action, board, previous_shift_location, piece):
     assert Graph(board.maze).is_reachable(piece_location, move_location)
 
 
+def _assert_reaches_objective(action, board, piece):
+    shift, move_location = action
+    shift_location, shift_rotation = shift
+    board.shift(shift_location, shift_rotation)
+    reached = board.move(piece, move_location)
+    assert reached
+
+
 def _create_board(test_setup):
     param_dict = param_tuple_to_param_dict(*test_setup)
     board = create_board_and_pieces(**param_dict)
@@ -174,8 +218,8 @@ MAZE_3BY3 = """
 #..|...|..#|
 #.#|#.#|###|
 ------------
-#.#|###|###|
-#..|...|...|
+#.#|#.#|###|
+#..|..#|...|
 #.#|###|###|
 ------------
 #.#|###|#.#|

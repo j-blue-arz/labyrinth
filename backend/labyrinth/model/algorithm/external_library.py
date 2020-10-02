@@ -11,6 +11,11 @@ class LOCATION(ctypes.Structure):
     _fields_ = [("row", ctypes.c_short), ("column", ctypes.c_short)]
 
 
+class PLAYER_LOCATIONS(ctypes.Structure):
+    """ an array of locations """
+    _fields_ = [("locations", ctypes.POINTER(LOCATION)), ("num_players", ctypes.c_ulong)]
+
+
 class NODE(ctypes.Structure):
     """ corresponds to game.MazeCard
     The out_paths are represented as a bitfield """
@@ -47,9 +52,8 @@ class ExternalLibraryBinding:
         self._library.find_action.restype = ACTION
         self._library.abort_search.restype = None
         self._board = board
-        self._board.clear_pieces()
-        self._board.pieces.append(piece)
-        self._piece = piece
+        pos = board.pieces.index(piece)
+        self._pieces = board.pieces[pos:] + board.pieces[:pos]
         self._previous_shift_location = previous_shift_location
         if self._previous_shift_location is None:
             self._previous_shift_location = BoardLocation(-1, -1)
@@ -57,11 +61,11 @@ class ExternalLibraryBinding:
     def find_optimal_action(self):
         """ finds optimal action by calling the external library """
         graph = self._create_graph(self._board)
-        start_location = self._board.maze.maze_card_location(self._piece.maze_card)
-        start_location = self._create_location(start_location)
+        start_locations = [self._board.maze.maze_card_location(piece.maze_card) for piece in self._pieces]
+        start_locations = self._create_player_locations(start_locations)
         previous_shift_location = self._create_location(self._previous_shift_location)
         objective_id = self._board.objective_maze_card.identifier
-        action = self._library.find_action(ctypes.byref(graph), ctypes.byref(start_location), objective_id,
+        action = self._library.find_action(ctypes.byref(graph), ctypes.byref(start_locations), objective_id,
                                            ctypes.byref(previous_shift_location))
         return self._map_returned_action(action)
 
@@ -103,3 +107,10 @@ class ExternalLibraryBinding:
             return (shift_location, action.rotation), move_location
         else:
             return None
+
+    @classmethod
+    def _create_player_locations(cls, board_locations):
+        """ creates a PLAYER_LOCATIONS from a list of BoardLocations """
+        location_array = [ExternalLibraryBinding._create_location(location) for location in board_locations]
+        player_locations = (LOCATION * len(location_array))(*location_array)
+        return PLAYER_LOCATIONS(locations=player_locations, num_players=len(location_array))

@@ -260,7 +260,7 @@ public:
                     best_action_ = action;
                 }
             }
-            if(is_aborted) {
+            if (is_aborted) {
                 break;
             }
         }
@@ -308,7 +308,7 @@ PlayerAction iterateMinimax(const MazeGraph& graph,
         ++max_depth;
         runner.setMaxDepth(max_depth);
         auto new_result = runner.runMinimax(graph, player_location, opponent_location, previous_shift_location);
-        if(!is_aborted || max_depth == 1) {
+        if (!is_aborted || max_depth == 1) {
             minimax_result = new_result;
         }
     } while (!minimax_result.evaluation.is_terminal && !is_aborted);
