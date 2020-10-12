@@ -119,16 +119,22 @@ private:
             current_shift_location_{node.getGraph().getShiftLocations().begin()},
             is_at_end_(is_at_end),
             node_{node} {
-            skipInvalidShiftLocation();
-            initPossibleMoves();
+            if (!is_at_end_) {
+                invalid_shift_location_ =
+                    opposingShiftLocation(node_.getPreviousShiftLocation(), node_.getGraph().getExtent());
+                skipInvalidShiftLocation();
+                initPossibleMoves();
+            }
         }
 
         void nextShift() {
             current_rotation_ += 90;
             if (current_rotation_ == 360) {
-                ++current_shift_location_;
-                skipInvalidShiftLocation();
                 current_rotation_ = 0;
+                ++current_shift_location_;
+                if (current_shift_location_ != node_.getGraph().getShiftLocations().end()) {
+                    skipInvalidShiftLocation();
+                }
                 if (current_shift_location_ == node_.getGraph().getShiftLocations().end()) {
                     is_at_end_ = true;
                 }
@@ -137,9 +143,7 @@ private:
         }
 
         void skipInvalidShiftLocation() {
-            const auto& invalid_shift_location =
-                opposingShiftLocation(node_.getPreviousShiftLocation(), node_.getGraph().getExtent());
-            if (invalid_shift_location == *current_shift_location_) {
+            if (invalid_shift_location_ == *current_shift_location_) {
                 ++current_shift_location_;
             }
         }
@@ -151,14 +155,17 @@ private:
                 auto translated_player_location = translateLocationByShift(
                     node_.getPlayerLocation(), *current_shift_location_, shifted_graph.getExtent());
                 possible_move_locations_ = reachable::reachableLocations(shifted_graph, translated_player_location);
-                current_move_location_ = possible_move_locations_.begin();
+            } else {
+                possible_move_locations_.resize(0);
             }
+            current_move_location_ = possible_move_locations_.begin();
         }
 
         RotationDegreeType current_rotation_;
         std::vector<Location>::const_iterator current_shift_location_;
         std::vector<Location> possible_move_locations_;
         std::vector<Location>::const_iterator current_move_location_;
+        Location invalid_shift_location_;
         bool is_at_end_;
         const GameTreeNode& node_;
     };
