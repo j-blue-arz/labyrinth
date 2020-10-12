@@ -7,7 +7,6 @@ from experiments.exhsearch import depths as exhsearch_depths
 from experiments import serialization
 
 
-
 @click.command()
 @click.option("--outfolder", required=True)
 @click.option("--library", required=True)
