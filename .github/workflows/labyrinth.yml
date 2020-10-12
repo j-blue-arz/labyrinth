@@ -48,7 +48,7 @@ jobs:
             export CC=gcc-8
             export CXX=g++-8
             mkdir builds
-            cmake -S. -Bbuilds/shared
+            cmake -S. -Bbuilds/shared -DCMAKE_BUILD_TYPE=RELEASE
             cmake --build builds/shared
             mkdir -p ../backend/instance/lib/
             cp builds/shared/solvers/*.so ../backend/instance/lib/
