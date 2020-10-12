@@ -1,8 +1,8 @@
-import labyrinth.model.algorithm.external_library as libexhsearch
+import labyrinth.model.algorithm.external_library as external
 import labyrinth.model.algorithm.util as algo_util
 
 
-class CompletePathLibraryBinding(libexhsearch.ExternalLibraryBinding):
+class CompletePathLibraryBinding(external.ExternalLibraryBinding):
     """ The external libraries only return one action, but the tests require a complete path, i.e. a series of actions
     which reach the objective. This subclass repeatedly calls the library to create such a path."""
 
@@ -11,7 +11,7 @@ class CompletePathLibraryBinding(libexhsearch.ExternalLibraryBinding):
         piece = board.pieces[0]
         board.validate_moves = True
         board.maze.validation = True
-        libexhsearch.ExternalLibraryBinding.__init__(self, path, board, piece, previous_shift_location)
+        external.ExternalLibraryBinding.__init__(self, path, board, piece, previous_shift_location)
 
     def find_optimal_actions(self):
         """ repeatedly calls library to retrieve all actions to reach the objective """

@@ -6,14 +6,14 @@ There are two commands:
 """
 import csv
 import glob
-import json
 import os
 import timeit
 
 import click
 
 from tests.unit.test_exhaustive_search import CASES_PARAMS
-import labyrinth.model.algorithm.external_library as libexhsearch
+from experiments import serialization
+import labyrinth.model.algorithm.external_library as external
 import tests.unit.factories as setup
 
 
@@ -66,7 +66,7 @@ def benchmark(library, repeats, testcase_key=None, instance_file=None):
     elif instance_file:
         board, piece, name = _create_board_from_instance_file(instance_file)
     print(f"Running benchmark {name}..")
-    optimizer = libexhsearch.ExternalLibraryBinding(library, board, piece)
+    optimizer = external.ExternalLibraryBinding(library, board, piece)
     return name, timeit.Timer(optimizer.find_optimal_action).repeat(repeats, 1)
 
 
@@ -77,22 +77,8 @@ def _create_board_from_test_key(key):
 
 
 def _create_board_from_instance_file(filename):
-    instance = None
-    with open(filename, mode="r") as infile:
-        instance = json.load(infile)
-    maze_string = "\n".join([""] + instance["maze_array"])
-
-    leftover_out_paths = instance["leftover"]
-    piece_locations = [(json_loc["row"], json_loc["column"]) for json_loc in instance["piece_locations"]]
-    objective_location = (instance["objective"]["row"], instance["objective"]["column"])
-    if objective_location == (-1, -1):
-        objective_location = "leftover"
-    param_dict = setup.param_tuple_to_param_dict(maze_string=maze_string,
-                                                 leftover_out_paths=leftover_out_paths,
-                                                 piece_starts=piece_locations,
-                                                 objective=objective_location)
-    board = setup.create_board_and_pieces(**param_dict)
-    return board, board.pieces[0], instance["name"]
+    board, instance_name = serialization.deserialize_instance_json(filename)
+    return board, board.pieces[0], instance_name
 
 
 def _write_csv(result_dict, outfile):
