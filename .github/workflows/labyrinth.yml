@@ -97,7 +97,7 @@ jobs:
             path: backend/instance/lib/
         - name: Run tests
           run: |
-            pytest . --junitxml=../test-results/backend-results.xml --cov=server --cov-report=xml:../test-results/backend-coverage.xml
+            pytest . --junitxml=../test-results/backend-results.xml --cov=backend --cov-report=xml:../test-results/backend-coverage.xml
         - name: Archive deployment
           uses: actions/upload-artifact@v2
           with:
