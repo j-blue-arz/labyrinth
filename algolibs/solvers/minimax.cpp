@@ -6,6 +6,7 @@
 #include "maze_graph.h"
 
 #include <algorithm>
+#include <list>
 #include <memory>
 #include <optional>
 
@@ -284,6 +285,41 @@ private:
     PlayerAction best_action_;
 };
 
+class IterativeDeepening {
+public:
+    IterativeDeepening() : max_depth{0}, minimax_result{error_player_action, -MinimaxRunner::infinity} {}
+    PlayerAction iterateMinimax(const MazeGraph& graph,
+                                const Location& player_location,
+                                const Location& opponent_location,
+                                const NodeId objective_id,
+                                const Location& previous_shift_location) {
+        is_aborted = false;
+        max_depth = 0;
+        minimax_result = {error_player_action, -MinimaxRunner::infinity};
+        Evaluator evaluator{objective_id};
+        MinimaxRunner runner{evaluator, max_depth};
+        do {
+            ++max_depth;
+            runner.setMaxDepth(max_depth);
+            auto new_result = runner.runMinimax(graph, player_location, opponent_location, previous_shift_location);
+            if (!is_aborted || max_depth == 1) {
+                minimax_result = new_result;
+            }
+        } while (!minimax_result.evaluation.is_terminal && !is_aborted);
+        return minimax_result.player_action;
+    }
+
+    size_t getCurrentSearchDepth() { return max_depth; }
+
+    bool currentResultIsTerminal() { return minimax_result.evaluation.is_terminal; }
+
+private:
+    size_t max_depth;
+    MinimaxResult minimax_result;
+};
+
+std::list<IterativeDeepening> iterative_deepening_searches{};
+
 } // namespace
 
 MinimaxResult findBestAction(const MazeGraph& graph,
@@ -306,24 +342,18 @@ PlayerAction iterateMinimax(const MazeGraph& graph,
                             const Location& opponent_location,
                             const NodeId objective_id,
                             const Location& previous_shift_location) {
-    is_aborted = false;
-    size_t max_depth = 0;
-    Evaluator evaluator{objective_id};
-    MinimaxRunner runner{evaluator, max_depth};
-    MinimaxResult minimax_result{error_player_action, -MinimaxRunner::infinity};
-    do {
-        ++max_depth;
-        runner.setMaxDepth(max_depth);
-        auto new_result = runner.runMinimax(graph, player_location, opponent_location, previous_shift_location);
-        if (!is_aborted || max_depth == 1) {
-            minimax_result = new_result;
-        }
-    } while (!minimax_result.evaluation.is_terminal && !is_aborted);
-    return minimax_result.player_action;
+    iterative_deepening_searches.push_back(IterativeDeepening{});
+    return iterative_deepening_searches.back().iterateMinimax(
+        graph, player_location, opponent_location, objective_id, previous_shift_location);
 }
 
 void abortComputation() {
     is_aborted = true;
+}
+
+SearchStatus getSearchStatus() {
+    auto search = iterative_deepening_searches.back();
+    return SearchStatus{search.getCurrentSearchDepth(), search.currentResultIsTerminal()};
 }
 
 } // namespace minimax

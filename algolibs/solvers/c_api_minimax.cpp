@@ -19,3 +19,9 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
 PUBLIC_API void abort_search() {
     labyrinth::minimax::abortComputation();
 }
+
+PUBLIC_API struct CSearchStatus get_status() {
+    auto status = labyrinth::minimax::getSearchStatus();
+    struct CSearchStatus search_status = {status.current_depth, status.is_terminal};
+    return search_status;
+}

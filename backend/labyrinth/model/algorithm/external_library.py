@@ -40,6 +40,14 @@ class ACTION(ctypes.Structure):
     ]
 
 
+class STATUS(ctypes.Structure):
+    """ Search status of the current search. """
+    _fields_ = [
+        ("current_search_depth", ctypes.c_ulong),
+        ("search_terminated", ctypes.c_bool)
+    ]
+
+
 class ExternalLibraryBinding:
     """ Binds to an external library at given path.
     Translates the game datastructures to the ctypes structures and back """
@@ -51,6 +59,7 @@ class ExternalLibraryBinding:
         self._library = ctypes.cdll.LoadLibrary(path)
         self._library.find_action.restype = ACTION
         self._library.abort_search.restype = None
+        self._library.get_status.restype = STATUS
         self._board = board
         pos = board.pieces.index(piece)
         self._pieces = board.pieces[pos:] + board.pieces[:pos]
@@ -71,6 +80,10 @@ class ExternalLibraryBinding:
 
     def abort_search(self):
         self._library.abort_search()
+
+    def get_search_status(self):
+        status = self._library.get_status()
+        return self._map_search_status(status)
 
     @staticmethod
     def _create_node(maze_card):
@@ -114,3 +127,8 @@ class ExternalLibraryBinding:
         location_array = [ExternalLibraryBinding._create_location(location) for location in board_locations]
         player_locations = (LOCATION * len(location_array))(*location_array)
         return PLAYER_LOCATIONS(locations=player_locations, num_players=len(location_array))
+
+    @classmethod
+    def _map_search_status(cls, status):
+        """ creates a dict from a STATUS """
+        return {"current_search_depth": status.current_search_depth, "search_terminated": status.search_terminated}

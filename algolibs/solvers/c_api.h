@@ -44,12 +44,19 @@ struct CPlayerLocations {
     unsigned long num_players;
 };
 
+struct CSearchStatus {
+    unsigned long current_search_depth;
+    bool search_terminated;
+};
+
 PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
                                       struct CPlayerLocations* c_player_locations,
                                       unsigned int objective_id,
                                       struct CLocation* c_previous_shift_location);
                                     
 PUBLIC_API void abort_search();
+
+PUBLIC_API struct CSearchStatus get_status();
 }
 
 labyrinth::Location mapLocation(const struct CLocation& location) noexcept {

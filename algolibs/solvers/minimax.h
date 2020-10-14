@@ -23,6 +23,11 @@ struct MinimaxResult {
     Evaluation evaluation;
 };
 
+struct SearchStatus {
+    size_t current_depth;
+    bool is_terminal;
+};
+
 static std::atomic_bool is_aborted = false;
 
 /** Aborts the current computation. This is only safe to use if one algorithm (findBestAction or iterateMinimax) is called from
@@ -48,6 +53,9 @@ PlayerAction iterateMinimax(const MazeGraph& graph,
                             const Location& opponent_location,
                             const NodeId objective_id,
                             const Location& previous_shift_location = Location{-1, -1});
+
+
+SearchStatus getSearchStatus();
 
 
 

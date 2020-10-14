@@ -22,3 +22,8 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
 PUBLIC_API void abort_search() {
     labyrinth::exhsearch::abortComputation();
 }
+
+PUBLIC_API struct CSearchStatus get_status() {
+    struct CSearchStatus search_status = {0, false};
+    return search_status;
+}
