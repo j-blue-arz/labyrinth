@@ -1,0 +1,81 @@
+Results:
+Test case big-component-d1-shift-req             resulted in actions ((((1, 0), 0), (0, 3)), 1)
+Test case big-component-d2-cannot-prevent        resulted in actions ((((0, 1), 0), (1, 0)), -1)
+Test case big-component-d3-reach                 resulted in actions ((((0, 5), 0), (6, 5)), 1)
+Test case difficult-d1-shift-req                 resulted in actions ((((0, 3), 0), (6, 2)), 1)
+Test case difficult-d2-cannot-prevent            resulted in actions ((((0, 1), 0), (5, 2)), -1)
+Test case difficult-d2-can-prevent               resulted in actions ((((1, 6), 90), (5, 2)), 0)
+Test case difficult-d3-reach                     resulted in actions ((((0, 3), 0), (6, 3)), 1)
+Test case bug-d1                                 resulted in actions ((((6, 3), 90), (6, 2)), 1)
+
+First implementation:
+Test case big-component-d1-shift-req             best of 3: 18.67ms
+Test case big-component-d2-cannot-prevent        best of 3: 604.27ms
+Test case big-component-d3-reach                 best of 1: 372654.59ms
+Test case difficult-d1-shift-req                 best of 3: 19.96ms
+Test case difficult-d2-cannot-prevent            best of 3: 260.05ms
+Test case difficult-d2-can-prevent               best of 3: 2110.12ms
+Test case difficult-d3-reach                     best of 3: 161798.55ms
+
+
+In last two levels, there is only one node per shift, no nodes for each move:
+Test case big-component-d1-shift-req             best of 3: 8.59ms
+Test case big-component-d2-cannot-prevent        best of 3: 28.48ms
+Test case big-component-d3-reach                 best of 1: 48676.90ms
+Test case difficult-d1-shift-req                 best of 3: 10.67ms
+Test case difficult-d2-cannot-prevent            best of 3: 35.77ms
+Test case difficult-d2-can-prevent               best of 3: 175.90ms
+Test case difficult-d3-reach                     best of 3: 16467.26ms
+-> Faster by a factor of up to 10
+
+Implemented out_paths() of MazeCard with a table lookup. 
+Test case big-component-d1-shift-req             best of 3: 7.01ms
+Test case big-component-d2-cannot-prevent        best of 3: 24.17ms
+Test case difficult-d1-shift-req                 best of 3: 9.59ms
+Test case difficult-d2-cannot-prevent            best of 3: 30.57ms
+Test case difficult-d2-can-prevent               best of 3: 153.34ms
+Test case difficult-d3-reach                     best of 1: 14620.49ms
+-> Faster by about 10%
+
+No neighbor check for already reached maze cards (in reachable_locations):
+Test case big-component-d1-shift-req             best of 3: 6.29ms
+Test case big-component-d2-cannot-prevent        best of 3: 24.13ms
+Test case difficult-d1-shift-req                 best of 3: 9.08ms
+Test case difficult-d2-cannot-prevent            best of 3: 28.53ms
+Test case difficult-d2-can-prevent               best of 3: 146.99ms
+Test case difficult-d3-reach                     best of 1: 13492.86ms
+-> Another 10%
+
+Implemented single-source bfs which does not require tracking parents:
+Test case big-component-d1-shift-req             best of 3: 5.48ms
+Test case big-component-d2-cannot-prevent        best of 3: 19.97ms
+Test case difficult-d1-shift-req                 best of 3: 7.57ms
+Test case difficult-d2-cannot-prevent            best of 3: 26.42ms
+Test case difficult-d2-can-prevent               best of 3: 135.75ms
+Test case difficult-d3-reach                     best of 1: 12470.99ms
+-> 8%
+
+Implemented rotation aware bfs:
+Test case big-component-d1-shift-req             best of 3: 2.05ms
+Test case big-component-d2-cannot-prevent        best of 3: 9.92ms
+Test case big-component-d3-reach                 best of 1: 11635.50ms
+Test case difficult-d1-shift-req                 best of 3: 2.49ms
+Test case difficult-d2-cannot-prevent            best of 3: 17.13ms
+Test case difficult-d2-can-prevent               best of 3: 56.59ms
+Test case difficult-d3-reach                     best of 1: 4632.21ms
+-> 60% faster. difficult-d3-reach now below 5s
+
+
+Implemented own hash function for BoardLocation:
+Test case big-component-d1-shift-req             best of 3: 1.97ms
+Test case big-component-d2-cannot-prevent        best of 3: 9.07ms
+Test case big-component-d3-reach                 best of 1: 4442.58ms
+Test case difficult-d1-shift-req                 best of 3: 0.58ms
+Test case difficult-d2-cannot-prevent            best of 3: 17.46ms
+Test case difficult-d2-can-prevent               best of 3: 40.57ms
+Test case difficult-d3-reach                     best of 1: 907.34ms
+-> d3 cases faster by big amount. However, the order the solutions are searched has changed, so the performance increase
+is not really conclusive. 
+
+The improvements discussed in this file concern the python implementation of the minimax algorithm. This implementation is longer part of the backend.
+This file is kept for documentational reasons.
