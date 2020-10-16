@@ -4,6 +4,8 @@
  */
 #include "maze_graph.h"
 
+#include <ostream>
+
 namespace labyrinth {
 
 struct ShiftAction {

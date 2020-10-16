@@ -10,7 +10,18 @@
 #include <string>
 
 namespace fs = std::filesystem;
+namespace bench {
 
+struct BenchmarkInstance {
+    std::string name{};
+    size_t depth;
+    std::vector<std::string> maze_text{};
+    labyrinth::Location objective{0, 0};
+    std::vector<labyrinth::Location> player_locations{};
+    std::string leftover_outpath_string{};
+};
+
+namespace reader {
 namespace { // anonymous namespace for file-internal linkage
 
 size_t extractDepth(const std::string& instance_name) {
@@ -27,15 +38,6 @@ labyrinth::Location readLocation(std::istream& stream) {
     stream >> row >> column >> std::ws;
     return labyrinth::Location{row, column};
 }
-
-struct BenchmarkInstance {
-    std::string name{};
-    size_t depth;
-    std::vector<std::string> maze_text{};
-    labyrinth::Location objective{0, 0};
-    std::vector<labyrinth::Location> player_locations{};
-    std::string leftover_outpath_string{};
-};
 
 } // namespace
 
@@ -77,3 +79,6 @@ labyrinth::MazeGraph buildMazeGraph(const BenchmarkInstance& benchmark_instance)
         .withLeftoverOutPaths(benchmark_instance.leftover_outpath_string)
         .buildGraph();
 }
+
+} // namespace reader
+} // namespace bench

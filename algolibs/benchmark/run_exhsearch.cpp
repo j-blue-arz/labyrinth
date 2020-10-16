@@ -20,9 +20,9 @@ static void show_usage(const std::string& name) {
 }
 
 void run(const std::string& filename) {
-    const BenchmarkInstance instance = readInstance(filename);
-    MazeGraph graph = buildMazeGraph(instance);
-    auto objective_id = objectiveIdFromLocation(graph, instance.objective);
+    const bench::BenchmarkInstance instance = bench::reader::readInstance(filename);
+    MazeGraph graph = bench::reader::buildMazeGraph(instance);
+    auto objective_id = bench::reader::objectiveIdFromLocation(graph, instance.objective);
     Location player_location = instance.player_locations[0];
     auto best_actions = exhsearch::findBestActions(graph, player_location, objective_id);
     if (best_actions.size() != instance.depth) {
