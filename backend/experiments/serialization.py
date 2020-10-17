@@ -1,6 +1,8 @@
 import json
 import os
 
+import click
+
 from labyrinth.model.game import BoardLocation
 import tests.unit.factories as setup
 
@@ -83,8 +85,27 @@ def maze_to_string_array(maze):
     return result
 
 
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.argument("infile")
+@click.argument("outfolder")
+@click.option("--name", "new_instance_name", default="", help="Changes name of the instance")
+def json_to_txt(infile, outfolder, new_instance_name):
+    board, instance_name = deserialize_instance_json(infile)
+    if new_instance_name:
+        instance_name = new_instance_name
+    serialize_instance_text(board, outfolder, instance_name)
+
+
 def _objective_as_location_or_leftover(board):
     """ Determines an identifier for the objective: either its location,
     or the location (-1, -1) to denote the leftover."""
     objective_location = board.maze.maze_card_location(board.objective_maze_card)
     return objective_location or BoardLocation(-1, -1)
+
+
+if __name__ == "__main__":
+    cli()
