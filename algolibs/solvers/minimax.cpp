@@ -125,9 +125,24 @@ private:
             }
         }
 
+        constexpr OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) const {
+            return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) |
+                                         static_cast<OutPathsIntegerType>(out_paths2));
+        }
+
+        RotationDegreeType determineMaxRotation(const Node& node) const {
+            auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
+            auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
+            if (node.out_paths == north_south || node.out_paths == east_west) {
+                return 180;
+            } else {
+                return 360;
+            }
+        }
+
         void nextShift() {
             current_rotation_ += 90;
-            if (current_rotation_ == 360) {
+            if (current_rotation_ == determineMaxRotation(node_.getGraph().getLeftover())) {
                 current_rotation_ = 0;
                 ++current_shift_location_;
                 if (current_shift_location_ != node_.getGraph().getShiftLocations().end()) {
