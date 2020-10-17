@@ -17,18 +17,12 @@ else()
     add_compile_options(-Wall -Wextra)
 endif()
 
-# Add valgrind build type
-SET(CMAKE_CXX_FLAGS_VALGRIND
-    "-g -O3"
-    CACHE STRING "Flags used by the C++ compiler during valgrind builds."
-    FORCE )
-SET(CMAKE_C_FLAGS_VALGRIND
-    "-g -O3"
-    CACHE STRING "Flags used by the C compiler during valgrind builds."
-    FORCE )
-MARK_AS_ADVANCED(
-    CMAKE_CXX_FLAGS_VALGRIND
-    CMAKE_C_FLAGS_VALGRIND )
+# always debug info
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+endif()
 
 if(NOT COMPILE_TO_WASM)
     include(FetchContent)
