@@ -28,9 +28,6 @@ namespace minimax {
 
 namespace { // anonymous namespace for file-internal linkage
 
-class GameTreeNode;
-using NodePtr = std::shared_ptr<GameTreeNode>;
-
 /**
  * Represents a node in the game tree for two players.
  *
@@ -240,7 +237,7 @@ public:
                              const Location& previous_shift_location = Location{-1, -1}) {
         const auto previous_action = PlayerAction{
             ShiftAction{previous_shift_location, graph.getNode(previous_shift_location).rotation}, opponent_location};
-        auto root = std::make_shared<GameTreeNode>(graph, previous_action, player_location);
+        GameTreeNode root{graph, previous_action, player_location};
         const auto& evaluation = negamax(root);
         return MinimaxResult{best_action_, evaluation};
     }
@@ -249,18 +246,18 @@ public:
      * This implementation of negamax does not use an alternating player index.
      * Therefore, the Evaluator always has to evaluate from the viewpoint of player 0.
      */
-    Evaluation negamax(NodePtr node, size_t depth = 0) {
-        auto evaluation = evaluator_.evaluate(*node);
+    Evaluation negamax(const GameTreeNode& node, size_t depth = 0) {
+        auto evaluation = evaluator_.evaluate(node);
         if (depth == max_depth_ or evaluation.is_terminal) {
             return evaluation;
         }
         auto best_value = -infinity;
-        for (auto action : node->possibleActions()) {
-            MazeGraph graph{node->getGraph()};
+        for (auto action : node.possibleActions()) {
+            MazeGraph graph{node.getGraph()};
             graph.shift(action.shift.location, action.shift.rotation);
             auto new_opponent_location =
-                translateLocationByShift(node->getOpponentLocation(), action.shift.location, graph.getExtent());
-            auto child_node = std::make_shared<GameTreeNode>(graph, action, new_opponent_location);
+                translateLocationByShift(node.getOpponentLocation(), action.shift.location, graph.getExtent());
+            GameTreeNode child_node{graph, action, new_opponent_location};
             auto negamax_value = -negamax(child_node, depth + 1);
             if (negamax_value > best_value) {
                 best_value = negamax_value;
