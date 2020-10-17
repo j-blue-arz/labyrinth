@@ -36,7 +36,7 @@ def cli():
 
 @cli.command()
 @click.argument('benchmark_files', nargs=-1)
-@click.argument('outfile', nargs=1)
+@click.option("--outfile", required=True)
 @click.option("--algo_name", "-n", "names", multiple=True, required=True,
               type=str, help="Algorithm names of the provided benchmark_files, in the same order. \
                   Should be provided as often as there are benchmark files.")
