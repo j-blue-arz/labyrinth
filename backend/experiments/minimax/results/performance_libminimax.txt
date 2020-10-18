@@ -1,0 +1,18 @@
+October 17th, 2020
+GameTreeNode on stack (local variable) instead of dynamically created on heap -> Speedup between 1.03 and 1.09
+Only try 2 rotations for straights -> Speedup between 1.6 and 2.3
+Location header-only (better inlining) -> slowed down by 5%
+
+October 18th, 2020
+shift: remove precomputation of changed locations, assign the nodes directly in one loop -> speedup between 1.04 and 1.09
+optimize action iterator: (less shifts in negamax, less graph copying) let iterator return a const ref to the shifted graph.
+   to this end, remove the stl compliance of the iterator, it is too much weight and not such a great value -> speedup between 1.5 and 1.7
+
+Current status: minimax with 0-1 evaluation achieves 55 instances for maze size 7, and 6 instances for maze size 13 in the 3s limit.
+The optimizations above combined resulted in a speedup between 3 and 5.
+   
+Ideas (try in this order)
+- remove copying(of graphs), use one graph, shift and undo shifts
+- optimize node neighbors: remove stl compliance of iterator.
+- perform bfs without shift and store result with bounding box. iterate over this result if the shift does not touch the bounding box.
+- rotation-aware bfs

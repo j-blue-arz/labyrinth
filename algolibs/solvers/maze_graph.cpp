@@ -62,8 +62,8 @@ MazeGraph::MazeGraph(ExtentType extent) : size_{static_cast<SizeType>(extent * e
     leftover_.node_id = current;
 }
 
-MazeGraph::MazeGraph(const std::vector<Node>& nodes)
-    : size_{nodes.size() - 1}, extent_{static_cast<ExtentType>(integerSquareRoot(nodes.size()))} {
+MazeGraph::MazeGraph(const std::vector<Node>& nodes) :
+    size_{nodes.size() - 1}, extent_{static_cast<ExtentType>(integerSquareRoot(nodes.size()))} {
     auto current_input = nodes.begin();
     node_matrix_.resize(size_);
     for (auto row = 0; row < extent_; row++) {
@@ -114,21 +114,17 @@ MazeGraph::ExtentType MazeGraph::getExtent() const noexcept {
     return extent_;
 }
 
-void MazeGraph::shift(const Location& location, RotationDegreeType leftoverRotation) {
+void MazeGraph::shift(const Location& location, RotationDegreeType leftover_rotation) {
     const OffsetType offset = getOffsetByShiftLocation(location, extent_);
-    std::vector<Location> line{};
-    line.reserve(extent_);
-    Location current = location;
-    for (auto i = 0; i < extent_; ++i) {
-        line.push_back(current);
-        current = current + offset;
+    auto to_location = opposingShiftLocation(location, extent_);
+    const Node updated_leftover = getNode(to_location);
+    for (auto i = 0; i < extent_ - 1; ++i) {
+        auto from_location = to_location - offset;
+        getNode(to_location) = getNode(from_location);
+        to_location = from_location;
     }
-    const Node updated_leftover = getNode(line.back());
-    for (auto to = line.rbegin(), from = std::next(to); from != line.rend(); ++to, ++from) {
-        getNode(*to) = getNode(*from);
-    }
-    leftover_.rotation = leftoverRotation;
-    getNode(line.front()) = leftover_;
+    leftover_.rotation = leftover_rotation;
+    getNode(to_location) = leftover_;
     leftover_ = updated_leftover;
 }
 
@@ -186,8 +182,8 @@ bool MazeGraph::NeighborIterator::isNeighbor(OutPaths out_path) {
     return graph_.isInside(potential_location) && hasOutPath(graph_.getNode(potential_location), mirrorOutPath(out_path));
 }
 
-MazeGraph::Neighbors::Neighbors(const MazeGraph& graph, const Location& location, const Node& node) noexcept
-    : graph_{graph}, location_{location}, node_{node} {}
+MazeGraph::Neighbors::Neighbors(const MazeGraph& graph, const Location& location, const Node& node) noexcept :
+    graph_{graph}, location_{location}, node_{node} {}
 
 MazeGraph::NeighborIterator MazeGraph::Neighbors::begin() const {
     return MazeGraph::NeighborIterator::begin(graph_, location_, node_);
@@ -221,20 +217,20 @@ Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType e
     return location;
 }
 
-Location translateLocationByShift(const Location& location, const Location& shift_location, MazeGraph::ExtentType extent) noexcept {
+Location translateLocationByShift(const Location& location,
+                                  const Location& shift_location,
+                                  MazeGraph::ExtentType extent) noexcept {
     const Location::OffsetType offset = getOffsetByShiftLocation(shift_location, extent);
     if (0 != offset.row_offset) { // shift in direction N or S
         if (location.getColumn() == shift_location.getColumn()) {
-            const Location::IndexType row =
-                (location.getRow() + offset.row_offset + extent) % extent;
+            const Location::IndexType row = (location.getRow() + offset.row_offset + extent) % extent;
             const Location::IndexType column = location.getColumn();
             return Location{row, column};
         }
     } else { // shift in direction E or W
         if (location.getRow() == shift_location.getRow()) {
             const Location::IndexType row = location.getRow();
-            const Location::IndexType column =
-                (location.getColumn() + offset.column_offset + extent) % extent;
+            const Location::IndexType column = (location.getColumn() + offset.column_offset + extent) % extent;
             return Location{row, column};
         }
     }

@@ -54,7 +54,7 @@ public:
 
     const Node& getLeftover() const { return leftover_; }
 
-    void shift(const Location& location, RotationDegreeType leftoverRotation);
+    void shift(const Location& location, RotationDegreeType leftover_rotation);
 
     const std::vector<Location>& getShiftLocations() const noexcept { return shift_locations_; };
 
@@ -96,8 +96,8 @@ private:
         NeighborIterator operator++(int);
 
     private:
-        NeighborIterator(OutPaths current_out_path, const MazeGraph& graph, const Location& location, const Node& node)
-            : current_out_path_{current_out_path}, graph_{graph}, location_{location}, node_{node} {
+        NeighborIterator(OutPaths current_out_path, const MazeGraph& graph, const Location& location, const Node& node) :
+            current_out_path_{current_out_path}, graph_{graph}, location_{location}, node_{node} {
             moveToNextNeighbor();
         };
 
@@ -142,7 +142,9 @@ Location::OffsetType getOffsetByShiftLocation(const Location& shift_location, Ma
 
 Location opposingShiftLocation(const Location& location, MazeGraph::ExtentType extent) noexcept;
 
-Location translateLocationByShift(const Location& location, const Location& shift_location, MazeGraph::ExtentType extent) noexcept;
+Location translateLocationByShift(const Location& location,
+                                  const Location& shift_location,
+                                  MazeGraph::ExtentType extent) noexcept;
 
 } // namespace labyrinth
 

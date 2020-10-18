@@ -9,8 +9,8 @@ public:
     using IndexType = int16_t;
     struct OffsetType {
         using OffsetValueType = int16_t;
-        explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept
-            : row_offset{row}, column_offset{column} {}
+        explicit OffsetType(OffsetValueType row, OffsetValueType column) noexcept :
+            row_offset{row}, column_offset{column} {}
         OffsetValueType row_offset{0};
         OffsetValueType column_offset{0};
 
@@ -24,11 +24,13 @@ public:
     constexpr Location() noexcept : row_{-1}, column_{-1} {}
 
     template <typename T, typename U>
-    constexpr explicit Location(T row, U column) noexcept
-        : row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
+    constexpr explicit Location(T row, U column) noexcept :
+        row_{static_cast<IndexType>(row)}, column_{static_cast<IndexType>(column)} {}
 
     const Location operator+(const OffsetType& offset) const noexcept;
+    const Location operator-(const OffsetType& offset) const noexcept;
     const Location& operator+=(const OffsetType& offset) noexcept;
+    const Location& operator-=(const OffsetType& offset) noexcept;
 
     IndexType getRow() const { // embind does not work with noexcept specifier
         return row_;

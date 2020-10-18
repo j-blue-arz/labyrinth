@@ -41,7 +41,7 @@ namespace { // anonymous namespace for file-internal linkage
  */
 class GameTreeNode {
 private:
-    class PlayerActionRange;
+    class PlayerActionIterator;
 
 public:
     explicit GameTreeNode(const MazeGraph& graph,
@@ -51,11 +51,8 @@ public:
         player_locations_{player_location, previous_player_action.move_location},
         previous_shift_location_{previous_player_action.shift.location} {}
 
-    /// Returns a range over possible PlayerActions.
-    /// The returned object has two member functions begin() and end(), so
-    /// that it can be used in range-based for loop, e.g.
-    /// for (auto player_action : node.possible_actions()) { ... }
-    PlayerActionRange possibleActions() const { return PlayerActionRange(*this); }
+    /// Returns an iterator over possible PlayerActions.
+    PlayerActionIterator possibleActions() const { return PlayerActionIterator(*this); }
 
     const MazeGraph& getGraph() const noexcept { return graph_; }
 
@@ -68,34 +65,27 @@ public:
 private:
     class PlayerActionIterator {
     public:
-        using iterator_category = std::input_iterator_tag;
-        using value_type = PlayerAction;
-        using difference_type = std::ptrdiff_t;
-        using reference = PlayerAction;
-        using pointer = void;
-
-        static PlayerActionIterator begin(const GameTreeNode& node) { return PlayerActionIterator{node}; }
-        static PlayerActionIterator end(const GameTreeNode& node) { return PlayerActionIterator{node, true}; }
-
-        bool operator==(const PlayerActionIterator& other) const noexcept {
-            if (other.is_at_end_) {
-                return is_at_end_;
-            } else if (is_at_end_) {
-                return false;
-            } else {
-                return current_rotation_ == other.current_rotation_ &&
-                       current_shift_location_ == other.current_shift_location_ &&
-                       current_move_location_ == other.current_move_location_;
+        explicit PlayerActionIterator(const GameTreeNode& node) :
+            current_rotation_{0},
+            current_shift_location_{node.getGraph().getShiftLocations().begin()},
+            is_at_end_{false},
+            node_{node},
+            shifted_graph_{node_.getGraph()} {
+            if (!is_at_end_) {
+                invalid_shift_location_ =
+                    opposingShiftLocation(node_.getPreviousShiftLocation(), shifted_graph_.getExtent());
+                skipInvalidShiftLocation();
+                initPossibleMoves();
             }
         }
 
-        bool operator!=(const PlayerActionIterator& other) const noexcept { return !(*this == other); }
-
-        reference operator*() const {
+        PlayerAction getPlayerAction() const {
             return PlayerAction{ShiftAction{*current_shift_location_, current_rotation_}, *current_move_location_};
         }
 
-        pointer operator->() = delete;
+        const MazeGraph& getGraph() const { return shifted_graph_; }
+
+        bool isAtEnd() const { return is_at_end_; }
 
         PlayerActionIterator& operator++() {
             ++current_move_location_;
@@ -112,19 +102,6 @@ private:
         }
 
     private:
-        explicit PlayerActionIterator(const GameTreeNode& node, bool is_at_end = false) :
-            current_rotation_{0},
-            current_shift_location_{node.getGraph().getShiftLocations().begin()},
-            is_at_end_(is_at_end),
-            node_{node} {
-            if (!is_at_end_) {
-                invalid_shift_location_ =
-                    opposingShiftLocation(node_.getPreviousShiftLocation(), node_.getGraph().getExtent());
-                skipInvalidShiftLocation();
-                initPossibleMoves();
-            }
-        }
-
         constexpr OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) const {
             return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) |
                                          static_cast<OutPathsIntegerType>(out_paths2));
@@ -163,11 +140,11 @@ private:
 
         void initPossibleMoves() {
             if (!is_at_end_) {
-                MazeGraph shifted_graph{node_.getGraph()};
-                shifted_graph.shift(*current_shift_location_, current_rotation_);
+                shifted_graph_ = MazeGraph{node_.getGraph()};
+                shifted_graph_.shift(*current_shift_location_, current_rotation_);
                 auto translated_player_location = translateLocationByShift(
-                    node_.getPlayerLocation(), *current_shift_location_, shifted_graph.getExtent());
-                possible_move_locations_ = reachable::reachableLocations(shifted_graph, translated_player_location);
+                    node_.getPlayerLocation(), *current_shift_location_, shifted_graph_.getExtent());
+                possible_move_locations_ = reachable::reachableLocations(shifted_graph_, translated_player_location);
             } else {
                 possible_move_locations_.resize(0);
             }
@@ -181,16 +158,7 @@ private:
         Location invalid_shift_location_;
         bool is_at_end_;
         const GameTreeNode& node_;
-    };
-
-    class PlayerActionRange {
-    public:
-        explicit PlayerActionRange(const GameTreeNode& node) : node_{node} {}
-        PlayerActionIterator begin() const { return PlayerActionIterator::begin(node_); }
-        PlayerActionIterator end() const { return PlayerActionIterator::end(node_); }
-
-    private:
-        const GameTreeNode& node_;
+        MazeGraph shifted_graph_;
     };
 
     MazeGraph graph_;
@@ -267,9 +235,9 @@ public:
             return evaluation;
         }
         auto best_value = -infinity;
-        for (auto action : node.possibleActions()) {
-            MazeGraph graph{node.getGraph()};
-            graph.shift(action.shift.location, action.shift.rotation);
+        for (auto action_iterator = node.possibleActions(); !action_iterator.isAtEnd(); ++action_iterator) {
+            auto action = action_iterator.getPlayerAction();
+            const auto& graph = action_iterator.getGraph();
             auto new_opponent_location =
                 translateLocationByShift(node.getOpponentLocation(), action.shift.location, graph.getExtent());
             GameTreeNode child_node{graph, action, new_opponent_location};
