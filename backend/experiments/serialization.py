@@ -89,6 +89,7 @@ def maze_to_string_array(maze):
 def cli():
     pass
 
+
 @cli.command()
 @click.argument("infile")
 @click.argument("outfolder")
