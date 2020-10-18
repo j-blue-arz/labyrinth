@@ -45,3 +45,6 @@ They have about equal running times, but different speedup factors for this impr
 The examination showed that the improvement did not add any other overheads.
 It is rather difference in the number of shifts vs. the number of breadth-first searches which leads to the different speedups. 
 The next focus of improvement has to be the neighbor search.
+
+October 18th, 2020
+Improvement of shift operation (see conclusion for libminimax): Speedups up to 1.1 for instances with higher depths, minimal slow down for depths 1 and 2.
