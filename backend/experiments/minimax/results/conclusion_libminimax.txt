@@ -12,7 +12,14 @@ Current status: minimax with 0-1 evaluation achieves 55 instances for maze size 
 The optimizations above combined resulted in a speedup between 3 and 5.
    
 Ideas (try in this order)
+- bfs return vector reserve n
 - remove copying(of graphs), use one graph, shift and undo shifts
 - optimize node neighbors: remove stl compliance of iterator.
+- store rotation as enum instead of int. 
 - perform bfs without shift and store result with bounding box. iterate over this result if the shift does not touch the bounding box.
 - rotation-aware bfs
+- bfs without shift, then handle case where shift touches/cuts the reached locations. Datastructure which facilitates the required operations
+- Compile-time ideas:
+	* Neighbor computation
+	* Rotating maze card
+

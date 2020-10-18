@@ -48,3 +48,10 @@ The next focus of improvement has to be the neighbor search.
 
 October 18th, 2020
 Improvement of shift operation (see conclusion for libminimax): Speedups up to 1.1 for instances with higher depths, minimal slow down for depths 1 and 2.
+
+
+Ideas (no order)
+- Compile-time ideas:
+	* Neighbor computation
+	* Rotating maze card
+- Different graph representation?
