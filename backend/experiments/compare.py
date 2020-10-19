@@ -117,7 +117,10 @@ def _plot(benchmark_file, outimage, names, depths=None, normalize=False):
 @cli.command()
 @click.argument("benchmarks_folder")
 @click.argument("output_folder")
-def compare(benchmarks_folder, output_folder):
+@click.option("--normalize", type=click.Choice(["none", "all"], case_sensitive=False), required=False, default="all",
+              help="Denotes which of the plots should be normalized to a common scale.\
+                If 'none', all plots have a scale of their own.")
+def compare(benchmarks_folder, output_folder, normalize):
     """ COMBINE and PLOT.
 
     Reads all .csv files in BENCHMARKS_FOLDER,
@@ -131,7 +134,7 @@ def compare(benchmarks_folder, output_folder):
     outfile = os.path.join(output_folder, "benchmark_results.csv")
     _combine(bench_files, outfile, names)
     outimage = os.path.join(output_folder, "speedup_" + names[0] + ".png")
-    _plot(outfile, outimage, (names[:2]), normalize=True)
+    _plot(outfile, outimage, (names[:2]), normalize=normalize)
 
 
 def _sort_by_modification_time(files):

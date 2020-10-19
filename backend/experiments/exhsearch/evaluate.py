@@ -27,8 +27,8 @@ def plot(benchmark_file, outimage, nrows, ncols, algo_name):
     """ Reads a benchmark result and creates a boxplot, grouped by maze size and search depth. """
     df = pd.read_csv(benchmark_file)
     df[algo_name] = np.log10(df[algo_name])
-    time_range = np.arange(math.floor(df[algo_name].min()),
-                           math.ceil(df[algo_name].max()) + 1)
+    min_time, max_time = math.floor(df[algo_name].min()), math.ceil(df[algo_name].max())
+    time_range = np.arange(min_time, max_time + 1)
     depths = np.arange(df["depth"].min(), df["depth"].max() + 1)
     sizes = np.sort(df["size"].unique())
     _ = plt.figure(figsize=(ncols*4.8, nrows*6.4))
@@ -48,6 +48,7 @@ def plot(benchmark_file, outimage, nrows, ncols, algo_name):
         ax.set_xticklabels(depths)
         ax.set_yticks(time_range)
         ax.set_yticklabels(10.0**time_range)
+        ax.set_ylim([min_time, max_time])
         if plot_num % ncols == 0:
             ax.yaxis.set_label_position("right")
             ax.yaxis.tick_right()

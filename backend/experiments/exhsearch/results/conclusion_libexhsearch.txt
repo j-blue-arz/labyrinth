@@ -49,6 +49,10 @@ The next focus of improvement has to be the neighbor search.
 October 18th, 2020
 Improvement of shift operation (see conclusion for libminimax): Speedups up to 1.1 for instances with higher depths, minimal slow down for depths 1 and 2.
 
+October 19th, 2020
+bfs return vector reserve n, optimize node neighbors: remove stl compliance of iterator, store rotation as enum instead of int. 
+-> large speedup (~40, up to 350) for depth 1, decreasing speedup for larger depths, but still 1.2-1.5 for depth 4 (size 13). see 'nbhit_rotenum'
+
 
 Ideas (no order)
 - Compile-time ideas:
