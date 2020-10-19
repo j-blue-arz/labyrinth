@@ -18,9 +18,9 @@ bool isReachable(const MazeGraph& graph, const Location& source, const Location&
         }
         q.pop();
         visited[graph.getNode(location).node_id] = true;
-        for (const auto& neighbor_location : graph.neighbors(location)) {
-            if (!visited[graph.getNode(neighbor_location).node_id]) {
-                q.push(neighbor_location);
+        for (auto neighbor_it = graph.neighbors(location); !neighbor_it.isAtEnd(); ++neighbor_it) {
+            if (!visited[graph.getNode(*neighbor_it).node_id]) {
+                q.push(*neighbor_it);
             }
         }
     }
@@ -39,9 +39,9 @@ std::vector<Location> reachableLocations(const MazeGraph& graph, const Location&
         result.push_back(location);
         q.pop();
         visited[graph.getNode(location).node_id] = true;
-        for (const auto& neighbor_location : graph.neighbors(location)) {
-            if (!visited[graph.getNode(neighbor_location).node_id]) {
-                q.push(neighbor_location);
+        for (auto neighbor_it = graph.neighbors(location); !neighbor_it.isAtEnd(); ++neighbor_it) {
+            if (!visited[graph.getNode(*neighbor_it).node_id]) {
+                q.push(*neighbor_it);
             }
         }
     }
@@ -63,11 +63,11 @@ std::vector<ReachableNode> multiSourceReachableLocations(const MazeGraph& graph,
         auto location = q.front();
         auto parent_index = parent_indices[graph.getNode(location).node_id];
         q.pop();
-        for (const auto& neighbor_location : graph.neighbors(location)) {
-            if (no_parent == parent_indices[graph.getNode(neighbor_location).node_id]) {
-                parent_indices[graph.getNode(neighbor_location).node_id] = parent_index;
-                q.push(neighbor_location);
-                result.emplace_back(parent_index, neighbor_location);
+        for (auto neighbor_it = graph.neighbors(location); !neighbor_it.isAtEnd(); ++neighbor_it) {
+            if (no_parent == parent_indices[graph.getNode(*neighbor_it).node_id]) {
+                parent_indices[graph.getNode(*neighbor_it).node_id] = parent_index;
+                q.push(*neighbor_it);
+                result.emplace_back(parent_index, *neighbor_it);
             }
         }
     }

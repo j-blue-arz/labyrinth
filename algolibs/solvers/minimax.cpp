@@ -98,7 +98,7 @@ private:
         }
 
     private:
-        constexpr OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) const {
+        OutPaths combineOutPaths(OutPaths out_paths1, OutPaths out_paths2) const {
             return static_cast<OutPaths>(static_cast<OutPathsIntegerType>(out_paths1) |
                                          static_cast<OutPathsIntegerType>(out_paths2));
         }
@@ -107,9 +107,9 @@ private:
             auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
             auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
             if (out_paths == north_south || out_paths == east_west) {
-                return 180;
+                return RotationDegreeType::_90;
             } else {
-                return 360;
+                return RotationDegreeType::_270;
             }
         }
 
@@ -117,12 +117,12 @@ private:
             // expects the graph to be (still) shifted.
             // At the end, the graph is either (again) shifted, or it is unshifted and is_at_end is true
             auto max_rotation = determineMaxRotation(graph_.getNode(*current_shift_location_).out_paths);
-            current_rotation_ += 90;
             if (current_rotation_ < max_rotation) {
+                current_rotation_ = nextRotation(current_rotation_);
                 graph_.getNode(*current_shift_location_).rotation = current_rotation_;
             } else {
                 undoShift();
-                current_rotation_ = 0;
+                current_rotation_ = RotationDegreeType::_0;
                 ++current_shift_location_;
                 if (current_shift_location_ != graph_.getShiftLocations().end()) {
                     skipInvalidShiftLocation();

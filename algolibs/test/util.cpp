@@ -3,6 +3,19 @@
 using namespace labyrinth;
 using namespace labyrinth::testutils;
 
+namespace {
+std::vector<Location> getNeighbors(const MazeGraph& graph, const Location& location) {
+    std::vector<Location> result;
+    result.reserve(4);
+    auto iter = graph.neighbors(location);
+    while (!iter.isAtEnd()) {
+        result.push_back(*iter);
+        ++iter;
+    }
+    return result;
+}
+} // namespace
+
 std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location> locations) {
     std::stringstream stream;
     for (const auto& location : locations) {
@@ -14,7 +27,7 @@ std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location
 ::testing::AssertionResult labyrinth::testutils::hasNeighbors(const labyrinth::MazeGraph& graph,
                                                               const labyrinth::Location& source,
                                                               std::set<labyrinth::Location> expected) {
-    auto neighbors = graph.neighbors(source);
+    auto neighbors = getNeighbors(graph, source);
     std::set<labyrinth::Location> actual{neighbors.begin(), neighbors.end()};
     if (actual == expected) {
         return ::testing::AssertionSuccess();
@@ -23,10 +36,10 @@ std::string labyrinth::testutils::locationsToString(std::set<labyrinth::Location
                                          << ", actual: " << locationsToString(actual);
 }
 
-::testing::AssertionResult labyrinth::testutils::assertNumNeighbors(const labyrinth::MazeGraph& g,
+::testing::AssertionResult labyrinth::testutils::assertNumNeighbors(const labyrinth::MazeGraph& graph,
                                                                     const labyrinth::Location& source,
                                                                     size_t expected) {
-    const auto neighbors = g.neighbors(source);
+    const auto neighbors = getNeighbors(graph, source);
     size_t actual = std::distance(std::cbegin(neighbors), std::cend(neighbors));
     if (actual == expected) {
         return ::testing::AssertionSuccess();

@@ -66,7 +66,7 @@ TEST_F(GraphAlgorithmsTest, isReachable_withUnconnectedNeighbors_returnsFalse) {
 }
 
 TEST_F(GraphAlgorithmsTest, isReachable_withPathToInsertedNode_returnsTrue) {
-    graph_.shift(Location{1, 0}, 0);
+    graph_.shift(Location{1, 0}, RotationDegreeType::_0);
     EXPECT_TRUE(reachable::isReachable(graph_, Location{0, 0}, Location{1, 0}));
 }
 

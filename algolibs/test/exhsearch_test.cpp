@@ -34,16 +34,12 @@ protected:
 ::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::PlayerAction>& actions,
                                                          const labyrinth::MazeGraph& original_graph,
                                                          const Location& player_start_location) {
-    std::set<labyrinth::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
     labyrinth::MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
     auto player_location = player_start_location;
     for (const auto& action : actions) {
         if (std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
             return ::testing::AssertionFailure() << "Invalid shift location: " << action.shift.location;
-        }
-        if (valid_shift_rotations.find(action.shift.rotation) == valid_shift_rotations.end()) {
-            return ::testing::AssertionFailure() << "Invalid shift rotation: " << action.shift.rotation;
         }
         graph.shift(action.shift.location, action.shift.rotation);
         player_location = translateLocationByShift(player_location, action.shift.location, graph.getExtent());

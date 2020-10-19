@@ -8,11 +8,11 @@
 
 namespace labyrinth {
 
-Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, RotationDegreeType rotation) {
+Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, short rotation) {
     Node* node = new Node();
     node->node_id = node_id;
     node->out_paths = static_cast<OutPaths>(out_paths_bitmask);
-    node->rotation = rotation;
+    node->rotation = static_cast<RotationDegreeType>((rotation / 90 + 4) % 4);
     return node;
 }
 

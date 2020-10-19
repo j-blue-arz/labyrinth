@@ -106,9 +106,8 @@ TEST_F(MazeGraphTest, neighbors_forBorderNodeWithThreeNeighbors) {
 }
 
 TEST_F(MazeGraphTest, neighbors_forBorderNodeWithThreeNeighbors_isIterable) {
-    auto neighbors = graph_.neighbors(Location{1, 0});
     std::set<Location> neighbor_set;
-    for (auto iter = neighbors.begin(); iter != neighbors.end(); ++iter) {
+    for (auto iter = graph_.neighbors(Location{1, 0}); !iter.isAtEnd(); ++iter) {
         Location location = *iter;
         neighbor_set.insert(location);
     }
@@ -143,7 +142,7 @@ TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectNodeIds) {
                                graph_.getNode(Location{1, 1}).node_id,
                                graph_.getNode(Location{2, 1}).node_id};
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
     EXPECT_EQ(old_column_ids[0], graph_.getNode(Location{1, 1}).node_id);
     EXPECT_EQ(old_column_ids[1], graph_.getNode(Location{2, 1}).node_id);
@@ -151,7 +150,7 @@ TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectNodeIds) {
 
 TEST_F(MazeGraphTest, shift_alongColumn_resultsInCorrectPaths) {
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 1}, {Location{1, 0}, Location{1, 2}}));
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{2, 2}}));
@@ -161,7 +160,7 @@ TEST_F(MazeGraphTest, shift_alongColumn_insertsLeftover) {
     graph_.setLeftoverOutPaths(getBitmask("ES"));
     auto old_leftover_id = graph_.getLeftover().node_id;
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
     EXPECT_EQ(old_leftover_id, graph_.getNode(Location{0, 1}).node_id);
     EXPECT_TRUE(hasNeighbors(graph_, Location{0, 1}, {Location{1, 1}, Location{0, 2}}));
@@ -170,7 +169,7 @@ TEST_F(MazeGraphTest, shift_alongColumn_insertsLeftover) {
 TEST_F(MazeGraphTest, shift_alongColumn_updatesLeftover) {
     auto pushed_out_id = graph_.getNode(Location{2, 1}).node_id;
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
     EXPECT_EQ(pushed_out_id, graph_.getLeftover().node_id);
 }
@@ -180,7 +179,7 @@ TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectNodeIds) {
                             graph_.getNode(Location{1, 1}).node_id,
                             graph_.getNode(Location{1, 2}).node_id};
 
-    graph_.shift(Location{1, 2}, 0);
+    graph_.shift(Location{1, 2}, RotationDegreeType::_0);
 
     EXPECT_EQ(old_row_ids[1], graph_.getNode(Location{1, 0}).node_id);
     EXPECT_EQ(old_row_ids[2], graph_.getNode(Location{1, 1}).node_id);
@@ -188,7 +187,7 @@ TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectNodeIds) {
 
 TEST_F(MazeGraphTest, shift_alongRow_resultsInCorrectPaths) {
 
-    graph_.shift(Location{1, 2}, 0);
+    graph_.shift(Location{1, 2}, RotationDegreeType::_0);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 1}, {Location{1, 0}}));
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 0}, {Location{1, 1}}));
@@ -198,7 +197,7 @@ TEST_F(MazeGraphTest, shift_alongRow_insertsLeftover) {
     graph_.setLeftoverOutPaths(getBitmask("NEW"));
     auto old_leftover_id = graph_.getLeftover().node_id;
 
-    graph_.shift(Location{1, 2}, 0);
+    graph_.shift(Location{1, 2}, RotationDegreeType::_0);
 
     EXPECT_EQ(old_leftover_id, graph_.getNode(Location{1, 2}).node_id);
     EXPECT_TRUE(hasNeighbors(graph_, Location{1, 2}, {Location{1, 1}}));
@@ -209,8 +208,8 @@ TEST_F(MazeGraphTest, shift_atOppositeLocationOfPreviouslyPushedInNode_insertsCo
     graph_.addShiftLocation(Location{1, 2});
     auto pushed_out_id = graph_.getNode(Location{1, 0}).node_id;
 
-    graph_.shift(Location{1, 2}, 0);
-    graph_.shift(Location{2, 1}, 0);
+    graph_.shift(Location{1, 2}, RotationDegreeType::_0);
+    graph_.shift(Location{2, 1}, RotationDegreeType::_0);
 
     EXPECT_EQ(pushed_out_id, graph_.getNode(Location{2, 1}).node_id);
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{1, 1}, Location{2, 2}}));
@@ -219,7 +218,7 @@ TEST_F(MazeGraphTest, shift_atOppositeLocationOfPreviouslyPushedInNode_insertsCo
 TEST_F(MazeGraphTest, shift_tJunctWithRotation_resultsInCorrectNeighbors) {
     graph_.setLeftoverOutPaths(getBitmask("NES"));
 
-    graph_.shift(Location{2, 1}, 90);
+    graph_.shift(Location{2, 1}, RotationDegreeType::_90);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{2, 2}}));
 }
@@ -227,17 +226,17 @@ TEST_F(MazeGraphTest, shift_tJunctWithRotation_resultsInCorrectNeighbors) {
 TEST_F(MazeGraphTest, shift_cornerWithRotation_resultsInCorrectNeighbors) {
     graph_.setLeftoverOutPaths(getBitmask("NE"));
 
-    graph_.shift(Location{2, 1}, 270);
+    graph_.shift(Location{2, 1}, RotationDegreeType::_270);
 
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{1, 1}}));
 }
 
 TEST_F(MazeGraphTest, givenPushedOutNodeWasRotated_whenShift_newLeftoverKeepsRotation) {
-    graph_.getNode(Location{2, 1}).rotation = 180;
+    graph_.getNode(Location{2, 1}).rotation = RotationDegreeType::_180;
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
-    EXPECT_EQ(graph_.getLeftover().rotation, 180);
+    EXPECT_EQ(graph_.getLeftover().rotation, RotationDegreeType::_180);
 }
 
 TEST_F(MazeGraphTest, getLocation_WithInnerNode_ReturnsCorrectLocation) {
@@ -251,7 +250,7 @@ TEST_F(MazeGraphTest, getLocation_WithInnerNode_ReturnsCorrectLocation) {
 TEST_F(MazeGraphTest, getLocation_WithInnerNodeAfterShift_ReturnsCorrectLocation) {
     auto node_id = graph_.getNode(Location{1, 1}).node_id;
 
-    graph_.shift(Location{0, 1}, 0);
+    graph_.shift(Location{0, 1}, RotationDegreeType::_0);
 
     Location location = graph_.getLocation(node_id, Location{1, 1});
     EXPECT_EQ(location, (Location{2, 1}));
@@ -265,7 +264,7 @@ TEST_F(MazeGraphTest, getLocation_WithLeftoverNodeId_ReturnsGivenLocation) {
 TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInsertedLocation) {
     auto old_leftover_id = graph_.getLeftover().node_id;
 
-    graph_.shift(Location{1, 2}, 0);
+    graph_.shift(Location{1, 2}, RotationDegreeType::_0);
 
     Location location = graph_.getLocation(old_leftover_id, Location{1, 1});
     EXPECT_EQ(location, (Location{1, 2}));
@@ -273,19 +272,19 @@ TEST_F(MazeGraphTest, LocationOfNode_WithLeftoverNodeIdAfterShift_ReturnsInserte
 
 TEST_F(MazeGraphTest, constructGraph_withLinearizedInputNodes_modificationOfInputNodeDoesNotAlterGraph) {
     std::vector<Node> nodes;
-    nodes.push_back(Node{0, getBitmask("ES"), 0});
-    nodes.push_back(Node{1, getBitmask("NESW"), 0});
-    nodes.push_back(Node{2, getBitmask("NW"), 0});
+    nodes.push_back(Node{0, getBitmask("ES"), RotationDegreeType::_0});
+    nodes.push_back(Node{1, getBitmask("NESW"), RotationDegreeType::_0});
+    nodes.push_back(Node{2, getBitmask("NW"), RotationDegreeType::_0});
 
-    nodes.push_back(Node{3, getBitmask("NES"), 0});
-    nodes.push_back(Node{4, getBitmask("EW"), 0});
-    nodes.push_back(Node{5, getBitmask("EW"), 0});
+    nodes.push_back(Node{3, getBitmask("NES"), RotationDegreeType::_0});
+    nodes.push_back(Node{4, getBitmask("EW"), RotationDegreeType::_0});
+    nodes.push_back(Node{5, getBitmask("EW"), RotationDegreeType::_0});
 
-    nodes.push_back(Node{6, getBitmask("NE"), 0});
-    nodes.push_back(Node{7, getBitmask("NS"), 0});
-    nodes.push_back(Node{8, getBitmask("WS"), 0});
+    nodes.push_back(Node{6, getBitmask("NE"), RotationDegreeType::_0});
+    nodes.push_back(Node{7, getBitmask("NS"), RotationDegreeType::_0});
+    nodes.push_back(Node{8, getBitmask("WS"), RotationDegreeType::_0});
 
-    nodes.push_back(Node{9, getBitmask("NS"), 0});
+    nodes.push_back(Node{9, getBitmask("NS"), RotationDegreeType::_0});
 
     MazeGraph graph{nodes};
 
@@ -319,16 +318,16 @@ MazeGraph createMazeGraphWithInputNodes() {
     const OutPaths straight = getBitmask({OutPaths::North, OutPaths::South});
     const OutPaths t_junct = getBitmask({OutPaths::North, OutPaths::East, OutPaths::South});
     const OutPaths cross = getBitmask({OutPaths::North, OutPaths::East, OutPaths::South, OutPaths::West});
-    input_nodes.push_back(Node{5, corner, 90});
-    input_nodes.push_back(Node{6, cross, 90});
-    input_nodes.push_back(Node{7, corner, 270});
-    input_nodes.push_back(Node{8, t_junct, 0});
-    input_nodes.push_back(Node{9, straight, 90});
-    input_nodes.push_back(Node{0, straight, 270});
-    input_nodes.push_back(Node{1, corner, 0});
-    input_nodes.push_back(Node{2, straight, 0});
-    input_nodes.push_back(Node{3, corner, 180});
-    input_nodes.push_back(Node{4, t_junct, 180});
+    input_nodes.push_back(Node{5, corner, RotationDegreeType::_90});
+    input_nodes.push_back(Node{6, cross, RotationDegreeType::_90});
+    input_nodes.push_back(Node{7, corner, RotationDegreeType::_270});
+    input_nodes.push_back(Node{8, t_junct, RotationDegreeType::_0});
+    input_nodes.push_back(Node{9, straight, RotationDegreeType::_90});
+    input_nodes.push_back(Node{0, straight, RotationDegreeType::_270});
+    input_nodes.push_back(Node{1, corner, RotationDegreeType::_0});
+    input_nodes.push_back(Node{2, straight, RotationDegreeType::_0});
+    input_nodes.push_back(Node{3, corner, RotationDegreeType::_180});
+    input_nodes.push_back(Node{4, t_junct, RotationDegreeType::_180});
     return MazeGraph(input_nodes);
 }
 

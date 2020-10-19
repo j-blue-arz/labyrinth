@@ -16,9 +16,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <chrono>
 #include <functional>
 #include <future>
+#include <iterator>
 #include <thread>
 
 using namespace labyrinth;
@@ -30,6 +32,7 @@ private:
     using duration_clock = std::chrono::steady_clock;
 
 protected:
+    using DegreeType = uint16_t;
     void givenGraph(const std::vector<std::string>& maze, const std::vector<OutPaths>& leftover_out_paths) {
         TextGraphBuilder builder{};
 
@@ -88,7 +91,12 @@ protected:
 
     void thenShiftLocationIsNot(const Location& location) { EXPECT_NE(result.shift.location, location); }
 
-    void thenShiftRotationIsOneOf(const std::vector<labyrinth::RotationDegreeType>& rotations) {
+    void thenShiftRotationIsOneOf(const std::vector<DegreeType>& rotation_degrees) {
+        std::vector<labyrinth::RotationDegreeType> rotations{};
+        std::transform(
+            rotation_degrees.begin(), rotation_degrees.end(), std::back_inserter(rotations), [](DegreeType degree) {
+                return static_cast<RotationDegreeType>(degree / 90);
+            });
         ASSERT_THAT(rotations, testing::Contains(result.shift.rotation));
     };
 
@@ -106,15 +114,11 @@ protected:
     ::testing::AssertionResult isValidPlayerAction(const PlayerAction& action,
                                                    const labyrinth::MazeGraph& graph,
                                                    const Location& player_start_location) {
-        std::set<labyrinth::RotationDegreeType> valid_shift_rotations = {0, 90, 180, 270};
         labyrinth::MazeGraph graph_copy{graph};
         auto shift_locations = graph_copy.getShiftLocations();
         auto player_location = player_start_location;
         if (std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
             return ::testing::AssertionFailure() << "Invalid shift location: " << action.shift.location;
-        }
-        if (valid_shift_rotations.find(action.shift.rotation) == valid_shift_rotations.end()) {
-            return ::testing::AssertionFailure() << "Invalid shift rotation: " << action.shift.rotation;
         }
         graph_copy.shift(action.shift.location, action.shift.rotation);
         player_location = translateLocationByShift(player_location, action.shift.location, graph_copy.getExtent());

@@ -33,8 +33,8 @@ using StatePtr = std::shared_ptr<GameStateNode>;
 struct GameStateNode {
     explicit GameStateNode(StatePtr parent,
                            const ShiftAction& shift,
-                           const std::vector<reachable::ReachableNode>& reached_nodes)
-        : parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
+                           const std::vector<reachable::ReachableNode>& reached_nodes) :
+        parent{parent}, shift{shift}, reached_nodes{reached_nodes} {}
     explicit GameStateNode() noexcept : parent{nullptr} {}
 
     StatePtr parent{nullptr};
@@ -65,14 +65,13 @@ std::vector<Location> determineReachedLocations(const GameStateNode& current_sta
                                                 Location shift_location) {
     std::vector<Location> updated_player_locations;
     updated_player_locations.resize(current_state.reached_nodes.size());
-    std::transform(
-        current_state.reached_nodes.begin(),
-        current_state.reached_nodes.end(),
-        updated_player_locations.begin(),
-        [&graph, &shift_location](reachable::ReachableNode reached_node) {
-            const Location& reached_location = reached_node.reached_location;
-            return translateLocationByShift(reached_location, shift_location, graph.getExtent());
-        });
+    std::transform(current_state.reached_nodes.begin(),
+                   current_state.reached_nodes.end(),
+                   updated_player_locations.begin(),
+                   [&graph, &shift_location](reachable::ReachableNode reached_node) {
+                       const Location& reached_location = reached_node.reached_location;
+                       return translateLocationByShift(reached_location, shift_location, graph.getExtent());
+                   });
     return updated_player_locations;
 }
 
@@ -105,9 +104,10 @@ std::vector<RotationDegreeType> determineRotations(const Node& node) {
     auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
     auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
     if (node.out_paths == north_south || node.out_paths == east_west) {
-        return std::vector<RotationDegreeType>{0, 90};
+        return std::vector<RotationDegreeType>{RotationDegreeType::_0, RotationDegreeType::_90};
     } else {
-        return std::vector<RotationDegreeType>{0, 90, 180, 270};
+        return std::vector<RotationDegreeType>{
+            RotationDegreeType::_0, RotationDegreeType::_90, RotationDegreeType::_180, RotationDegreeType::_270};
     }
 }
 
@@ -132,7 +132,7 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
     root->reached_nodes.emplace_back(0, player_location);
-    root->shift = ShiftAction{previous_shift_location, 0};
+    root->shift = ShiftAction{previous_shift_location, RotationDegreeType::_0};
     state_queue.push(root);
     while (!state_queue.empty() && !is_aborted) {
         auto current_state = state_queue.front();

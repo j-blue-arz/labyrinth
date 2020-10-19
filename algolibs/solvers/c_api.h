@@ -53,7 +53,7 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
                                       struct CPlayerLocations* c_player_locations,
                                       unsigned int objective_id,
                                       struct CLocation* c_previous_shift_location);
-                                    
+
 PUBLIC_API void abort_search();
 
 PUBLIC_API struct CSearchStatus get_status();
@@ -70,9 +70,13 @@ labyrinth::Location mapLocationAtIndex(const struct CPlayerLocations& player_loc
     return mapLocation(player_locations.locations[index]);
 }
 
+labyrinth::RotationDegreeType mapRotation(short rotation) noexcept {
+    return static_cast<labyrinth::RotationDegreeType>((rotation / 90 + 4) % 4);
+}
+
 labyrinth::Node mapNode(const struct CNode& node) noexcept {
     const auto out_paths = static_cast<labyrinth::OutPaths>(node.out_paths);
-    return labyrinth::Node{node.node_id, out_paths, static_cast<labyrinth::RotationDegreeType>(node.rotation)};
+    return labyrinth::Node{node.node_id, out_paths, mapRotation(node.rotation)};
 }
 
 labyrinth::MazeGraph mapGraph(struct CGraph graph) {
@@ -97,9 +101,14 @@ struct CLocation locationToCLocation(const labyrinth::Location& location) noexce
     return c_location;
 }
 
+short rotationToCRotation(labyrinth::RotationDegreeType rotation) noexcept {
+    return static_cast<labyrinth::RotationDegreeIntegerType>(rotation) * 90;
+}
+
 struct CAction actionToCAction(const labyrinth::PlayerAction& action) {
-    struct CAction c_action = {
-        locationToCLocation(action.shift.location), action.shift.rotation, locationToCLocation(action.move_location)};
+    struct CAction c_action = {locationToCLocation(action.shift.location),
+                               rotationToCRotation(action.shift.rotation),
+                               locationToCLocation(action.move_location)};
     return c_action;
 }
 
