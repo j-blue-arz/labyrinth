@@ -5,6 +5,8 @@ There are two commands:
 - compare will plot the speedup between two benchmark results, grouped by maze size and search depth.
 """
 import re
+import os
+from operator import itemgetter
 
 import click
 import matplotlib.pyplot as plt
@@ -47,6 +49,10 @@ def combine(benchmark_files, outfile, names):
     the minimum of all columns containing the word 'time'
     will be contained in the OUTFILE as ALGO_NAME.
     """
+    _combine(benchmark_files, outfile, names)
+
+
+def _combine(benchmark_files, outfile, names):
     dfs = [pd.read_csv(infile) for infile in benchmark_files]
     dfs = [clean_times(df, name) for df, name in zip(dfs, names)]
     df = combine_benchmark_results(dfs)
@@ -65,10 +71,14 @@ def combine(benchmark_files, outfile, names):
 @click.option("--normalize", type=click.Choice(["none", "all"], case_sensitive=False), required=False, default="none",
               help="Denotes which of the plots should be normalized to a common scale.\
                 If 'none', all plots have a scale of their own.")
-def compare(benchmark_file, outimage, names, depths, normalize):
+def plot(benchmark_file, outimage, names, depths, normalize):
     """ Reads a benchmark result file BENCHMARK_FILE containing at least two time columns
     and creates a plot showing the speedup, grouped by maze size and depth.
     """
+    _plot(benchmark_file, outimage, names, depths, normalize)
+
+
+def _plot(benchmark_file, outimage, names, depths=None, normalize=False):
     df = pd.read_csv(benchmark_file)
     df["speedup"] = df[names[1]] / df[names[0]]
     if depths:
@@ -102,6 +112,54 @@ def compare(benchmark_file, outimage, names, depths, normalize):
     fig.tight_layout()
     fig.subplots_adjust(left=0.05, top=0.9)
     plt.savefig(outimage)
+
+
+@cli.command()
+@click.argument("benchmarks_folder")
+@click.argument("output_folder")
+def compare(benchmarks_folder, output_folder):
+    """ COMBINE and PLOT.
+
+    Reads all .csv files in BENCHMARKS_FOLDER,
+    and combines them into a file benchmark_results.csv in the OUTPUT_FOLDER. The algorithm names are inferred from
+    the original filenames.
+    Then plots a comparison plot using the latest two algorithm names (by file age).
+    The plot is saved in a file containing the latest algorithm name in the OUTPUT_FOLDER."""
+    bench_files = _get_bench_files(benchmarks_folder)
+    bench_files = _sort_by_modification_time(bench_files)
+    names = _get_bench_names(bench_files)
+    outfile = os.path.join(output_folder, "benchmark_results.csv")
+    _combine(bench_files, outfile, names)
+    outimage = os.path.join(output_folder, "speedup_" + names[0] + ".png")
+    _plot(outfile, outimage, (names[:2]), normalize=True)
+
+
+def _sort_by_modification_time(files):
+    mod_times = [os.path.getmtime(f) for f in files]
+    sorted_files = sorted(list(zip(files, mod_times)), key=itemgetter(1), reverse=True)
+    return [file_tuple[0] for file_tuple in sorted_files]
+
+
+def _get_bench_files(folder):
+    folder_contents = list(os.listdir(folder))
+    folder_paths = [os.path.join(folder, f) for f in folder_contents]
+    folder_files = [f for f in folder_paths if os.path.isfile(f)]
+    return [f for f in folder_files if f.endswith(".csv")]
+
+
+def _get_bench_names(files):
+    prefix_len = len(_longest_common_prefix(files))
+    suffix_len = len(".csv")
+    names = [f[prefix_len:-suffix_len] for f in files]
+    return [name.replace("_", "-") for name in names]
+
+
+def _longest_common_prefix(filenames):
+    result = ""
+    for chars in zip(*filenames):
+        if len(set(chars)) == 1:
+            result += chars[0]
+    return result
 
 
 def _label_depths(fig, depths):
