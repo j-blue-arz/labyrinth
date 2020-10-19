@@ -10,10 +10,13 @@ optimize action iterator: (less shifts in negamax, less graph copying) let itera
 
 Current status: minimax with 0-1 evaluation achieves 55 instances for maze size 7, and 6 instances for maze size 13 in the 3s limit.
 The optimizations above combined resulted in a speedup between 3 and 5.
+
+October 19th, 2020
+remove copying, use one graph, shift and undo shifts. 
+Also: not one shift for each rotation, instead rotate the inserted node inplace -> speedup about 2 for maze size 7, 4 for maze size 13!
+bfs return vector reserve n -> speedup 1.1
    
 Ideas (try in this order)
-- bfs return vector reserve n
-- remove copying(of graphs), use one graph, shift and undo shifts
 - optimize node neighbors: remove stl compliance of iterator.
 - store rotation as enum instead of int. 
 - perform bfs without shift and store result with bounding box. iterate over this result if the shift does not touch the bounding box.

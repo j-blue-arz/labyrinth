@@ -232,6 +232,14 @@ TEST_F(MazeGraphTest, shift_cornerWithRotation_resultsInCorrectNeighbors) {
     EXPECT_TRUE(hasNeighbors(graph_, Location{2, 1}, {Location{2, 0}, Location{1, 1}}));
 }
 
+TEST_F(MazeGraphTest, givenPushedOutNodeWasRotated_whenShift_newLeftoverKeepsRotation) {
+    graph_.getNode(Location{2, 1}).rotation = 180;
+
+    graph_.shift(Location{0, 1}, 0);
+
+    EXPECT_EQ(graph_.getLeftover().rotation, 180);
+}
+
 TEST_F(MazeGraphTest, getLocation_WithInnerNode_ReturnsCorrectLocation) {
     auto node_id = graph_.getNode(Location{1, 1}).node_id;
 

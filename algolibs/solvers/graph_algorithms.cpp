@@ -33,6 +33,7 @@ std::vector<Location> reachableLocations(const MazeGraph& graph, const Location&
     q.push(source);
     visited[graph.getNode(source).node_id] = true;
     std::vector<Location> result;
+    result.reserve(graph.getNumberOfNodes());
     while (!q.empty()) {
         auto location = q.front();
         result.push_back(location);

@@ -44,15 +44,15 @@ private:
     class PlayerActionIterator;
 
 public:
-    explicit GameTreeNode(const MazeGraph& graph,
-                          const PlayerAction& previous_player_action,
-                          const Location& player_location) :
+    explicit GameTreeNode(MazeGraph& graph, const PlayerAction& previous_player_action, const Location& player_location) :
         graph_{graph},
         player_locations_{player_location, previous_player_action.move_location},
         previous_shift_location_{previous_player_action.shift.location} {}
 
     /// Returns an iterator over possible PlayerActions.
-    PlayerActionIterator possibleActions() const { return PlayerActionIterator(*this); }
+    PlayerActionIterator possibleActions() const {
+        return PlayerActionIterator(graph_, player_locations_[0], previous_shift_location_);
+    }
 
     const MazeGraph& getGraph() const noexcept { return graph_; }
 
@@ -60,30 +60,26 @@ public:
 
     const Location& getOpponentLocation() const { return player_locations_[1]; }
 
-    const Location& getPreviousShiftLocation() const { return previous_shift_location_; }
-
 private:
     class PlayerActionIterator {
     public:
-        explicit PlayerActionIterator(const GameTreeNode& node) :
-            current_rotation_{0},
-            current_shift_location_{node.getGraph().getShiftLocations().begin()},
+        explicit PlayerActionIterator(MazeGraph& graph, const Location& player_location, Location previous_shift_location) :
+            graph_{graph},
+            player_location_{player_location},
             is_at_end_{false},
-            node_{node},
-            shifted_graph_{node_.getGraph()} {
-            if (!is_at_end_) {
-                invalid_shift_location_ =
-                    opposingShiftLocation(node_.getPreviousShiftLocation(), shifted_graph_.getExtent());
-                skipInvalidShiftLocation();
-                initPossibleMoves();
-            }
+            current_rotation_{0},
+            current_shift_location_{graph_.getShiftLocations().begin()} {
+            invalid_shift_location_ = opposingShiftLocation(previous_shift_location, graph_.getExtent());
+            skipInvalidShiftLocation();
+            shift();
+            initPossibleMoves();
         }
 
         PlayerAction getPlayerAction() const {
             return PlayerAction{ShiftAction{*current_shift_location_, current_rotation_}, *current_move_location_};
         }
 
-        const MazeGraph& getGraph() const { return shifted_graph_; }
+        MazeGraph& getGraph() { return graph_; }
 
         bool isAtEnd() const { return is_at_end_; }
 
@@ -107,10 +103,10 @@ private:
                                          static_cast<OutPathsIntegerType>(out_paths2));
         }
 
-        RotationDegreeType determineMaxRotation(const Node& node) const {
+        RotationDegreeType determineMaxRotation(OutPaths out_paths) const {
             auto north_south = combineOutPaths(OutPaths::North, OutPaths::South);
             auto east_west = combineOutPaths(OutPaths::East, OutPaths::West);
-            if (node.out_paths == north_south || node.out_paths == east_west) {
+            if (out_paths == north_south || out_paths == east_west) {
                 return 180;
             } else {
                 return 360;
@@ -118,15 +114,23 @@ private:
         }
 
         void nextShift() {
+            // expects the graph to be (still) shifted.
+            // At the end, the graph is either (again) shifted, or it is unshifted and is_at_end is true
+            auto max_rotation = determineMaxRotation(graph_.getNode(*current_shift_location_).out_paths);
             current_rotation_ += 90;
-            if (current_rotation_ == determineMaxRotation(node_.getGraph().getLeftover())) {
+            if (current_rotation_ < max_rotation) {
+                graph_.getNode(*current_shift_location_).rotation = current_rotation_;
+            } else {
+                undoShift();
                 current_rotation_ = 0;
                 ++current_shift_location_;
-                if (current_shift_location_ != node_.getGraph().getShiftLocations().end()) {
+                if (current_shift_location_ != graph_.getShiftLocations().end()) {
                     skipInvalidShiftLocation();
                 }
-                if (current_shift_location_ == node_.getGraph().getShiftLocations().end()) {
+                if (current_shift_location_ == graph_.getShiftLocations().end()) {
                     is_at_end_ = true;
+                } else {
+                    shift();
                 }
             }
             initPossibleMoves();
@@ -138,30 +142,40 @@ private:
             }
         }
 
+        void shift() {
+            graph_.shift(*current_shift_location_, current_rotation_);
+            pushed_out_rotation_ = graph_.getLeftover().rotation;
+            player_location_ = translateLocationByShift(player_location_, *current_shift_location_, graph_.getExtent());
+        }
+
+        void undoShift() {
+            auto opposing_shift_location = opposingShiftLocation(*current_shift_location_, graph_.getExtent());
+            graph_.shift(opposing_shift_location, pushed_out_rotation_);
+            player_location_ = translateLocationByShift(player_location_, opposing_shift_location, graph_.getExtent());
+        }
+
         void initPossibleMoves() {
+            // expects the graph to already be shifted
             if (!is_at_end_) {
-                shifted_graph_ = MazeGraph{node_.getGraph()};
-                shifted_graph_.shift(*current_shift_location_, current_rotation_);
-                auto translated_player_location = translateLocationByShift(
-                    node_.getPlayerLocation(), *current_shift_location_, shifted_graph_.getExtent());
-                possible_move_locations_ = reachable::reachableLocations(shifted_graph_, translated_player_location);
+                possible_move_locations_ = reachable::reachableLocations(graph_, player_location_);
             } else {
                 possible_move_locations_.resize(0);
             }
             current_move_location_ = possible_move_locations_.begin();
         }
 
+        MazeGraph& graph_;
+        Location player_location_;
+        Location invalid_shift_location_;
+        bool is_at_end_;
         RotationDegreeType current_rotation_;
+        RotationDegreeType pushed_out_rotation_;
         std::vector<Location>::const_iterator current_shift_location_;
         std::vector<Location> possible_move_locations_;
         std::vector<Location>::const_iterator current_move_location_;
-        Location invalid_shift_location_;
-        bool is_at_end_;
-        const GameTreeNode& node_;
-        MazeGraph shifted_graph_;
     };
 
-    MazeGraph graph_;
+    MazeGraph& graph_;
     std::array<Location, 2> player_locations_;
     Location previous_shift_location_;
 };
@@ -218,9 +232,10 @@ public:
                              const Location& player_location,
                              const Location& opponent_location,
                              const Location& previous_shift_location = Location{-1, -1}) {
+        MazeGraph graph_copy{graph};
         const auto previous_action = PlayerAction{
             ShiftAction{previous_shift_location, graph.getNode(previous_shift_location).rotation}, opponent_location};
-        GameTreeNode root{graph, previous_action, player_location};
+        GameTreeNode root{graph_copy, previous_action, player_location};
         const auto& evaluation = negamax(root);
         return MinimaxResult{best_action_, evaluation};
     }
@@ -237,7 +252,7 @@ public:
         auto best_value = -infinity;
         for (auto action_iterator = node.possibleActions(); !action_iterator.isAtEnd(); ++action_iterator) {
             auto action = action_iterator.getPlayerAction();
-            const auto& graph = action_iterator.getGraph();
+            auto& graph = action_iterator.getGraph();
             auto new_opponent_location =
                 translateLocationByShift(node.getOpponentLocation(), action.shift.location, graph.getExtent());
             GameTreeNode child_node{graph, action, new_opponent_location};
