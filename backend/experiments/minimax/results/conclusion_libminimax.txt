@@ -17,6 +17,8 @@ Also: not one shift for each rotation, instead rotate the inserted node inplace 
 bfs return vector reserve n -> speedup 1.1
 optimize node neighbors: remove stl compliance of iterator. -> speedup 1.06
 store rotation as enum instead of int. -> speedup 1.1
+The high speedups for maze size 13 lead to great improvements for the achieved depths (3s limit): 55 instances for maze size 7, and 6 instances for maze size 13.
+
    
 Ideas (try in this order)
 - perform bfs without shift and store result with bounding box. iterate over this result if the shift does not touch the bounding box.
