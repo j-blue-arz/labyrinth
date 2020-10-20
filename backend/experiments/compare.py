@@ -90,7 +90,7 @@ def _plot(benchmark_file, outimage, names, depths=None, normalize=False):
     nrows = len(sizes)
     fig = plt.figure(figsize=(ncols*8, nrows*4))
     fig.suptitle(f"Speedup: $t_{{{names[1]}}}/t_{{{names[0]}}}$", fontsize=20)
-    speedup_limits = [min(0.5, df["speedup"].min()), df["speedup"].max()]
+    speedup_limits = [min(0.5, df["speedup"].min()), max(1.1, df["speedup"].max())]
     plot_num = 1
     for size in sizes:
         for depth in depths:

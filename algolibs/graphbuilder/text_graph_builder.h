@@ -11,7 +11,6 @@ namespace labyrinth {
 
 class TextGraphBuilder : public GraphBuilder {
 public:
-    /// Builds a StaticGraph from a text. See implementation file for an example.
     MazeGraph buildGraph() override;
     TextGraphBuilder& setMaze(const std::vector<std::string>& lines);
 
