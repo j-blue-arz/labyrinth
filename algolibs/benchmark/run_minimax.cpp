@@ -1,3 +1,4 @@
+#include "solvers/evaluators.h"
 #include "solvers/location.h"
 #include "solvers/maze_graph.h"
 #include "solvers/minimax.h"
@@ -10,6 +11,8 @@
 #include <string>
 
 using namespace labyrinth;
+
+namespace mm = solvers::minimax;
 
 namespace fs = std::filesystem;
 
@@ -24,9 +27,11 @@ void run(const std::string& filename) {
     MazeGraph graph = bench::reader::buildMazeGraph(instance);
     auto objective_id = bench::reader::objectiveIdFromLocation(graph, instance.objective);
     Location player_location = instance.player_locations[0];
-    Location opponent_location = instance.player_locations[0];
-    auto minimax_result = minimax::findBestAction(graph, player_location, opponent_location, objective_id, instance.depth);
-    if (minimax_result.player_action.move_location == labyrinth::error_player_action.move_location) {
+    Location opponent_location = instance.player_locations[1];
+    solvers::SolverInstance solver_instance{
+        graph, player_location, opponent_location, objective_id, labyrinth::Location{-1, -1}};
+    auto minimax_result = mm::findBestAction(solver_instance, mm::WinEvaluator{solver_instance}, instance.depth);
+    if (minimax_result.player_action.move_location == labyrinth::solvers::error_player_action.move_location) {
         std::cerr << "Error returned for " << instance.name << std::endl;
     }
 }

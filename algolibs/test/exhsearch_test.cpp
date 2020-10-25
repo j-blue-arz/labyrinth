@@ -1,8 +1,8 @@
+#include "exhsearch_test.h"
 #include "graphbuilder/text_graph_builder.h"
 #include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
 #include "solvers/maze_graph.h"
-#include "exhsearch_test.h"
 #include "util.h"
 
 #include "gmock/gmock.h"
@@ -15,6 +15,8 @@
 
 using namespace labyrinth;
 using namespace labyrinth::testutils;
+
+namespace exh = labyrinth::solvers::exhsearch;
 
 class ExhaustiveSearchTest : public ::testing::Test {
 protected:
@@ -31,10 +33,10 @@ protected:
     MazeGraph graph_{0};
 };
 
-::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<labyrinth::PlayerAction>& actions,
-                                                         const labyrinth::MazeGraph& original_graph,
+::testing::AssertionResult isCorrectPlayerActionSequence(const std::vector<solvers::PlayerAction>& actions,
+                                                         const MazeGraph& original_graph,
                                                          const Location& player_start_location) {
-    labyrinth::MazeGraph graph{original_graph};
+    MazeGraph graph{original_graph};
     auto shift_locations = graph.getShiftLocations();
     auto player_location = player_start_location;
     for (const auto& action : actions) {
@@ -65,7 +67,7 @@ bool isOpposing(const Location& location1, const Location& location2, size_t ext
     return false;
 }
 
-::testing::AssertionResult respectPushbackRule(const std::vector<labyrinth::PlayerAction>& actions,
+::testing::AssertionResult respectPushbackRule(const std::vector<solvers::PlayerAction>& actions,
                                                size_t extent,
                                                const Location& previous_shift_location) {
     std::vector<Location> shift_locations;
@@ -84,12 +86,12 @@ bool isOpposing(const Location& location1, const Location& location2, size_t ext
     return ::testing::AssertionSuccess();
 }
 
-::testing::AssertionResult playerActionsReachObjective(const std::vector<labyrinth::PlayerAction>& actions,
-                                                       labyrinth::MazeGraph& original_graph,
+::testing::AssertionResult playerActionsReachObjective(const std::vector<solvers::PlayerAction>& actions,
+                                                       MazeGraph& original_graph,
                                                        const Location& player_start_location,
-                                                       labyrinth::NodeId objective_id) {
+                                                       NodeId objective_id) {
 
-    labyrinth::MazeGraph graph{original_graph};
+    MazeGraph graph{original_graph};
     auto player_location_id = graph.getNode(player_start_location).node_id;
     for (const auto& action : actions) {
         graph.shift(action.shift.location, action.shift.rotation);
@@ -110,8 +112,8 @@ void performTest(MazeGraph& graph,
                  NodeId objective_id,
                  size_t expected_depth,
                  const Location& previous_shift = Location{-1, -1}) {
-
-    auto actions = labyrinth::exhsearch::findBestActions(graph, player_location, objective_id, previous_shift);
+    solvers::SolverInstance solver_instance{graph, player_location, Location{-1, -1}, objective_id, previous_shift};
+    auto actions = exh::findBestActions(solver_instance);
 
     ASSERT_THAT(actions, testing::SizeIs(testing::Ge(1)));
     EXPECT_TRUE(isCorrectPlayerActionSequence(actions, graph, player_location));
@@ -229,11 +231,12 @@ TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_shouldReturnQuicklyWitho
     auto objective_id = graph_.getNode(Location{6, 7}).node_id;
     Location player_location{4, 2};
     Location previous_shift{-1, -1};
+    solvers::SolverInstance solver_instance{graph_, player_location, Location{-1, -1}, objective_id, previous_shift};
 
     const auto start = std::chrono::steady_clock::now();
-    auto future_actions = std::async(std::launch::async, labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
+    auto future_actions = std::async(std::launch::async, exh::findBestActions, solver_instance);
     std::this_thread::sleep_for(1ms);
-    labyrinth::exhsearch::abortComputation();
+    exh::abortComputation();
     auto actions = future_actions.get();
     const auto stop = std::chrono::steady_clock::now();
     const std::chrono::duration<double> duration = std::chrono::duration<double>(stop - start);
@@ -248,10 +251,11 @@ TEST_F(ExhaustiveSearchTest, depth4Instance_whenAborted_runsFineAfterwards) {
     auto objective_id = graph_.getNode(Location{6, 7}).node_id;
     Location player_location{4, 2};
     Location previous_shift{-1, -1};
+    solvers::SolverInstance solver_instance{graph_, player_location, Location{-1, -1}, objective_id, previous_shift};
 
-    auto future_actions = std::async(labyrinth::exhsearch::findBestActions, graph_, player_location, objective_id, previous_shift);
-    labyrinth::exhsearch::abortComputation();
+    auto future_actions = std::async(exh::findBestActions, solver_instance);
+    exh::abortComputation();
     auto actions = future_actions.get();
-    
+
     performTest(graph_, player_location, objective_id, 4);
 }

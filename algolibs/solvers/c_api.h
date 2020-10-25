@@ -105,7 +105,7 @@ short rotationToCRotation(labyrinth::RotationDegreeType rotation) noexcept {
     return static_cast<labyrinth::RotationDegreeIntegerType>(rotation) * 90;
 }
 
-struct CAction actionToCAction(const labyrinth::PlayerAction& action) {
+struct CAction actionToCAction(const labyrinth::solvers::PlayerAction& action) {
     struct CAction c_action = {locationToCLocation(action.shift.location),
                                rotationToCRotation(action.shift.rotation),
                                locationToCLocation(action.move_location)};

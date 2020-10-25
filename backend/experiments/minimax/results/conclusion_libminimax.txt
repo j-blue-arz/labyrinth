@@ -21,6 +21,7 @@ The high speedups for maze size 13 lead to great improvements for the achieved d
 
    
 Ideas (try in this order)
+- remove node ids? also: make node ids uint16_t instead of unsigned int.
 - perform bfs without shift and store result with bounding box. iterate over this result if the shift does not touch the bounding box.
 - rotation-aware bfs
 - bfs without shift, then handle case where shift touches/cuts the reached locations. Datastructure which facilitates the required operations.

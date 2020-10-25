@@ -24,7 +24,8 @@ void run(const std::string& filename) {
     MazeGraph graph = bench::reader::buildMazeGraph(instance);
     auto objective_id = bench::reader::objectiveIdFromLocation(graph, instance.objective);
     Location player_location = instance.player_locations[0];
-    auto best_actions = exhsearch::findBestActions(graph, player_location, objective_id);
+    solvers::SolverInstance solver_instance{graph, player_location, Location{-1, -1}, objective_id, Location{-1, -1}};
+    auto best_actions = solvers::exhsearch::findBestActions(solver_instance);
     if (best_actions.size() != instance.depth) {
         std::cerr << "Search depth mismatch for instance " << instance.name << ", expected " << instance.depth
                   << ", found" << best_actions.size() << std::endl;

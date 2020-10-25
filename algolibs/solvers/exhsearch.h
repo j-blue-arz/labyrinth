@@ -5,7 +5,7 @@
 #include <future>
 
 namespace labyrinth {
-
+namespace solvers {
 namespace exhsearch {
 
 static std::atomic_bool is_aborted = false;
@@ -17,10 +17,8 @@ static std::atomic_bool is_aborted = false;
 void abortComputation();
 
 /** Searches for the lowest number of actions which lead to the objective. */
-std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
-                                          const Location& player_location,
-                                          NodeId objective_id,
-                                          const Location& previous_shift_location = Location{-1, -1});
+std::vector<PlayerAction> findBestActions(const SolverInstance& solver_instance);
 
 } // namespace exhsearch
+} // namespace solvers
 } // namespace labyrinth

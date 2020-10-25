@@ -1,12 +1,6 @@
-/** Tests for the minimax algorithm.
- * There are currently four types of test cases:
- * - reachableWithOneAction
- * - cannotPreventOpponent
- * - prevent_opponent_then_reach
- * - prevent_opponent_then_cannot_reach
- */
 #include "minimax_test.h"
 #include "graphbuilder/text_graph_builder.h"
+#include "solvers/evaluators.h"
 #include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
 #include "solvers/maze_graph.h"
@@ -26,6 +20,8 @@
 using namespace labyrinth;
 using namespace labyrinth::testutils;
 using namespace std::chrono_literals;
+
+namespace mm = labyrinth::solvers::minimax;
 
 class MinimaxTest : public ::testing::Test {
 private:
@@ -50,31 +46,30 @@ protected:
     void givenPreviousShift(const Location& location) { previous_shift_location = location; }
 
     void givenFindBestActionAsync() {
+        solvers::SolverInstance solver_instance{
+            graph, player_location, opponent_location, objective_id, previous_shift_location};
         start = duration_clock::now();
-        future_action = std::async(std::launch::async,
-                                   minimax::iterateMinimax,
-                                   graph,
-                                   player_location,
-                                   opponent_location,
-                                   objective_id,
-                                   previous_shift_location);
+        future_action =
+            std::async(std::launch::async, mm::iterateMinimax, solver_instance, mm::WinEvaluator{solver_instance});
     }
 
     void givenSleepFor(duration_clock::duration duration) { std::this_thread::sleep_for(duration); }
 
     void whenFindBestAction() {
-        result =
-            minimax::iterateMinimax(graph, player_location, opponent_location, objective_id, previous_shift_location);
+        solvers::SolverInstance solver_instance{
+            graph, player_location, opponent_location, objective_id, previous_shift_location};
+        result = mm::iterateMinimax(solver_instance, mm::WinEvaluator{solver_instance});
     }
 
     void whenFindBestActionWithDepth(size_t depth) {
-        minimax_result = minimax::findBestAction(
-            graph, player_location, opponent_location, objective_id, depth, previous_shift_location);
+        solvers::SolverInstance solver_instance{
+            graph, player_location, opponent_location, objective_id, previous_shift_location};
+        minimax_result = mm::findBestAction(solver_instance, mm::WinEvaluator{solver_instance}, depth);
         result = minimax_result.player_action;
     }
 
     void whenComputationIsAborted() {
-        minimax::abortComputation();
+        mm::abortComputation();
         result = future_action.get();
         stop = duration_clock::now();
     }
@@ -92,7 +87,7 @@ protected:
     void thenShiftLocationIsNot(const Location& location) { EXPECT_NE(result.shift.location, location); }
 
     void thenShiftRotationIsOneOf(const std::vector<DegreeType>& rotation_degrees) {
-        std::vector<labyrinth::RotationDegreeType> rotations{};
+        std::vector<RotationDegreeType> rotations{};
         std::transform(
             rotation_degrees.begin(), rotation_degrees.end(), std::back_inserter(rotations), [](DegreeType degree) {
                 return static_cast<RotationDegreeType>(degree / 90);
@@ -111,10 +106,10 @@ protected:
         ASSERT_TRUE(opponentCannotReachAfterPlayerAction(result, graph, opponent_location, objective_id));
     }
 
-    ::testing::AssertionResult isValidPlayerAction(const PlayerAction& action,
-                                                   const labyrinth::MazeGraph& graph,
+    ::testing::AssertionResult isValidPlayerAction(const solvers::PlayerAction& action,
+                                                   const MazeGraph& graph,
                                                    const Location& player_start_location) {
-        labyrinth::MazeGraph graph_copy{graph};
+        MazeGraph graph_copy{graph};
         auto shift_locations = graph_copy.getShiftLocations();
         auto player_location = player_start_location;
         if (std::find(shift_locations.begin(), shift_locations.end(), action.shift.location) == shift_locations.end()) {
@@ -129,10 +124,10 @@ protected:
         return ::testing::AssertionSuccess();
     }
 
-    ::testing::AssertionResult actionReachesObjective(const PlayerAction& action,
-                                                      const labyrinth::MazeGraph& graph,
-                                                      const labyrinth::NodeId objective_id) {
-        labyrinth::MazeGraph graph_copy{graph};
+    ::testing::AssertionResult actionReachesObjective(const solvers::PlayerAction& action,
+                                                      const MazeGraph& graph,
+                                                      const NodeId objective_id) {
+        MazeGraph graph_copy{graph};
         graph_copy.shift(action.shift.location, action.shift.rotation);
         if (graph_copy.getNode(action.move_location).node_id != objective_id) {
             auto objective_location = graph_copy.getLocation(objective_id, Location(-1, -1));
@@ -143,15 +138,16 @@ protected:
         return ::testing::AssertionSuccess();
     }
 
-    ::testing::AssertionResult opponentCannotReachAfterPlayerAction(const PlayerAction& action,
-                                                                    const labyrinth::MazeGraph& graph,
+    ::testing::AssertionResult opponentCannotReachAfterPlayerAction(const solvers::PlayerAction& action,
+                                                                    const MazeGraph& graph,
                                                                     Location opponent_location,
-                                                                    const labyrinth::NodeId objective_id) {
-        labyrinth::MazeGraph graph_copy{graph};
+                                                                    const NodeId objective_id) {
+        MazeGraph graph_copy{graph};
         graph_copy.shift(result.shift.location, result.shift.rotation);
         opponent_location = translateLocationByShift(opponent_location, result.shift.location, graph_copy.getExtent());
-        auto actions =
-            labyrinth::exhsearch::findBestActions(graph, opponent_location, objective_id, result.shift.location);
+        solvers::SolverInstance solver_instance{
+            graph, opponent_location, Location{-1, -1}, objective_id, Location{-1, -1}};
+        auto actions = solvers::exhsearch::findBestActions(solver_instance);
         if (actions.size() == 1) {
             return ::testing::AssertionFailure()
                    << "Player action " << action << " lets opponent reach objective afterwards with " << actions[0];
@@ -166,12 +162,12 @@ protected:
     Location previous_shift_location{-1, -1};
     size_t max_depth;
 
-    PlayerAction result;
-    minimax::MinimaxResult minimax_result{PlayerAction{}, 0};
+    solvers::PlayerAction result;
+    mm::MinimaxResult minimax_result{solvers::PlayerAction{}, 0};
 
     duration_clock::time_point start;
     duration_clock::time_point stop;
-    std::future<labyrinth::PlayerAction> future_action;
+    std::future<labyrinth::solvers::PlayerAction> future_action;
 };
 
 TEST_F(MinimaxTest, findBestAction__reachableWithOneAction__returnsCorrectMove) {

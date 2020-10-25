@@ -8,6 +8,16 @@
 
 namespace labyrinth {
 
+namespace solvers {
+
+struct SolverInstance {
+    MazeGraph graph{0};
+    Location player_location{-1, -1};
+    Location opponent_location{-1, -1};
+    NodeId objective_id{0};
+    Location previous_shift_location{-1, -1};
+};
+
 struct ShiftAction {
     Location location{0, 0};
     RotationDegreeType rotation{0};
@@ -19,9 +29,9 @@ struct PlayerAction {
 };
 
 static const PlayerAction error_player_action = PlayerAction{ShiftAction{}, Location{-1, -1}};
-
+} // namespace solvers
 } // namespace labyrinth
 
 namespace std {
-std::ostream& operator<<(std::ostream& stream, const labyrinth::PlayerAction& player_action);
+std::ostream& operator<<(std::ostream& stream, const labyrinth::solvers::PlayerAction& player_action);
 } // namespace std

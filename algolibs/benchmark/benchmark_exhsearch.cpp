@@ -14,10 +14,11 @@ protected:
         MazeGraph graph = reader::buildMazeGraph(instance);
         auto objective_id = reader::objectiveIdFromLocation(graph, instance.objective);
         Location player_location = instance.player_locations[0];
+        solvers::SolverInstance solver_instance{graph, player_location, Location{-1, -1}, objective_id, Location{-1, -1}};
         std::vector<FracSeconds> result{};
         for (size_t run = 0; run < repeats; run++) {
             const auto start = std::chrono::steady_clock::now();
-            auto best_actions = exhsearch::findBestActions(graph, player_location, objective_id);
+            auto best_actions = solvers::exhsearch::findBestActions(solver_instance);
             const auto stop = std::chrono::steady_clock::now();
             const FracSeconds duration = FracSeconds(stop - start);
             result.push_back(duration);

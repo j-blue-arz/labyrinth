@@ -16,9 +16,9 @@ Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, short ro
     return node;
 }
 
-PlayerAction errorAction() {
+solvers::PlayerAction errorAction() {
     Location errorLocation{-1, -1};
-    return PlayerAction{exhsearch::ShiftAction{errorLocation, 0}, errorLocation};
+    return PlayerAction{solvers::ShiftAction{errorLocation, 0}, errorLocation};
 }
 
 struct LocationValueObject {
@@ -26,14 +26,17 @@ struct LocationValueObject {
     Location::IndexType column;
 };
 
-PlayerAction findBestAction(const MazeGraph& graph,
-                                       LocationValueObject player_location,
-                                       NodeId objective_id,
-                                       LocationValueObject previous_shift_location) {
-    auto best_actions = exhsearch::findBestActions(graph,
-                                                   Location{player_location.row, player_location.column},
-                                                   objective_id,
-                                                   Location{previous_shift_location.row, previous_shift_location.column});
+solvers::PlayerAction findBestAction(const MazeGraph& graph,
+                                     LocationValueObject player_location,
+                                     NodeId objective_id,
+                                     LocationValueObject previous_shift_location) {
+    labyrinth::solvers::SolverInstance solver_instance{
+        graph,
+        Location{player_location.row, player_location.column},
+        labyrinth::Location{-1, -1},
+        objective_id,
+        Location{previous_shift_location.row, previous_shift_location.column}};
+    auto best_actions = solvers::exhsearch::findBestActions(solver_instance);
     if (best_actions.empty()) {
         return errorAction();
     } else {

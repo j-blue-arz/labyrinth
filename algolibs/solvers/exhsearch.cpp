@@ -23,6 +23,8 @@
 
 namespace labyrinth {
 
+namespace solvers {
+
 namespace exhsearch {
 
 namespace { // anonymous namespace for file-internal linkage
@@ -123,21 +125,19 @@ void abortComputation() {
     is_aborted = true;
 }
 
-std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
-                                          const Location& player_location,
-                                          NodeId objective_id,
-                                          const Location& previous_shift_location) {
+std::vector<PlayerAction> findBestActions(const SolverInstance& solver_instance) {
     // invariant: GameStateNode contains reachable nodes after shift has been carried out.
     is_aborted = false;
+    auto objective_id = solver_instance.objective_id;
     QueueType state_queue;
     StatePtr root = std::make_shared<GameStateNode>();
-    root->reached_nodes.emplace_back(0, player_location);
-    root->shift = ShiftAction{previous_shift_location, RotationDegreeType::_0};
+    root->reached_nodes.emplace_back(0, solver_instance.player_location);
+    root->shift = ShiftAction{solver_instance.previous_shift_location, RotationDegreeType::_0};
     state_queue.push(root);
     while (!state_queue.empty() && !is_aborted) {
         auto current_state = state_queue.front();
         state_queue.pop();
-        MazeGraph current_graph = createGraphFromState(graph, current_state);
+        MazeGraph current_graph = createGraphFromState(solver_instance.graph, current_state);
         auto shift_locations = current_graph.getShiftLocations();
         auto invalid_shift_location = opposingShiftLocation(current_state->shift.location, current_graph.getExtent());
         for (const auto& shift_location : shift_locations) {
@@ -168,4 +168,5 @@ std::vector<PlayerAction> findBestActions(const MazeGraph& graph,
 }
 
 } // namespace exhsearch
+} // namespace solvers
 } // namespace labyrinth

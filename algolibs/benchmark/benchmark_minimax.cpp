@@ -1,4 +1,5 @@
 #include "benchmark/benchmark.h"
+#include "solvers/evaluators.h"
 #include "solvers/location.h"
 #include "solvers/maze_graph.h"
 #include "solvers/minimax.h"
@@ -15,15 +16,17 @@ protected:
         auto objective_id = reader::objectiveIdFromLocation(graph, instance.objective);
         Location player_location = instance.player_locations[0];
         Location opponent_location = instance.player_locations[1];
+        solvers::SolverInstance solver_instance{
+            graph, player_location, opponent_location, objective_id, labyrinth::Location{-1, -1}};
         std::vector<FracSeconds> result{};
         for (size_t run = 0; run < repeats; run++) {
             const auto start = std::chrono::steady_clock::now();
-            const auto minimax_result =
-                minimax::findBestAction(graph, player_location, opponent_location, objective_id, instance.depth);
+            const auto minimax_result = solvers::minimax::findBestAction(
+                solver_instance, solvers::minimax::WinEvaluator{solver_instance}, instance.depth);
             const auto stop = std::chrono::steady_clock::now();
             const FracSeconds duration = FracSeconds(stop - start);
             result.push_back(duration);
-            if (minimax_result.player_action.move_location == labyrinth::error_player_action.move_location) {
+            if (minimax_result.player_action.move_location == solvers::error_player_action.move_location) {
                 std::cerr << "Error returned for " << instance.name << std::endl;
             }
         }
