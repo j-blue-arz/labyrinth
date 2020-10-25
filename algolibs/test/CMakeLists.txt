@@ -10,6 +10,7 @@ set(
     TEST_SOURCES
         "util.h"
         "util.cpp"
+        "solvers_test.h"
         "location_test.cpp"
         "maze_graph_test.cpp"
         "graph_algorithms_test.cpp"

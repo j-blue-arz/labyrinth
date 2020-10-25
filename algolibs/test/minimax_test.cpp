@@ -1,11 +1,11 @@
 #include "minimax_test.h"
-#include "graphbuilder/text_graph_builder.h"
+#include "solvers_test.h"
 #include "solvers/evaluators.h"
 #include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
-#include "solvers/maze_graph.h"
 #include "solvers/minimax.h"
 #include "util.h"
+
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -23,28 +23,12 @@ using namespace std::chrono_literals;
 
 namespace mm = labyrinth::solvers::minimax;
 
-class MinimaxTest : public ::testing::Test {
+class MinimaxTest : public SolversTest {
 private:
     using duration_clock = std::chrono::steady_clock;
 
 protected:
     using DegreeType = uint16_t;
-    void givenGraph(const std::vector<std::string>& maze, const std::vector<OutPaths>& leftover_out_paths) {
-        TextGraphBuilder builder{};
-
-        graph = builder.setMaze(maze).withStandardShiftLocations().buildGraph();
-        graph.setLeftoverOutPaths(getBitmask(leftover_out_paths));
-    }
-
-    void givenPlayerLocations(const Location& player_location, const Location& opponent_location) {
-        this->player_location = player_location;
-        this->opponent_location = opponent_location;
-    }
-
-    void givenObjectiveAt(const Location& location) { objective_id = graph.getNode(location).node_id; }
-
-    void givenPreviousShift(const Location& location) { previous_shift_location = location; }
-
     void givenFindBestActionAsync() {
         solvers::SolverInstance solver_instance{
             graph, player_location, opponent_location, objective_id, previous_shift_location};
@@ -155,11 +139,6 @@ protected:
         return ::testing::AssertionSuccess();
     }
 
-    MazeGraph graph{0};
-    Location player_location;
-    Location opponent_location;
-    NodeId objective_id;
-    Location previous_shift_location{-1, -1};
     size_t max_depth;
 
     solvers::PlayerAction result;
