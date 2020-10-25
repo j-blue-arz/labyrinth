@@ -48,6 +48,34 @@ public:
         return value;
     }
 };
+
+class ObjectiveChessboardDistance : public Evaluator {
+public:
+    explicit ObjectiveChessboardDistance(const SolverInstance& solver_instance) :
+        objective_id_{solver_instance.objective_id} {}
+
+    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+        auto player_location = node.getPlayerLocation();
+        auto opponent_location = node.getOpponentLocation();
+        auto objective_location = node.getGraph().getLocation(objective_id_, Location{-1, -1});
+        if (objective_location != Location{-1, -1}) {
+            return chessboardDistance(opponent_location, objective_location) -
+                   chessboardDistance(player_location, objective_location);
+        } else {
+            // If the objective is on the leftover, the current player can insert
+            // it anywhere on the border. It is therefore difficult to determine
+            // any heuristic distance metric for this case. => stay neutral
+            return 0;
+        }
+    }
+
+private:
+    Location::IndexType chessboardDistance(const Location& a, const Location& b) const {
+        return std::max(std::abs(a.getColumn() - b.getColumn()), std::abs(a.getRow() - b.getRow()));
+    }
+
+    NodeId objective_id_;
+};
 } // namespace minimax
 } // namespace solvers
 } // namespace labyrinth

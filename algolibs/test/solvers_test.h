@@ -28,6 +28,8 @@ protected:
 
     void givenObjectiveAt(const Location& location) { objective_id = graph.getNode(location).node_id; }
 
+    void givenObjectiveOnLeftover() { objective_id = graph.getLeftover().node_id; }
+
     void givenPreviousShift(const Location& location) { previous_shift_location = location; }
 
     solvers::SolverInstance getSolverInstance() const {

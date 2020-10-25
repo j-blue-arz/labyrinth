@@ -34,6 +34,12 @@ protected:
         result_ = evaluator.evaluate(game_tree_node);
     }
 
+    void whenObjectiveChessboardDistanceIsUsed() {
+        auto evaluator = mm::ObjectiveChessboardDistance{getSolverInstance()};
+        mm::GameTreeNode game_tree_node{graph, player_location, opponent_location, previous_shift_location};
+        result_ = evaluator.evaluate(game_tree_node);
+    }
+
     void thenEvaluationShouldBeTerminal() { ASSERT_TRUE(result_.is_terminal); }
 
     void thenEvaluationShouldNotBeTerminal() { ASSERT_FALSE(result_.is_terminal); }
@@ -42,7 +48,7 @@ protected:
 
     void thenEvaluationShouldBePositive() { ASSERT_GT(result_.value, 0); }
 
-    void thenEvaluationShouldBeZero() { ASSERT_EQ(result_.value, 0); }
+    void thenEvaluationShouldBe(mm::Evaluation::ValueType value) { ASSERT_EQ(result_.value, value); }
 
     mm::Evaluation result_{0};
 };
@@ -64,7 +70,7 @@ TEST_F(EvaluatorsTest, givenPlayerIsLocationOnObjective_whenWinEvaluatorIsUsed_i
     whenWinEvaluatorIsUsed();
 
     thenEvaluationShouldNotBeTerminal();
-    thenEvaluationShouldBeZero();
+    thenEvaluationShouldBe(0);
 }
 
 TEST_F(EvaluatorsTest, givenPlayerHasMoreFreedomOfMove_whenReachableHeuristicIsUsed_isGreaterThanZero) {
@@ -73,7 +79,6 @@ TEST_F(EvaluatorsTest, givenPlayerHasMoreFreedomOfMove_whenReachableHeuristicIsU
     whenReachableLocationsHeuristicIsUsed();
 
     thenEvaluationShouldBePositive();
-    thenEvaluationShouldNotBeTerminal();
 }
 
 TEST_F(EvaluatorsTest, givenPlayerHasEqualFreedomOfMove_whenReachableHeuristicIsUsed_isZero) {
@@ -81,8 +86,7 @@ TEST_F(EvaluatorsTest, givenPlayerHasEqualFreedomOfMove_whenReachableHeuristicIs
 
     whenReachableLocationsHeuristicIsUsed();
 
-    thenEvaluationShouldBeZero();
-    thenEvaluationShouldNotBeTerminal();
+    thenEvaluationShouldBe(0);
 }
 
 TEST_F(EvaluatorsTest, givenPlayerHasLessFreedomOfMove_whenReachableHeuristicIsUsed_isLessThanZero) {
@@ -91,5 +95,40 @@ TEST_F(EvaluatorsTest, givenPlayerHasLessFreedomOfMove_whenReachableHeuristicIsU
     whenReachableLocationsHeuristicIsUsed();
 
     thenEvaluationShouldBeNegative();
-    thenEvaluationShouldNotBeTerminal();
+}
+
+TEST_F(EvaluatorsTest, givenPlayerIsCloserToObjective_whenObjectiveChessboardDistanceIsUsed_isExpectedValue) {
+    givenPlayerLocations(Location{0, 0}, Location{6, 6});
+    givenObjectiveAt(Location{2, 2});
+
+    whenObjectiveChessboardDistanceIsUsed();
+
+    thenEvaluationShouldBe(2);
+}
+
+TEST_F(EvaluatorsTest, givenOpponentIsCloserToObjective_whenObjectiveChessboardDistanceIsUsed_isExpectedValue) {
+    givenPlayerLocations(Location{2, 6}, Location{4, 5});
+    givenObjectiveAt(Location{6, 1});
+
+    whenObjectiveChessboardDistanceIsUsed();
+
+    thenEvaluationShouldBe(-1);
+}
+
+TEST_F(EvaluatorsTest, givenSameDistanceToObjective_whenObjectiveChessboardDistanceIsUsed_isExpectedValue) {
+    givenPlayerLocations(Location{5, 0}, Location{6, 1});
+    givenObjectiveAt(Location{3, 3});
+
+    whenObjectiveChessboardDistanceIsUsed();
+
+    thenEvaluationShouldBe(0);
+}
+
+TEST_F(EvaluatorsTest, givenObjectiveOnLeftover_whenObjectiveChessboardDistanceIsUsed_isZero) {
+    givenPlayerLocations(Location{5, 0}, Location{6, 1});
+    givenObjectiveOnLeftover();
+
+    whenObjectiveChessboardDistanceIsUsed();
+
+    thenEvaluationShouldBe(0);
 }
