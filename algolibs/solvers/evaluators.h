@@ -34,6 +34,20 @@ public:
 private:
     NodeId objective_id_;
 };
+
+class ReachableLocationsHeuristic : public Evaluator {
+public:
+    explicit ReachableLocationsHeuristic() {}
+
+    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+        auto player_reachable = reachable::reachableLocations(node.getGraph(), node.getPlayerLocation());
+        auto opponent_reachable = reachable::reachableLocations(node.getGraph(), node.getOpponentLocation());
+        auto player_diameter = static_cast<Evaluation::ValueType>(std::sqrt(player_reachable.size()));
+        auto opponent_diameter = static_cast<Evaluation::ValueType>(std::sqrt(opponent_reachable.size()));
+        auto value = player_diameter - opponent_diameter;
+        return value;
+    }
+};
 } // namespace minimax
 } // namespace solvers
 } // namespace labyrinth

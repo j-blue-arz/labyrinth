@@ -31,13 +31,12 @@ protected:
     void givenPreviousShift(const Location& location) { previous_shift_location = location; }
 
     solvers::SolverInstance getSolverInstance() const {
-
         return solvers::SolverInstance{graph, player_location, opponent_location, objective_id, previous_shift_location};
     }
 
     MazeGraph graph{0};
     Location player_location;
     Location opponent_location;
-    NodeId objective_id;
+    NodeId objective_id{0};
     Location previous_shift_location{-1, -1};
 };

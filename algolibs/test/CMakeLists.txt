@@ -20,6 +20,7 @@ set(
         "minimax_test.h"
         "minimax_test.cpp"
         "evaluators_test.cpp"
+        "evaluators_test.h"
 )
 
 add_executable(all_tests ${TEST_SOURCES})
