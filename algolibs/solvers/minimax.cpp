@@ -251,6 +251,14 @@ Evaluation operator-(const Evaluation& evaluation) noexcept {
     return Evaluation{-evaluation.value, evaluation.is_terminal};
 }
 
+Evaluation operator+(const Evaluation& evaluation1, const Evaluation& evaluation2) noexcept {
+    return Evaluation{evaluation1.value + evaluation2.value, evaluation1.is_terminal || evaluation2.is_terminal};
+}
+
+Evaluation operator*(const Evaluation& evaluation, Evaluation::ValueType factor) noexcept {
+    return Evaluation{evaluation.value * factor, evaluation.is_terminal};
+}
+
 MinimaxResult findBestAction(const SolverInstance& solver_instance, const Evaluator& evaluator, const size_t max_depth) {
     is_aborted = false;
     MinimaxRunner runner{evaluator, max_depth};

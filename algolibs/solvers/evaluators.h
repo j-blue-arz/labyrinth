@@ -5,6 +5,7 @@
 #include "minimax.h"
 
 #include <cmath>
+#include <utility>
 
 namespace labyrinth {
 
@@ -59,8 +60,15 @@ public:
         auto opponent_location = node.getOpponentLocation();
         auto objective_location = node.getGraph().getLocation(objective_id_, Location{-1, -1});
         if (objective_location != Location{-1, -1}) {
-            return chessboardDistance(opponent_location, objective_location) -
-                   chessboardDistance(player_location, objective_location);
+            auto opponent_distance = chessboardDistance(opponent_location, objective_location);
+            auto player_distance = chessboardDistance(player_location, objective_location);
+            if (opponent_distance != 0 && player_distance != 0) {
+                return opponent_distance - player_distance;
+            } else {
+                // If one of the players has reached the objective (distance == 0), then heuristic
+                // is invalid, because the new location of the objective is unknown => stay neutral
+                return 0;
+            }
         } else {
             // If the objective is on the leftover, the current player can insert
             // it anywhere on the border. It is therefore difficult to determine
@@ -76,6 +84,32 @@ private:
 
     NodeId objective_id_;
 };
+
+/**
+ * Combines several other Evaluators with a linear combination.
+ */
+class MultiEvaluator : public Evaluator {
+public:
+    struct Coefficient {
+        Evaluation::ValueType value;
+    };
+
+    void addEvaluator(const Evaluator& evaluator, Coefficient coefficient) {
+        evaluators_.push_back(std::make_pair(std::ref(evaluator), coefficient));
+    }
+
+    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+        Evaluation result{0};
+        for (const auto& evaluator : evaluators_) {
+            result = result + (evaluator.first.evaluate(node) * evaluator.second.value);
+        }
+        return result;
+    }
+
+private:
+    std::vector<std::pair<const Evaluator&, Coefficient>> evaluators_;
+};
+
 } // namespace minimax
 } // namespace solvers
 } // namespace labyrinth

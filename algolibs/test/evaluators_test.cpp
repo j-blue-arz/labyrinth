@@ -10,12 +10,16 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <cstdarg>
+#include <utility>
+
 using namespace labyrinth;
 
 namespace mm = labyrinth::solvers::minimax;
 
 class EvaluatorsTest : public SolversTest {
 protected:
+    using Coefficient = mm::MultiEvaluator::Coefficient;
     void SetUp() override { givenGraph(mazes::evaluators_test_maze, {OutPaths::North, OutPaths::East}); }
 
     static constexpr Location one_location_reachable = Location{0, 0};
@@ -40,6 +44,17 @@ protected:
         result_ = evaluator.evaluate(game_tree_node);
     }
 
+    void whenMultiEvaluatorIsUsed(Coefficient win_evaluator_coefficient, Coefficient reachable_heuristic_coefficient) {
+        mm::WinEvaluator win_evaluator{getSolverInstance()};
+        mm::ReachableLocationsHeuristic heuristic{};
+
+        auto multi_evaluator = mm::MultiEvaluator{};
+        multi_evaluator.addEvaluator(win_evaluator, win_evaluator_coefficient);
+        multi_evaluator.addEvaluator(heuristic, reachable_heuristic_coefficient);
+        mm::GameTreeNode game_tree_node{graph, player_location, opponent_location, previous_shift_location};
+        result_ = multi_evaluator.evaluate(game_tree_node);
+    }
+
     void thenEvaluationShouldBeTerminal() { ASSERT_TRUE(result_.is_terminal); }
 
     void thenEvaluationShouldNotBeTerminal() { ASSERT_FALSE(result_.is_terminal); }
@@ -47,6 +62,8 @@ protected:
     void thenEvaluationShouldBeNegative() { ASSERT_LT(result_.value, 0); }
 
     void thenEvaluationShouldBePositive() { ASSERT_GT(result_.value, 0); }
+
+    void thenEvaluationShouldBeLessThan(mm::Evaluation::ValueType value) { ASSERT_LT(result_.value, value); }
 
     void thenEvaluationShouldBe(mm::Evaluation::ValueType value) { ASSERT_EQ(result_.value, value); }
 
@@ -60,7 +77,7 @@ TEST_F(EvaluatorsTest, givenOpponentReachedObjective_whenWinEvaluatorIsUsed_isTe
     whenWinEvaluatorIsUsed();
 
     thenEvaluationShouldBeTerminal();
-    thenEvaluationShouldBeNegative();
+    thenEvaluationShouldBe(-1);
 }
 
 TEST_F(EvaluatorsTest, givenPlayerIsLocationOnObjective_whenWinEvaluatorIsUsed_isZeroAndNotTerminal) {
@@ -131,4 +148,14 @@ TEST_F(EvaluatorsTest, givenObjectiveOnLeftover_whenObjectiveChessboardDistanceI
     whenObjectiveChessboardDistanceIsUsed();
 
     thenEvaluationShouldBe(0);
+}
+
+TEST_F(EvaluatorsTest, givenOpponentReachedObjective_whenCombinedEvaluatorIsUsed_isTerminalAndRespectsReachableLocations) {
+    givenPlayerLocations(four_locations_reachable, twentyfive_locations_reachable);
+    givenObjectiveAt(Location{3, 3});
+
+    whenMultiEvaluatorIsUsed(Coefficient{100}, Coefficient{1});
+
+    thenEvaluationShouldBeTerminal();
+    thenEvaluationShouldBeLessThan(100);
 }

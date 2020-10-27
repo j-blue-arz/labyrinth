@@ -47,11 +47,11 @@ private:
 
 /**
  * The value type of a game state in the minimax algorithm.
- * 
+ *
  * Is returned by an Evaluator, and holds the actual (scalar) value and a flag
  * designating if the node is terminal, i.e. if the algorithm should not continue searching
  * along the current path.
- * This is typically the case if the objective has been reached. * 
+ * This is typically the case if the objective has been reached. *
  */
 struct Evaluation {
     using ValueType = int32_t;
@@ -66,6 +66,10 @@ struct Evaluation {
 inline bool operator>(const Evaluation& lhs, const Evaluation& rhs) noexcept;
 
 Evaluation operator-(const Evaluation& evaluation) noexcept;
+
+Evaluation operator+(const Evaluation& evaluation1, const Evaluation& evaluation2) noexcept;
+
+Evaluation operator*(const Evaluation& evaluation, Evaluation::ValueType factor) noexcept;
 
 struct MinimaxResult {
     PlayerAction player_action;
