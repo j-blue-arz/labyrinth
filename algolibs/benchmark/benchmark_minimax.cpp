@@ -5,6 +5,7 @@
 #include "solvers/minimax.h"
 
 #include <vector>
+#include <memory>
 
 namespace bench {
 
@@ -22,7 +23,7 @@ protected:
         for (size_t run = 0; run < repeats; run++) {
             const auto start = std::chrono::steady_clock::now();
             const auto minimax_result = solvers::minimax::findBestAction(
-                solver_instance, solvers::minimax::WinEvaluator{solver_instance}, instance.depth);
+                solver_instance, std::make_unique<solvers::minimax::WinEvaluator>(solver_instance), instance.depth);
             const auto stop = std::chrono::steady_clock::now();
             const FracSeconds duration = FracSeconds(stop - start);
             result.push_back(duration);

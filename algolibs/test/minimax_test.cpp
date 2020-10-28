@@ -1,11 +1,20 @@
+/**
+ * Tests minimax implementation.
+ *
+ * Most testcases assert certain return values (or their properties) of a call to either
+ * the iterative deepening or the fixed-depth minimax.
+ * These testcases are parameterized over different Evaluators.
+ *
+ * One testcase asserts that the algorithm aborts quickly when asked to do so.
+ */
+
 #include "minimax_test.h"
-#include "solvers_test.h"
 #include "solvers/evaluators.h"
 #include "solvers/exhsearch.h"
 #include "solvers/graph_algorithms.h"
 #include "solvers/minimax.h"
+#include "solvers_test.h"
 #include "util.h"
-
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -15,6 +24,7 @@
 #include <functional>
 #include <future>
 #include <iterator>
+#include <memory>
 #include <thread>
 
 using namespace labyrinth;
@@ -23,18 +33,50 @@ using namespace std::chrono_literals;
 
 namespace mm = labyrinth::solvers::minimax;
 
-class MinimaxTest : public SolversTest {
+using EvaluatorFactory = std::unique_ptr<mm::Evaluator> (*)(solvers::SolverInstance);
+
+std::unique_ptr<mm::Evaluator> createWinEvaluator(solvers::SolverInstance solver_instance) {
+    return std::make_unique<mm::WinEvaluator>(solver_instance);
+}
+
+std::unique_ptr<mm::Evaluator> createWinAndReachedLocationsEvaluator(solvers::SolverInstance solver_instance) {
+    using Factor = mm::MultiEvaluator::Factor;
+    auto win_evaluator = std::make_unique<mm::WinEvaluator>(solver_instance);
+    auto reachable_heuristic = std::make_unique<mm::ReachableLocationsHeuristic>();
+
+    auto multi_evaluator = std::make_unique<mm::MultiEvaluator>();
+    multi_evaluator->addEvaluator(std::move(win_evaluator), Factor{100});
+    multi_evaluator->addEvaluator(std::move(reachable_heuristic), Factor{1});
+    return multi_evaluator;
+}
+
+std::unique_ptr<mm::Evaluator> createWinAndObjectiveDistanceEvaluator(solvers::SolverInstance solver_instance) {
+    using Factor = mm::MultiEvaluator::Factor;
+    auto win_evaluator = std::make_unique<mm::WinEvaluator>(solver_instance);
+    auto distance_heuristic = std::make_unique<mm::ObjectiveChessboardDistance>(solver_instance);
+
+    auto multi_evaluator = std::make_unique<mm::MultiEvaluator>();
+    multi_evaluator->addEvaluator(std::move(win_evaluator), Factor{100});
+    multi_evaluator->addEvaluator(std::move(distance_heuristic), Factor{1});
+    return multi_evaluator;
+}
+
+const std::vector<EvaluatorFactory> evaluator_factories = {&createWinEvaluator, &createWinAndReachedLocationsEvaluator, &createWinAndObjectiveDistanceEvaluator};
+const std::vector<std::string> names = {"OnlyWin", "WinAndReachedLocations", "WinAndObjectiveDistance"};
+
+class MinimaxTest : public SolversTest, public ::testing::WithParamInterface<size_t> {
 private:
     using duration_clock = std::chrono::steady_clock;
 
 protected:
     using DegreeType = uint16_t;
+
     void givenFindBestActionAsync() {
         solvers::SolverInstance solver_instance{
             graph, player_location, opponent_location, objective_id, previous_shift_location};
         start = duration_clock::now();
-        future_action =
-            std::async(std::launch::async, mm::iterateMinimax, solver_instance, mm::WinEvaluator{solver_instance});
+        future_action = std::async(
+            std::launch::async, mm::iterateMinimax, solver_instance, std::make_unique<mm::WinEvaluator>(solver_instance));
     }
 
     void givenSleepFor(duration_clock::duration duration) { std::this_thread::sleep_for(duration); }
@@ -42,13 +84,14 @@ protected:
     void whenFindBestAction() {
         solvers::SolverInstance solver_instance{
             graph, player_location, opponent_location, objective_id, previous_shift_location};
-        result = mm::iterateMinimax(solver_instance, mm::WinEvaluator{solver_instance});
+        result = mm::iterateMinimax(solver_instance, getEvaluator(solver_instance));
     }
 
     void whenFindBestActionWithDepth(size_t depth) {
         solvers::SolverInstance solver_instance{
             graph, player_location, opponent_location, objective_id, previous_shift_location};
-        minimax_result = mm::findBestAction(solver_instance, mm::WinEvaluator{solver_instance}, depth);
+
+        minimax_result = mm::findBestAction(solver_instance, getEvaluator(solver_instance), depth);
         result = minimax_result.player_action;
     }
 
@@ -147,9 +190,14 @@ protected:
     duration_clock::time_point start;
     duration_clock::time_point stop;
     std::future<labyrinth::solvers::PlayerAction> future_action;
+
+private:
+    std::unique_ptr<mm::Evaluator> getEvaluator(const solvers::SolverInstance& solver_instance) {
+        return (*evaluator_factories[GetParam()])(solver_instance);
+    }
 };
 
-TEST_F(MinimaxTest, findBestAction__reachableWithOneAction__returnsCorrectMove) {
+TEST_P(MinimaxTest, findBestAction__reachableWithOneAction__returnsCorrectMove) {
     givenGraph(mazes::big_component_maze, {OutPaths::North, OutPaths::East});
     givenPlayerLocations(Location{3, 3}, Location{6, 6});
     givenObjectiveAt(Location{0, 3});
@@ -160,7 +208,7 @@ TEST_F(MinimaxTest, findBestAction__reachableWithOneAction__returnsCorrectMove) 
     thenActionReachesObjective();
 }
 
-TEST_F(MinimaxTest, findBestAction__cannotPreventOpponent__terminatesWithValidAction) {
+TEST_P(MinimaxTest, findBestAction__cannotPreventOpponent__terminatesWithValidAction) {
     givenGraph(mazes::big_component_maze, {OutPaths::North, OutPaths::South});
     givenPlayerLocations(Location{3, 2}, Location{0, 4});
     givenObjectiveAt(Location{0, 5});
@@ -170,7 +218,7 @@ TEST_F(MinimaxTest, findBestAction__cannotPreventOpponent__terminatesWithValidAc
     thenActionIsValid();
 }
 
-TEST_F(MinimaxTest, findBestAction__cannotPreventOpponent__isTerminalAndNegative) {
+TEST_P(MinimaxTest, findBestAction__cannotPreventOpponent__isTerminalAndNegative) {
     givenGraph(mazes::big_component_maze, {OutPaths::North, OutPaths::South});
     givenPlayerLocations(Location{3, 2}, Location{0, 4});
     givenObjectiveAt(Location{0, 5});
@@ -181,7 +229,7 @@ TEST_F(MinimaxTest, findBestAction__cannotPreventOpponent__isTerminalAndNegative
     thenMinimaxResultShouldBeNegative();
 }
 
-TEST_F(MinimaxTest, findBestAction__opponentCannotPreventReachNextMove__returnsExpectedAction) {
+TEST_P(MinimaxTest, findBestAction__opponentCannotPreventReachNextMove__returnsExpectedAction) {
     givenGraph(mazes::big_component_maze, {OutPaths::North, OutPaths::East});
     givenPlayerLocations(Location{6, 6}, Location{0, 0});
     givenObjectiveAt(Location{0, 6});
@@ -193,7 +241,7 @@ TEST_F(MinimaxTest, findBestAction__opponentCannotPreventReachNextMove__returnsE
     thenMoveLocationIs(Location{6, 5});
 }
 
-TEST_F(MinimaxTest, findBestAction__preventOpponent__returnsExpectedShift) {
+TEST_P(MinimaxTest, findBestAction__preventOpponent__returnsExpectedShift) {
     givenGraph(mazes::difficult_maze, {OutPaths::North, OutPaths::East});
     givenPlayerLocations(Location{3, 3}, Location{2, 6});
     givenObjectiveAt(Location{0, 6});
@@ -205,7 +253,7 @@ TEST_F(MinimaxTest, findBestAction__preventOpponent__returnsExpectedShift) {
     thenShiftRotationIsOneOf({90, 180, 270});
 }
 
-TEST_F(MinimaxTest, findBestAction__bestActionViolatesPreviousShift__doesReturnDifferentShift) {
+TEST_P(MinimaxTest, findBestAction__bestActionViolatesPreviousShift__doesReturnDifferentShift) {
     givenGraph(mazes::difficult_maze, {OutPaths::North, OutPaths::East});
     givenPlayerLocations(Location{3, 3}, Location{2, 6});
     givenObjectiveAt(Location{0, 6});
@@ -215,6 +263,17 @@ TEST_F(MinimaxTest, findBestAction__bestActionViolatesPreviousShift__doesReturnD
 
     thenActionIsValid();
     thenShiftLocationIsNot(Location{1, 6});
+}
+
+TEST_P(MinimaxTest, findBestAction__opponentAndObjectiveOppositeOfBoardButPreventPossible__shouldPreventOpponent) {
+    givenGraph(mazes::difficult_maze, {OutPaths::North, OutPaths::East});
+    givenPlayerLocations(Location{0, 0}, Location{5, 6});
+    givenObjectiveAt(Location{5, 0});
+
+    whenFindBestActionWithDepth(2);
+
+    thenActionIsValid();
+    thenOpponentCannotReachObjective();
 }
 
 TEST_F(MinimaxTest, findBestAction__whenAborted__shouldReturnQuicklyWithResult) {
@@ -230,13 +289,9 @@ TEST_F(MinimaxTest, findBestAction__whenAborted__shouldReturnQuicklyWithResult) 
     thenActionIsValid();
 }
 
-TEST_F(MinimaxTest, findBestAction__opponentAndObjectiveOppositeOfBoardButPreventPossible__shouldPreventOpponent) {
-    givenGraph(mazes::difficult_maze, {OutPaths::North, OutPaths::East});
-    givenPlayerLocations(Location{0, 0}, Location{5, 6});
-    givenObjectiveAt(Location{5, 0});
-
-    whenFindBestActionWithDepth(2);
-
-    thenActionIsValid();
-    thenOpponentCannotReachObjective();
-}
+INSTANTIATE_TEST_SUITE_P(,
+                         MinimaxTest,
+                         ::testing::Values(0, 1, 2),
+                         [](const testing::TestParamInfo<MinimaxTest::ParamType>& info) {
+                             return names[info.param];
+                         });

@@ -160,15 +160,19 @@ class MinimaxRunner {
 public:
     constexpr static Evaluation infinity{10000};
 
-    explicit MinimaxRunner(const Evaluator& evaluator, size_t max_depth) :
-        evaluator_{evaluator}, max_depth_{max_depth}, best_action_{error_player_action} {}
+    explicit MinimaxRunner(std::unique_ptr<Evaluator> evaluator, const SolverInstance& solver_instance, size_t max_depth) :
+        evaluator_{std::move(evaluator)},
+        win_evaluator_{solver_instance},
+        solver_instance_{solver_instance},
+        max_depth_{max_depth},
+        best_action_{error_player_action} {}
 
-    MinimaxResult runMinimax(const SolverInstance& solver_instance) {
-        MazeGraph graph_copy{solver_instance.graph};
+    MinimaxResult runMinimax() {
+        MazeGraph graph_copy{solver_instance_.graph};
         GameTreeNode root{graph_copy,
-                          solver_instance.player_location,
-                          solver_instance.opponent_location,
-                          solver_instance.previous_shift_location};
+                          solver_instance_.player_location,
+                          solver_instance_.opponent_location,
+                          solver_instance_.previous_shift_location};
         const auto& evaluation = negamax(root);
         return MinimaxResult{best_action_, evaluation};
     }
@@ -178,9 +182,9 @@ public:
      * Therefore, the Evaluator always has to evaluate from the viewpoint of player 0.
      */
     Evaluation negamax(const GameTreeNode& node, size_t depth = 0) {
-        auto evaluation = evaluator_.evaluate(node);
-        if (depth == max_depth_ or evaluation.is_terminal) {
-            return evaluator_.evaluate(node);
+        auto is_terminal = win_evaluator_.evaluate(node).is_terminal;
+        if (depth == max_depth_ or is_terminal) {
+            return evaluator_->evaluate(node);
         }
         auto best_value = -infinity;
         for (ChildIterator child_iterator{node}; !child_iterator.isAtEnd(); ++child_iterator) {
@@ -204,24 +208,31 @@ public:
     const PlayerAction& getBestAction() const { return best_action_; }
 
 private:
-    const Evaluator& evaluator_;
+    std::unique_ptr<Evaluator> evaluator_;
+    WinEvaluator win_evaluator_;
+    const SolverInstance& solver_instance_;
     size_t max_depth_;
     PlayerAction best_action_;
 };
 
+/**
+ * Iterative Deepening implementation. Runs minimax with increasing depths.
+ */
 class IterativeDeepening {
 public:
-    IterativeDeepening(const Evaluator& evaluator) :
-        evaluator_{evaluator}, max_depth_{0}, minimax_result_{error_player_action, -MinimaxRunner::infinity} {}
-    PlayerAction iterateMinimax(const SolverInstance& solver_instance) {
+    IterativeDeepening(std::unique_ptr<Evaluator> evaluator, const SolverInstance& solver_instance) :
+        max_depth_{0},
+        runner_{std::move(evaluator), solver_instance, max_depth_},
+        minimax_result_{error_player_action, -MinimaxRunner::infinity} {}
+        
+    PlayerAction iterateMinimax() {
         is_aborted = false;
         max_depth_ = 0;
         minimax_result_ = {error_player_action, -MinimaxRunner::infinity};
-        MinimaxRunner runner{evaluator_, max_depth_};
         do {
             ++max_depth_;
-            runner.setMaxDepth(max_depth_);
-            auto new_result = runner.runMinimax(solver_instance);
+            runner_.setMaxDepth(max_depth_);
+            auto new_result = runner_.runMinimax();
             if (!is_aborted || max_depth_ == 1) {
                 minimax_result_ = new_result;
             }
@@ -234,8 +245,8 @@ public:
     bool currentResultIsTerminal() { return minimax_result_.evaluation.is_terminal; }
 
 private:
-    const Evaluator& evaluator_;
     size_t max_depth_;
+    MinimaxRunner runner_;
     MinimaxResult minimax_result_;
 };
 
@@ -259,18 +270,20 @@ Evaluation operator*(const Evaluation& evaluation, Evaluation::ValueType factor)
     return Evaluation{evaluation.value * factor, evaluation.is_terminal};
 }
 
-MinimaxResult findBestAction(const SolverInstance& solver_instance, const Evaluator& evaluator, const size_t max_depth) {
+MinimaxResult findBestAction(const SolverInstance& solver_instance,
+                             std::unique_ptr<Evaluator> evaluator,
+                             const size_t max_depth) {
     is_aborted = false;
-    MinimaxRunner runner{evaluator, max_depth};
-    return runner.runMinimax(solver_instance);
+    MinimaxRunner runner{std::move(evaluator), solver_instance, max_depth};
+    return runner.runMinimax();
 }
 
-/**
- * Iterative Deepening implementation. Runs minimax with increasing depths.
- */
-PlayerAction iterateMinimax(const SolverInstance& solver_instance, const Evaluator& evaluator) {
-    iterative_deepening_searches.push_back(IterativeDeepening{evaluator});
-    return iterative_deepening_searches.back().iterateMinimax(solver_instance);
+PlayerAction iterateMinimax(const SolverInstance& solver_instance, std::unique_ptr<Evaluator> evaluator) {
+    auto iterative_deepening =
+        iterative_deepening_searches.emplace(iterative_deepening_searches.end(), std::move(evaluator), solver_instance);
+    auto result = iterative_deepening->iterateMinimax();
+    iterative_deepening_searches.erase(iterative_deepening);
+    return result;
 }
 
 void abortComputation() {
@@ -278,8 +291,12 @@ void abortComputation() {
 }
 
 SearchStatus getSearchStatus() {
-    auto search = iterative_deepening_searches.back();
-    return SearchStatus{search.getCurrentSearchDepth(), search.currentResultIsTerminal()};
+    if (!iterative_deepening_searches.empty()) {
+        auto& search = iterative_deepening_searches.back();
+        return SearchStatus{search.getCurrentSearchDepth(), search.currentResultIsTerminal()};
+    } else {
+        return SearchStatus{0, false};
+    }
 }
 
 } // namespace minimax

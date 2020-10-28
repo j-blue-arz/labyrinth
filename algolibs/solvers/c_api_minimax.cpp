@@ -2,7 +2,9 @@
 #include "evaluators.h"
 #include "minimax.h"
 #include "solvers.h"
+
 #include <iostream>
+#include <memory>
 
 namespace slv = labyrinth::solvers;
 
@@ -15,8 +17,7 @@ PUBLIC_API struct CAction find_action(struct CGraph* c_graph,
                                         mapLocationAtIndex(*c_player_locations, 1),
                                         objective_id,
                                         mapLocation(*c_previous_shift_location)};
-    slv::minimax::WinEvaluator evaluator{solver_instance};
-    auto best_action = slv::minimax::iterateMinimax(solver_instance, evaluator);
+    auto best_action = slv::minimax::iterateMinimax(solver_instance, std::make_unique<slv::minimax::WinEvaluator>(solver_instance));
 
     return actionToCAction(best_action);
 }

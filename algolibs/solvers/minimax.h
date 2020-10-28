@@ -101,13 +101,13 @@ static std::atomic_bool is_aborted = false;
 void abortComputation();
 
 /** Searches for the minimax action, up to a given depth */
-MinimaxResult findBestAction(const SolverInstance& solver_instance, const Evaluator& evaluator, const size_t max_depth);
+MinimaxResult findBestAction(const SolverInstance& solver_instance, std::unique_ptr<Evaluator> evaluator, const size_t max_depth);
 
 /** Searches for a minimax action, with increasing depths.
  * The algorithm will run until either it is aborted or it finds a terminating result,
  * i.e. one of the players is guaranteed to reach the objective.
  */
-PlayerAction iterateMinimax(const SolverInstance& solver_instance, const Evaluator& evaluator);
+PlayerAction iterateMinimax(const SolverInstance& solver_instance, std::unique_ptr<Evaluator> evaluator);
 
 SearchStatus getSearchStatus();
 

@@ -5,6 +5,7 @@
 #include "minimax.h"
 
 #include <cmath>
+#include <memory>
 #include <utility>
 
 namespace labyrinth {
@@ -24,7 +25,7 @@ public:
      * However, if the current player is placed on the objective, it has to return 0 (not 1), because
      * The player has not actively reached the objective in his last move.
      */
-    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+    Evaluation evaluate(const GameTreeNode& node) const override {
         if (node.getGraph().getNode(node.getOpponentLocation()).node_id == objective_id_) {
             return Evaluation{-1, true};
         } else {
@@ -38,9 +39,7 @@ private:
 
 class ReachableLocationsHeuristic : public Evaluator {
 public:
-    explicit ReachableLocationsHeuristic() {}
-
-    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+    Evaluation evaluate(const GameTreeNode& node) const override {
         auto player_reachable = reachable::reachableLocations(node.getGraph(), node.getPlayerLocation());
         auto opponent_reachable = reachable::reachableLocations(node.getGraph(), node.getOpponentLocation());
         auto player_diameter = static_cast<Evaluation::ValueType>(std::sqrt(player_reachable.size()));
@@ -55,7 +54,7 @@ public:
     explicit ObjectiveChessboardDistance(const SolverInstance& solver_instance) :
         objective_id_{solver_instance.objective_id} {}
 
-    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+    Evaluation evaluate(const GameTreeNode& node) const override {
         auto player_location = node.getPlayerLocation();
         auto opponent_location = node.getOpponentLocation();
         auto objective_location = node.getGraph().getLocation(objective_id_, Location{-1, -1});
@@ -89,25 +88,33 @@ private:
  * Combines several other Evaluators with a linear combination.
  */
 class MultiEvaluator : public Evaluator {
+private:
+    struct Operand;
+
 public:
-    struct Coefficient {
+    struct Factor {
         Evaluation::ValueType value;
     };
 
-    void addEvaluator(const Evaluator& evaluator, Coefficient coefficient) {
-        evaluators_.push_back(std::make_pair(std::ref(evaluator), coefficient));
+    void addEvaluator(std::unique_ptr<Evaluator> evaluator, Factor factor) {
+        evaluators_.push_back(Operand{std::move(evaluator), factor});
     }
 
-    virtual Evaluation evaluate(const GameTreeNode& node) const override {
+    Evaluation evaluate(const GameTreeNode& node) const override {
         Evaluation result{0};
-        for (const auto& evaluator : evaluators_) {
-            result = result + (evaluator.first.evaluate(node) * evaluator.second.value);
+        for (const auto& operand : evaluators_) {
+            result = result + (operand.evaluator->evaluate(node) * operand.factor.value);
         }
         return result;
     }
 
 private:
-    std::vector<std::pair<const Evaluator&, Coefficient>> evaluators_;
+    struct Operand {
+        std::unique_ptr<Evaluator> evaluator;
+        Factor factor;
+    };
+
+    std::vector<Operand> evaluators_;
 };
 
 } // namespace minimax

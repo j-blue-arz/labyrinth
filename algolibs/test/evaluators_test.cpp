@@ -19,7 +19,7 @@ namespace mm = labyrinth::solvers::minimax;
 
 class EvaluatorsTest : public SolversTest {
 protected:
-    using Coefficient = mm::MultiEvaluator::Coefficient;
+    using Factor = mm::MultiEvaluator::Factor;
     void SetUp() override { givenGraph(mazes::evaluators_test_maze, {OutPaths::North, OutPaths::East}); }
 
     static constexpr Location one_location_reachable = Location{0, 0};
@@ -44,13 +44,10 @@ protected:
         result_ = evaluator.evaluate(game_tree_node);
     }
 
-    void whenMultiEvaluatorIsUsed(Coefficient win_evaluator_coefficient, Coefficient reachable_heuristic_coefficient) {
-        mm::WinEvaluator win_evaluator{getSolverInstance()};
-        mm::ReachableLocationsHeuristic heuristic{};
-
+    void whenMultiEvaluatorIsUsed(Factor win_evaluator_factor, Factor reachable_heuristic_factor) {
         auto multi_evaluator = mm::MultiEvaluator{};
-        multi_evaluator.addEvaluator(win_evaluator, win_evaluator_coefficient);
-        multi_evaluator.addEvaluator(heuristic, reachable_heuristic_coefficient);
+        multi_evaluator.addEvaluator(std::make_unique<mm::WinEvaluator>(getSolverInstance()), win_evaluator_factor);
+        multi_evaluator.addEvaluator(std::make_unique<mm::ReachableLocationsHeuristic>(), reachable_heuristic_factor);
         mm::GameTreeNode game_tree_node{graph, player_location, opponent_location, previous_shift_location};
         result_ = multi_evaluator.evaluate(game_tree_node);
     }
@@ -154,7 +151,7 @@ TEST_F(EvaluatorsTest, givenOpponentReachedObjective_whenCombinedEvaluatorIsUsed
     givenPlayerLocations(four_locations_reachable, twentyfive_locations_reachable);
     givenObjectiveAt(Location{3, 3});
 
-    whenMultiEvaluatorIsUsed(Coefficient{100}, Coefficient{1});
+    whenMultiEvaluatorIsUsed(Factor{100}, Factor{1});
 
     thenEvaluationShouldBeTerminal();
     thenEvaluationShouldBeLessThan(100);
