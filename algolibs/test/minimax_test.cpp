@@ -35,33 +35,7 @@ namespace mm = labyrinth::solvers::minimax;
 
 using EvaluatorFactory = std::unique_ptr<mm::Evaluator> (*)(solvers::SolverInstance);
 
-std::unique_ptr<mm::Evaluator> createWinEvaluator(solvers::SolverInstance solver_instance) {
-    return std::make_unique<mm::WinEvaluator>(solver_instance);
-}
-
-std::unique_ptr<mm::Evaluator> createWinAndReachedLocationsEvaluator(solvers::SolverInstance solver_instance) {
-    using Factor = mm::MultiEvaluator::Factor;
-    auto win_evaluator = std::make_unique<mm::WinEvaluator>(solver_instance);
-    auto reachable_heuristic = std::make_unique<mm::ReachableLocationsHeuristic>();
-
-    auto multi_evaluator = std::make_unique<mm::MultiEvaluator>();
-    multi_evaluator->addEvaluator(std::move(win_evaluator), Factor{100});
-    multi_evaluator->addEvaluator(std::move(reachable_heuristic), Factor{1});
-    return multi_evaluator;
-}
-
-std::unique_ptr<mm::Evaluator> createWinAndObjectiveDistanceEvaluator(solvers::SolverInstance solver_instance) {
-    using Factor = mm::MultiEvaluator::Factor;
-    auto win_evaluator = std::make_unique<mm::WinEvaluator>(solver_instance);
-    auto distance_heuristic = std::make_unique<mm::ObjectiveChessboardDistance>(solver_instance);
-
-    auto multi_evaluator = std::make_unique<mm::MultiEvaluator>();
-    multi_evaluator->addEvaluator(std::move(win_evaluator), Factor{100});
-    multi_evaluator->addEvaluator(std::move(distance_heuristic), Factor{1});
-    return multi_evaluator;
-}
-
-const std::vector<EvaluatorFactory> evaluator_factories = {&createWinEvaluator, &createWinAndReachedLocationsEvaluator, &createWinAndObjectiveDistanceEvaluator};
+const std::vector<EvaluatorFactory> evaluator_factories = {&mm::factories::createWinEvaluator, &mm::factories::createWinAndReachableLocationsEvaluator, &mm::factories::createWinAndObjectiveDistanceEvaluator};
 const std::vector<std::string> names = {"OnlyWin", "WinAndReachedLocations", "WinAndObjectiveDistance"};
 
 class MinimaxTest : public SolversTest, public ::testing::WithParamInterface<size_t> {

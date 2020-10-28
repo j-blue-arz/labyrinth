@@ -9,9 +9,7 @@
 #include <utility>
 
 namespace labyrinth {
-
 namespace solvers {
-
 namespace minimax {
 
 class WinEvaluator : public Evaluator {
@@ -116,6 +114,14 @@ private:
 
     std::vector<Operand> evaluators_;
 };
+
+namespace factories {
+
+std::unique_ptr<Evaluator> createWinEvaluator(solvers::SolverInstance solver_instance);
+std::unique_ptr<Evaluator> createWinAndReachableLocationsEvaluator(solvers::SolverInstance solver_instance);
+std::unique_ptr<Evaluator> createWinAndObjectiveDistanceEvaluator(solvers::SolverInstance solver_instance);
+
+} // namespace factories
 
 } // namespace minimax
 } // namespace solvers

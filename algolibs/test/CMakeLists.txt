@@ -1,11 +1,3 @@
-macro(package_add_test TESTNAME)
-    add_executable(${TESTNAME} ${ARGN})
-	target_include_directories(${TESTNAME} PUBLIC ${PROJECT_SOURCE_DIR})
-    target_link_libraries(${TESTNAME} gtest gmock gtest_main exhsearch minimax BUILDER)
-    add_test(NAME ${TESTNAME} COMMAND ${TESTNAME} --gtest_output=xml:${TESTNAME}.xml)
-    set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
-endmacro()
-
 set(
     TEST_SOURCES
         "util.h"
