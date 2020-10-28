@@ -65,6 +65,8 @@ struct Evaluation {
 
 inline bool operator>(const Evaluation& lhs, const Evaluation& rhs) noexcept;
 
+inline bool operator>=(const Evaluation& lhs, const Evaluation& rhs) noexcept;
+
 Evaluation operator-(const Evaluation& evaluation) noexcept;
 
 Evaluation operator+(const Evaluation& evaluation1, const Evaluation& evaluation2) noexcept;

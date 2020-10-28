@@ -46,9 +46,16 @@ RotationDegreeType determineMaxRotation(OutPaths out_paths) {
     }
 }
 
+
+/**
+ * Iterator for children of a node.
+ * 
+ * Computes all possible shifts and moves. The moves are computed lazily.
+ * The iterator alters the maze state by applying and undoing the current shift action.
+ */
 class ChildIterator {
+// Invariant: either the graph is in a shifted state, or is_at_end_ is true
 public:
-    // MazeGraph& graph, const Location& player_location, Location previous_shift_location)
     explicit ChildIterator(const GameTreeNode& parent) :
         parent_{parent},
         graph_{parent.getGraph()},
@@ -60,6 +67,12 @@ public:
         skipInvalidShiftLocation();
         shift();
         initPossibleMoves();
+    }
+
+    ~ChildIterator() {
+        if(!is_at_end_) {
+            undoShift();
+        }
     }
 
     PlayerAction getPlayerAction() const {
@@ -158,7 +171,8 @@ private:
  */
 class MinimaxRunner {
 public:
-    constexpr static Evaluation infinity{10000};
+    constexpr static Evaluation::ValueType inf_value{10000};
+    constexpr static Evaluation infinity{inf_value};
 
     explicit MinimaxRunner(std::unique_ptr<Evaluator> evaluator, const SolverInstance& solver_instance, size_t max_depth) :
         evaluator_{std::move(evaluator)},
@@ -177,21 +191,29 @@ public:
         return MinimaxResult{best_action_, evaluation};
     }
 
+    void setMaxDepth(size_t depth) { max_depth_ = depth; }
+
+private:
     /**
      * This implementation of negamax does not use an alternating player index.
      * Therefore, the Evaluator always has to evaluate from the viewpoint of player 0.
      */
-    Evaluation negamax(const GameTreeNode& node, size_t depth = 0) {
+    Evaluation negamax(const GameTreeNode& node,
+                       Evaluation alpha = -infinity,
+                       Evaluation beta = infinity,
+                       size_t depth = 0) {
         auto is_terminal = win_evaluator_.evaluate(node).is_terminal;
         if (depth == max_depth_ or is_terminal) {
             return evaluator_->evaluate(node);
         }
-        auto best_value = -infinity;
         for (ChildIterator child_iterator{node}; !child_iterator.isAtEnd(); ++child_iterator) {
             auto child_node = child_iterator.createGameTreeNode();
-            auto negamax_value = -negamax(child_node, depth + 1);
-            if (negamax_value > best_value) {
-                best_value = negamax_value;
+            auto negamax_value = -negamax(child_node, -beta, -alpha, depth + 1);
+            if (negamax_value >= beta) {
+                return beta;
+            }
+            if (negamax_value > alpha) {
+                alpha = negamax_value;
                 if (depth == 0) {
                     best_action_ = child_iterator.getPlayerAction();
                 }
@@ -200,14 +222,9 @@ public:
                 break;
             }
         }
-        return best_value;
+        return alpha;
     }
 
-    void setMaxDepth(size_t depth) { max_depth_ = depth; }
-
-    const PlayerAction& getBestAction() const { return best_action_; }
-
-private:
     std::unique_ptr<Evaluator> evaluator_;
     WinEvaluator win_evaluator_;
     const SolverInstance& solver_instance_;
@@ -224,7 +241,7 @@ public:
         max_depth_{0},
         runner_{std::move(evaluator), solver_instance, max_depth_},
         minimax_result_{error_player_action, -MinimaxRunner::infinity} {}
-        
+
     PlayerAction iterateMinimax() {
         is_aborted = false;
         max_depth_ = 0;
@@ -256,6 +273,10 @@ std::list<IterativeDeepening> iterative_deepening_searches{};
 
 inline bool operator>(const Evaluation& lhs, const Evaluation& rhs) noexcept {
     return lhs.value > rhs.value;
+}
+
+inline bool operator>=(const Evaluation& lhs, const Evaluation& rhs) noexcept {
+    return lhs.value >= rhs.value;
 }
 
 Evaluation operator-(const Evaluation& evaluation) noexcept {

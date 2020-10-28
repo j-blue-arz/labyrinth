@@ -109,7 +109,7 @@ protected:
 
     void thenMinimaxResultShouldBeNegative() { ASSERT_LT(minimax_result.evaluation.value, 0); }
 
-    void thenShiftLocationIs(const Location& location) { EXPECT_EQ(result.shift.location, location); }
+    void thenShiftLocationIs(const Location& location) { EXPECT_THAT(result.shift.location, testing::Eq(location)); }
 
     void thenShiftLocationIsNot(const Location& location) { EXPECT_NE(result.shift.location, location); }
 
@@ -119,7 +119,7 @@ protected:
             rotation_degrees.begin(), rotation_degrees.end(), std::back_inserter(rotations), [](DegreeType degree) {
                 return static_cast<RotationDegreeType>(degree / 90);
             });
-        ASSERT_THAT(rotations, testing::Contains(result.shift.rotation));
+        ASSERT_THAT(result.shift.rotation, testing::AnyOfArray(rotations));
     };
 
     void thenMoveLocationIs(const Location& location) { EXPECT_EQ(result.move_location, location); }
