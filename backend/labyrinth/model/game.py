@@ -279,7 +279,6 @@ class Board:
         if not objective_maze_card:
             objective_maze_card = self._find_new_objective_maze_card()
         self._objective_maze_card = objective_maze_card
-        self.validate_moves = True
 
     @property
     def leftover_card(self):
@@ -373,11 +372,9 @@ class Board:
         raise exceptions.InvalidStateException("Location {} is not on the border".format(border_location))
 
     def _validate_move_location(self, piece_location, target_location):
-        # sourcery skip: merge-nested-ifs
-        if self.validate_moves:
-            if not Graph(self._maze).is_reachable(piece_location, target_location):
-                raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
-                    piece_location, target_location))
+        if not Graph(self._maze).is_reachable(piece_location, target_location):
+            raise exceptions.MoveUnreachableException("Locations {} and {} are not connected".format(
+                piece_location, target_location))
 
     def _validate_shift_location(self, location):
         if location not in self._shift_locations:
