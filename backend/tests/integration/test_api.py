@@ -35,18 +35,18 @@ def test_post_players_four_times(client):
 def test_post_players_library_computer_player(client):
     """ Tests POST for /api/games/0/players with computer player
 
-    Adds a human player and a computer player with compute method 'dynamic-libexhsearch'
+    Adds a human player and a computer player with compute method 'libexhsearch'
     Expects an OK response with a single int in the body.
     Checks if the game state respects the added computer player.
     """
     _post_player(client)
-    response = _post_player(client, is_computer=True, computation_method="dynamic-libexhsearch")
+    response = _post_player(client, is_computer=True, computation_method="libexhsearch")
     assert response.content_type == "application/json"
     _assert_ok_retrieve_id(response)
     response = _get_state(client)
     state = response.get_json()
     assert state["players"][1]["isComputerPlayer"] is True
-    assert state["players"][1]["computationMethod"] == "dynamic-libexhsearch"
+    assert state["players"][1]["computationMethod"] == "libexhsearch"
 
 
 def test_post_players_unknown_compute_method(client):
@@ -407,8 +407,7 @@ def test_get_computation_methods_contains_library(library_path, client):
 
     The returned methods should contain the library.
     """
-    name, ext = os.path.splitext(os.path.basename(library_path))
-    expected_name = "dynamic-" + name
+    expected_name, ext = os.path.splitext(os.path.basename(library_path))
     computation_methods = _get_computation_methods(client).get_json()
     assert expected_name in computation_methods
 

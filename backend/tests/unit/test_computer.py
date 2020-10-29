@@ -11,7 +11,7 @@ from labyrinth.model.game import Board, BoardLocation, Game
 def test_computer_player_register_in_turns():
     """ Tests that register_in_turns calls method in turns with callback """
     turns = Mock()
-    player = ComputerPlayer(compute_method_factory=Mock(), shift_url="shift-url",
+    player = ComputerPlayer(library_binding_factory=Mock(), shift_url="shift-url",
                             move_url="move-url", game=None, identifier=9)
     player.register_in_turns(turns)
     turns.add_player.assert_called_once_with(player, turn_callback=player.start)
@@ -35,7 +35,7 @@ def test_computer_player_calls_start_on_compute_method(post_move, post_shift, ti
     mock_method.move_action = board.maze.maze_card_location(piece.maze_card)
     mock_method_factory = Mock()
     mock_method_factory.return_value = mock_method
-    player = ComputerPlayer(compute_method_factory=mock_method_factory, move_url="move-url", shift_url="shift-url",
+    player = ComputerPlayer(library_binding_factory=mock_method_factory, move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     player.run()
     mock_method.start.assert_called_once()
@@ -55,7 +55,7 @@ def test_random_actions_computes_valid_actions():
         game = Mock()
         game.get_enabled_shift_locations.return_value = board.shift_locations
         game.board = board
-        computer_player = ComputerPlayer(compute_method_factory=Mock(), move_url="move-url", shift_url="shift-url",
+        computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
                                          game=game, identifier=9, board=board, piece=piece)
         shift_action, move_location = computer_player.random_actions()
         shift_location, shift_rotation = shift_action
@@ -97,7 +97,7 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     game = Mock()
     game.get_enabled_shift_locations.return_value = board.shift_locations
     game.board = board
-    computer_player = ComputerPlayer(compute_method_factory=Mock(), move_url="move-url", shift_url="shift-url",
+    computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
                                      game=game, identifier=9, board=board, piece=piece)
 
     for _ in range(100):
@@ -124,7 +124,7 @@ def test_random_actions_should_respect_no_pushback_rule():
         piece.maze_card = maze[BoardLocation(0, 0)]
         game = Game(0, board=orig_board)
         game.previous_shift_location = BoardLocation(0, 3)
-        computer_player = ComputerPlayer(compute_method_factory=Mock(), move_url="move-url", shift_url="shift-url",
+        computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
                                          game=game, identifier=9, board=board, piece=piece)
         shift_action, _ = computer_player.random_actions()
         shift_location, _ = shift_action
