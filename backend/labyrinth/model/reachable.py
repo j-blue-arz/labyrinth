@@ -5,39 +5,6 @@ Currently it only has one class to compute all reachable locations.
 from collections import deque
 
 
-class ReachedLocation:
-    """ A container type for a location reached in the search from the source """
-    def __init__(self, location, source):
-        self._location = location
-        self._source = source
-
-    @property
-    def location(self):
-        """ Getter for location """
-        return self._location
-
-    @property
-    def source(self):
-        """ Getter for source """
-        return self._source
-
-    def __eq__(self, other):
-        return isinstance(self, type(other)) and \
-            self._location == other._location
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __hash__(self):
-        return hash(self._location)
-
-    def __str__(self):
-        return "{} -> {}".format(self._source, self._location)
-
-    def __repr__(self):
-        return self.__str__()
-
-
 class Graph:
     """ Performs a BFS in a graph represented by the current maze to
     verify if two locations are connected, or to determine all reachable locations
@@ -59,38 +26,12 @@ class Graph:
         reachable_locations = self.reachable_locations(source_location)
         return target_location in reachable_locations
 
-    def reachable_locations(self, source=None, sources=None, with_sources=False):
+    def reachable_locations(self, source):
         """ Performs a BFS, returning all reachable BoardLocations.
-        Either source or sources has to be provided
 
         :param source: a BoardLocations to start from.
-        :param sources: an iterable of BoardLocations.
-        :param with_sources: if True, includes the sources of the reached board locations.
-                             Only possible if multiple sources are given.
-        :return: a set of BoardLocations, or ReachedLocations if with_sources was set to True
+        :return: a set of BoardLocations
         """
-        if sources is None:
-            return self._single_source_bfs(source)
-        else:
-            return self._multi_source_bfs(sources, with_sources)
-
-    def _multi_source_bfs(self, sources, with_sources=False):
-        reached_locations = {ReachedLocation(source, source) for source in sources}
-        self._reached_locations = set(sources)
-        next_elements = deque(reached_locations)
-        while next_elements:
-            current = next_elements.popleft()
-            for neighbor in self._neighbors(current.location):
-                reached_location = ReachedLocation(neighbor, current.source)
-                if reached_location not in reached_locations:
-                    reached_locations.add(reached_location)
-                    self._reached_locations.add(neighbor)
-                    next_elements.append(reached_location)
-        if not with_sources:
-            return {reached.location for reached in reached_locations}
-        return reached_locations
-
-    def _single_source_bfs(self, source):
         self._reached_locations = {source}
         next_elements = deque([source])
         while next_elements:
@@ -114,94 +55,3 @@ class Graph:
                     card_to_test = self._maze[location_to_test]
                     if card_to_test.has_rotated_out_path(_mirror(delta)):
                         yield location_to_test
-
-
-class RotatableMazeCardGraph:
-    """ Performs BFS on a graph represented by a maze.
-    Allows for a specific maze card to be rotatable. """
-
-    def __init__(self, maze, rotatable_maze_card_location):
-        self._maze = maze
-        self._certainly_reached = set()
-        self._rotatable = rotatable_maze_card_location
-        self._rotatable_touched_directions = []
-        self._rotation_map = {}
-
-    def reachable_locations(self, source):
-        """ Performs a BFS, returning all reachable BoardLocations.
-        The maze card at the given rotatable location is considered for all its rotations.
-
-        :param source: a BoardLocations to start from.
-        :return: a set s of reachable locations, and a map m of the form {r: locations}.
-                 The locations in s are reachable in any case.
-                 The locations in m are reachable if the rotatable card has rotation r.
-                 the rotatable card itself is never contained in s.
-                 If a certain key is not present in the dictionary, the rotatable is not reachable for this rotation.
-        """
-        # The algorithm runs in two phases.
-        # First phase performs standard bfs, and keeps track of all directions from which the rotatable
-        #        could have been reached (= touched)
-        # Second phase tries all rotations, checks if the rotatable is reached, and performs a bfs without touching
-        #        already reached cards
-        self._certainly_reached = self._determine_reachable(source, self._rotatable)
-        self._determine_rotation_dependend_reachable()
-        return self._certainly_reached, self._rotation_map
-
-    def _determine_reachable(self, source, rotatable):
-        reached = set()
-        if source == rotatable:
-            self._rotatable_touched_directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-            reached = set()
-        else:
-            reached = {source}
-            next_elements = deque([source])
-            while next_elements:
-                current = next_elements.popleft()
-                for neighbor in self._reachable_neighbors(current, rotatable):
-                    if neighbor not in reached and neighbor not in self._certainly_reached:
-                        reached.add(neighbor)
-                        next_elements.append(neighbor)
-        return reached
-
-    def _determine_rotation_dependend_reachable(self):
-        if self._rotatable_touched_directions:
-            rotatable_card = self._maze[self._rotatable]
-            original_rotation = rotatable_card.rotation
-            for rotation in self._rotations(rotatable_card):
-                rotatable_card.rotation = rotation
-                entered_paths = list(filter(rotatable_card.has_rotated_out_path, self._rotatable_touched_directions))
-                if entered_paths:
-                    self._rotation_map[rotation] = self._determine_reachable(self._rotatable, None)
-            rotatable_card.rotation = original_rotation
-
-    def _reachable_neighbors(self, location, rotatable):
-        """ Returns an iterator over valid neighbor BoardLocations
-        of the given BoardLocation, with the current state of the maze """
-        def _mirror(delta_tuple):
-            return (-delta_tuple[0], -delta_tuple[1])
-        maze_card = self._maze[location]
-        for delta in maze_card.rotated_out_paths():
-            location_to_test = location.add(*delta)
-            if location_to_test == rotatable:
-                self._rotatable_touched_directions.append(_mirror(delta))
-            elif self._maze.is_inside(location_to_test):
-                card_to_test = self._maze[location_to_test]
-                if card_to_test.has_rotated_out_path(_mirror(delta)):
-                    yield location_to_test
-
-    def _rotations(self, maze_card):
-        rotations = [0, 90, 180, 270]
-        if maze_card.out_paths == maze_card.STRAIGHT:
-            rotations = [0, 90]
-        if maze_card.out_paths == maze_card.CROSS:
-            rotations = [0]
-        return rotations
-
-
-def all_reachables(certainly_reached, rotation_map, rotation):
-    """ Given the two return values of RotatableMazeCardGraph.reachable_locations() along with a specific rotation,
-    this method returns all reachable locations for this rotation.
-    It adds the respective entry of the rotation map to the list of certainly reachable maze cards """
-    if rotation in rotation_map:
-        return rotation_map[rotation].union(certainly_reached)
-    return certainly_reached

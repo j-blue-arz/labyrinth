@@ -5,7 +5,7 @@ The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
 import labyrinth.mapper.persistence as mapper
 from labyrinth.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from labyrinth.model.computer import create_computer_player, ComputerPlayer, AlphaBeta
+from labyrinth.model.computer import create_computer_player
 from labyrinth.model.factories import MazeCardFactory
 
 
@@ -27,7 +27,7 @@ def _create_test_game(with_computer=False):
     players = [Player(identifier=player_id, game=None) for player_id in player_ids]
     if with_computer:
         player_ids.append(42)
-        players.append(create_computer_player(player_id=42, compute_method="alpha-beta",
+        players.append(create_computer_player(player_id=42, compute_method="dynamic-foo",
                                               shift_url="shift-url", move_url="move-url"))
     for player in players:
         player.set_board(board)
@@ -57,18 +57,6 @@ def test_mapping_for_player():
                                  lambda g: g.get_player(player_ids[0]).piece.maze_card.identifier)
     _assert_games_using_function(created_game, game,
                                  lambda g: g.get_player(player_ids[1]).piece.maze_card.identifier)
-
-
-def test_mapping_for_computer_player():
-    """ Tests correct mapping for computer player """
-    created_game, player_ids = _create_test_game(with_computer=True)
-    game_dto = mapper.game_to_dto(created_game)
-    game = mapper.dto_to_game(game_dto)
-    computer_player = game.get_player(player_ids[2])
-    assert isinstance(computer_player, ComputerPlayer)
-    assert computer_player.compute_method_factory == AlphaBeta
-    assert computer_player.shift_url == "shift-url"
-    assert computer_player.move_url == "move-url"
 
 
 def test_mapping_for_leftover():

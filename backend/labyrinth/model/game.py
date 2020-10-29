@@ -18,16 +18,16 @@ import itertools
 from random import choice
 
 from labyrinth.model import exceptions
+from labyrinth.model import out_paths_dict
 from labyrinth.model.reachable import Graph
-from labyrinth.model.algorithm import out_paths_dict
-
-_HASH_MAX = 31
 
 
 class BoardLocation:
     """ A board location, defined by the row and the column.
     The location does now know the extent of the maze.
     """
+
+    _HASH_MAX = 31
 
     def __init__(self, row: int, column: int):
         self.row = row
@@ -36,11 +36,6 @@ class BoardLocation:
     def add(self, row_delta: int, column_delta: int):
         """ Returns a new BoardLocation by adding the deltas to the current location """
         return BoardLocation(self.row + row_delta, self.column + column_delta)
-
-    @classmethod
-    def copy(cls, board_location):
-        """ Create new BoardLocation as a copy from another """
-        return cls(board_location.row, board_location.column)
 
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
@@ -51,7 +46,7 @@ class BoardLocation:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return self.row*_HASH_MAX + self.column
+        return self.row*self._HASH_MAX + self.column
 
     def __str__(self):
         return f"({self.row}, {self.column})"
@@ -114,7 +109,7 @@ class MazeCard:
         return direction in self._DIRECTIONS_BY_OUT_PATHS_ROTATED[(self._out_paths, self._rotation)]
 
     def rotated_out_paths(self):
-        """ Returns an iteratable over all directions
+        """ Returns an iterable over all directions
         with outgoing paths, taking rotation into account.
         """
         return self._DIRECTIONS_BY_OUT_PATHS_ROTATED[(self._out_paths, self._rotation)]
@@ -153,11 +148,10 @@ class Maze:
     The state is maintained in a 2-d array of MazeCard instances.
     """
 
-    def __init__(self, maze_size=7, validate_locations=True):
+    def __init__(self, maze_size=7):
         self._maze_size = maze_size
         self._maze_locations = [BoardLocation(row, column) for row in range(maze_size) for column in range(maze_size)]
         self._maze_cards = [[None for _ in range(maze_size)] for _ in range(maze_size)]
-        self.validation = validate_locations
 
     @property
     def maze_size(self):
@@ -176,8 +170,7 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :return: the MazeCard instance
         """
-        if self.validation:
-            self._validate_location(location)
+        self._validate_location(location)
         return self._maze_cards[location.row][location.column]
 
     def __setitem__(self, location, maze_card):
@@ -187,8 +180,7 @@ class Maze:
         :raises InvalidLocationException: if location is outside of the board
         :param maze_card: the maze card to set
         """
-        if self.validation:
-            self._validate_location(location)
+        self._validate_location(location)
         self._maze_cards[location.row][location.column] = maze_card
 
     def maze_card_location(self, maze_card):
@@ -268,8 +260,7 @@ class Maze:
             raise exceptions.InvalidLocationException("Location {} is outside of the maze.".format(str(location)))
 
     def _validate_shift_location(self, location):
-        if self.validation:
-            self._validate_location(location)
+        self._validate_location(location)
 
 
 class Board:
@@ -618,9 +609,9 @@ class Game:
 
     def __init__(self, identifier, board=None, players=None, turns=None):
         self._id = identifier
-        self._players = players if players else []
-        self._board = board if board else Board()
-        self._turns = turns if turns else Turns()
+        self._players = players or []
+        self._board = board or Board()
+        self._turns = turns or Turns()
         self._turns.register_turn_changed_listener(self._notify_turn_listeners)
         self.previous_shift_location = None
         self._turn_listeners = []

@@ -1,5 +1,4 @@
-import labyrinth.model.algorithm.external_library as external
-import labyrinth.model.algorithm.util as algo_util
+import labyrinth.model.external_library as external
 
 
 class CompletePathLibraryBinding(external.ExternalLibraryBinding):
@@ -7,10 +6,7 @@ class CompletePathLibraryBinding(external.ExternalLibraryBinding):
     which reach the objective. This subclass repeatedly calls the library to create such a path."""
 
     def __init__(self, path, board, previous_shift_location=None):
-        board = algo_util.copy_board(board)
         piece = board.pieces[0]
-        board.validate_moves = True
-        board.maze.validation = True
         external.ExternalLibraryBinding.__init__(self, path, board, piece, previous_shift_location)
 
     def find_optimal_actions(self):

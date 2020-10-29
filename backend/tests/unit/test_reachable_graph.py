@@ -90,48 +90,6 @@ def test_reachable_locations():
     assert set(reachable) == expected
 
 
-def test_multi_sources_reachable_locations():
-    """ Tests reachable_locations with multiple sources """
-    maze = create_maze(MAZE_STRING)
-    graph = Graph(maze)
-    reachable = graph.reachable_locations(sources=[BoardLocation(6, 4), BoardLocation(6, 5)])
-    expected = {BoardLocation(*coord) for coord in [(4, 4), (5, 4), (5, 5), (5, 6), (6, 4), (6, 5), (6, 6)]}
-    assert set(reachable) == expected
-
-
-def test_multi_source_reachable_locations_with_sources():
-    """ Tests multi-source reachable_locations with returned sources """
-    maze = create_maze(MAZE_STRING)
-    graph = Graph(maze)
-    sources = [BoardLocation(0, 0), BoardLocation(6, 6), BoardLocation(0, 6)]
-    reachable = graph.reachable_locations(sources=sources, with_sources=True)
-    assert len(reachable) == 9
-    sources_to_locations = {source: {reached.location for reached in reachable if reached.source == source}
-                            for source in sources}
-    expected = {BoardLocation(*coord) for coord in [(5, 5), (5, 6), (6, 5), (6, 6)]}
-    assert sources_to_locations[BoardLocation(6, 6)] == expected
-    expected = {BoardLocation(*coord) for coord in [(0, 0)]}
-    assert sources_to_locations[BoardLocation(0, 0)] == expected
-    expected = {BoardLocation(*coord) for coord in [(0, 6), (1, 5), (1, 6), (2, 6)]}
-    assert sources_to_locations[BoardLocation(0, 6)] == expected
-
-
-def test_two_sources_one_component_reachable_locations_with_sources():
-    """ Tests multi-source reachable_locations with returned sources.
-    Two sources are in the same connected component """
-    maze = create_maze(MAZE_STRING)
-    graph = Graph(maze)
-    sources = [BoardLocation(0, 2), BoardLocation(0, 3)]
-    reachable = graph.reachable_locations(sources=sources, with_sources=True)
-    assert len(reachable) == 4
-    sources_to_locations = {source: {reached.location for reached in reachable if reached.source == source}
-                            for source in sources}
-    expected = {BoardLocation(*coord) for coord in [(0, 1), (0, 2)]}
-    assert sources_to_locations[BoardLocation(0, 2)] == expected
-    expected = {BoardLocation(*coord) for coord in [(0, 3), (1, 3)]}
-    assert sources_to_locations[BoardLocation(0, 3)] == expected
-
-
 MAZE_STRING = """
 ###|#.#|#.#|###|#.#|#.#|###|
 #..|#..|...|...|#..|..#|..#|

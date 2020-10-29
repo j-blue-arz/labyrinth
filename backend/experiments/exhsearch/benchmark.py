@@ -13,7 +13,7 @@ import click
 
 from tests.unit.test_exhaustive_search import CASES_PARAMS
 from experiments import serialization
-import labyrinth.model.algorithm.external_library as external
+import labyrinth.model.external_library as external
 import tests.unit.factories as setup
 
 

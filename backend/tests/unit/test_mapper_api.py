@@ -6,7 +6,6 @@ import labyrinth.mapper.api as mapper
 import labyrinth.mapper.constants as keys
 from labyrinth.model.game import BoardLocation, Player
 from labyrinth.model.factories import create_game
-from labyrinth.model.computer import ComputerPlayer, RandomActionsMethod
 
 
 def _create_test_game():
@@ -16,8 +15,6 @@ def _create_test_game():
     game.previous_shift_location = BoardLocation(0, 1)
     game.add_player(Player(identifier=0))
     game.add_player(Player(identifier=1))
-    game.add_player(ComputerPlayer(identifier=2, compute_method_factory=RandomActionsMethod,
-                                   shift_url="shift-url", move_url="move-url"))
     game.get_player(0).score = 9
     game.start_game()
     return game
@@ -39,18 +36,6 @@ def test_mapping_players():
         assert keys.SCORE in player_dto
         assert player_dto[keys.SCORE] == player_game.score
         assert player_dto[keys.PIECE_INDEX] == player_game.piece.piece_index
-
-
-def test_mapping_computer_player():
-    """ Tests correct mapping of information about computer player """
-    game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
-    computer_player_dto = game_dto[keys.PLAYERS][2]
-    assert computer_player_dto[keys.IS_COMPUTER]
-    assert computer_player_dto[keys.COMPUTATION_METHOD] == "random"
-    player_dto = game_dto[keys.PLAYERS][1]
-    assert not player_dto[keys.IS_COMPUTER]
-    assert keys.COMPUTATION_METHOD not in player_dto
 
 
 def test_mapping_leftover():

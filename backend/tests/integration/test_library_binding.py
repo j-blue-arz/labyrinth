@@ -9,7 +9,7 @@ from datetime import timedelta
 import time
 import threading
 
-from labyrinth.model.algorithm.external_library import ExternalLibraryBinding
+from labyrinth.model.external_library import ExternalLibraryBinding
 from labyrinth.model.reachable import Graph
 from labyrinth.model.game import BoardLocation
 from tests.unit.factories import param_tuple_to_param_dict, create_board_and_pieces

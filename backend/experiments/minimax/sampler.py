@@ -1,7 +1,7 @@
 import threading
 import time
 
-import labyrinth.model.algorithm.external_library as external
+import labyrinth.model.external_library as external
 
 
 def observe_search_status(library, board, limit_timedelta, observe_timedelta):
