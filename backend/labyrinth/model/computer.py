@@ -31,33 +31,31 @@ def create_computer_player(player_id, compute_method,
 
     :param player_id: the identifier of the player to create.
     :param compute_method: is used to determine the action computation method and its parameters.
-        If this parameter starts with 'dynamic-', it is expected to denote a shared library.
+        It is expected to denote the filename of a shared library.
     :param url_supplier: a supplier for the shift and move API URLs.
         This supplier is expected to have methods get_shift_url(game_id, player_id), and
         get_move_url(game_id, player_id).
     :param shift_url: use this instead of url_supplier, if you already know the final url to call for a shift.
     :param move_url: use this instead of url_supplier, if you already know the final url to call for a move.
-    :raises InvalidComputeMethodException: if compute_method cannot identify an existing computation method.
+    :raises InvalidComputeMethodException: if compute_method cannot identify an existing library.
     """
-    compute_method_factory = _dynamic_compute_method_factory(compute_method)
-    return ComputerPlayer(compute_method_factory, url_supplier=url_supplier,
+    library_binding_factory = _library_binding_factory(expected_library=compute_method)
+    return ComputerPlayer(library_binding_factory, url_supplier=url_supplier,
                           shift_url=shift_url, move_url=move_url,
                           identifier=player_id, game=game, piece=piece)
 
 
 def get_available_computation_methods():
     """ Returns the identifiers of the available computation methods.
-    The methods implemented in the backend are hard-coded.
-    For the dynamically loaded libraries, all base filenames (without extension) in the
-    library folder are returned, each prefixed with 'dynamic-'.
+    All base filenames (without extension) in the
+    library folder are returned.
     """
     def extract_basename(filename):
         basename, ext = os.path.splitext(os.path.basename(filename))
         return basename
 
     filenames = _library_filenames()
-    prefix = LibraryBinding.LIBRARY_PREFIX
-    return [prefix + extract_basename(filename) for filename in filenames]
+    return [extract_basename(filename) for filename in filenames]
 
 
 class ComputerPlayer(Player, Thread):
@@ -67,7 +65,7 @@ class ComputerPlayer(Player, Thread):
     and a thread for letting the compute method determine the next shift and move action.
     Computation methods are time-restricted. After the computation timeout, they will be asked to abort.
     They will then receive a short grace period to finish their current work and return a result.
-    :param compute_method_factory: a method creating a LibraryBinding,
+    :param library_binding_factory: a method creating a LibraryBinding,
         It is expected to take a board, a piece, and a game as its parameters.
     :param kwargs: keyword arguments, which are passed to the Player initializer.
      """
@@ -76,10 +74,10 @@ class ComputerPlayer(Player, Thread):
     WAIT_FOR_RESULT = timedelta(milliseconds=100)
     MOVE_ACTION_IDLE_TIME = timedelta(seconds=2)
 
-    def __init__(self, compute_method_factory, url_supplier=None, shift_url=None, move_url=None, **kwargs):
+    def __init__(self, library_binding_factory, url_supplier=None, shift_url=None, move_url=None, **kwargs):
         Player.__init__(self, **kwargs)
         Thread.__init__(self)
-        self._compute_method_factory = compute_method_factory
+        self._library_binding_factory = library_binding_factory
         self._shift_url = shift_url
         self._move_url = move_url
         self._url_supplier = url_supplier
@@ -104,7 +102,7 @@ class ComputerPlayer(Player, Thread):
                 self._move_url = self._url_supplier.get_move_url(self._game.identifier, self.identifier)
 
     def run(self):
-        compute_method = self._compute_method_factory(self._board, self._piece, self._game)
+        compute_method = self._library_binding_factory(self._board, self._piece, self._game)
         compute_method.start()
         time.sleep(self.COMPUTATION_TIMEOUT.total_seconds())
         compute_method.abort_search()
@@ -131,8 +129,8 @@ class ComputerPlayer(Player, Thread):
 
     @property
     def compute_method_factory(self):
-        """ Getter for compute_method_factory, e.g. for serialization """
-        return self._compute_method_factory
+        """ Getter for library_binding_factory, e.g. for serialization """
+        return self._library_binding_factory
 
     def _post_shift(self, location, rotation):
         dto = labyrinth.mapper.api.shift_action_to_dto(location, rotation)
@@ -158,7 +156,6 @@ class ComputerPlayer(Player, Thread):
 class LibraryBinding(Thread, extlib.ExternalLibraryBinding):
     """ Calls an external library to perform the move. The abort_search method is already
     implemented in the superclass. """
-    LIBRARY_PREFIX = "dynamic-"
 
     def __init__(self, board, piece, game, full_library_path):
         extlib.ExternalLibraryBinding.__init__(self, full_library_path,
@@ -198,12 +195,7 @@ def _library_filenames():
     return glob.glob(search_pattern)
 
 
-def _dynamic_compute_method_factory(compute_method):
-    library_prefix = LibraryBinding.LIBRARY_PREFIX
-    if not compute_method.startswith(library_prefix):
-        raise exceptions.InvalidComputeMethodException("{} does not have prefix {}".format(compute_method,
-                                                                                           library_prefix))
-    expected_library = compute_method[len(library_prefix):]
+def _library_binding_factory(expected_library):
     library_folder = current_app.config['LIBRARY_PATH']
     extension = _library_extension()
     filenames = _library_filenames()
@@ -213,9 +205,9 @@ def _dynamic_compute_method_factory(compute_method):
         if filename == expected_filename:
             full_library_path = filename
     if full_library_path:
-        compute_method_factory = functools.partial(LibraryBinding,
-                                                   full_library_path=full_library_path)
-        setattr(compute_method_factory, "SHORT_NAME", library_prefix + expected_library)
-        return compute_method_factory
+        library_binding_factory = functools.partial(LibraryBinding,
+                                                    full_library_path=full_library_path)
+        setattr(library_binding_factory, "SHORT_NAME", expected_library)
+        return library_binding_factory
     else:
         raise exceptions.InvalidComputeMethodException("Could not find library {}".format(expected_library))

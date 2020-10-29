@@ -101,8 +101,8 @@ def perform_move(game_id, player_id, move_dto):
 
 def get_computation_methods():
     """ Retrieves the available computation methods.
-    These are either methods implemented in the backend, i.e. those in labyrinth.model.computer,
-    or methods made available by dynamically loaded libraries """
+
+    These can be used to add computer players. """
     return computer.get_available_computation_methods()
 
 
