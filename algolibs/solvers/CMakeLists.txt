@@ -28,8 +28,8 @@ set (
 )
 
 macro(add_libminimax_with_evaluator EVALUATOR_NAME LIBRARY_NAME)
-    add_library(libminimax-${LIBRARY_NAME} SHARED ${MINIMAX_SOURCES} c_api.h c_api_minimax.cpp)
-    set_target_properties(libminimax-${LIBRARY_NAME} PROPERTIES OUTPUT_NAME minimax-${LIBRARY_NAME} COMPILE_DEFINITIONS ${EVALUATOR_NAME})
+    add_library(libminimax${LIBRARY_NAME} SHARED ${MINIMAX_SOURCES} c_api.h c_api_minimax.cpp)
+    set_target_properties(libminimax${LIBRARY_NAME} PROPERTIES OUTPUT_NAME minimax${LIBRARY_NAME} COMPILE_DEFINITIONS ${EVALUATOR_NAME})
 endmacro()
 
 if(COMPILE_TO_WASM)
@@ -56,9 +56,9 @@ elseif(NOT COMPILE_TO_WASM)
     add_library(libexhsearch SHARED ${EXHSEARCH_SOURCES} c_api.h c_api_exhsearch.cpp)
     set_target_properties(libexhsearch PROPERTIES OUTPUT_NAME exhsearch)
 
-    add_libminimax_with_evaluator(MINIMAX_WIN_EVALUATOR only-win)
-    add_libminimax_with_evaluator(MINIMAX_REACHABLE_HEURISTIC reachable)
-    add_libminimax_with_evaluator(MINIMAX_DISTANCE_HEURISTIC distance)
+    add_libminimax_with_evaluator(MINIMAX_WIN_EVALUATOR "")
+    add_libminimax_with_evaluator(MINIMAX_REACHABLE_HEURISTIC -reachable)
+    add_libminimax_with_evaluator(MINIMAX_DISTANCE_HEURISTIC -distance)
 endif(COMPILE_TO_WASM)
 
 

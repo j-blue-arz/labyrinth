@@ -57,16 +57,19 @@ export default class Player {
     }
 
     static computationMethodLabel(computationMethod) {
-        if (computationMethod === "exhaustive-search") {
-            return "Exhaustive Search";
-        } else if (computationMethod === "alpha-beta") {
-            return "Alpha-Beta";
-        } else if (computationMethod === "minimax") {
-            return "Minimax";
-        } else if (computationMethod === "random") {
-            return "Random actions";
-        } else if (computationMethod.startsWith("dynamic-")) {
-            return computationMethod.replace("dynamic-", "Library: ");
+        if (computationMethod === "libexhsearch") {
+            return "Exhaustive Search (1P)";
+        } else if (computationMethod === "libminimax") {
+            return "Minimax (2P)";
+        } else if (computationMethod.startsWith("libminimax-")) {
+            let suffix = computationMethod.replace("libminimax-", "");
+            if (suffix === "distance") {
+                return "Minimax (2P) - Distance Heuristic";
+            } else if (suffix === "reachable") {
+                return "Minimax (2P) - Reachable Heuristic";
+            } else {
+                return "Minimax (2P) - heuristic: " + suffix;
+            }
         } else {
             return computationMethod;
         }

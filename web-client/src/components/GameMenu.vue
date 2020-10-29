@@ -56,7 +56,7 @@ export default {
                     });
                 }
                 if (this.playerManager.canAddWasmPlayer()) {
-                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search"));
+                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search (1P)"));
                 }
                 menu.push(new MenuItem("add", "Add computer..", submenu));
             }

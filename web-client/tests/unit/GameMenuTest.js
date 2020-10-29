@@ -115,13 +115,13 @@ describe("GameMenu", () => {
 
     describe("Add computer submenu", () => {
         it("has entries corresponding to API computation methods", () => {
-            givenComputationMethods(["exhaustive-search", "dynamic-libexhsearch"]);
+            givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
-            expect(menu.find({ ref: "add-exhaustive-search" }).exists()).toBe(true);
-            expect(menu.find({ ref: "add-dynamic-libexhsearch" }).exists()).toBe(true);
+            expect(menu.find({ ref: "add-libminimax-distance" }).exists()).toBe(true);
+            expect(menu.find({ ref: "add-libexhsearch" }).exists()).toBe(true);
             expect(menu.find({ ref: "add-alpha-beta" }).exists()).toBe(false);
         });
 
@@ -162,7 +162,7 @@ describe("GameMenu", () => {
         });
 
         it("displays readable labels", async () => {
-            givenComputationMethods(["alpha-beta", "dynamic-libexhsearch"]);
+            givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             givenWasmIsNotParticipating();
             let gameMenu = factory();
             await flushPromises();
@@ -173,9 +173,9 @@ describe("GameMenu", () => {
             let labels = entries.wrappers.map(wrapper => wrapper.text());
             expect(labels).toEqual(
                 expect.arrayContaining([
-                    "Alpha-Beta",
-                    "Library: libexhsearch",
-                    "WASM: Exhaustive Search"
+                    "Minimax (2P) - Distance Heuristic",
+                    "Exhaustive Search (1P)",
+                    "WASM: Exhaustive Search (1P)"
                 ])
             );
         });
@@ -191,13 +191,13 @@ describe("GameMenu", () => {
 
     describe("Remove computer submenu", () => {
         it("offers all computer players for removal", () => {
-            let exhaustiveSearch = createComputerPlayer(10, "exhaustive-search");
-            let alphaBeta = createComputerPlayer(11, "alpha-beta");
+            let exhaustiveSearch = createComputerPlayer(10, "libexhsearch");
+            let alphaBeta = createComputerPlayer(11, "libminimax");
             givenComputerPlayers([exhaustiveSearch, alphaBeta]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
-            expectMenuContainsLabelContaining(gameMenu, "Alpha-Beta");
+            expectMenuContainsLabelContaining(gameMenu, "Minimax");
             expectMenuContainsLabelContaining(gameMenu, "Exhaustive Search");
             expectMenuDoesNotContainLabelContaining(gameMenu, "WASM: Exhaustive Search");
         });
