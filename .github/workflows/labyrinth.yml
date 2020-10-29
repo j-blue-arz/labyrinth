@@ -86,6 +86,7 @@ jobs:
             pip install -r dev-requirements.txt
         - name: Lint
           run: |
+            . venv/bin/activate
             flake8 . --count --max-line-length=120 --max-complexity=10 --show-source --statistics --exclude __pycache__,venv
         - name: Restore web-client artifact
           uses: actions/download-artifact@v1
@@ -99,6 +100,7 @@ jobs:
             path: backend/instance/lib/
         - name: Run tests
           run: |
+            . venv/bin/activate
             pytest . --junitxml=../test-results/backend-results.xml --cov=backend --cov-report=xml:../test-results/backend-coverage.xml
         - name: Archive deployment
           uses: actions/upload-artifact@v2
