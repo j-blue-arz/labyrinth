@@ -13,6 +13,3 @@ def test_get_root(client):
     assert response.status_code == 200
     assert b'<!DOCTYPE html>' in response.get_data()
     assert b'<title>Labyrinth</title>' in response.get_data()
-    assert b'<div id=app>' in response.get_data()
-    assert b'href=/assets/js/' in response.get_data()
-    assert b'href=/assets/css/' in response.get_data()
