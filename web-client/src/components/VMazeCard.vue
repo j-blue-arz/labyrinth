@@ -116,7 +116,8 @@ export default {
             xPosAnimated: 0,
             yPosAnimated: 0,
             pathWidth: 37,
-            piecesSize: 28
+            piecesSize: 28,
+            positionAnimationThreshold: 50
         };
     },
     watch: {
@@ -127,11 +128,19 @@ export default {
                 this.animatedRotationClass = "rotate" + newValue;
             }, 500);
         },
-        xPos: function(newValue) {
-            TweenLite.to(this.$data, 1, { xPosAnimated: newValue, ease: Power3.easeInOut });
+        xPos: function(newValue, oldValue) {
+            if (Math.abs(newValue - oldValue) > positionAnimationThreshold) {
+                TweenLite.to(this.$data, 1, { xPosAnimated: newValue, ease: Power3.easeInOut });
+            } else {
+                this.xPosAnimated = newValue;
+            }
         },
-        yPos: function(newValue) {
-            TweenLite.to(this.$data, 1, { yPosAnimated: newValue, ease: Power3.easeInOut });
+        yPos: function(newValue, oldValue) {
+            if (Math.abs(newValue - oldValue) > positionAnimationThreshold) {
+                TweenLite.to(this.$data, 1, { yPosAnimated: newValue, ease: Power3.easeInOut });
+            } else {
+                this.yPosAnimated = newValue;
+            }
         }
     },
     computed: {
