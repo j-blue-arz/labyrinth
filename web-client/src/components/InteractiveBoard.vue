@@ -3,7 +3,6 @@
         <v-svg-defs></v-svg-defs>
         <v-game-board
             @maze-card-clicked="onMazeCardClick"
-            :board-offset="boardOffset"
             :n="mazeSize"
             :maze-cards="mazeCards"
             :interactive-maze-cards="interactiveMazeCards"
@@ -13,7 +12,6 @@
         <v-move-animation
             v-for="player in players"
             :key="'player-' + player.id"
-            :board-offset="boardOffset"
             :player="player"
             :maze-card-id="player.mazeCard.id"
             :game="game"
@@ -112,9 +110,6 @@ export default {
                 this.game.nextAction.playerId === this.userPlayerId &&
                 this.game.nextAction.action === action.SHIFT_ACTION
             );
-        },
-        boardOffset: function() {
-            return this.$ui.cardSize;
         },
         mazeCards: function() {
             return this.game.mazeCardsAsList();

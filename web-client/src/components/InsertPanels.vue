@@ -30,11 +30,6 @@ export default {
         interaction: {
             type: Boolean,
             required: true
-        },
-        boardOffset: {
-            type: Number,
-            required: false,
-            default: 100
         }
     },
     computed: {
@@ -55,10 +50,10 @@ export default {
     },
     methods: {
         xPos(insertPanel) {
-            return this.$ui.cardSize * insertPanel.displayLocation.column + this.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.column + this.$ui.boardOffset;
         },
         yPos(insertPanel) {
-            return this.$ui.cardSize * insertPanel.displayLocation.row + this.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.row + this.$ui.boardOffset;
         },
         locationsEqual(locA, locB) {
             return locA && locB && locA.row === locB.row && locA.column === locB.column;

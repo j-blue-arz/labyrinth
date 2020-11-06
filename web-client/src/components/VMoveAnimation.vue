@@ -29,10 +29,6 @@ export default {
         mazeCardId: {
             type: Number,
             required: true
-        },
-        boardOffset: {
-            type: Number,
-            default: 100
         }
     },
     data() {
@@ -80,7 +76,7 @@ export default {
         },
         locationToPosition: function(location) {
             let cardMidpoint = this.$ui.cardSize / 2;
-            let offset = cardMidpoint + this.boardOffset;
+            let offset = cardMidpoint + this.$ui.boardOffset;
             let x = location.column * this.$ui.cardSize + offset;
             let y = location.row * this.$ui.cardSize + offset;
             return [x, y];

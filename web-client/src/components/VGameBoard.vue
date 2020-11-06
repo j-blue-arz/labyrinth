@@ -1,7 +1,7 @@
 <template>
     <svg
-        :x="boardOffset - borderWidth"
-        :y="boardOffset - borderWidth"
+        :x="$ui.boardOffset - borderWidth"
+        :y="$ui.boardOffset - borderWidth"
         :width="boardSize + 2 * borderWidth"
         :height="boardSize + 2 * borderWidth"
         @mousedown="startDrag($event)"
@@ -50,10 +50,6 @@ export default {
         mazeCards: {
             type: Array,
             required: true
-        },
-        boardOffset: {
-            type: Number,
-            default: 100
         },
         interactiveMazeCards: {
             required: false,
@@ -146,8 +142,8 @@ export default {
             };
         },
         getMazeCard(mousePosition) {
-            let column = Math.floor((mousePosition.x - this.boardOffset) / this.$ui.cardSize);
-            let row = Math.floor((mousePosition.y - this.boardOffset) / this.$ui.cardSize);
+            let column = Math.floor((mousePosition.x - this.$ui.boardOffset) / this.$ui.cardSize);
+            let row = Math.floor((mousePosition.y - this.$ui.boardOffset) / this.$ui.cardSize);
             let mazeCard = this.mazeCards.find(
                 mazeCard => mazeCard.location.row == row && mazeCard.location.column == column
             );
