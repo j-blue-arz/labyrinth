@@ -1,14 +1,13 @@
 <template>
     <svg :viewBox="`0 0 ${interactionWidth} ${interactionHeight}`" class="interactive-board">
         <v-svg-defs></v-svg-defs>
-        <v-game-board
+        <draggable-game-board
             @maze-card-clicked="onMazeCardClick"
-            :n="mazeSize"
-            :maze-cards="mazeCards"
+            :game="game"
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableMazeCards"
-        ></v-game-board>
+        ></draggable-game-board>
         <v-move-animation
             v-for="player in players"
             :key="'player-' + player.id"
@@ -32,7 +31,7 @@
 </template>
 
 <script>
-import VGameBoard from "@/components/VGameBoard.vue";
+import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
@@ -45,7 +44,7 @@ export default {
     name: "interactive-board",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VGameBoard,
+        DraggableGameBoard,
         InsertPanels,
         VMazeCard,
         VMoveAnimation,
@@ -110,9 +109,6 @@ export default {
                 this.game.nextAction.playerId === this.userPlayerId &&
                 this.game.nextAction.action === action.SHIFT_ACTION
             );
-        },
-        mazeCards: function() {
-            return this.game.mazeCardsAsList();
         },
         leftoverMazeCard: function() {
             return this.game.leftoverMazeCard;

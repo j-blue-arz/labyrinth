@@ -1,14 +1,5 @@
 <template>
-    <svg
-        :x="$ui.boardOffset - borderWidth"
-        :y="$ui.boardOffset - borderWidth"
-        :width="boardSize + 2 * borderWidth"
-        :height="boardSize + 2 * borderWidth"
-        @mousedown="startDrag($event)"
-        @mousemove="drag($event)"
-        @mouseup="endDrag($event)"
-        @mouseleave="endDrag($event)"
-    >
+    <g>
         <rect
             :width="boardSize + 2 * borderWidth"
             :height="boardSize + 2 * borderWidth"
@@ -27,7 +18,7 @@
                 class="game-board__maze-card"
             ></v-maze-card>
         </transition-group>
-    </svg>
+    </g>
 </template>
 
 <script>
@@ -40,12 +31,13 @@ export default {
         VMazeCard
     },
     props: {
-        n: {
+        boardSize: {
             type: Number,
-            default: 7,
-            validator: function(num) {
-                return num % 2 == 1;
-            }
+            required: true
+        },
+        borderWidth: {
+            type: Number,
+            required: true
         },
         mazeCards: {
             type: Array,
@@ -62,21 +54,12 @@ export default {
         currentPlayerColor: {
             required: false,
             default: null
-        }
-    },
-    data() {
-        return {
-            draggedMazeCardId: null,
-            dragStart: null,
-            dragOffset: null
-        };
-    },
-    computed: {
-        boardSize: function() {
-            return this.$ui.cardSize * this.n;
         },
-        borderWidth: function() {
-            return Math.floor(this.$ui.cardSize / 6);
+        drag: {
+            required: false,
+            default: function() {
+                return { mazeCardId: null, offset: null };
+            }
         }
     },
     methods: {
@@ -91,63 +74,23 @@ export default {
         },
         xPos(mazeCard) {
             let xPos = this.$ui.cardSize * mazeCard.location.column + this.borderWidth;
-            if (mazeCard.id === this.draggedMazeCardId) {
-                xPos += this.dragOffset.x;
+            if (this.isDragging(mazeCard.id)) {
+                xPos += this.drag.offset.x;
             }
             return xPos;
         },
         yPos(mazeCard) {
             let yPos = this.$ui.cardSize * mazeCard.location.row + this.borderWidth;
-            if (mazeCard.id === this.draggedMazeCardId) {
-                yPos += this.dragOffset.y;
+            if (this.isDragging(mazeCard.id)) {
+                yPos += this.drag.offset.y;
             }
             return yPos;
         },
+        isDragging(mazeCardId) {
+            return this.drag && this.drag.mazeCardId === mazeCardId;
+        },
         onMazeCardClick: function($event, mazeCard) {
             this.$emit("maze-card-clicked", mazeCard);
-        },
-        startDrag: function($event) {
-            let mousePosition = this.getMousePosition($event);
-            let mazeCard = this.getMazeCard(mousePosition);
-            if (mazeCard) {
-                this.draggedMazeCardId = mazeCard.id;
-                this.dragStart = mousePosition;
-            }
-            this.dragOffset = { x: 0, y: 0 };
-        },
-        drag: function($event) {
-            if (this.draggedMazeCardId !== null) {
-                $event.preventDefault();
-                let mousePosition = this.getMousePosition($event);
-                this.dragOffset = this.offset(this.dragStart, mousePosition);
-            }
-        },
-        endDrag: function($event) {
-            this.draggedMazeCardId = null;
-            this.dragStart = null;
-            this.dragOffset = { x: 0, y: 0 };
-        },
-        offset: function(from, to) {
-            return {
-                x: to.x - from.x,
-                y: to.y - from.y
-            };
-        },
-        getMousePosition(evt) {
-            const svg = evt.currentTarget;
-            const CTM = svg.getScreenCTM();
-            return {
-                x: (evt.clientX - CTM.e) / CTM.a,
-                y: (evt.clientY - CTM.f) / CTM.d
-            };
-        },
-        getMazeCard(mousePosition) {
-            let column = Math.floor((mousePosition.x - this.$ui.boardOffset) / this.$ui.cardSize);
-            let row = Math.floor((mousePosition.y - this.$ui.boardOffset) / this.$ui.cardSize);
-            let mazeCard = this.mazeCards.find(
-                mazeCard => mazeCard.location.row == row && mazeCard.location.column == column
-            );
-            return mazeCard;
         }
     }
 };
