@@ -1,7 +1,7 @@
 <template>
     <svg
-        :height="cardSize"
-        :width="cardSize"
+        :height="$ui.cardSize"
+        :width="$ui.cardSize"
         :id="mazeCard.id"
         :x="xPosAnimated"
         :y="yPosAnimated"
@@ -85,10 +85,6 @@ export default {
             type: MazeCard,
             required: true
         },
-        cardSize: {
-            type: Number,
-            default: 100
-        },
         xPos: {
             type: Number,
             required: false,
@@ -129,14 +125,14 @@ export default {
             }, 500);
         },
         xPos: function(newValue, oldValue) {
-            if (Math.abs(newValue - oldValue) > positionAnimationThreshold) {
+            if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
                 TweenLite.to(this.$data, 1, { xPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.xPosAnimated = newValue;
             }
         },
         yPos: function(newValue, oldValue) {
-            if (Math.abs(newValue - oldValue) > positionAnimationThreshold) {
+            if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
                 TweenLite.to(this.$data, 1, { yPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.yPosAnimated = newValue;
@@ -163,7 +159,7 @@ export default {
             return this.mazeCard.players;
         },
         remainingSpace: function() {
-            return Math.floor((this.cardSize - this.pathWidth) / 2);
+            return Math.floor((this.$ui.cardSize - this.pathWidth) / 2);
         },
         hasNorth: function() {
             return this.mazeCard.hasNorthOutPath();

@@ -7,7 +7,7 @@
             :insert-panel="insertPanel"
             :x-pos="xPos(insertPanel)"
             :y-pos="yPos(insertPanel)"
-            :size="cardSize"
+            :size="$ui.cardSize"
             :interaction="interaction"
         />
     </g>
@@ -30,11 +30,6 @@ export default {
         interaction: {
             type: Boolean,
             required: true
-        },
-        cardSize: {
-            type: Number,
-            required: false,
-            default: 100
         },
         boardOffset: {
             type: Number,
@@ -60,10 +55,10 @@ export default {
     },
     methods: {
         xPos(insertPanel) {
-            return this.cardSize * insertPanel.displayLocation.column + this.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.column + this.boardOffset;
         },
         yPos(insertPanel) {
-            return this.cardSize * insertPanel.displayLocation.row + this.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.row + this.boardOffset;
         },
         locationsEqual(locA, locB) {
             return locA && locB && locA.row === locB.row && locA.column === locB.column;

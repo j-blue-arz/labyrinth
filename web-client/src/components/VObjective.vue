@@ -1,5 +1,5 @@
 <template>
-    <svg :height="cardSize" :width="cardSize" viewBox="-50 -50 100 100">
+    <svg :height="$ui.cardSize" :width="$ui.cardSize" viewBox="-50 -50 100 100">
         <g class="objective">
             <line
                 :x1="svgFlagLine.x"
@@ -14,12 +14,6 @@
 <script>
 export default {
     name: "v-objective",
-    props: {
-        cardSize: {
-            type: Number,
-            default: 100
-        }
-    },
     data() {
         return {
             mastSize: 50,

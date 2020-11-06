@@ -4,7 +4,6 @@
             @click.native="onLeftoverClick"
             v-if="hasStarted"
             :maze-card="mazeCard"
-            :card-size="cardSize"
             x="0"
             y="0"
             :interaction="interaction"
@@ -31,10 +30,6 @@ export default {
             type: MazeCard,
             required: true
         },
-        cardSize: {
-            type: Number,
-            required: true
-        },
         landscape: {
             type: Boolean,
             required: false,
@@ -56,25 +51,25 @@ export default {
             return this.mazeCard instanceof MazeCard;
         },
         leftoverSize: function() {
-            return this.cardSize * 1.6;
+            return this.$ui.cardSize * 1.6;
         },
         width: function() {
             if (this.isLandscape) {
-                return this.cardSize * 1.5;
+                return this.$ui.cardSize * 1.5;
             } else {
-                return this.cardSize;
+                return this.$ui.cardSize;
             }
         },
         height: function() {
             if (this.isLandscape) {
-                return this.cardSize;
+                return this.$ui.cardSize;
             } else {
-                return this.cardSize * 1.5;
+                return this.$ui.cardSize * 1.5;
             }
         },
         mazeCardX: function() {
             if (this.isLandscape) {
-                return this.cardSize;
+                return this.$ui.cardSize;
             } else {
                 return 0;
             }
@@ -83,7 +78,7 @@ export default {
             if (this.isLandscape) {
                 return 0;
             } else {
-                return this.cardSize;
+                return this.$ui.cardSize;
             }
         },
         arrowPath: function() {

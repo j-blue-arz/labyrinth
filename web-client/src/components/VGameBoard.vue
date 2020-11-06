@@ -20,7 +20,6 @@
                 @click.native="onMazeCardClick($event, mazeCard)"
                 :maze-card="mazeCard"
                 :key="'mazeCard-' + mazeCard.id"
-                :card-size="cardSize"
                 :xPos="xPos(mazeCard)"
                 :yPos="yPos(mazeCard)"
                 :interaction="isInteractive(mazeCard)"
@@ -52,10 +51,6 @@ export default {
             type: Array,
             required: true
         },
-        cardSize: {
-            type: Number,
-            default: 100
-        },
         boardOffset: {
             type: Number,
             default: 100
@@ -82,10 +77,10 @@ export default {
     },
     computed: {
         boardSize: function() {
-            return this.cardSize * this.n;
+            return this.$ui.cardSize * this.n;
         },
         borderWidth: function() {
-            return Math.floor(this.cardSize / 6);
+            return Math.floor(this.$ui.cardSize / 6);
         }
     },
     methods: {
@@ -99,14 +94,14 @@ export default {
             return null;
         },
         xPos(mazeCard) {
-            let xPos = this.cardSize * mazeCard.location.column + this.borderWidth;
+            let xPos = this.$ui.cardSize * mazeCard.location.column + this.borderWidth;
             if (mazeCard.id === this.draggedMazeCardId) {
                 xPos += this.dragOffset.x;
             }
             return xPos;
         },
         yPos(mazeCard) {
-            let yPos = this.cardSize * mazeCard.location.row + this.borderWidth;
+            let yPos = this.$ui.cardSize * mazeCard.location.row + this.borderWidth;
             if (mazeCard.id === this.draggedMazeCardId) {
                 yPos += this.dragOffset.y;
             }
@@ -151,8 +146,8 @@ export default {
             };
         },
         getMazeCard(mousePosition) {
-            let column = Math.floor((mousePosition.x - this.boardOffset) / this.cardSize);
-            let row = Math.floor((mousePosition.y - this.boardOffset) / this.cardSize);
+            let column = Math.floor((mousePosition.x - this.boardOffset) / this.$ui.cardSize);
+            let row = Math.floor((mousePosition.y - this.boardOffset) / this.$ui.cardSize);
             let mazeCard = this.mazeCards.find(
                 mazeCard => mazeCard.location.row == row && mazeCard.location.column == column
             );

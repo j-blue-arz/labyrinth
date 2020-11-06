@@ -6,7 +6,6 @@
             :board-offset="boardOffset"
             :n="mazeSize"
             :maze-cards="mazeCards"
-            :card-size="cardSize"
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableMazeCards"
@@ -15,7 +14,6 @@
             v-for="player in players"
             :key="'player-' + player.id"
             :board-offset="boardOffset"
-            :card-size="cardSize"
             :player="player"
             :maze-card-id="player.mazeCard.id"
             :game="game"
@@ -23,13 +21,11 @@
         <insert-panels
             @insert-panel-clicked="onInsertPanelClick"
             :interaction="isMyTurnToShift"
-            :card-size="cardSize"
             :game="game"
         ></insert-panels>
         <leftover-maze-card
             :x="leftoverX"
             :y="leftoverY"
-            :card-size="cardSize"
             :is-landscape="!isLandscape"
             :maze-card="leftoverMazeCard"
             :interaction="isMyTurnToShift"
@@ -70,7 +66,6 @@ export default {
             interactionHeight: 900,
             leftoverX: 0,
             leftoverY: 0,
-            cardSize: 100,
             isLandscape: true
         };
     },
@@ -119,7 +114,7 @@ export default {
             );
         },
         boardOffset: function() {
-            return this.cardSize;
+            return this.$ui.cardSize;
         },
         mazeCards: function() {
             return this.game.mazeCardsAsList();
@@ -169,10 +164,10 @@ export default {
             }
         },
         interactiveBoardSize: function() {
-            return this.cardSize * (this.mazeSize + 2);
+            return this.$ui.cardSize * (this.mazeSize + 2);
         },
         leftoverSize: function() {
-            return this.cardSize;
+            return this.$ui.cardSize;
         },
         handleResize: function() {
             if (window.innerWidth > window.innerHeight) {

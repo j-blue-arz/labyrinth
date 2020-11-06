@@ -30,10 +30,6 @@ export default {
             type: Number,
             required: true
         },
-        cardSize: {
-            type: Number,
-            default: 100
-        },
         boardOffset: {
             type: Number,
             default: 100
@@ -83,10 +79,10 @@ export default {
             }
         },
         locationToPosition: function(location) {
-            let cardMidpoint = this.cardSize / 2;
+            let cardMidpoint = this.$ui.cardSize / 2;
             let offset = cardMidpoint + this.boardOffset;
-            let x = location.column * this.cardSize + offset;
-            let y = location.row * this.cardSize + offset;
+            let x = location.column * this.$ui.cardSize + offset;
+            let y = location.row * this.$ui.cardSize + offset;
             return [x, y];
         },
         isLeftover: function(mazeCard) {
