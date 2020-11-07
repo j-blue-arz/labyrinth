@@ -1,5 +1,6 @@
 import VMazeCard from "@/components/VMazeCard.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
+import MazeCard from "@/model/mazeCard";
 
 export function assertConsistentLocation(game, location) {
     expect(game.getMazeCard(location).location).toEqual(location);
@@ -52,4 +53,19 @@ export function extractIdMatrix(gameContainer) {
 
 export function copyObjectStructure(obj) {
     return JSON.parse(JSON.stringify(obj));
+}
+
+export function buildRandomMaze(game) {
+    let mazeCards = [];
+    let id = 0;
+    for (let row = 0; row < game.n; row++) {
+        game.mazeCards.push([]);
+        for (let col = 0; col < game.n; col++) {
+            let mazeCard = MazeCard.createNewRandom(id, row, col);
+            mazeCards.push(mazeCard);
+            game.mazeCards[row].push(mazeCard);
+            id++;
+        }
+    }
+    return mazeCards;
 }
