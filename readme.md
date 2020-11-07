@@ -24,7 +24,7 @@ Now is a good time to create and activate a virtual environment, e.g. on Linux:
 
 install required packages:
 
-    pip install -r requirements-dev.txt
+    pip install -r dev-requirements.txt
     python -m pytest ./tests
 
 ## Running server  
