@@ -15,35 +15,34 @@ const mazeCardListFactory = function(n) {
 };
 
 const findLowestPositionOfMazeCard = function(vGameBoard, dimension) {
-    var toplevelPosition = parseInt(vGameBoard.element.getAttribute(dimension));
     var vMazeCards = vGameBoard.findAll(VMazeCard);
     var min = Number.MAX_VALUE;
     for (var i = 0; i < vMazeCards.length; i++) {
         var value = parseInt(vMazeCards.at(i).element.getAttribute(dimension));
         if (value < min) min = value;
     }
-    return toplevelPosition + min;
+    return min;
 };
 
 describe("VGameBoard", () => {
     it("renders all VMazeCard components", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
-                n: 5,
+                boardSize: 500,
                 mazeCards: mazeCardListFactory(5),
-                boardOffset: 100
+                borderWidth: 100
             }
         });
 
         expect(gameBoard.findAll(VMazeCard).length).toBe(5 * 5);
     });
 
-    it("renders leftmost v-maze-card exactly at given boardOffset prop", () => {
+    it("renders leftmost v-maze-card exactly at given borderWidth prop", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
-                n: 7,
+                boardSize: 700,
                 mazeCards: mazeCardListFactory(7),
-                boardOffset: 166
+                borderWidth: 166
             }
         });
 
@@ -51,12 +50,12 @@ describe("VGameBoard", () => {
         expect(xPos).toBe(166);
     });
 
-    it("renders topmost v-maze-card exactly at given boardOffset prop", () => {
+    it("renders topmost v-maze-card exactly at given borderWidth prop", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
-                n: 5,
+                boardSize: 500,
                 mazeCards: mazeCardListFactory(5),
-                boardOffset: 99
+                borderWidth: 99
             }
         });
         var yPos = findLowestPositionOfMazeCard(gameBoard, "y");

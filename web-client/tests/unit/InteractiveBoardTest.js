@@ -2,6 +2,7 @@ import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
+import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import { copyObjectStructure } from "./testutils.js";
@@ -137,7 +138,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithMoveAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][2];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(mockPerformMove).toHaveBeenCalled();
     });
 
@@ -145,7 +146,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithShiftAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][2];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(mockPerformMove).not.toHaveBeenCalled();
     });
 
@@ -153,7 +154,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithShiftAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][0];
-        board.find(VGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
         expect(mockPerformMove).not.toHaveBeenCalled();
     });
 
