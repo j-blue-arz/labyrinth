@@ -1,3 +1,5 @@
+import { locationsEqual } from "@/model/game.js";
+
 export default class Graph {
     constructor(game) {
         this.game = game;
@@ -16,7 +18,7 @@ export default class Graph {
             let nextElements = [sourceLocation];
             var currentLocation;
             while ((currentLocation = nextElements.shift()) !== undefined) {
-                if (this._locationsEqual(currentLocation, targetLocation)) {
+                if (locationsEqual(currentLocation, targetLocation)) {
                     return this._reachedToPath(currentLocation);
                 }
                 this._neighborLocations(currentLocation).forEach(neighbor => {
@@ -33,15 +35,11 @@ export default class Graph {
     isReachable(sourceLocation, targetLocation) {
         let locations = this.reachableLocations(sourceLocation);
         for (var location of locations) {
-            if (this._locationsEqual(location, targetLocation)) {
+            if (locationsEqual(location, targetLocation)) {
                 return true;
             }
         }
         return false;
-    }
-
-    _locationsEqual(locationA, locationB) {
-        return locationA.row === locationB.row && locationA.column == locationB.column;
     }
 
     reachableLocations(sourceLocation) {
@@ -141,7 +139,7 @@ export default class Graph {
     _reachedToPath(location) {
         let path = [location];
         let current = location;
-        while (!this._locationsEqual(this._getReached(current).parent, current)) {
+        while (!locationsEqual(this._getReached(current).parent, current)) {
             current = this._getReached(current).parent;
             path.push(current);
         }

@@ -58,7 +58,7 @@ export default {
         drag: {
             required: false,
             default: function() {
-                return { mazeCardId: null, offset: null };
+                return { row: false, column: false, offset: 0 };
             }
         }
     },
@@ -74,20 +74,17 @@ export default {
         },
         xPos(mazeCard) {
             let xPos = this.$ui.cardSize * mazeCard.location.column + this.borderWidth;
-            if (this.isDragging(mazeCard.id)) {
-                xPos += this.drag.offset.x;
+            if (this.drag.row === mazeCard.location.row) {
+                xPos += this.drag.offset;
             }
             return xPos;
         },
         yPos(mazeCard) {
             let yPos = this.$ui.cardSize * mazeCard.location.row + this.borderWidth;
-            if (this.isDragging(mazeCard.id)) {
-                yPos += this.drag.offset.y;
+            if (this.drag.column === mazeCard.location.column) {
+                yPos += this.drag.offset;
             }
             return yPos;
-        },
-        isDragging(mazeCardId) {
-            return this.drag && this.drag.mazeCardId === mazeCardId;
         },
         onMazeCardClick: function($event, mazeCard) {
             this.$emit("maze-card-clicked", mazeCard);

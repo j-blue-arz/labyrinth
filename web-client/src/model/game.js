@@ -12,6 +12,10 @@ export function loc(row, column) {
     return { row: row, column: column };
 }
 
+export function locationsEqual(locA, locB) {
+    return locA && locB && locA.row === locB.row && locA.column === locB.column;
+}
+
 export default class Game {
     constructor() {
         this.n = 7;
@@ -70,7 +74,7 @@ export default class Game {
     }
 
     shift(location) {
-        if (this._locationsEqual(location, this.disabledShiftLocation)) {
+        if (locationsEqual(location, this.disabledShiftLocation)) {
             throw new ValueError("Shifting at " + location + " is not allowed.");
         }
 
@@ -109,10 +113,6 @@ export default class Game {
             oppositeLocation = { row: borderLocation.row, column: this.n - 1 };
         }
         return oppositeLocation;
-    }
-
-    _locationsEqual(locA, locB) {
-        return locA && locB && locA.row === locB.row && locA.column === locB.column;
     }
 
     getShiftLocations() {

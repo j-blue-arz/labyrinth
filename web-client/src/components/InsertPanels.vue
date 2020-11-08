@@ -16,6 +16,7 @@
 <script>
 import VInsertPanel from "@/components/VInsertPanel.vue";
 import InsertPanel from "@/model/insertPanel.js";
+import { locationsEqual } from "@/model/game.js";
 
 export default {
     name: "insert-panels",
@@ -40,7 +41,7 @@ export default {
             let shiftLocations = this.game.getShiftLocations();
             for (let location of shiftLocations) {
                 let insertPanel = new InsertPanel(id++, location, n);
-                if (this.locationsEqual(this.game.disabledShiftLocation, location)) {
+                if (locationsEqual(this.game.disabledShiftLocation, location)) {
                     insertPanel.enabled = false;
                 }
                 result.push(insertPanel);
@@ -54,9 +55,6 @@ export default {
         },
         yPos(insertPanel) {
             return this.$ui.cardSize * insertPanel.displayLocation.row + this.$ui.boardOffset;
-        },
-        locationsEqual(locA, locB) {
-            return locA && locB && locA.row === locB.row && locA.column === locB.column;
         },
         onClick: function(event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {

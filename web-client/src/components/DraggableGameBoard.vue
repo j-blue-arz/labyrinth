@@ -16,7 +16,7 @@
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableCards"
-            :drag="{ mazeCardId: draggedMazeCardId, offset: dragOffset }"
+            :drag="{ row: dragRow, column: dragColumn, offset: dragOffset }"
             @maze-card-clicked="onMazeCardClicked"
         ></v-game-board>
     </svg>
@@ -24,6 +24,7 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
+import { locationsEqual, loc } from "@/model/game.js";
 
 export default {
     name: "draggable-game-board",
@@ -34,6 +35,10 @@ export default {
     props: {
         game: {
             type: Object,
+            required: true
+        },
+        userHasToShift: {
+            type: Boolean,
             required: true
         },
         interactiveMazeCards: {
@@ -51,9 +56,11 @@ export default {
     },
     data() {
         return {
-            draggedMazeCardId: null,
-            dragStart: null,
-            dragOffset: { x: 0, y: 0 }
+            mouseStart: null,
+            dragLocation: null,
+            dragOffset: 0,
+            dragRow: null,
+            dragColumn: null
         };
     },
     computed: {
@@ -65,29 +72,90 @@ export default {
         },
         mazeCards: function() {
             return this.game.mazeCardsAsList();
+        },
+        shiftableRows: function() {
+            let result = new Array(this.game.n - 1).fill(false);
+            let shiftLocations = this.game.getShiftLocations();
+            for (let location of shiftLocations) {
+                if (location.column == 0 || location.column == this.game.n - 1) {
+                    result[location.row] = true;
+                }
+            }
+            return result;
+        },
+        shiftableColumns: function() {
+            let result = new Array(this.game.n - 1).fill(false);
+            let shiftLocations = this.game.getShiftLocations();
+            for (let location of shiftLocations) {
+                if (location.row == 0 || location.row == this.game.n - 1) {
+                    result[location.column] = true;
+                }
+            }
+            return result;
+        },
+        canDragRow: function() {
+            if (this.dragLocation) {
+                return this.shiftableRows[this.dragLocation.row];
+            }
+            return false;
+        },
+        canDragColumn: function() {
+            if (this.dragLocation) {
+                return this.shiftableColumns[this.dragLocation.column];
+            }
+            return false;
         }
     },
     methods: {
         startDrag: function($event) {
-            let mousePosition = this.getMousePosition($event);
-            let mazeCard = this.getMazeCard(mousePosition);
-            if (mazeCard) {
-                this.draggedMazeCardId = mazeCard.id;
-                this.dragStart = mousePosition;
+            this.endDrag();
+            if (this.userHasToShift) {
+                let mousePosition = this.getMousePosition($event);
+                let location = this.getLocation(mousePosition);
+                let mazeCard = this.getMazeCard(location);
+                if (mazeCard) {
+                    if (
+                        this.shiftableColumns[location.column] ||
+                        this.shiftableRows[location.row]
+                    ) {
+                        this.dragLocation = location;
+                        this.mouseStart = mousePosition;
+                    }
+                }
             }
-            this.dragOffset = { x: 0, y: 0 };
         },
         drag: function($event) {
-            if (this.draggedMazeCardId !== null) {
+            if (this.dragLocation !== null) {
                 $event.preventDefault();
                 let mousePosition = this.getMousePosition($event);
-                this.dragOffset = this.offset(this.dragStart, mousePosition);
+                let offset = this.offset(this.mouseStart, mousePosition);
+                if (this.canDragRow && this.canDragColumn) {
+                    if (Math.abs(offset.x) >= Math.abs(offset.y)) {
+                        this.dragOffset = offset.x;
+                        this.dragRow = this.dragLocation.row;
+                        this.dragColumn = null;
+                    } else {
+                        this.dragOffset = offset.y;
+                        this.dragRow = null;
+                        this.dragColumn = this.dragLocation.column;
+                    }
+                } else if (this.canDragRow) {
+                    this.dragOffset = offset.x;
+                    this.dragRow = this.dragLocation.row;
+                    this.dragColumn = null;
+                } else if (this.canDragColumn) {
+                    this.dragOffset = offset.y;
+                    this.dragRow = null;
+                    this.dragColumn = this.dragLocation.column;
+                }
             }
         },
         endDrag: function($event) {
-            this.draggedMazeCardId = null;
-            this.dragStart = null;
-            this.dragOffset = { x: 0, y: 0 };
+            this.dragRow = null;
+            this.dragColumn = null;
+            this.mouseStart = null;
+            this.dragLocation = null;
+            this.dragOffset = 0;
         },
         offset: function(from, to) {
             return {
@@ -103,11 +171,14 @@ export default {
                 y: (evt.clientY - CTM.f) / CTM.d
             };
         },
-        getMazeCard: function(mousePosition) {
+        getLocation: function(mousePosition) {
             let column = Math.floor((mousePosition.x - this.$ui.boardOffset) / this.$ui.cardSize);
             let row = Math.floor((mousePosition.y - this.$ui.boardOffset) / this.$ui.cardSize);
-            let mazeCard = this.mazeCards.find(
-                mazeCard => mazeCard.location.row == row && mazeCard.location.column == column
+            return loc(row, column);
+        },
+        getMazeCard: function(location) {
+            let mazeCard = this.mazeCards.find(mazeCard =>
+                locationsEqual(mazeCard.location, location)
             );
             return mazeCard;
         },

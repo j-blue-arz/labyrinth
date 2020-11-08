@@ -7,6 +7,7 @@
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableMazeCards"
+            :user-has-to-shift="isMyTurnToShift"
         ></draggable-game-board>
         <v-move-animation
             v-for="player in players"
