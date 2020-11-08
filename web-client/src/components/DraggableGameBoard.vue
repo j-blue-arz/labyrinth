@@ -53,7 +53,7 @@ export default {
         return {
             draggedMazeCardId: null,
             dragStart: null,
-            dragOffset: null
+            dragOffset: { x: 0, y: 0 }
         };
     },
     computed: {

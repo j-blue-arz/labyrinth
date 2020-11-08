@@ -36,7 +36,7 @@ describe("InsertPanels", () => {
         expect(insertPanelsHtml.length).toBe(1);
         let xPos = Number.parseInt(insertPanelsHtml.at(0).attributes("x"));
         let yPos = Number.parseInt(insertPanelsHtml.at(0).attributes("y"));
-        expect(xPos).toBe(2 * 100);
-        expect(yPos).toBe(0 * 100);
+        expect(xPos).toBe(100);
+        expect(yPos).toBe(-100);
     });
 });
