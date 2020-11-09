@@ -175,17 +175,33 @@ export default {
             this.dragColumn = this.dragLocation.column;
         },
         endDrag: function($event) {
+            if (Math.abs(this.dragOffset) > this.SHIFT_DRAG_THRESHOLD) {
+                this.emitShiftEvent();
+            }
             this.dragRow = null;
             this.dragColumn = null;
             this.mouseStart = null;
             this.dragLocation = null;
             this.dragOffset = 0;
         },
-        offset: function(from, to) {
-            return {
-                x: to.x - from.x,
-                y: to.y - from.y
-            };
+        emitShiftEvent() {
+            let shiftLocation = null;
+            if (this.dragRow) {
+                if (this.dragOffset > 0) {
+                    shiftLocation = loc(this.dragRow, 0);
+                } else {
+                    shiftLocation = loc(this.dragRow, this.game.n - 1);
+                }
+            } else if (this.dragColumn) {
+                if (this.dragOffset > 0) {
+                    shiftLocation = loc(0, this.dragColumn);
+                } else {
+                    shiftLocation = loc(this.game.n - 1, this.dragColumn);
+                }
+            }
+            if (shiftLocation) {
+                this.$emit("insert-panel-clicked", shiftLocation);
+            }
         },
         getMousePosition: function(evt) {
             const svg = evt.currentTarget;

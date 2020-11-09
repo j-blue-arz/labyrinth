@@ -109,6 +109,28 @@ describe("DraggableGameBoard", () => {
             thenNoDraggingOccurs();
         });
     });
+
+    describe("when mouse is released", () => {
+        it("emits shift event when dragged by more than 50", () => {
+            givenMouseDownAt(loc(1, 1));
+            givenMouseIsMoved({ x: 0, y: 75 });
+
+            whenMouseIsReleased();
+
+            thenNoDraggingOccurs();
+            thenShiftEventIsEmitted(loc(0, 1));
+        });
+
+        it("does not emit shift event when dragged by less than 50", () => {
+            givenMouseDownAt(loc(1, 1));
+            givenMouseIsMoved({ x: 0, y: 25 });
+
+            whenMouseIsReleased();
+
+            thenNoDraggingOccurs();
+            thenNoShiftEventIsEmitted();
+        });
+    });
 });
 
 let wrapper = null;
