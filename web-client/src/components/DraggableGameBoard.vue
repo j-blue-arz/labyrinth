@@ -129,26 +129,53 @@ export default {
                 $event.preventDefault();
                 let mousePosition = this.getMousePosition($event);
                 let offset = this.offset(this.mouseStart, mousePosition);
+                let boundingBox = { xMin: -100, xMax: 100, yMin: -100, yMax: 100 };
+                if (this.game.disabledShiftLocation) {
+                    const disabled = this.game.disabledShiftLocation;
+                    if (this.dragLocation.row === disabled.row) {
+                        if (disabled.column === 0) {
+                            boundingBox.xMax = 0;
+                        } else {
+                            boundingBox.xMin = 0;
+                        }
+                    } else if (this.dragLocation.column == disabled.column) {
+                        if (disabled.row === 0) {
+                            boundingBox.yMax = 0;
+                        } else {
+                            boundingBox.yMin = 0;
+                        }
+                    }
+                }
+                offset = {
+                    x: bound(offset.x, boundingBox.xMin, boundingBox.xMax),
+                    y: bound(offset.y, boundingBox.yMin, boundingBox.yMax)
+                };
                 if (this.canDragRow && this.canDragColumn) {
                     if (Math.abs(offset.x) >= Math.abs(offset.y)) {
-                        this.dragOffset = offset.x;
-                        this.dragRow = this.dragLocation.row;
-                        this.dragColumn = null;
+                        this.dragHorizontally(offset);
                     } else {
-                        this.dragOffset = offset.y;
-                        this.dragRow = null;
-                        this.dragColumn = this.dragLocation.column;
+                        this.dragVertically(offset);
                     }
                 } else if (this.canDragRow) {
-                    this.dragOffset = offset.x;
-                    this.dragRow = this.dragLocation.row;
-                    this.dragColumn = null;
+                    this.dragHorizontally(offset);
                 } else if (this.canDragColumn) {
-                    this.dragOffset = offset.y;
-                    this.dragRow = null;
-                    this.dragColumn = this.dragLocation.column;
+                    this.dragVertically(offset);
                 }
             }
+
+            function bound(value, min, max) {
+                return Math.min(Math.max(value, min), max);
+            }
+        },
+        dragHorizontally: function(offset) {
+            this.dragOffset = offset.x;
+            this.dragRow = this.dragLocation.row;
+            this.dragColumn = null;
+        },
+        dragVertically: function(offset) {
+            this.dragOffset = offset.y;
+            this.dragRow = null;
+            this.dragColumn = this.dragLocation.column;
         },
         endDrag: function($event) {
             this.dragRow = null;

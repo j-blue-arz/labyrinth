@@ -87,6 +87,24 @@ describe("DraggableGameBoard", () => {
 
         thenNoDraggingOccurs();
     });
+
+    it("does not allow dragging against the direction of the previous shift", () => {
+        givenDisabledShiftLocation(loc(1, 0));
+        givenMouseDownAt(loc(1, 1));
+
+        whenMouseIsMoved({ x: 40, y: 0 });
+
+        thenNoDraggingOccurs();
+    });
+
+    it("does not offset by more than 100", () => {
+        givenMouseDownAt(loc(1, 1));
+
+        whenMouseIsMoved({ x: 120, y: 0 });
+
+        thenRowIsDragged(1);
+        thenDragOffsetIs(100);
+    });
 });
 
 let wrapper = null;
@@ -111,6 +129,10 @@ const factory = function() {
 
 const givenShiftIsNotRequired = function() {
     wrapper.setProps({ userHasToShift: false });
+};
+
+const givenDisabledShiftLocation = function(location) {
+    game.disabledShiftLocation = location;
 };
 
 const givenMouseDownAt = function(location) {
