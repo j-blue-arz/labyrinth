@@ -10,100 +10,104 @@ beforeEach(() => {
 });
 
 describe("DraggableGameBoard", () => {
-    it("offsets entire row when dragging right", () => {
-        givenMouseDownAt(loc(1, 1));
+    describe("when dragging", () => {
+        it("offsets entire row when dragging right", () => {
+            givenMouseDownAt(loc(1, 1));
 
-        whenMouseIsMoved({ x: 40, y: 0 });
+            whenMouseIsMoved({ x: 40, y: 0 });
 
-        thenRowIsDragged(1);
-        thenDragOffsetIs(40);
+            thenRowIsDragged(1);
+            thenDragOffsetIs(40);
+        });
+
+        it("offset entire column when dragging upwards", () => {
+            givenMouseDownAt(loc(1, 1));
+
+            whenMouseIsMoved({ x: 0, y: -30 });
+
+            thenColumnIsDragged(1);
+            thenDragOffsetIs(-30);
+        });
+
+        it("drags column when dragging more down than right", () => {
+            givenMouseDownAt(loc(1, 1));
+
+            whenMouseIsMoved({ x: 20, y: 40 });
+
+            thenColumnIsDragged(1);
+            thenDragOffsetIs(40);
+        });
+
+        it("drags row when dragging more left than downwards", () => {
+            givenMouseDownAt(loc(1, 1));
+
+            whenMouseIsMoved({ x: -40, y: -20 });
+
+            thenRowIsDragged(1);
+            thenDragOffsetIs(-40);
+        });
+
+        it("drags row when dragging equally horizontally and vertically", () => {
+            givenMouseDownAt(loc(1, 1));
+
+            whenMouseIsMoved({ x: 30, y: 30 });
+
+            thenRowIsDragged(1);
+            thenDragOffsetIs(30);
+        });
+
+        it("does not offset by more than 100", () => {
+            givenMouseDownAt(loc(1, 1));
+
+            whenMouseIsMoved({ x: 120, y: 0 });
+
+            thenRowIsDragged(1);
+            thenDragOffsetIs(100);
+        });
     });
 
-    it("does not allow dragging horizontally for not shiftable rows", () => {
-        givenMouseDownAt(loc(0, 1));
+    describe("does not allow dragging", () => {
+        it("horizontally for not shiftable rows", () => {
+            givenMouseDownAt(loc(0, 1));
 
-        whenMouseIsMoved({ x: 40, y: 0 });
+            whenMouseIsMoved({ x: 40, y: 0 });
 
-        thenNoDraggingOccurs();
-    });
+            thenNoDraggingOccurs();
+        });
 
-    it("offset entire column when dragging upwards", () => {
-        givenMouseDownAt(loc(1, 1));
+        it("when it is not player's turn to shift", () => {
+            givenShiftIsNotRequired();
+            givenMouseDownAt(loc(1, 1));
 
-        whenMouseIsMoved({ x: 0, y: -30 });
+            whenMouseIsMoved({ x: 40, y: 0 });
 
-        thenColumnIsDragged(1);
-        thenDragOffsetIs(-30);
-    });
+            thenNoDraggingOccurs();
+        });
 
-    it("does not allow dragging vertically for not shiftable columns", () => {
-        givenMouseDownAt(loc(1, 0));
+        it("against the direction of the previous shift", () => {
+            givenDisabledShiftLocation(loc(1, 0));
+            givenMouseDownAt(loc(1, 1));
 
-        whenMouseIsMoved({ x: 0, y: 30 });
+            whenMouseIsMoved({ x: 40, y: 0 });
 
-        thenNoDraggingOccurs();
-    });
+            thenNoDraggingOccurs();
+        });
 
-    it("drags column when dragging more down than right", () => {
-        givenMouseDownAt(loc(1, 1));
+        it("vertically for not shiftable columns", () => {
+            givenMouseDownAt(loc(1, 0));
 
-        whenMouseIsMoved({ x: 20, y: 40 });
+            whenMouseIsMoved({ x: 0, y: 30 });
 
-        thenColumnIsDragged(1);
-        thenDragOffsetIs(40);
-    });
+            thenNoDraggingOccurs();
+        });
 
-    it("drags row when dragging more left than downwards", () => {
-        givenMouseDownAt(loc(1, 1));
+        it("for fixed positions", () => {
+            givenMouseDownAt(loc(0, 0));
 
-        whenMouseIsMoved({ x: -40, y: -20 });
+            whenMouseIsMoved({ x: 40, y: 0 });
 
-        thenRowIsDragged(1);
-        thenDragOffsetIs(-40);
-    });
-
-    it("drags row when dragging equally horizontally and vertically", () => {
-        givenMouseDownAt(loc(1, 1));
-
-        whenMouseIsMoved({ x: 30, y: 30 });
-
-        thenRowIsDragged(1);
-        thenDragOffsetIs(30);
-    });
-
-    it("does not allow dragging for fixed positions", () => {
-        givenMouseDownAt(loc(0, 0));
-
-        whenMouseIsMoved({ x: 40, y: 0 });
-
-        thenNoDraggingOccurs();
-    });
-
-    it("does not allow dragging when it is not player's turn to shift", () => {
-        givenShiftIsNotRequired();
-        givenMouseDownAt(loc(1, 1));
-
-        whenMouseIsMoved({ x: 40, y: 0 });
-
-        thenNoDraggingOccurs();
-    });
-
-    it("does not allow dragging against the direction of the previous shift", () => {
-        givenDisabledShiftLocation(loc(1, 0));
-        givenMouseDownAt(loc(1, 1));
-
-        whenMouseIsMoved({ x: 40, y: 0 });
-
-        thenNoDraggingOccurs();
-    });
-
-    it("does not offset by more than 100", () => {
-        givenMouseDownAt(loc(1, 1));
-
-        whenMouseIsMoved({ x: 120, y: 0 });
-
-        thenRowIsDragged(1);
-        thenDragOffsetIs(100);
+            thenNoDraggingOccurs();
+        });
     });
 });
 
@@ -142,11 +146,19 @@ const givenMouseDownAt = function(location) {
     wrapper.trigger("mousedown", mousePosition);
 };
 
+const givenMouseIsMoved = function(offset) {
+    whenMouseIsMoved(offset);
+};
+
 const whenMouseIsMoved = function(offset) {
     const clientX = mousePosition.clientX + offset.x;
     const clientY = mousePosition.clientY + offset.y;
     mousePosition = { clientX: clientX, clientY: clientY };
     wrapper.trigger("mousemove", mousePosition);
+};
+
+const whenMouseIsReleased = function() {
+    wrapper.trigger("mouseup");
 };
 
 const thenRowIsDragged = function(expectedRow) {
@@ -169,4 +181,15 @@ const thenDragOffsetIs = function(expectedOffset) {
 const thenNoDraggingOccurs = function() {
     const drag = wrapper.find(VGameBoard).props("drag");
     expect(drag.offset).toBe(0);
+};
+
+const thenShiftEventIsEmitted = function(expectedShiftLocation) {
+    expect(wrapper.emitted("insert-panel-clicked")).toBeTruthy();
+    expect(wrapper.emitted("insert-panel-clicked").length).toBe(1);
+    expect(wrapper.emitted("insert-panel-clicked")[0][0].row).toBe(expectedShiftLocation.row);
+    expect(wrapper.emitted("insert-panel-clicked")[0][0].column).toBe(expectedShiftLocation.column);
+};
+
+const thenNoShiftEventIsEmitted = function() {
+    expect(wrapper.emitted("insert-panel-clicked")).toBeFalsy();
 };

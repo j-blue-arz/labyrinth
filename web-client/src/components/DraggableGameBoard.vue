@@ -25,6 +25,7 @@
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
 import { locationsEqual, loc } from "@/model/game.js";
+import { Vector, BoundingBox, HALF_PLANES } from "@/model/2d.js";
 
 export default {
     name: "draggable-game-board",
@@ -104,6 +105,26 @@ export default {
                 return this.shiftableColumns[this.dragLocation.column];
             }
             return false;
+        },
+        dragBoundingBox: function() {
+            let boundingBox = this.DRAG_BOUNDING_BOX;
+            if (this.game.disabledShiftLocation) {
+                const disabled = this.game.disabledShiftLocation;
+                if (this.dragLocation.row === disabled.row) {
+                    if (disabled.column === 0) {
+                        boundingBox = boundingBox.intersect(HALF_PLANES.left);
+                    } else {
+                        boundingBox = boundingBox.intersect(HALF_PLANES.right);
+                    }
+                } else if (this.dragLocation.column == disabled.column) {
+                    if (disabled.row === 0) {
+                        boundingBox = boundingBox.intersect(HALF_PLANES.upper);
+                    } else {
+                        boundingBox = boundingBox.intersect(HALF_PLANES.lower);
+                    }
+                }
+            }
+            return boundingBox;
         }
     },
     methods: {
@@ -128,28 +149,8 @@ export default {
             if (this.dragLocation !== null) {
                 $event.preventDefault();
                 let mousePosition = this.getMousePosition($event);
-                let offset = this.offset(this.mouseStart, mousePosition);
-                let boundingBox = { xMin: -100, xMax: 100, yMin: -100, yMax: 100 };
-                if (this.game.disabledShiftLocation) {
-                    const disabled = this.game.disabledShiftLocation;
-                    if (this.dragLocation.row === disabled.row) {
-                        if (disabled.column === 0) {
-                            boundingBox.xMax = 0;
-                        } else {
-                            boundingBox.xMin = 0;
-                        }
-                    } else if (this.dragLocation.column == disabled.column) {
-                        if (disabled.row === 0) {
-                            boundingBox.yMax = 0;
-                        } else {
-                            boundingBox.yMin = 0;
-                        }
-                    }
-                }
-                offset = {
-                    x: bound(offset.x, boundingBox.xMin, boundingBox.xMax),
-                    y: bound(offset.y, boundingBox.yMin, boundingBox.yMax)
-                };
+                let offset = this.mouseStart.to(mousePosition);
+                offset = this.dragBoundingBox.bound(offset);
                 if (this.canDragRow && this.canDragColumn) {
                     if (Math.abs(offset.x) >= Math.abs(offset.y)) {
                         this.dragHorizontally(offset);
@@ -161,10 +162,6 @@ export default {
                 } else if (this.canDragColumn) {
                     this.dragVertically(offset);
                 }
-            }
-
-            function bound(value, min, max) {
-                return Math.min(Math.max(value, min), max);
             }
         },
         dragHorizontally: function(offset) {
@@ -193,14 +190,14 @@ export default {
         getMousePosition: function(evt) {
             const svg = evt.currentTarget;
             const CTM = svg.getScreenCTM();
-            return {
-                x: (evt.clientX - CTM.e) / CTM.a,
-                y: (evt.clientY - CTM.f) / CTM.d
-            };
+            return new Vector((evt.clientX - CTM.e) / CTM.a, (evt.clientY - CTM.f) / CTM.d);
         },
         getLocation: function(mousePosition) {
-            let column = Math.floor((mousePosition.x - this.$ui.boardOffset) / this.$ui.cardSize);
-            let row = Math.floor((mousePosition.y - this.$ui.boardOffset) / this.$ui.cardSize);
+            let locationVector = mousePosition
+                .minus(this.BOARD_OFFSET_VECTOR)
+                .dividedBy(this.$ui.cardSize);
+            let column = Math.floor(locationVector.x);
+            let row = Math.floor(locationVector.y);
             return loc(row, column);
         },
         getMazeCard: function(location) {
@@ -212,6 +209,11 @@ export default {
         onMazeCardClicked: function(mazeCard) {
             this.$emit("maze-card-clicked", mazeCard);
         }
+    },
+    created() {
+        this.BOARD_OFFSET_VECTOR = new Vector(this.$ui.boardOffset, this.$ui.boardOffset);
+        this.DRAG_BOUNDING_BOX = new BoundingBox(new Vector(-100, -100), new Vector(100, 100));
+        this.SHIFT_DRAG_THRESHOLD = this.$ui.cardSize / 2;
     }
 };
 </script>

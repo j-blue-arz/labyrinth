@@ -113,7 +113,7 @@ export default {
             yPosAnimated: 0,
             pathWidth: 37,
             piecesSize: 28,
-            positionAnimationThreshold: 30
+            positionAnimationThreshold: 25
         };
     },
     watch: {
