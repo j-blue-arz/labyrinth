@@ -25,7 +25,8 @@
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
 import { locationsEqual, loc } from "@/model/game.js";
-import { Vector, BoundingBox, HALF_PLANES } from "@/model/2d.js";
+import { Vector, bound } from "@/model/2d.js";
+import { ShiftLocation } from "@/model/shift.js";
 
 export default {
     name: "draggable-game-board",
@@ -74,57 +75,26 @@ export default {
         mazeCards: function() {
             return this.game.mazeCardsAsList();
         },
-        shiftableRows: function() {
-            let result = new Array(this.game.n - 1).fill(false);
-            let shiftLocations = this.game.getShiftLocations();
-            for (let location of shiftLocations) {
-                if (location.column == 0 || location.column == this.game.n - 1) {
-                    result[location.row] = true;
-                }
+        shiftLocations: function() {
+            let result = [];
+            let locations = this.game.getShiftLocations();
+            for (let location of locations) {
+                result.push(new ShiftLocation(location, this.game.n));
             }
             return result;
         },
-        shiftableColumns: function() {
-            let result = new Array(this.game.n - 1).fill(false);
-            let shiftLocations = this.game.getShiftLocations();
-            for (let location of shiftLocations) {
-                if (location.row == 0 || location.row == this.game.n - 1) {
-                    result[location.column] = true;
+        possibleDragDirections: function() {
+            let result = [];
+            if (this.dragLocation) {
+                for (let shiftLocation of this.shiftLocations) {
+                    if (!locationsEqual(this.game.disabledShiftLocation, shiftLocation)) {
+                        if (shiftLocation.affects(this.dragLocation)) {
+                            result.push(shiftLocation.direction);
+                        }
+                    }
                 }
             }
             return result;
-        },
-        canDragRow: function() {
-            if (this.dragLocation) {
-                return this.shiftableRows[this.dragLocation.row];
-            }
-            return false;
-        },
-        canDragColumn: function() {
-            if (this.dragLocation) {
-                return this.shiftableColumns[this.dragLocation.column];
-            }
-            return false;
-        },
-        dragBoundingBox: function() {
-            let boundingBox = this.DRAG_BOUNDING_BOX;
-            if (this.game.disabledShiftLocation) {
-                const disabled = this.game.disabledShiftLocation;
-                if (this.dragLocation.row === disabled.row) {
-                    if (disabled.column === 0) {
-                        boundingBox = boundingBox.intersect(HALF_PLANES.left);
-                    } else {
-                        boundingBox = boundingBox.intersect(HALF_PLANES.right);
-                    }
-                } else if (this.dragLocation.column == disabled.column) {
-                    if (disabled.row === 0) {
-                        boundingBox = boundingBox.intersect(HALF_PLANES.upper);
-                    } else {
-                        boundingBox = boundingBox.intersect(HALF_PLANES.lower);
-                    }
-                }
-            }
-            return boundingBox;
         }
     },
     methods: {
@@ -135,10 +105,7 @@ export default {
                 let location = this.getLocation(mousePosition);
                 let mazeCard = this.getMazeCard(location);
                 if (mazeCard) {
-                    if (
-                        this.shiftableColumns[location.column] ||
-                        this.shiftableRows[location.row]
-                    ) {
+                    if (this.isDraggable(location)) {
                         this.dragLocation = location;
                         this.mouseStart = mousePosition;
                     }
@@ -150,29 +117,30 @@ export default {
                 $event.preventDefault();
                 let mousePosition = this.getMousePosition($event);
                 let offset = this.mouseStart.to(mousePosition);
-                offset = this.dragBoundingBox.bound(offset);
-                if (this.canDragRow && this.canDragColumn) {
-                    if (Math.abs(offset.x) >= Math.abs(offset.y)) {
-                        this.dragHorizontally(offset);
-                    } else {
-                        this.dragVertically(offset);
+                for (let direction of ["N", "S", "E", "W"]) {
+                    if (!this.possibleDragDirections.includes(direction)) {
+                        offset = offset.removeDirectionComponent(direction);
                     }
-                } else if (this.canDragRow) {
+                }
+                if (Math.abs(offset.x) >= Math.abs(offset.y)) {
                     this.dragHorizontally(offset);
-                } else if (this.canDragColumn) {
+                } else {
                     this.dragVertically(offset);
                 }
             }
         },
         dragHorizontally: function(offset) {
-            this.dragOffset = offset.x;
+            this.dragOffset = this.bound(offset.x);
             this.dragRow = this.dragLocation.row;
             this.dragColumn = null;
         },
         dragVertically: function(offset) {
-            this.dragOffset = offset.y;
+            this.dragOffset = this.bound(offset.y);
             this.dragRow = null;
             this.dragColumn = this.dragLocation.column;
+        },
+        bound: function(value) {
+            return bound(value, -this.DRAG_BOUND, this.DRAG_BOUND);
         },
         endDrag: function($event) {
             if (Math.abs(this.dragOffset) > this.SHIFT_DRAG_THRESHOLD) {
@@ -184,7 +152,15 @@ export default {
             this.dragLocation = null;
             this.dragOffset = 0;
         },
-        emitShiftEvent() {
+        isDraggable: function(location) {
+            for (let shiftLocation of this.shiftLocations) {
+                if (shiftLocation.affects(location)) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        emitShiftEvent: function() {
             let shiftLocation = null;
             if (this.dragRow) {
                 if (this.dragOffset > 0) {
@@ -228,7 +204,7 @@ export default {
     },
     created() {
         this.BOARD_OFFSET_VECTOR = new Vector(this.$ui.boardOffset, this.$ui.boardOffset);
-        this.DRAG_BOUNDING_BOX = new BoundingBox(new Vector(-100, -100), new Vector(100, 100));
+        this.DRAG_BOUND = 100;
         this.SHIFT_DRAG_THRESHOLD = this.$ui.cardSize / 2;
     }
 };

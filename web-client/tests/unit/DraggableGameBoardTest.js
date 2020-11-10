@@ -84,11 +84,20 @@ describe("DraggableGameBoard", () => {
             thenNoDraggingOccurs();
         });
 
-        it("against the direction of the previous shift", () => {
+        it("against the direction of the previous horizontal shift", () => {
             givenDisabledShiftLocation(loc(1, 0));
             givenMouseDownAt(loc(1, 1));
 
             whenMouseIsMoved({ x: 40, y: 0 });
+
+            thenNoDraggingOccurs();
+        });
+
+        it("against the direction of the previous vertical shift", () => {
+            givenDisabledShiftLocation(loc(2, 1));
+            givenMouseDownAt(loc(2, 1));
+
+            whenMouseIsMoved({ x: 0, y: -40 });
 
             thenNoDraggingOccurs();
         });

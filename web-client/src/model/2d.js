@@ -1,3 +1,7 @@
+/**
+ * Contains classes and constants for elemental 2D computation.
+ * The origin is at the top left corner.
+ */
 export class Vector {
     constructor(x, y) {
         this._x = x;
@@ -16,6 +20,21 @@ export class Vector {
         return new Vector(this._x / scalar, this._y / scalar);
     }
 
+    removeDirectionComponent(direction) {
+        let x = this.x;
+        let y = this.y;
+        if (direction === "N") {
+            y = bound(y, 0, Number.POSITIVE_INFINITY);
+        } else if (direction === "E") {
+            x = bound(x, Number.NEGATIVE_INFINITY, 0);
+        } else if (direction === "S") {
+            y = bound(y, Number.NEGATIVE_INFINITY, 0);
+        } else if (direction === "W") {
+            x = bound(x, 0, Number.POSITIVE_INFINITY);
+        }
+        return new Vector(x, y);
+    }
+
     get x() {
         return this._x;
     }
@@ -25,69 +44,6 @@ export class Vector {
     }
 }
 
-export class BoundingBox {
-    constructor(bottomLeft, topRight) {
-        this._xMin = bottomLeft.x;
-        this._yMin = bottomLeft.y;
-        this._xMax = topRight.x;
-        this._yMax = topRight.y;
-    }
-
-    bound(vector) {
-        return new Vector(
-            this._bound(vector.x, this._xMin, this._xMax),
-            this._bound(vector.y, this._yMin, this._yMax)
-        );
-    }
-
-    intersect(other) {
-        const bottomLeft = new Vector(
-            Math.max(this.xMin, other.xMin),
-            Math.max(this.yMin, other.yMin)
-        );
-        const topRight = new Vector(
-            Math.min(this.xMax, other.xMax),
-            Math.min(this.yMax, other.yMax)
-        );
-        return new BoundingBox(bottomLeft, topRight);
-    }
-
-    _bound(value, min, max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-    get xMin() {
-        return this._xMin;
-    }
-
-    get xMax() {
-        return this._xMax;
-    }
-
-    get yMin() {
-        return this._yMin;
-    }
-
-    get yMax() {
-        return this._yMax;
-    }
+export function bound(value, min, max) {
+    return Math.min(Math.max(value, min), max);
 }
-
-export const HALF_PLANES = {
-    left: new BoundingBox(
-        new Vector(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY),
-        new Vector(0, Number.POSITIVE_INFINITY)
-    ),
-    right: new BoundingBox(
-        new Vector(0, Number.NEGATIVE_INFINITY),
-        new Vector(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
-    ),
-    upper: new BoundingBox(
-        new Vector(Number.NEGATIVE_INFINITY, 0),
-        new Vector(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY)
-    ),
-    lower: new BoundingBox(
-        new Vector(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY),
-        new Vector(Number.POSITIVE_INFINITY, 0)
-    )
-};

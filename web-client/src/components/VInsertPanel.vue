@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import InsertPanel from "@/model/insertPanel.js";
+import { InsertPanel, ShiftLocation } from "@/model/shift.js";
 
 export default {
     name: "v-insert-panel",
@@ -82,11 +82,31 @@ export default {
             }
         },
         pathCross: function() {
-            let paths = [[[25, 25], [75, 75]], [[75, 25], [25, 75]]];
+            let paths = [
+                [
+                    [25, 25],
+                    [75, 75]
+                ],
+                [
+                    [75, 25],
+                    [25, 75]
+                ]
+            ];
             return "M" + paths.join("M");
         },
         pathArrow: function() {
-            let paths = [[[25, 45], [50, 25], [75, 45]], [[25, 70], [50, 50], [75, 70]]];
+            let paths = [
+                [
+                    [25, 45],
+                    [50, 25],
+                    [75, 45]
+                ],
+                [
+                    [25, 70],
+                    [50, 50],
+                    [75, 70]
+                ]
+            ];
             this.rotateAndTranslatePaths(paths);
             return "M" + paths.join("M");
         }

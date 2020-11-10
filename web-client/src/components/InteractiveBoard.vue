@@ -2,7 +2,8 @@
     <svg :viewBox="`0 0 ${interactionWidth} ${interactionHeight}`" class="interactive-board">
         <v-svg-defs></v-svg-defs>
         <draggable-game-board
-            @player-move="onMazeCardClick"
+            @player-move="onPlayerMove"
+            @player-shift="onPlayerShift"
             :game="game"
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
@@ -17,7 +18,7 @@
             :game="game"
         ></v-move-animation>
         <insert-panels
-            @player-shift="onInsertPanelClick"
+            @player-shift="onPlayerShift"
             :interaction="isMyTurnToShift"
             :game="game"
         ></insert-panels>
@@ -135,7 +136,7 @@ export default {
                 return new Set([]);
             }
         },
-        onInsertPanelClick: function(shiftLocation) {
+        onPlayerShift: function(shiftLocation) {
             let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
@@ -143,7 +144,7 @@ export default {
             };
             this.controller.performShift(shiftAction);
         },
-        onMazeCardClick: function(mazeCard) {
+        onPlayerMove: function(mazeCard) {
             if (
                 this.isMyTurnToMove &&
                 this.game.isMoveValid(this.userPlayerId, mazeCard.location)

@@ -15,7 +15,7 @@
 
 <script>
 import VInsertPanel from "@/components/VInsertPanel.vue";
-import InsertPanel from "@/model/insertPanel.js";
+import { InsertPanel } from "@/model/shift.js";
 import { locationsEqual } from "@/model/game.js";
 
 export default {
