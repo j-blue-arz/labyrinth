@@ -206,12 +206,12 @@ const thenNoDraggingOccurs = function() {
 };
 
 const thenShiftEventIsEmitted = function(expectedShiftLocation) {
-    expect(wrapper.emitted("insert-panel-clicked")).toBeTruthy();
-    expect(wrapper.emitted("insert-panel-clicked").length).toBe(1);
-    expect(wrapper.emitted("insert-panel-clicked")[0][0].row).toBe(expectedShiftLocation.row);
-    expect(wrapper.emitted("insert-panel-clicked")[0][0].column).toBe(expectedShiftLocation.column);
+    expect(wrapper.emitted("player-shift")).toBeTruthy();
+    expect(wrapper.emitted("player-shift").length).toBe(1);
+    expect(wrapper.emitted("player-shift")[0][0].row).toBe(expectedShiftLocation.row);
+    expect(wrapper.emitted("player-shift")[0][0].column).toBe(expectedShiftLocation.column);
 };
 
 const thenNoShiftEventIsEmitted = function() {
-    expect(wrapper.emitted("insert-panel-clicked")).toBeFalsy();
+    expect(wrapper.emitted("player-shift")).toBeFalsy();
 };

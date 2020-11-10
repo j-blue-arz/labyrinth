@@ -17,7 +17,7 @@
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableCards"
             :drag="{ row: dragRow, column: dragColumn, offset: dragOffset }"
-            @maze-card-clicked="onMazeCardClicked"
+            @player-move="onMazeCardClicked"
         ></v-game-board>
     </svg>
 </template>
@@ -200,7 +200,7 @@ export default {
                 }
             }
             if (shiftLocation) {
-                this.$emit("insert-panel-clicked", shiftLocation);
+                this.$emit("player-shift", shiftLocation);
             }
         },
         getMousePosition: function(evt) {
@@ -223,7 +223,7 @@ export default {
             return mazeCard;
         },
         onMazeCardClicked: function(mazeCard) {
-            this.$emit("maze-card-clicked", mazeCard);
+            this.$emit("player-move", mazeCard);
         }
     },
     created() {

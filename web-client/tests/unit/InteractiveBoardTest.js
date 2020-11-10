@@ -138,7 +138,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithMoveAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][2];
-        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
         expect(mockPerformMove).toHaveBeenCalled();
     });
 
@@ -146,7 +146,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithShiftAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][2];
-        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
         expect(mockPerformMove).not.toHaveBeenCalled();
     });
 
@@ -154,7 +154,7 @@ describe("InteractiveBoard", () => {
         let game = fromStateWithShiftAction();
         let board = shallowFactory(game);
         let clickedMazeCard = game.mazeCards[0][0];
-        board.find(DraggableGameBoard).vm.$emit("maze-card-clicked", clickedMazeCard);
+        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
         expect(mockPerformMove).not.toHaveBeenCalled();
     });
 

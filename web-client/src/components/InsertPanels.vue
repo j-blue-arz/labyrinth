@@ -58,7 +58,7 @@ export default {
         },
         onClick: function(event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {
-                this.$emit("insert-panel-clicked", insertPanel.shiftLocation);
+                this.$emit("player-shift", insertPanel.shiftLocation);
             }
         }
     }

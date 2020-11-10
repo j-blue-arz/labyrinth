@@ -2,7 +2,7 @@
     <svg :viewBox="`0 0 ${interactionWidth} ${interactionHeight}`" class="interactive-board">
         <v-svg-defs></v-svg-defs>
         <draggable-game-board
-            @maze-card-clicked="onMazeCardClick"
+            @player-move="onMazeCardClick"
             :game="game"
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
@@ -17,7 +17,7 @@
             :game="game"
         ></v-move-animation>
         <insert-panels
-            @insert-panel-clicked="onInsertPanelClick"
+            @player-shift="onInsertPanelClick"
             :interaction="isMyTurnToShift"
             :game="game"
         ></insert-panels>

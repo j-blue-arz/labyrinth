@@ -87,7 +87,7 @@ export default {
             return yPos;
         },
         onMazeCardClick: function($event, mazeCard) {
-            this.$emit("maze-card-clicked", mazeCard);
+            this.$emit("player-move", mazeCard);
         }
     }
 };
