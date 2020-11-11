@@ -1,3 +1,5 @@
+import { loc } from "@/model/game.js";
+
 function shiftLocationDirection(shiftLocation, limit) {
     if (shiftLocation.row === 0) {
         return "S";
@@ -30,6 +32,17 @@ export class ShiftLocation {
         }
         if (this.isVertical()) {
             return location.column === this._shiftLocation.column;
+        }
+    }
+
+    affectedLocations(mazeSize) {
+        if (this.isHorizontal()) {
+            const row = this._shiftLocation.row;
+            return Array.from({ length: mazeSize }, (_, index) => loc(row, index));
+        }
+        if (this.isVertical()) {
+            const column = this._shiftLocation.column;
+            return Array.from({ length: mazeSize }, (_, index) => loc(index, column));
         }
     }
 

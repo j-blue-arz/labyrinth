@@ -3,7 +3,8 @@ $interaction-color-secondary: lighten($interaction-color, 40%);
 $disabled-color: hsl(14, 45%, 45%);
 $disabled-color-secondary: lighten($disabled-color, 40%);
 
-$color-outline: black;
+$color-outline-interactive: black;
+$color-outline-noninteractive: white;
 
 $color-pathways: white;
 

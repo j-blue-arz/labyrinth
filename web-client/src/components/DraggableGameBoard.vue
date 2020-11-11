@@ -16,6 +16,7 @@
             :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableCards"
+            :required-action="userAction"
             :drag="{ row: dragRow, column: dragColumn, offset: dragOffset }"
             @player-move="onMazeCardClicked"
         ></v-game-board>
@@ -24,7 +25,7 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
-import { locationsEqual, loc } from "@/model/game.js";
+import { locationsEqual, loc, MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
 import { Vector, bound } from "@/model/2d.js";
 import { ShiftLocation } from "@/model/shift.js";
 
@@ -39,17 +40,13 @@ export default {
             type: Object,
             required: true
         },
-        userHasToShift: {
-            type: Boolean,
-            required: true
-        },
-        interactiveMazeCards: {
+        userAction: {
             required: false,
-            default: () => new Set([])
+            default: NO_ACTION
         },
         reachableCards: {
             required: false,
-            default: () => new Set([])
+            default: () => new Set()
         },
         currentPlayerColor: {
             required: false,
@@ -83,6 +80,28 @@ export default {
             }
             return result;
         },
+        dragInteractiveLocations: function() {
+            let result = new Set();
+            for (let shiftLocation of this.shiftLocations) {
+                shiftLocation
+                    .affectedLocations(this.game.n)
+                    .forEach(location => result.add(location));
+            }
+            return result;
+        },
+        interactiveMazeCards: function() {
+            if (this.userAction === MOVE_ACTION) {
+                return this.reachableCards;
+            } else if (this.userAction === SHIFT_ACTION) {
+                let result = new Set();
+                for (let location of this.dragInteractiveLocations) {
+                    result.add(this.game.getMazeCard(location));
+                }
+                return result;
+            } else {
+                return new Set();
+            }
+        },
         possibleDragDirections: function() {
             let result = [];
             if (this.dragLocation) {
@@ -100,7 +119,7 @@ export default {
     methods: {
         startDrag: function($event) {
             this.endDrag();
-            if (this.userHasToShift) {
+            if (this.userAction === SHIFT_ACTION) {
                 let mousePosition = this.getMousePosition($event);
                 let location = this.getLocation(mousePosition);
                 let mazeCard = this.getMazeCard(location);

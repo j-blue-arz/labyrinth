@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import Game, { loc } from "@/model/game.js";
+import Game, { loc, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import { buildRandomMaze } from "./testutils.js";
 
@@ -152,7 +152,7 @@ const factory = function() {
     buildRandomMaze(game);
     let wrapper = mount(DraggableGameBoard, {
         propsData: {
-            userHasToShift: true,
+            userAction: SHIFT_ACTION,
             game: game
         }
     });
@@ -163,7 +163,7 @@ const factory = function() {
 };
 
 const givenShiftIsNotRequired = function() {
-    wrapper.setProps({ userHasToShift: false });
+    wrapper.setProps({ userAction: NO_ACTION });
 };
 
 const givenDisabledShiftLocation = function(location) {

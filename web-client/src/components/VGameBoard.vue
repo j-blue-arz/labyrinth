@@ -13,7 +13,8 @@
                 :key="'mazeCard-' + mazeCard.id"
                 :xPos="xPos(mazeCard)"
                 :yPos="yPos(mazeCard)"
-                :interaction="isInteractive(mazeCard)"
+                :moveInteraction="isMoveInteractive(mazeCard)"
+                :shiftInteraction="isShiftInteractive(mazeCard)"
                 :reachable-by-player="reachableByPlayer(mazeCard)"
                 class="game-board__maze-card"
             ></v-maze-card>
@@ -23,6 +24,7 @@
 
 <script>
 import VMazeCard from "@/components/VMazeCard.vue";
+import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
 
 export default {
     name: "v-game-board",
@@ -45,11 +47,15 @@ export default {
         },
         interactiveMazeCards: {
             required: false,
-            default: () => new Set([])
+            default: () => new Set()
+        },
+        requiredAction: {
+            required: false,
+            default: NO_ACTION
         },
         reachableCards: {
             required: false,
-            default: () => new Set([])
+            default: () => new Set()
         },
         currentPlayerColor: {
             required: false,
@@ -63,8 +69,17 @@ export default {
         }
     },
     methods: {
-        isInteractive(mazeCard) {
-            return this.interactiveMazeCards.has(mazeCard);
+        isMoveInteractive(mazeCard) {
+            if (this.requiredAction === MOVE_ACTION) {
+                return this.interactiveMazeCards.has(mazeCard);
+            }
+            return false;
+        },
+        isShiftInteractive(mazeCard) {
+            if (this.requiredAction === SHIFT_ACTION) {
+                return this.interactiveMazeCards.has(mazeCard);
+            }
+            return false;
         },
         reachableByPlayer(mazeCard) {
             if (this.currentPlayerColor !== null && this.reachableCards.has(mazeCard)) {

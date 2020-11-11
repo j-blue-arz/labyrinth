@@ -6,7 +6,7 @@
             :maze-card="mazeCard"
             x="0"
             y="0"
-            :interaction="interaction"
+            :moveInteraction="interaction"
             class="leftover__card"
             ref="leftover"
         ></v-maze-card>
@@ -29,11 +29,6 @@ export default {
         mazeCard: {
             type: MazeCard,
             required: true
-        },
-        landscape: {
-            type: Boolean,
-            required: false,
-            default: true
         },
         isLandscape: {
             type: Boolean,

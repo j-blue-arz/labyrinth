@@ -7,7 +7,10 @@
         :y="yPosAnimated"
         viewBox="0 0 100 100"
         class="maze-card"
-        :class="[{ 'maze-card--interactive': interaction }, reachablePlayerColorIndexClass]"
+        :class="[
+            { 'maze-card--interactive': moveInteraction, 'maze-card--shiftable': shiftInteraction },
+            reachablePlayerColorIndexClass
+        ]"
     >
         <g class="maze-card__group" :class="rotationClass">
             <rect
@@ -95,7 +98,12 @@ export default {
             required: false,
             default: 0
         },
-        interaction: {
+        moveInteraction: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        shiftInteraction: {
             type: Boolean,
             required: false,
             default: false
@@ -113,7 +121,7 @@ export default {
             yPosAnimated: 0,
             pathWidth: 37,
             piecesSize: 28,
-            positionAnimationThreshold: 25
+            positionAnimationThreshold: 40
         };
     },
     watch: {
@@ -184,19 +192,29 @@ export default {
 <style lang="scss">
 .maze-card {
     &__outline {
-        stroke: $color-outline;
+        stroke: $color-outline-noninteractive;
         stroke-width: 1px;
         stroke-opacity: 0.8;
+    }
+
+    &__wall {
+        fill: $color-walls;
+        opacity: 0.9;
     }
 
     &--interactive {
         cursor: pointer;
 
         .maze-card__outline {
-            stroke-width: 2px;
+            stroke: $color-outline-interactive;
+            stroke-width: 3px;
             stroke-opacity: 1;
             stroke: $interaction-color;
             animation: maze-card__outline--pulse 3s infinite;
+        }
+
+        .maze-card__wall {
+            opacity: 1;
         }
 
         &:hover {
@@ -206,8 +224,22 @@ export default {
         }
     }
 
-    &__wall {
-        fill: $color-walls;
+    &--shiftable {
+        cursor: grab;
+
+        &:active:hover {
+            cursor: grabbing;
+        }
+
+        .maze-card__outline {
+            stroke: $color-outline-interactive;
+            stroke-width: 3px;
+            stroke-opacity: 0.8;
+        }
+
+        .maze-card__wall {
+            opacity: 1;
+        }
     }
 
     &__pathway {
@@ -268,7 +300,7 @@ $degrees: 0 90 180 270;
     @include rotateFromTo($animationName, $from + deg, $to + deg);
 }
 
-$color1: $color-outline;
+$color1: $color-outline-interactive;
 $color2: $interaction-color;
 @keyframes maze-card__outline--pulse {
     0% {

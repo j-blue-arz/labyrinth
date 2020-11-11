@@ -5,10 +5,9 @@
             @player-move="onPlayerMove"
             @player-shift="onPlayerShift"
             :game="game"
-            :interactive-maze-cards="interactiveMazeCards"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableMazeCards"
-            :user-has-to-shift="isMyTurnToShift"
+            :user-action="userAction"
         ></draggable-game-board>
         <v-move-animation
             v-for="player in players"
@@ -83,21 +82,12 @@ export default {
         userPlayerId: function() {
             return this.controller.getPlayerManager().getUserPlayer();
         },
-        interactiveMazeCards: function() {
-            if (this.isMyTurnToMove()) {
-                let player = this.game.getPlayer(this.userPlayerId);
-                if (player) {
-                    return this.computeReachableMazeCards(player);
-                }
-            }
-            return new Set([]);
-        },
         reachableMazeCards: function() {
             let player = this.game.getPlayer(this.game.nextAction.playerId);
             if (player) {
                 return this.computeReachableMazeCards(player);
             }
-            return new Set([]);
+            return new Set();
         },
         currentPlayerColor: function() {
             let player = this.game.getPlayer(this.game.nextAction.playerId);
@@ -117,6 +107,13 @@ export default {
         },
         players: function() {
             return this.game.getPlayers();
+        },
+        userAction: function() {
+            let player = this.game.getPlayer(this.userPlayerId);
+            if (player) {
+                return player.getTurnAction();
+            }
+            return action.NO_ACTION;
         }
     },
     methods: {
@@ -133,7 +130,7 @@ export default {
                 let locations = graph.reachableLocations(pieceLocation);
                 return new Set(locations.map(location => this.game.getMazeCard(location)));
             } else {
-                return new Set([]);
+                return new Set();
             }
         },
         onPlayerShift: function(shiftLocation) {
@@ -146,7 +143,7 @@ export default {
         },
         onPlayerMove: function(mazeCard) {
             if (
-                this.isMyTurnToMove &&
+                this.isMyTurnToMove() &&
                 this.game.isMoveValid(this.userPlayerId, mazeCard.location)
             ) {
                 let moveAction = {
