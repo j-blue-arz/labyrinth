@@ -1,26 +1,18 @@
 <template>
-    <svg
-        :x="$ui.boardOffset - borderWidth"
-        :y="$ui.boardOffset - borderWidth"
-        :width="boardSize + 2 * borderWidth"
-        :height="boardSize + 2 * borderWidth"
-        @mousedown="startDrag($event)"
-        @mousemove="drag($event)"
-        @mouseup="endDrag($event)"
-        @mouseleave="endDrag($event)"
-    >
-        <v-game-board
-            :board-size="boardSize"
-            :border-width="borderWidth"
-            :maze-cards="mazeCards"
-            :interactive-maze-cards="interactiveMazeCards"
-            :current-player-color="currentPlayerColor"
-            :reachable-cards="reachableCards"
-            :required-action="userAction"
-            :drag="{ row: dragRow, column: dragColumn, offset: dragOffset }"
-            @player-move="onMazeCardClicked"
-        ></v-game-board>
-    </svg>
+    <v-game-board
+        @mousedown.native="startDrag($event)"
+        @mousemove.native="drag($event)"
+        @mouseup.native="endDrag($event)"
+        @mouseleave.native="endDrag($event)"
+        :maze-size="mazeSize"
+        :maze-cards="mazeCards"
+        :interactive-maze-cards="interactiveMazeCards"
+        :current-player-color="currentPlayerColor"
+        :reachable-cards="reachableCards"
+        :required-action="userAction"
+        :drag="{ row: dragRow, column: dragColumn, offset: dragOffset }"
+        @player-move="onMazeCardClicked"
+    ></v-game-board>
 </template>
 
 <script>
@@ -63,11 +55,8 @@ export default {
         };
     },
     computed: {
-        boardSize: function() {
-            return this.$ui.cardSize * this.game.n;
-        },
-        borderWidth: function() {
-            return Math.floor(this.$ui.cardSize / 6);
+        mazeSize: function() {
+            return this.game.n;
         },
         mazeCards: function() {
             return this.game.mazeCardsAsList();

@@ -40,25 +40,23 @@ describe("VGameBoard", () => {
     it("renders leftmost v-maze-card exactly at given borderWidth prop", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
-                boardSize: 700,
-                mazeCards: mazeCardListFactory(7),
-                borderWidth: 166
+                mazeSize: 7,
+                mazeCards: mazeCardListFactory(7)
             }
         });
 
         var xPos = findLowestPositionOfMazeCard(gameBoard, "x");
-        expect(xPos).toBe(166);
+        expect(xPos).toBe(16);
     });
 
     it("renders topmost v-maze-card exactly at given borderWidth prop", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
-                boardSize: 500,
-                mazeCards: mazeCardListFactory(5),
-                borderWidth: 99
+                mazeSize: 5,
+                mazeCards: mazeCardListFactory(5)
             }
         });
         var yPos = findLowestPositionOfMazeCard(gameBoard, "y");
-        expect(yPos).toBe(99);
+        expect(yPos).toBe(16);
     });
 });

@@ -1,25 +1,32 @@
 <template>
-    <g>
-        <rect
-            :width="boardSize + 2 * borderWidth"
-            :height="boardSize + 2 * borderWidth"
-            class="game-board__background"
-        ></rect>
-        <transition-group name="game-board__maze-card-" tag="g">
-            <v-maze-card
-                v-for="mazeCard in mazeCards"
-                @click.native="onMazeCardClick($event, mazeCard)"
-                :maze-card="mazeCard"
-                :key="'mazeCard-' + mazeCard.id"
-                :xPos="xPos(mazeCard)"
-                :yPos="yPos(mazeCard)"
-                :moveInteraction="isMoveInteractive(mazeCard)"
-                :shiftInteraction="isShiftInteractive(mazeCard)"
-                :reachable-by-player="reachableByPlayer(mazeCard)"
-                class="game-board__maze-card"
-            ></v-maze-card>
-        </transition-group>
-    </g>
+    <svg
+        :x="$ui.boardOffset - borderWidth"
+        :y="$ui.boardOffset - borderWidth"
+        :width="boardSize + 2 * borderWidth"
+        :height="boardSize + 2 * borderWidth"
+    >
+        <g>
+            <rect
+                :width="boardSize + 2 * borderWidth"
+                :height="boardSize + 2 * borderWidth"
+                class="game-board__background"
+            ></rect>
+            <transition-group name="game-board__maze-card-" tag="g">
+                <v-maze-card
+                    v-for="mazeCard in mazeCards"
+                    @click.native="onMazeCardClick($event, mazeCard)"
+                    :maze-card="mazeCard"
+                    :key="'mazeCard-' + mazeCard.id"
+                    :xPos="xPos(mazeCard)"
+                    :yPos="yPos(mazeCard)"
+                    :moveInteraction="isMoveInteractive(mazeCard)"
+                    :shiftInteraction="isShiftInteractive(mazeCard)"
+                    :reachable-by-player="reachableByPlayer(mazeCard)"
+                    class="game-board__maze-card"
+                ></v-maze-card>
+            </transition-group>
+        </g>
+    </svg>
 </template>
 
 <script>
@@ -33,11 +40,7 @@ export default {
         VMazeCard
     },
     props: {
-        boardSize: {
-            type: Number,
-            required: true
-        },
-        borderWidth: {
+        mazeSize: {
             type: Number,
             required: true
         },
@@ -66,6 +69,14 @@ export default {
             default: function() {
                 return { row: false, column: false, offset: 0 };
             }
+        }
+    },
+    computed: {
+        boardSize: function() {
+            return this.$ui.cardSize * this.mazeSize;
+        },
+        borderWidth: function() {
+            return Math.floor(this.$ui.cardSize / 6);
         }
     },
     methods: {
