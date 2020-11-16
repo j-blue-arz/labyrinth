@@ -8,39 +8,63 @@ from labyrinth.model.factories import create_maze, MazeCardFactory
 from labyrinth.model.game import Board, BoardLocation, Game
 
 
-def test_computer_player_register_in_turns():
+def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with_callback():
     """ Tests that register_in_turns calls method in turns with callback """
     turns = Mock()
     player = ComputerPlayer(library_binding_factory=Mock(), shift_url="shift-url",
                             move_url="move-url", game=None, identifier=9)
     player.register_in_turns(turns)
-    turns.add_player.assert_called_once_with(player, turn_callback=player.start)
+
+    turns.add_player.assert_called_once()
+    assert turns.add_player.call_args[0][0] == player
+    assert turns.add_player.call_args[1]["turn_callback"] is not None
 
 
 @patch('time.sleep', return_value=None)
 @patch.object(ComputerPlayer, "_post_shift")
 @patch.object(ComputerPlayer, "_post_move")
-def test_computer_player_calls_start_on_compute_method(post_move, post_shift, time_sleep):
+def test_given_library_binding__when_computer_player_run__calls_start_on_binding(post_move, post_shift,
+                                                                                 time_sleep):
     """ Tests that the computer player calls start() one its computation method.
     """
-    card_factory = MazeCardFactory()
-    board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
-    piece = board.create_piece()
+    board = Mock()
+    piece = Mock()
     game = Mock()
-    type(game).identifier = PropertyMock(return_value=7)
-    game.get_enabled_shift_locations.return_value = board.shift_locations
-    mock_method = Mock()
-    mock_method.start = Mock()
-    mock_method.shift_action = BoardLocation(0, 1), 90
-    mock_method.move_action = board.maze.maze_card_location(piece.maze_card)
-    mock_method_factory = Mock()
-    mock_method_factory.return_value = mock_method
-    player = ComputerPlayer(library_binding_factory=mock_method_factory, move_url="move-url", shift_url="shift-url",
+    library_factory, library = _mock_library_binding(board, piece)
+    player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
                             game=game, identifier=9, board=board, piece=piece)
     player.run()
-    mock_method.start.assert_called_once()
-    post_shift.assert_called_once()
-    post_move.assert_called_once()
+
+    library.start.assert_called_once()
+
+
+@patch('time.sleep', return_value=None)
+@patch.object(ComputerPlayer, "_post_shift")
+@patch.object(ComputerPlayer, "_post_move")
+def test_given_library_binding__when_library_finished__calls_post_shift_but_not_post_move(post_move,
+                                                                                          post_shift,
+                                                                                          time_sleep):
+    board = Mock()
+    piece = Mock()
+    game = Mock()
+    type(game).identifier = PropertyMock(return_value=7)
+    library_factory, library = _mock_library_binding(board, piece)
+    player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
+                            game=game, identifier=9, board=board, piece=piece)
+    player.run()
+
+    post_shift.assert_called_once_with(BoardLocation(0, 1), 90)
+    post_move.assert_called_once_with(BoardLocation(0, 0))
+
+
+def _mock_library_binding(board, piece):
+    mock_computation_method = Mock()
+    mock_computation_method.start = Mock()
+    mock_computation_method.shift_action = BoardLocation(0, 1), 90
+    mock_computation_method.move_action = BoardLocation(0, 0)
+    mock_computation_method_factory = Mock()
+    mock_computation_method_factory.return_value = mock_computation_method
+    return mock_computation_method_factory, mock_computation_method
 
 
 def test_random_actions_computes_valid_actions():

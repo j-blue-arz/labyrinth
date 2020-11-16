@@ -22,7 +22,7 @@ import labyrinth.mapper.api
 import labyrinth.model.external_library as extlib
 from labyrinth.model import exceptions
 from .reachable import Graph
-from .game import Player, Turns
+from .game import Player, Turns, PlayerAction
 
 
 def create_computer_player(player_id, compute_method,
@@ -86,7 +86,7 @@ class ComputerPlayer(Player, Thread):
     def register_in_turns(self, turns: Turns):
         """ Registers itself in a Turns manager.
         Overwrites superclass method. """
-        turns.add_player(self, turn_callback=self.start)
+        turns.add_player(self, turn_callback=self.notify_turn_change)
 
     def set_game(self, game):
         """ Sets the API urls.
@@ -94,12 +94,9 @@ class ComputerPlayer(Player, Thread):
         Player.set_game(self, game)
         self._set_urls()
 
-    def _set_urls(self):
-        if self._game:
-            if not self._shift_url:
-                self._shift_url = self._url_supplier.get_shift_url(self._game.identifier, self.identifier)
-            if not self._move_url:
-                self._move_url = self._url_supplier.get_move_url(self._game.identifier, self.identifier)
+    def notify_turn_change(self, action):
+        if action is PlayerAction.SHIFT_ACTION:
+            self.start()
 
     def run(self):
         compute_method = self._library_binding_factory(self._board, self._piece, self._game)
@@ -139,6 +136,13 @@ class ComputerPlayer(Player, Thread):
     def _post_move(self, move_location):
         dto = labyrinth.mapper.api.move_action_to_dto(move_location)
         requests.post(self.move_url, json=dto)
+
+    def _set_urls(self):
+        if self._game:
+            if not self._shift_url:
+                self._shift_url = self._url_supplier.get_shift_url(self._game.identifier, self.identifier)
+            if not self._move_url:
+                self._move_url = self._url_supplier.get_move_url(self._game.identifier, self.identifier)
 
     def random_actions(self):
         board = copy.deepcopy(self._board)
@@ -204,10 +208,10 @@ def _library_binding_factory(expected_library):
     for filename in filenames:
         if filename == expected_filename:
             full_library_path = filename
-    if full_library_path:
-        library_binding_factory = functools.partial(LibraryBinding,
-                                                    full_library_path=full_library_path)
-        setattr(library_binding_factory, "SHORT_NAME", expected_library)
-        return library_binding_factory
-    else:
+    if not full_library_path:
         raise exceptions.InvalidComputeMethodException("Could not find library {}".format(expected_library))
+
+    library_binding_factory = functools.partial(LibraryBinding,
+                                                full_library_path=full_library_path)
+    setattr(library_binding_factory, "SHORT_NAME", expected_library)
+    return library_binding_factory

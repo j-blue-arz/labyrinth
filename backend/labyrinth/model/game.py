@@ -497,22 +497,20 @@ class Turns:
     """ This class contains the turn progression.
 
     It manages player's turns and the correct order of their actions.
-    The methods expect two parameters: a player parameter, and an action parameter.
-    The former is an instance of Player, the latter is either PlayerAction.MOVE_ACTION or PlayerAction.SHIFT_ACTION
     """
 
     def __init__(self, players=None, next_action=None):
         self._turn_changed_listeners = []
-        self._player_actions = []
+        self._turn_states = []
         self._is_running = False
         self._next = 0
         self.init(players)
         if next_action:
-            self._next = self._player_actions.index(next_action)
+            self._next = self._turn_states.index(next_action)
 
     def init(self, players=None):
         """ clears turn progression, adds all players """
-        self._player_actions = []
+        self._turn_states = []
         self._is_running = False
         if players:
             for player in players:
@@ -522,11 +520,11 @@ class Turns:
         """ Adds a player to the turn progression, if he is not present already """
         already_present = any(
             player_action.player is player
-            for player_action in self._player_actions
+            for player_action in self._turn_states
         )
         if not already_present:
-            self._player_actions.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
-            self._player_actions.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
+            self._turn_states.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
+            self._turn_states.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
         if self._is_running and self.next_player_action().player is player:
             self._notify_turn_changed_listeners()
 
@@ -534,18 +532,18 @@ class Turns:
         """ Removes all PlayerActions with this player. If it was this player's turn to play, the next
         Player has to play and listeners have to be notified. """
         old_next_player_action = self.next_player_action()
-        old_player_actions = self._player_actions
-        self._player_actions = [player_action for player_action in self._player_actions
-                                if player_action.player is not player_to_remove]
-        if self._player_actions:
+        old_player_actions = self._turn_states
+        self._turn_states = [player_action for player_action in self._turn_states
+                             if player_action.player is not player_to_remove]
+        if self._turn_states:
             if old_next_player_action.player is player_to_remove:
                 next_player_index = (self._next + 2) % len(old_player_actions)
                 next_player = old_player_actions[next_player_index].player
                 new_next_player_action = PlayerAction(next_player, PlayerAction.SHIFT_ACTION)
-                self._next = self._player_actions.index(new_next_player_action)
+                self._next = self._turn_states.index(new_next_player_action)
                 self._notify_turn_changed_listeners()
             else:
-                self._next = self._player_actions.index(old_next_player_action)
+                self._next = self._turn_states.index(old_next_player_action)
         else:
             self._next = 0
 
@@ -576,13 +574,13 @@ class Turns:
         if not self.is_action_possible(player, action):
             raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
                 player.identifier, action))
-        self._next = (self._next + 1) % len(self._player_actions)
+        self._next = (self._next + 1) % len(self._turn_states)
         self._notify_turn_changed_listeners()
 
     def next_player_action(self):
         """ Returns the next PlayerAction in the turn progression """
         try:
-            return self._player_actions[self._next]
+            return self._turn_states[self._next]
         except IndexError:
             return None
 
@@ -594,8 +592,8 @@ class Turns:
 
     def _notify_turn_changed_listeners(self):
         player_action = self.next_player_action()
-        if player_action and player_action.action is PlayerAction.SHIFT_ACTION and player_action.turn_callback:
-            player_action.turn_callback()
+        if player_action and player_action.turn_callback:
+            player_action.turn_callback(player_action.action)
         for listener in self._turn_changed_listeners:
             listener()
 

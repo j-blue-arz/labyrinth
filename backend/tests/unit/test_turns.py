@@ -94,7 +94,7 @@ def test_start_calls_callback_if_present():
     turns.add_player(player, turn_callback=callback)
     callback.assert_not_called()
     turns.start()
-    callback.assert_called_once()
+    callback.assert_called_once_with(PlayerAction.SHIFT_ACTION)
 
 
 def test_perform_action_calls_callback_if_present():
@@ -108,10 +108,10 @@ def test_perform_action_calls_callback_if_present():
     turns.perform_action(player1, PlayerAction.SHIFT_ACTION)
     player2.callback.assert_not_called()
     turns.perform_action(player1, PlayerAction.MOVE_ACTION)
-    player2.callback.assert_called_once()
+    player2.callback.assert_called_once_with(PlayerAction.SHIFT_ACTION)
     player2.callback.reset_mock()
     turns.perform_action(player2, PlayerAction.SHIFT_ACTION)
-    player2.callback.assert_not_called()
+    player2.callback.assert_called_once_with(PlayerAction.MOVE_ACTION)
 
 
 def test_callback_with_one_player():
@@ -120,11 +120,13 @@ def test_callback_with_one_player():
     player1 = Mock()
     turns.add_player(player1, turn_callback=player1.callback)
     turns.start()
-    player1.callback.assert_called_once()
+    player1.callback.assert_called_once_with(PlayerAction.SHIFT_ACTION)
     player1.callback.reset_mock()
     turns.perform_action(player1, PlayerAction.SHIFT_ACTION)
+    player1.callback.assert_called_once_with(PlayerAction.MOVE_ACTION)
+    player1.callback.reset_mock()
     turns.perform_action(player1, PlayerAction.MOVE_ACTION)
-    player1.callback.assert_called_once()
+    player1.callback.assert_called_once_with(PlayerAction.SHIFT_ACTION)
 
 
 def test_removed_player_no_callback_called():
