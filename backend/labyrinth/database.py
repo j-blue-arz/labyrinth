@@ -6,11 +6,24 @@ from .mapper.persistence import dto_to_game, game_to_dto
 
 
 class DatabaseGateway:
-    """ This gateway manages a database connection and
-    encapsulates database access methods
+    """ This gateway allows encapsulates a database connection and
+    allows managing via database access methods.
 
-    The class is implemented as a singleton, clients should get an instance
-    via get_instance()."""
+    It opens the connection lazily, but does not close it automatically.
+    'commit' has to be called manually to persist the changes.
+
+    There are two ways to use this gateway. The first is to use it as a singleton, calling
+    get_instance() to get an instance. It will register itself in the request-wide application context.
+    'commit' will be called in the controller, and the application will close this instance at request teardown.
+
+    If it should be use without a request context, it can be instantiated directly. Users should then take
+    care to commit their changes and close the connection themselves. A convenient way to do so is a with-statement:
+
+            with DatabaseGateway() as gateway:
+                gateway.update_game(7, game)
+
+    This will open a connection, update a game, commit and close the connection.
+    """
 
     def __init__(self):
         self._db_connection = None
@@ -159,3 +172,12 @@ class DatabaseGateway:
         if gateway._db_connection:
             gateway._db_connection.close()
             gateway._db_connection = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self.commit()
+        if self._db_connection:
+            self._db_connection.close()
+            self._db_connection = None

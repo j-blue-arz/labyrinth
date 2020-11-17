@@ -16,6 +16,7 @@ BoardLocation is a wrapper for a row and a column. If both are positive, the pos
 """
 import itertools
 from random import choice
+from datetime import timedelta
 
 from labyrinth.model import exceptions
 from labyrinth.model import out_paths_dict
@@ -455,6 +456,7 @@ class PlayerAction:
 
     MOVE_ACTION = "MOVE"
     SHIFT_ACTION = "SHIFT"
+    PREPARE = "PREPARE"
 
     def __init__(self, player, action, turn_callback=None):
         """
@@ -499,11 +501,12 @@ class Turns:
     It manages player's turns and the correct order of their actions.
     """
 
-    def __init__(self, players=None, next_action=None):
+    def __init__(self, delay=timedelta(0), players=None, next_action=None):
         self._turn_changed_listeners = []
         self._turn_states = []
         self._is_running = False
         self._next = 0
+        self._delay = delay
         self.init(players)
         if next_action:
             self._next = self._turn_states.index(next_action)
