@@ -5,6 +5,9 @@ Also defines the GameRepository.
 
 from datetime import datetime, timedelta
 
+from flask import has_request_context
+from labyrinth.database import DatabaseGateway
+
 from labyrinth.model import exceptions
 
 
@@ -19,13 +22,20 @@ class PlayerActionInteractor:
 
     def perform_shift(self, game_id, player_id, shift_location, shift_rotation):
         game = self._game_repository.find_by_id(game_id)
+        game.register_turn_change_listener(self._update_game_async)
         game.shift(player_id, shift_location, shift_rotation)
         self._game_repository.update(game)
 
     def perform_move(self, game_id, player_id, move_location):
         game = self._game_repository.find_by_id(game_id)
+        game.register_turn_change_listener(self._update_game_async)
         game.move(player_id, move_location)
         self._game_repository.update(game)
+
+    def _update_game_async(self, game, player, next_action):
+        if not has_request_context():
+            with DatabaseGateway() as gateway:
+                gateway.update_game(game.identifier, game)
 
 
 class OverduePlayerInteractor:

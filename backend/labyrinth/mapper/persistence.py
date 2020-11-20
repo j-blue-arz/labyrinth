@@ -146,5 +146,4 @@ def _dto_to_turns(next_action_dto, players):
         return Turns()
     player = next(player for player in players if player.identifier == next_action_dto[PLAYER_ID])
     action = next_action_dto[ACTION]
-    next_player_action = PlayerAction(player, action)
-    return Turns(players, next_player_action)
+    return Turns(players=players, next_action=PlayerAction(player, action))

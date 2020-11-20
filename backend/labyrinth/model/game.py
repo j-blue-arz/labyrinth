@@ -15,7 +15,9 @@ a reference to a maze card the piece is currently positioned on and an objective
 BoardLocation is a wrapper for a row and a column. If both are positive, the position is in the maze.
 """
 import itertools
-from random import choice
+from threading import Thread
+import time
+import random
 from datetime import timedelta
 
 from labyrinth.model import exceptions
@@ -405,7 +407,7 @@ class Board:
                           for location in self._maze.maze_locations] + [self._leftover_card])
         for piece in self._pieces:
             maze_cards.discard(piece.maze_card)
-        return choice(tuple(maze_cards))
+        return random.choice(tuple(maze_cards))
 
 
 class Player:
@@ -448,6 +450,15 @@ class Player:
     def register_in_turns(self, turns):
         """ registers itself in a Turns manager """
         turns.add_player(self)
+
+    def __eq__(self, other):
+        return self.identifier == other.identifier
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self.identifier)
 
 
 class PlayerAction:
@@ -501,69 +512,67 @@ class Turns:
     It manages player's turns and the correct order of their actions.
     """
 
-    def __init__(self, delay=timedelta(0), players=None, next_action=None):
+    def __init__(self, prepare_delay=timedelta(0), players=None, next_action=None):
         self._turn_changed_listeners = []
         self._turn_states = []
-        self._is_running = False
-        self._next = 0
-        self._delay = delay
+        self._prepare_delay = prepare_delay
         self.init(players)
-        if next_action:
-            self._next = self._turn_states.index(next_action)
+        self._next = self._turn_states.index(next_action) if next_action else 0
+        if self._is_next_action(PlayerAction.PREPARE) and not self._prepare_delay:
+            self._next += 1
 
     def init(self, players=None):
         """ clears turn progression, adds all players """
         self._turn_states = []
-        self._is_running = False
         if players:
             for player in players:
                 player.register_in_turns(self)
 
+    def _num_players(self):
+        return len(self._turn_states) // 3
+
     def add_player(self, player, turn_callback=None):
         """ Adds a player to the turn progression, if he is not present already """
         already_present = any(
-            player_action.player is player
+            player_action.player == player
             for player_action in self._turn_states
         )
         if not already_present:
+            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
-        if self._is_running and self.next_player_action().player is player:
-            self._notify_turn_changed_listeners()
 
     def remove_player(self, player_to_remove):
         """ Removes all PlayerActions with this player. If it was this player's turn to play, the next
         Player has to play and listeners have to be notified. """
+        def next_player(state_list):
+            next_player_index = (self._next + 3) % len(state_list)
+            return state_list[next_player_index].player
+
         old_next_player_action = self.next_player_action()
         old_player_actions = self._turn_states
         self._turn_states = [player_action for player_action in self._turn_states
-                             if player_action.player is not player_to_remove]
+                             if player_action.player != player_to_remove]
         if self._turn_states:
-            if old_next_player_action.player is player_to_remove:
-                next_player_index = (self._next + 2) % len(old_player_actions)
-                next_player = old_player_actions[next_player_index].player
-                new_next_player_action = PlayerAction(next_player, PlayerAction.SHIFT_ACTION)
-                self._next = self._turn_states.index(new_next_player_action)
-                self._notify_turn_changed_listeners()
+            if old_next_player_action.player == player_to_remove:
+                new_next_player_action = PlayerAction(next_player(old_player_actions), PlayerAction.PREPARE)
+                self._set_next(self._turn_states.index(new_next_player_action))
             else:
                 self._next = self._turn_states.index(old_next_player_action)
-        else:
-            self._next = 0
 
     def start(self):
         """ Starts the progression, informs player if necessary """
-        self._next = 0
-        self._is_running = True
-        self._notify_turn_changed_listeners()
+        self._set_next(0)
 
     def is_action_possible(self, player, action):
         """ Checks if the action can be performed by the player
 
         :param player: an instance of Player
-        :param action: one of Turn.MOVE_ACTION and Turn.SHIFT_ACTION
+        :param action: one of PlayerAction.MOVE_ACTION and PlayerAction.SHIFT_ACTION
         :return: true, iff the action is to be performed by the player
         """
-        return self.next_player_action() == PlayerAction(player, action)
+        return (action is PlayerAction.MOVE_ACTION or action is PlayerAction.SHIFT_ACTION) and \
+            self.next_player_action() == PlayerAction(player, action)
 
     def perform_action(self, player, action):
         """Method to call when a player performed the given action.
@@ -577,8 +586,28 @@ class Turns:
         if not self.is_action_possible(player, action):
             raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
                 player.identifier, action))
-        self._next = (self._next + 1) % len(self._turn_states)
-        self._notify_turn_changed_listeners()
+        self._set_next()
+
+    def _is_next_action(self, action):
+        return self.next_player_action() and self.next_player_action().action is action
+
+    def _set_next(self, index=None):
+        if index is None:
+            self._next = (self._next + 1) % len(self._turn_states)
+        else:
+            self._next = index
+        if self.next_player_action().action is PlayerAction.PREPARE:
+            if self._prepare_delay:
+                self._notify_turn_changed_listeners()
+                Thread(target=self._delay_next_state).start()
+            else:
+                self._set_next()
+        else:
+            self._notify_turn_changed_listeners()
+
+    def _delay_next_state(self):
+        time.sleep(self._prepare_delay.total_seconds())
+        self._set_next()
 
     def next_player_action(self):
         """ Returns the next PlayerAction in the turn progression """
@@ -602,7 +631,9 @@ class Turns:
 
 
 class Game:
-    """ This class represents one played game """
+    """ This class represents one played game
+
+    The game is started as soon as the first player is added. """
     MAX_PLAYERS = 4
 
     def __init__(self, identifier, board=None, players=None, turns=None):
@@ -652,6 +683,8 @@ class Game:
         player.set_game(self)
         player.register_in_turns(self._turns)
         self._players.append(player)
+        if len(self.players) == 1:
+            self._turns.start()
 
     def get_player(self, player_id):
         """ Finds a player by ID
@@ -676,12 +709,6 @@ class Game:
         self.board.remove_piece(player.piece)
         self.turns.remove_player(player)
         self.players.remove(player)
-
-    def start_game(self):
-        """ Initializes and starts turn progression.
-        """
-        self._turns.init(self.players)
-        self._turns.start()
 
     def replace_board(self, board):
         """ Replaces the current board with a new one and resets the game.

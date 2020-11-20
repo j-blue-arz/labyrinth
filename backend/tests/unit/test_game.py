@@ -1,5 +1,5 @@
 """ Tests for Game of game.py """
-from unittest.mock import Mock, patch, call, PropertyMock
+from unittest.mock import Mock, call, PropertyMock
 import pytest
 from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board
 from labyrinth.model import factories
@@ -25,10 +25,8 @@ def test_add_player_with_duplicate_id_does_not_add():
     """ Tests add_player """
     game = Game(identifier=0)
     game.add_player(Player(1))
-    other_player = Player(1)
-    game.add_player(other_player)
+    game.add_player(Player(1))
     assert len(game.players) == 1
-    assert other_player not in game.players
 
 
 def test_unused_player_id_returns_new_id():
@@ -51,36 +49,22 @@ def test_unused_player_id_raises_exception_on_full_game():
         player_id = game.unused_player_id()
 
 
-def test_add_player_start_game_calls_methods_on_board():
-    """ Tests add_player, start_game and Player """
+def given_empty_game__when_adding_players__creates_pieces_on_board():
     board = Board()
-    turns = Mock()
-    game = Game(identifier=0, board=board, turns=turns)
-    with patch.object(board, 'create_piece',
-                      wraps=board.create_piece) as board_create_piece:
-        for _ in range(4):
-            player_id = game.unused_player_id()
-            game.add_player(Player(player_id))
-        game.start_game()
-        expected_board_calls = [
-            call.create_piece(),
-            call.create_piece(),
-            call.create_piece(),
-            call.create_piece()]
-        assert board_create_piece.mock_calls == expected_board_calls
-
-
-def test_add_player_start_game_calls_methods_on_turns():
-    """ Tests add_player, start_game and Player """
-    board = Board()
-    turns = Mock()
-    game = Game(identifier=0, board=board, turns=turns)
+    game = Game(identifier=0, board=board, turns=Mock())
     for _ in range(4):
         player_id = game.unused_player_id()
         game.add_player(Player(player_id))
-    game.start_game()
-    expected_turn_calls = [call.init(game.players)] + [call.start()]
-    assert turns.mock_calls[-2:] == expected_turn_calls
+    assert len(board.pieces) == 4
+
+
+def test_given_empty_game__when_player_is_added__initializes_turns():
+    game = Game(identifier=0)
+
+    player = Player(game.unused_player_id())
+    game.add_player(player)
+
+    game.turns.next_player_action() == PlayerAction(player, PlayerAction.SHIFT_ACTION)
 
 
 def test_add_player_validation():
@@ -98,7 +82,6 @@ def test_shift_raises_error_on_invalid_player_id():
     game = Game(identifier=0)
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
-    game.start_game()
     with pytest.raises(PlayerNotFoundException):
         game.shift(player_id + 1, BoardLocation(0, 1), 90)
 
@@ -108,7 +91,6 @@ def test_move_raises_error_on_invalid_player_id():
     game = Game(identifier=0)
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
-    game.start_game()
     with pytest.raises(PlayerNotFoundException):
         game.move(player_id - 1, BoardLocation(5, 5))
 
@@ -121,7 +103,6 @@ def test_move_raises_error_on_invalid_turn():
     game = Game(identifier=0, board=board, turns=turns)
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
-    game.start_game()
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
     board.move.assert_not_called()
@@ -136,7 +117,6 @@ def test_move_does_not_raise_error_after_shift():
     game = Game(identifier=0, board=board, turns=turns)
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
-    game.start_game()
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
     board.move.assert_called_once()
@@ -213,19 +193,18 @@ def _turn_listener_test_setup(players):
     return game, listener
 
 
-def test_turn_listener__when_game_is_started__listener_is_notified():
+def given_empty_game__when_first_player_is_added__turn_listener_is_notified():
     player = Player(0)
-    game, listener = _turn_listener_test_setup([player])
+    game, listener = _turn_listener_test_setup([])
 
     listener.reset_mock()
-    game.start_game()
+    game.add_player(player)
     listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.SHIFT_ACTION)
 
 
 def test_register_turn_listener__when_current_player_is_deleted__listener_is_notified():
     players = [Player(0), Player(1)]
     game, listener = _turn_listener_test_setup(players)
-    game.start_game()
 
     listener.reset_mock()
     game.remove_player(players[0].identifier)
@@ -234,7 +213,6 @@ def test_register_turn_listener__when_current_player_is_deleted__listener_is_not
 
 def test_register_turn_listener__when_first_player_is_added__listener_is_notified():
     game, listener = _turn_listener_test_setup([Player(0)])
-    game.start_game()
     game.remove_player(0)
     player = Player(1)
 
@@ -246,7 +224,6 @@ def test_register_turn_listener__when_first_player_is_added__listener_is_notifie
 def test_register_turn_listener__when_player_shifts__listener_is_notified():
     player = Player(0)
     game, listener = _turn_listener_test_setup([player])
-    game.start_game()
 
     listener.reset_mock()
     game.shift(0, BoardLocation(0, 1), 0)
@@ -256,7 +233,6 @@ def test_register_turn_listener__when_player_shifts__listener_is_notified():
 def test_register_turn_listener__when_player_moves__listener_is_notified():
     players = [Player(0), Player(1)]
     game, listener = _turn_listener_test_setup(players)
-    game.start_game()
     game.shift(0, BoardLocation(0, 1), 0)
 
     listener.reset_mock()

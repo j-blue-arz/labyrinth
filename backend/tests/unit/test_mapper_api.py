@@ -16,7 +16,6 @@ def _create_test_game():
     game.add_player(Player(identifier=0))
     game.add_player(Player(identifier=1))
     game.get_player(0).score = 9
-    game.start_game()
     return game
 
 

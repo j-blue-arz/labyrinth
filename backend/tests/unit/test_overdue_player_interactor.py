@@ -12,7 +12,6 @@ def setup_test():
     game = factories.create_game(game_id=5)
     player = Player(3)
     game.add_player(player)
-    game.start_game()
     return game, player
 
 

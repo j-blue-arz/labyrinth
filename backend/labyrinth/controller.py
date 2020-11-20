@@ -34,8 +34,6 @@ def add_player(game_id, player_request_dto):
         player = _try(lambda: computer.create_computer_player(compute_method=computation_method,
                                                               url_supplier=URLSupplier(), player_id=player_id))
     _try(lambda: game.add_player(player))
-    if len(game.players) == 1:
-        _try(game.start_game)
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
     return mapper.player_to_dto(player)

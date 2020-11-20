@@ -38,7 +38,7 @@ def _create_test_game(with_computer=False):
     players[0].score = 7
     players[1].score = 8
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
-    turns = Turns(players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
+    turns = Turns(players=players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
     game = Game(identifier=7, turns=turns, board=board, players=players)
     for player in players:
         player._game = game
