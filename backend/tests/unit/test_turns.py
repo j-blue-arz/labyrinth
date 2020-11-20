@@ -188,7 +188,7 @@ def test_remove_player__with_only_one_player__no_callback_called():
     player.callback.assert_not_called()
 
 
-def test_given_delay__when_start__is_in_prepare_state():
+def given_delay__when_start__is_in_prepare_state():
     player = Player(0)
     turns = Turns(prepare_delay=timedelta(milliseconds=10), players=[player])
     turns.start()
@@ -196,7 +196,16 @@ def test_given_delay__when_start__is_in_prepare_state():
     assert turns.next_player_action().action == PlayerAction.PREPARE
 
 
-def test_given_delay__when_start__calls_callback_on_player():
+def given_prepare_state__when_player_tries_shift__raises_exception():
+    player = Player(0)
+    turns = Turns(prepare_delay=timedelta(milliseconds=10), players=[player])
+    turns.start()
+
+    with pytest.raises(TurnActionViolationException):
+        turns.perform_action(player, PlayerAction.SHIFT_ACTION)
+
+
+def given_delay__when_start__calls_callback_on_player():
     turns = Turns(prepare_delay=timedelta(milliseconds=5))
     player = Mock()
     turns.add_player(player, turn_callback=player.callback)
@@ -206,7 +215,7 @@ def test_given_delay__when_start__calls_callback_on_player():
     player.callback.assert_called_with(PlayerAction.PREPARE)
 
 
-def test_given_delay__when_waiting_long_enough__then_is_in_shift_state():
+def given_delay__when_waiting_long_enough__then_is_in_shift_state():
     player = Player(0)
     turns = Turns(prepare_delay=timedelta(milliseconds=5), players=[player])
     turns.start()
@@ -247,19 +256,20 @@ def test_given_delay_with_two_players__when_player1_leaves_during_wait__has_prep
 
 def test_given_delay_with_two_players__when_player1_leaves_during_wait__another_wait_leads_to_player2_shift():
     turns = Turns(prepare_delay=timedelta(milliseconds=30))
-    player1, player2 = Mock(), Mock()
-    turns.add_player(player1, turn_callback=player1.callback)
-    turns.add_player(player2, turn_callback=player2.callback)
+    player1, player2 = Player(1), Player(2)
+    callback1, callback2 = Mock(), Mock()
+    turns.add_player(player1, turn_callback=callback1)
+    turns.add_player(player2, turn_callback=callback2)
     turns.start()
     time.sleep(timedelta(milliseconds=50).total_seconds())
     turns.perform_action(player1, PlayerAction.SHIFT_ACTION)
     time.sleep(timedelta(milliseconds=5).total_seconds())
     turns.remove_player(player1)
-    player2.callback.reset_mock()
+    callback2.reset_mock()
 
     time.sleep(timedelta(milliseconds=50).total_seconds())
 
-    assert player2.callback.call_count == 1
+    assert callback2.call_count == 1
     assert turns.next_player_action().player == player2
     assert turns.next_player_action().action == PlayerAction.SHIFT_ACTION
 

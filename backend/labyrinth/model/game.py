@@ -540,6 +540,7 @@ class Turns:
         if not already_present:
             self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
+            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
 
     def remove_player(self, player_to_remove):
@@ -562,7 +563,8 @@ class Turns:
 
     def start(self):
         """ Starts the progression, informs player if necessary """
-        self._set_next(0)
+        if self._turn_states:
+            self._set_next(0)
 
     def is_action_possible(self, player, action):
         """ Checks if the action can be performed by the player
@@ -592,6 +594,7 @@ class Turns:
         return self.next_player_action() and self.next_player_action().action is action
 
     def _set_next(self, index=None):
+        assert self._turn_states
         if index is None:
             self._next = (self._next + 1) % len(self._turn_states)
         else:
@@ -599,15 +602,17 @@ class Turns:
         if self.next_player_action().action is PlayerAction.PREPARE:
             if self._prepare_delay:
                 self._notify_turn_changed_listeners()
-                Thread(target=self._delay_next_state).start()
+                Thread(target=self._delay_next_state, args=[self.next_player_action()]).start()
             else:
                 self._set_next()
         else:
             self._notify_turn_changed_listeners()
 
-    def _delay_next_state(self):
+    def _delay_next_state(self, current_player_action):
         time.sleep(self._prepare_delay.total_seconds())
-        self._set_next()
+        # check that state was not changed, e.g. due to removed player
+        if current_player_action == self.next_player_action():
+            self._set_next()
 
     def next_player_action(self):
         """ Returns the next PlayerAction in the turn progression """
