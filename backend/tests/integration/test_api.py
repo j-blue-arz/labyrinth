@@ -14,6 +14,7 @@ def test_post_player_returns_player(client):
     assert player["isComputerPlayer"] is False
     assert "pieceIndex" in player
     assert player["pieceIndex"] >= 0
+    _wait_for(client, "SHIFT")
 
 
 def test_post_players_four_times(client):
@@ -31,6 +32,7 @@ def test_post_players_four_times(client):
     response = _post_player(client)
     player_ids.add(_assert_ok_retrieve_id(response))
     assert len(player_ids) == 4
+    _wait_for(client, "SHIFT")
 
 
 def test_post_players_library_computer_player(client):
@@ -48,6 +50,7 @@ def test_post_players_library_computer_player(client):
     state = response.get_json()
     assert state["players"][1]["isComputerPlayer"] is True
     assert state["players"][1]["computationMethod"] == "libexhsearch"
+    _wait_for(client, "SHIFT")
 
 
 def test_post_players_unknown_compute_method(client):
@@ -76,6 +79,7 @@ def test_post_players_five_times(client):
     response = _post_player(client)
     _assert_error_response(response, user_message="Number of players has reached game limit.",
                            key="GAME_FULL", status=400)
+    _wait_for(client, "SHIFT")
 
 
 def test_get_state(client):
@@ -99,6 +103,7 @@ def test_get_state(client):
     assert len(state["players"]) == 2
     player_ids = {state["players"][0]["id"], state["players"][1]["id"]}
     assert player_ids == {player_id1, player_id2}
+    _wait_for(client, "SHIFT")
 
 
 def test_post_player_creates_game_with_correct_identifier(client):
@@ -111,6 +116,7 @@ def test_post_player_creates_game_with_correct_identifier(client):
     response = _get_state(client, game_id=3)
     state = response.get_json()
     assert state["id"] == 3
+    _wait_for(client, "SHIFT", game_id=3)
 
 
 def test_get_state_has_correct_initial_state(client):
@@ -146,6 +152,7 @@ def test_get_state_has_correct_initial_state(client):
     assert "N" in leftover_card["outPaths"]
     for player in state["players"]:
         assert player["score"] == 0
+    _wait_for(client, "SHIFT")
 
 
 def test_get_state_for_nonexisting_game(client):
@@ -158,6 +165,7 @@ def test_get_state_for_nonexisting_game(client):
     response = client.get("/api/games/1/state")
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
+    _wait_for(client, "SHIFT")
 
 
 def test_get_state_valid_after_error(client):
@@ -179,6 +187,7 @@ def test_get_state_valid_after_error(client):
     state = response.get_json()
     assert "mazeCards" in state["maze"]
     assert len(state["maze"]["mazeCards"]) == 50
+    _wait_for(client, "SHIFT")
 
 
 def test_change_maze_size(client):
@@ -195,6 +204,7 @@ def test_change_maze_size(client):
     state = response.get_json()
     assert state["maze"]["mazeSize"] == 11
     assert len(state["maze"]["mazeCards"]) == 11*11 + 1
+    _wait_for(client, "SHIFT", game_id=5)
 
 
 def test_change_maze_size_with_even_size(client):
@@ -206,6 +216,7 @@ def test_change_maze_size_with_even_size(client):
     response = _put_game(client, game_id=5, size=12)
     _assert_error_response(response, user_message="The combination of arguments in this request is not supported.",
                            key="INVALID_ARGUMENTS", status=400)
+    _wait_for(client, "SHIFT", game_id=5)
 
 
 def test_post_move(client):
@@ -235,6 +246,7 @@ def test_post_move(client):
                     None)
     assert location["row"] == 0
     assert location["column"] == 1
+    _wait_for(client, "SHIFT")
 
 
 def test_post_move_unreachable_move(client):
@@ -275,6 +287,7 @@ def test_post_shift_violates_turn(client):
     player_id = _assert_ok_retrieve_id(response)
     response = _post_shift(client, player_id, 0, 1, 0)
     _assert_error_response(response, key="TURN_VIOLATION", status=400)
+    _wait_for(client, "SHIFT")
 
 
 def test_post_move_nonexisting_game(client):
@@ -294,6 +307,7 @@ def test_post_move_nonexisting_game(client):
     response = client.post("/api/games/8/move?p_id={}".format(player_id), data=data)
     _assert_error_response(response, user_message="The game does not exist.",
                            key="GAME_NOT_FOUND", status=404)
+    _wait_for(client, "SHIFT")
 
 
 def test_post_shift(client):
@@ -414,6 +428,7 @@ def test_delete_player(client):
     _delete_player(client, player_id_1)
     state = _get_state(client).get_json()
     assert len(state["players"]) == 1
+    _wait_for(client, "SHIFT")
 
 
 def test_get_computation_methods_contains_library(library_path, client):
@@ -431,6 +446,7 @@ def test_remove_overdue_players__with_one_overdue_player__should_remove_player(c
 
     Sets the overdue time to 1s and waits 2s before executing cli."""
     player_id = _assert_ok_retrieve_id(_post_player(client))
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id, 0, 1, 270)
     time.sleep(2)
     _cli_remove_overdue_players(cli_runner, 1)
@@ -507,15 +523,14 @@ def _assert_error_response(response, key, status, user_message=None, user_messag
         assert user_message_contains in message["userMessage"]
 
 
-
-def _wait_for(client, expected_action, timeout=timedelta(seconds=3)):
+def _wait_for(client, expected_action, timeout=timedelta(seconds=3), game_id=0):
     """ Retrieves game state until expected action is required """
     poll_frequency = timedelta(milliseconds=600)
-    state = _get_state(client).get_json()
+    state = _get_state(client, game_id=game_id).get_json()
     start = time.time()
     while state["nextAction"]["action"] != expected_action and (time.time() - start < timeout.total_seconds()):
         time.sleep(poll_frequency.total_seconds())
-        state = _get_state(client).get_json()
+        state = _get_state(client, game_id=game_id).get_json()
     assert state["nextAction"]["action"] == expected_action
 
 

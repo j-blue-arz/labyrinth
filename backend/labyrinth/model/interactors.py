@@ -46,10 +46,9 @@ class UpdateOnTurnChangeInteractor:
             with self._game_repository.managed_gateway() as gateway:
                 # game has to be fetched, so other changes are not overwritten
                 game = gateway.load_game(game.identifier)
-                if game is None:
-                    raise exceptions.GameNotFoundException
-                game.turns.set_next(PlayerAction(player, next_action))
-                gateway.update_game(game.identifier, game)
+                if game is not None:
+                    game.turns.set_next(PlayerAction(player, next_action))
+                    gateway.update_game(game.identifier, game)
 
 
 class OverduePlayerInteractor:
