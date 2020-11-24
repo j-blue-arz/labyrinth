@@ -25,7 +25,7 @@ from .reachable import Graph
 from .game import Player, Turns, PlayerAction
 
 
-def create_computer_player(player_id, compute_method,
+def create_computer_player(player_id, compute_method, full_path=None,
                            url_supplier=None, game=None, shift_url=None, move_url=None, piece=None):
     """ This is a factory method creating a ComputerPlayer.
 
@@ -39,7 +39,7 @@ def create_computer_player(player_id, compute_method,
     :param move_url: use this instead of url_supplier, if you already know the final url to call for a move.
     :raises InvalidComputeMethodException: if compute_method cannot identify an existing library.
     """
-    library_binding_factory = _library_binding_factory(expected_library=compute_method)
+    library_binding_factory = _create_library_binding_factory(expected_library=compute_method, full_path=full_path)
     return ComputerPlayer(library_binding_factory, url_supplier=url_supplier,
                           shift_url=shift_url, move_url=move_url,
                           identifier=player_id, game=game, piece=piece)
@@ -199,19 +199,22 @@ def _library_filenames():
     return glob.glob(search_pattern)
 
 
-def _library_binding_factory(expected_library):
+def _validate_expected_library(expected_library):
     library_folder = current_app.config['LIBRARY_PATH']
     extension = _library_extension()
     filenames = _library_filenames()
-    full_library_path = None
     expected_filename = os.path.join(library_folder, expected_library + extension)
     for filename in filenames:
         if filename == expected_filename:
-            full_library_path = filename
-    if not full_library_path:
-        raise exceptions.InvalidComputeMethodException("Could not find library {}".format(expected_library))
+            return filename
+    raise exceptions.InvalidComputeMethodException("Could not find library {}".format(expected_library))
+
+
+def _create_library_binding_factory(expected_library, full_path=None):
+    full_library_path = full_path or _validate_expected_library(expected_library)
 
     library_binding_factory = functools.partial(LibraryBinding,
                                                 full_library_path=full_library_path)
     setattr(library_binding_factory, "SHORT_NAME", expected_library)
+    setattr(library_binding_factory, "FULL_PATH", full_library_path)
     return library_binding_factory

@@ -10,8 +10,8 @@ import labyrinth.model.computer as computer
 from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
                                         PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
-                                        PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD, 
-                                        TURN_PREPARE_DELAY)
+                                        PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD,
+                                        TURN_PREPARE_DELAY, LIBRARY_PATH)
 
 
 def game_to_dto(game: Game):
@@ -87,6 +87,7 @@ def _player_to_dto(player: Player):
     if type(player) is computer.ComputerPlayer:
         player_dto[IS_COMPUTER] = True
         player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME
+        player_dto[LIBRARY_PATH] = player.compute_method_factory.FULL_PATH
         player_dto[SHIFT_URL] = player.shift_url
         player_dto[MOVE_URL] = player.move_url
     return player_dto
@@ -121,6 +122,7 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
     if IS_COMPUTER in player_dto and player_dto[IS_COMPUTER]:
         player = computer.create_computer_player(
             compute_method=player_dto[COMPUTATION_METHOD],
+            full_path=player_dto[LIBRARY_PATH],
             url_supplier=None,
             player_id=player_dto[ID],
             game=game,
