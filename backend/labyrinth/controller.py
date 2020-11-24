@@ -24,6 +24,7 @@ def add_player(game_id, player_request_dto):
     :return: the added player
     """
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _get_or_create_game(game_id)
     is_computer, computation_method = mapper.dto_to_type(player_request_dto)
     player_id = _try(game.unused_player_id)
@@ -46,6 +47,7 @@ def delete_player(game_id, player_id):
     :param player_id: specifies the player to remove
     """
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _load_game_or_throw(game_id, for_update=True)
     _try(lambda: game.remove_player(player_id))
     DatabaseGateway.get_instance().update_game(game_id, game)
@@ -62,6 +64,7 @@ def change_game(game_id, game_request_dto):
     :param game_request_dto: contains the new maze size."""
     new_size = mapper.dto_to_maze_size(game_request_dto)
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _load_game_or_throw(game_id)
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
     _try(lambda: game.replace_board(new_board))
@@ -72,6 +75,7 @@ def change_game(game_id, game_request_dto):
 def get_game_state(game_id):
     """ Returns the game state """
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     interactor = interactors.ObserveGameInteractor(game_repository())
     game = _try(lambda: interactor.retrieve_game(game_id))
     game_state = mapper.game_state_to_dto(game)
@@ -83,6 +87,7 @@ def perform_shift(game_id, player_id, shift_dto):
     """Performs a shift operation on the game."""
     location, rotation = mapper.dto_to_shift_action(shift_dto)
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     interactor = interactors.PlayerActionInteractor(game_repository())
     _try(lambda: interactor.perform_shift(game_id, player_id, location, rotation))
     DatabaseGateway.get_instance().commit()
@@ -92,6 +97,7 @@ def perform_move(game_id, player_id, move_dto):
     """Performs a move operation on the game."""
     location = mapper.dto_to_move_action(move_dto)
     _ = interactors.OverduePlayerInteractor(game_repository())
+    _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     interactor = interactors.PlayerActionInteractor(game_repository())
     _try(lambda: interactor.perform_move(game_id, player_id, location))
     DatabaseGateway.get_instance().commit()

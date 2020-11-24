@@ -1,7 +1,7 @@
 """ Tests for Game of game.py """
 from unittest.mock import Mock, call, PropertyMock
 import pytest
-from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board
+from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board, Turns
 from labyrinth.model import factories
 from labyrinth.model.exceptions import PlayerNotFoundException, GameFullException
 
@@ -64,7 +64,7 @@ def test_given_empty_game__when_player_is_added__initializes_turns():
     player = Player(game.unused_player_id())
     game.add_player(player)
 
-    game.turns.next_player_action() == PlayerAction(player, PlayerAction.SHIFT_ACTION)
+    game.turns.next_player_action() == PlayerAction(player, PlayerAction.PREPARE)
 
 
 def test_add_player_validation():
@@ -79,7 +79,7 @@ def test_add_player_validation():
 
 def test_shift_raises_error_on_invalid_player_id():
     """ Tests shift validation """
-    game = Game(identifier=0)
+    game = Game(identifier=0, turns=Turns())
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
     with pytest.raises(PlayerNotFoundException):
@@ -88,7 +88,7 @@ def test_shift_raises_error_on_invalid_player_id():
 
 def test_move_raises_error_on_invalid_player_id():
     """ Tests move validation """
-    game = Game(identifier=0)
+    game = Game(identifier=0, turns=Turns())
     player_id = game.unused_player_id()
     game.add_player(Player(player_id))
     with pytest.raises(PlayerNotFoundException):
@@ -185,7 +185,7 @@ def test_replace_board():
 
 
 def _turn_listener_test_setup(players):
-    game = factories.create_game(game_id=7)
+    game = factories.create_game(game_id=7, with_delay=False)
     listener = Mock()
     game.register_turn_change_listener(listener)
     for player in players:

@@ -505,6 +505,12 @@ class PlayerAction:
     def __hash__(self):
         return hash((self.player.identifier, self.action))
 
+    def __str__(self):
+        return f"(player {self.player.identifier}, {self.action})"
+
+    def __repr__(self):
+        return self.__str__()
+
 
 class Turns:
     """ This class contains the turn progression.
@@ -529,7 +535,7 @@ class Turns:
                 player.register_in_turns(self)
 
     def _num_players(self):
-        return len(self._turn_states) // 3
+        return len(self._turn_states) // 4
 
     def add_player(self, player, turn_callback=None):
         """ Adds a player to the turn progression, if he is not present already """
@@ -547,7 +553,7 @@ class Turns:
         """ Removes all PlayerActions with this player. If it was this player's turn to play, the next
         Player has to play and listeners have to be notified. """
         def next_player(state_list):
-            next_player_index = (self._next + 3) % len(state_list)
+            next_player_index = (self._next + 4) % len(state_list)
             return state_list[next_player_index].player
 
         old_next_player_action = self.next_player_action()
@@ -557,14 +563,14 @@ class Turns:
         if self._turn_states:
             if old_next_player_action.player == player_to_remove:
                 new_next_player_action = PlayerAction(next_player(old_player_actions), PlayerAction.PREPARE)
-                self._set_next(self._turn_states.index(new_next_player_action))
+                self.set_next(new_next_player_action)
             else:
                 self._next = self._turn_states.index(old_next_player_action)
 
     def start(self):
         """ Starts the progression, informs player if necessary """
         if self._turn_states:
-            self._set_next(0)
+            self.set_next(index=0)
 
     def is_action_possible(self, player, action):
         """ Checks if the action can be performed by the player
@@ -588,23 +594,26 @@ class Turns:
         if not self.is_action_possible(player, action):
             raise exceptions.TurnActionViolationException("Player {} should not be able to make action {}.".format(
                 player.identifier, action))
-        self._set_next()
+        self.set_next()
 
     def _is_next_action(self, action):
         return self.next_player_action() and self.next_player_action().action is action
 
-    def _set_next(self, index=None):
+    def set_next(self, player_action=None, index=None):
         assert self._turn_states
-        if index is None:
-            self._next = (self._next + 1) % len(self._turn_states)
+        if player_action:
+            next_index = self._turn_states.index(player_action)
+        elif index is not None:
+            next_index = index
         else:
-            self._next = index
+            next_index = (self._next + 1) % len(self._turn_states)
+        self._next = next_index
         if self.next_player_action().action is PlayerAction.PREPARE:
             if self._prepare_delay:
                 self._notify_turn_changed_listeners()
                 Thread(target=self._delay_next_state, args=[self.next_player_action()]).start()
             else:
-                self._set_next()
+                self.set_next()
         else:
             self._notify_turn_changed_listeners()
 
@@ -612,7 +621,7 @@ class Turns:
         time.sleep(self._prepare_delay.total_seconds())
         # check that state was not changed, e.g. due to removed player
         if current_player_action == self.next_player_action():
-            self._set_next()
+            self.set_next()
 
     def next_player_action(self):
         """ Returns the next PlayerAction in the turn progression """
@@ -620,6 +629,11 @@ class Turns:
             return self._turn_states[self._next]
         except IndexError:
             return None
+
+    @property
+    def prepare_delay(self):
+        """ Getter of prepare_delay """
+        return self._prepare_delay
 
     def register_turn_changed_listener(self, listener):
         """ Register a listener which is notified whenever the turn changes.
@@ -638,14 +652,16 @@ class Turns:
 class Game:
     """ This class represents one played game
 
-    The game is started as soon as the first player is added. """
+    The game is started as soon as the first player is added.
+    By default, it creates a turn progression with a delay of one second.
+    To use no delay, or a delay of your choice, provide a Turns instance."""
     MAX_PLAYERS = 4
 
     def __init__(self, identifier, board=None, players=None, turns=None):
         self._id = identifier
         self._players = players or []
         self._board = board or Board()
-        self._turns = turns or Turns()
+        self._turns = turns or Turns(prepare_delay=timedelta(seconds=1))
         self._turns.register_turn_changed_listener(self._notify_turn_listeners)
         self.previous_shift_location = None
         self._turn_listeners = []

@@ -138,7 +138,6 @@ def test_second_player_to_play__performs_valid_action(library_path):
     library_binding = ExternalLibraryBinding(library_path, board, piece,
                                              previous_shift_location=previous_shift_location)
     action = library_binding.find_optimal_action()
-    print(action)
 
     _assert_valid_action(action, board, previous_shift_location, piece)
     _assert_reaches_objective(action, board, piece)

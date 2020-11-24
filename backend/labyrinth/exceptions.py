@@ -38,9 +38,10 @@ def domain_to_api_exception(domain_exception):
     if isinstance(domain_exception, PlayerNotFoundException):
         return ApiException("PLAYER_NOT_IN_GAME", "The player does not take part in this game.", 400)
     if isinstance(domain_exception, (InvalidShiftLocationException,
-                                     MoveUnreachableException,
-                                     TurnActionViolationException)):
+                                     MoveUnreachableException)):
         return ApiException("INVALID_ACTION", "The sent action is invalid.", 400)
+    if isinstance(domain_exception, TurnActionViolationException):
+        return ApiException("TURN_VIOLATION", "It is not the player's turn to perform the requested action.", 400)
     if isinstance(domain_exception, (InvalidSizeException,
                                      InvalidRotationException,
                                      InvalidLocationException)):

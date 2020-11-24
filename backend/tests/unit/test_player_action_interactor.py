@@ -4,13 +4,13 @@ import pytest
 
 from labyrinth.model import interactors
 from labyrinth.model.exceptions import InvalidShiftLocationException, TurnActionViolationException
-from labyrinth.model.game import BoardLocation, Game, Player
+from labyrinth.model.game import BoardLocation, Game, Player, Turns
 
 
 @pytest.fixture()
 def test_setup():
     def _setup():
-        game = Game(5)
+        game = Game(5, turns=Turns())
         game_repository = when_game_repository_find_by_id_then_return(game)
         game_repository.update = Mock()
         interactor = interactors.PlayerActionInteractor(game_repository=game_repository)

@@ -163,6 +163,7 @@ components:
                     enum:
                         - "GAME_FULL"
                         - "INVALID_ACTION"
+                        - "TURN_VIOLATION"
                         - "GAME_NOT_FOUND"
                         - "PLAYER_NOT_IN_GAME"
                         - "UNKNOWN_ERROR"

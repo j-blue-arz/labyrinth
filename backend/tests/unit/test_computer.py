@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch, PropertyMock
 
 from labyrinth.model.computer import ComputerPlayer
 from labyrinth.model.factories import create_maze, MazeCardFactory
-from labyrinth.model.game import Board, BoardLocation, Game
+from labyrinth.model.game import Board, BoardLocation, Game, Turns
 
 
 def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with_callback():
@@ -146,7 +146,7 @@ def test_random_actions_should_respect_no_pushback_rule():
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        game = Game(0, board=orig_board)
+        game = Game(0, board=orig_board, turns=Turns())
         game.previous_shift_location = BoardLocation(0, 3)
         computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
                                          game=game, identifier=9, board=board, piece=piece)

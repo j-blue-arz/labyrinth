@@ -19,15 +19,17 @@ class DatabaseGateway:
     If it should be use without a request context, it can be instantiated directly. Users should then take
     care to commit their changes and close the connection themselves. A convenient way to do so is a with-statement:
 
-            with DatabaseGateway() as gateway:
+            with DatabaseGateway(settings) as gateway:
                 gateway.update_game(7, game)
 
     This will open a connection, update a game, commit and close the connection.
+    The settings parameter is required to a be a dictionary with an entry 'DATABASE', the path to the sqlite file.
     """
 
-    def __init__(self):
+    def __init__(self, settings=None):
         self._db_connection = None
         self._game_created_listeners = []
+        self._settings = settings or current_app.config
 
     @classmethod
     def get_instance(cls):
@@ -37,6 +39,11 @@ class DatabaseGateway:
         if "db_gateway" not in g:
             g.db_gateway = cls()
         return g.db_gateway
+
+    @property
+    def settings(self):
+        """ Getter for settings """
+        return self._settings
 
     def register_game_created_listener(self, listener):
         """ Registers a callback, which is called everytime a game is created from the database.
@@ -141,7 +148,7 @@ class DatabaseGateway:
         a sqlite connection is opened and stored in the global context """
         if not self._db_connection:
             self._db_connection = sqlite3.connect(
-                current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
+                self._settings["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
             )
             self._db_connection.row_factory = sqlite3.Row
             if exclusive:
@@ -176,7 +183,7 @@ class DatabaseGateway:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.commit()
         if self._db_connection:
             self._db_connection.close()

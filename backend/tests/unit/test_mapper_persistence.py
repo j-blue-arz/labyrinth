@@ -3,10 +3,15 @@ Tests the main methods dto_to_game() and game_to_dto(), i.e.
 the methods used to persist a Game instance.
 The tests are performed by creating a Game instance by hand, mapping it to DTO,
 mapping the DTO back to a Game and then asserting the structure of the result """
+from datetime import timedelta
+import time
+
 import labyrinth.mapper.persistence as mapper
 from labyrinth.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
 from labyrinth.model.computer import create_computer_player
 from labyrinth.model.factories import MazeCardFactory
+
+DELAY = timedelta(milliseconds=10)
 
 
 def _create_test_game(with_computer=False):
@@ -38,7 +43,8 @@ def _create_test_game(with_computer=False):
     players[0].score = 7
     players[1].score = 8
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
-    turns = Turns(players=players, next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
+    turns = Turns(prepare_delay=DELAY, players=players,
+                  next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
     game = Game(identifier=7, turns=turns, board=board, players=players)
     for player in players:
         player._game = game
@@ -92,6 +98,7 @@ def test_mapping_turns():
     created_game, player_ids = _create_test_game()
     game_dto = mapper.game_to_dto(created_game)
     game = mapper.dto_to_game(game_dto)
+    _assert_games_using_function(created_game, game, lambda g: g.turns.prepare_delay)
     for _ in range(len(player_ids) * 2):
         _assert_games_using_function(created_game, game,
                                      lambda g: g.turns.next_player_action().player.identifier)
@@ -100,6 +107,8 @@ def test_mapping_turns():
         game.turns.perform_action(game.turns.next_player_action().player, game.turns.next_player_action().action)
         created_game.turns.perform_action(created_game.turns.next_player_action().player,
                                           created_game.turns.next_player_action().action)
+        assert game.turns.next_player_action().action == PlayerAction.PREPARE
+        time.sleep(DELAY.total_seconds() + 0.1)
 
 
 def test_mapping_previous_shift_location():

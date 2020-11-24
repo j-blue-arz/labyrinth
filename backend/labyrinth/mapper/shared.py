@@ -60,8 +60,7 @@ def _maze_cards_to_dto(board):
     :param board: an instance of model.Board
     :return: a list of DTOs.
     """
-    dto = []
-    dto.append(_maze_card_to_dto(board.leftover_card, None))
+    dto = [_maze_card_to_dto(board.leftover_card, None)]
     for location in board.maze.maze_locations:
         maze_card = board.maze[location]
         dto.append(_maze_card_to_dto(maze_card, location))
@@ -74,7 +73,4 @@ def _board_to_dto(board):
     :param board: an instance of model.Board
     :return: a dictionary of the maze size and a list of maze card DTOs
     """
-    dto = dict()
-    dto[MAZE_SIZE] = board.maze.maze_size
-    dto[MAZE_CARDS] = _maze_cards_to_dto(board)
-    return dto
+    return {MAZE_SIZE: board.maze.maze_size, MAZE_CARDS: _maze_cards_to_dto(board)}

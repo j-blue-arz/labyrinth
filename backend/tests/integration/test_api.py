@@ -1,4 +1,5 @@
 """ Tests the api methods ( /api/ ) """
+from datetime import timedelta
 import json
 import os
 import time
@@ -219,7 +220,9 @@ def test_post_move(client):
     """
     response = _post_player(client)
     player_id = _assert_ok_retrieve_id(response)
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id, 0, 1, 270)
+    _wait_for(client, "MOVE")
     response = _post_move(client, player_id, 0, 1)
     assert response.status_code == 200
     assert response.content_length == 0
@@ -246,24 +249,32 @@ def test_post_move_unreachable_move(client):
     """
     response = _post_player(client)
     player_id = _assert_ok_retrieve_id(response)
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id, 0, 1, 0)
+    _wait_for(client, "MOVE")
     _post_move(client, player_id, 0, 0)
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id, 1, 0, 90)
+    _wait_for(client, "MOVE")
     response = _post_move(client, player_id, 0, 1)
     _assert_error_response(response, user_message="The sent action is invalid.",
                            key="INVALID_ACTION", status=400)
 
 
-def test_post_move_invalid_move(client):
+def test_post_shift_violates_turn(client):
     """ Tests POST for /api/games/0/move
 
-    with an invalid location.
+    with an unreachable location. The state is constructed by
+    shifting the pieces next to the top left corner so that
+    all outgoing paths are blocked.
+    It is exploited that no card has a "W" out_path.
     Expects a 400 Bad Request, with exception body.
     State is unchanged.
     """
     response = _post_player(client)
     player_id = _assert_ok_retrieve_id(response)
-    _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 7, 0))
+    response = _post_shift(client, player_id, 0, 1, 0)
+    _assert_error_response(response, key="TURN_VIOLATION", status=400)
 
 
 def test_post_move_nonexisting_game(client):
@@ -299,6 +310,7 @@ def test_post_shift(client):
                              None)
     old_rotation = old_leftover_card["rotation"]
     new_rotation = (old_rotation + 180) % 360
+    _wait_for(client, "SHIFT")
     response = _post_shift(client, player_id, 0, 1, new_rotation)
     assert response.status_code == 200
     assert response.content_length == 0
@@ -312,6 +324,7 @@ def test_post_shift(client):
     assert pushed_in_card["rotation"] == new_rotation
     assert pushed_in_card["location"]["row"] == 0
     assert pushed_in_card["location"]["column"] == 1
+    _wait_for(client, "MOVE")
 
 
 def test_post_shift_with_invalid_rotation(client):
@@ -323,6 +336,7 @@ def test_post_shift_with_invalid_rotation(client):
     """
     response = _post_player(client)
     player_id = _assert_ok_retrieve_id(response)
+    _wait_for(client, "SHIFT")
     _assert_invalid_argument_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 1, 66))
 
 
@@ -335,19 +349,8 @@ def test_post_shift_with_invalid_location(client):
     """
     response = _post_player(client)
     player_id = _assert_ok_retrieve_id(response)
+    _wait_for(client, "SHIFT")
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id, 0, 0, 90))
-
-
-def test_post_move_with_invalid_turn_action(client):
-    """ Tests POST for /api/games/0/move
-
-    when a shift should be performed.
-    Expects a 400 Bad Request, with exception body.
-    State is unchanged.
-    """
-    response = _post_player(client)
-    player_id = _assert_ok_retrieve_id(response)
-    _assert_invalid_action_and_unchanged_state(client, lambda: _post_move(client, player_id, 0, 0))
 
 
 def test_turn_action_progression(client):
@@ -356,26 +359,34 @@ def test_turn_action_progression(client):
     expects the nextAction to change as correct actions are performed.
     """
     player_id_0 = _assert_ok_retrieve_id(_post_player(client))
+    state = _get_state(client).get_json()
+    assert state["nextAction"]["playerId"] == player_id_0
+    assert state["nextAction"]["action"] == "PREPARE"
     player_id_1 = _assert_ok_retrieve_id(_post_player(client))
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "SHIFT"
+    assert state["nextAction"]["action"] == "PREPARE"
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id_0, 0, 1, 270)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "MOVE"
+    assert state["nextAction"]["action"] == "PREPARE"
+    _wait_for(client, "MOVE")
     _post_move(client, player_id_0, 0, 0)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
-    assert state["nextAction"]["action"] == "SHIFT"
+    assert state["nextAction"]["action"] == "PREPARE"
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id_1, 0, 1, 270)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
-    assert state["nextAction"]["action"] == "MOVE"
+    assert state["nextAction"]["action"] == "PREPARE"
+    _wait_for(client, "MOVE")
     _post_move(client, player_id_1, 0, 6)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "SHIFT"
+    assert state["nextAction"]["action"] == "PREPARE"
+    _wait_for(client, "SHIFT")
 
 
 def test_no_pushback_rule(client):
@@ -385,8 +396,11 @@ def test_no_pushback_rule(client):
     """
     player_id_0 = _assert_ok_retrieve_id(_post_player(client))
     player_id_1 = _assert_ok_retrieve_id(_post_player(client))
+    _wait_for(client, "SHIFT")
     _post_shift(client, player_id_0, 0, 1, 270)
+    _wait_for(client, "MOVE")
     _post_move(client, player_id_0, 0, 0)
+    _wait_for(client, "SHIFT")
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id_1, 6, 1, 270))
 
 
@@ -486,11 +500,23 @@ def _assert_error_response(response, key, status, user_message=None, user_messag
     assert response.status_code == status
     assert response.content_type == "application/json"
     message = response.get_json()
+    assert message["key"] == key
     if user_message:
         assert message["userMessage"] == user_message
     if user_message_contains:
         assert user_message_contains in message["userMessage"]
-    assert message["key"] == key
+
+
+
+def _wait_for(client, expected_action, timeout=timedelta(seconds=3)):
+    """ Retrieves game state until expected action is required """
+    poll_frequency = timedelta(milliseconds=600)
+    state = _get_state(client).get_json()
+    start = time.time()
+    while state["nextAction"]["action"] != expected_action and (time.time() - start < timeout.total_seconds()):
+        time.sleep(poll_frequency.total_seconds())
+        state = _get_state(client).get_json()
+    assert state["nextAction"]["action"] == expected_action
 
 
 def _post_shift(client, player_id, row, column, rotation):

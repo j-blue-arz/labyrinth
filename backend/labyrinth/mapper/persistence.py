@@ -3,12 +3,15 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
+from datetime import timedelta
+
 from labyrinth.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
 import labyrinth.model.computer as computer
 from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
                                         PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
-                                        PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD)
+                                        PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD, 
+                                        TURN_PREPARE_DELAY)
 
 
 def game_to_dto(game: Game):
@@ -22,6 +25,7 @@ def game_to_dto(game: Game):
         PLAYERS: [_player_to_dto(player) for player in game.players],
         MAZE: _board_to_dto(game.board),
         NEXT_ACTION: _turns_to_next_action_dto(game.turns),
+        TURN_PREPARE_DELAY: _timedelta_to_dto_(game.turns.prepare_delay),
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
         PREVIOUS_SHIFT_LOCATION: _board_location_to_dto(game.previous_shift_location)
     }
@@ -41,7 +45,8 @@ def dto_to_game(game_dto):
     players = [_dto_to_player(player_dto, None, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
-    turns = _dto_to_turns(game_dto[NEXT_ACTION], players)
+    turns_prepare_delay = _dto_to_timedelta(game_dto[TURN_PREPARE_DELAY])
+    turns = _dto_to_turns(game_dto[NEXT_ACTION], players=players, prepare_delay=turns_prepare_delay)
     identifier = game_dto[ID]
     game = Game(identifier, board=board, players=players, turns=turns)
     for player in players:
@@ -63,6 +68,10 @@ def _dto_to_maze_cards_and_dictionary(maze_dto):
             maze[board_location] = maze_card
         maze_card_by_id[maze_card.identifier] = maze_card
     return maze, leftover_card, maze_card_by_id
+
+
+def _dto_to_timedelta(delta_dto):
+    return timedelta(seconds=float(delta_dto))
 
 
 def _player_to_dto(player: Player):
@@ -92,6 +101,10 @@ def _turns_to_next_action_dto(turns: Turns):
         return None
     return {PLAYER_ID: player_action.player.identifier,
             ACTION: player_action.action}
+
+
+def _timedelta_to_dto_(delta: timedelta):
+    return str(delta.total_seconds())
 
 
 def _dto_to_player(player_dto, game, board, maze_card_dict):
@@ -133,7 +146,7 @@ def _dto_to_maze_card(maze_card_dto):
     return maze_card, location
 
 
-def _dto_to_turns(next_action_dto, players):
+def _dto_to_turns(next_action_dto, players, prepare_delay=timedelta(0)):
     """ Maps a DTO to a Turns instance
 
     :param next_action_dto: a dictionary representing the next player action,
@@ -143,7 +156,7 @@ def _dto_to_turns(next_action_dto, players):
     :return: an instance of Turns
     """
     if not players:
-        return Turns()
+        return Turns(prepare_delay=prepare_delay)
     player = next(player for player in players if player.identifier == next_action_dto[PLAYER_ID])
     action = next_action_dto[ACTION]
-    return Turns(players=players, next_action=PlayerAction(player, action))
+    return Turns(players=players, next_action=PlayerAction(player, action), prepare_delay=prepare_delay)

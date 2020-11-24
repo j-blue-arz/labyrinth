@@ -40,7 +40,7 @@ def test_remove_overdue_players__with_player_just_removed__does_not_raise_except
 
 def test_interactor__when_game_notifies_turn_listeners__updates_player_action_timestamp():
     game, _ = setup_test()
-    data_access = DatabaseGateway()
+    data_access = DatabaseGateway(settings={"DATABASE": "foo"})
     game_repository = interactors.GameRepository(data_access)
     game_repository.update_action_timestamp = Mock()
     _ = interactors.OverduePlayerInteractor(game_repository)

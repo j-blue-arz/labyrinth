@@ -4,7 +4,7 @@ There are two ways of creating these objects: either by fully specifying all det
 by randomly generating layouts based with certain restrictions, based on the original game. """
 import random
 import math
-from labyrinth.model.game import MazeCard, Maze, BoardLocation, Board, Game
+from labyrinth.model.game import MazeCard, Maze, BoardLocation, Board, Game, Turns
 from labyrinth.model.exceptions import InvalidSizeException
 
 
@@ -141,10 +141,13 @@ def create_board(maze_size=7):
     return Board(maze=maze, leftover_card=leftover)
 
 
-def create_game(maze_size=7, game_id=0):
+def create_game(maze_size=7, game_id=0, with_delay=True):
     """ Creates a game instance with a random board. Player and piece initialization
     is not done here. """
-    return Game(game_id, board=create_board(maze_size))
+    if not with_delay:
+        return Game(game_id, board=create_board(maze_size), turns=Turns())
+    else:
+        return Game(game_id, board=create_board(maze_size))
 
 
 def create_maze(maze_string, maze_card_factory=None):

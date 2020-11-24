@@ -9,6 +9,7 @@ from flask import has_request_context
 from labyrinth.database import DatabaseGateway
 
 from labyrinth.model import exceptions
+from labyrinth.model.game import PlayerAction
 
 
 class PlayerActionInteractor:
@@ -22,19 +23,32 @@ class PlayerActionInteractor:
 
     def perform_shift(self, game_id, player_id, shift_location, shift_rotation):
         game = self._game_repository.find_by_id(game_id)
-        game.register_turn_change_listener(self._update_game_async)
         game.shift(player_id, shift_location, shift_rotation)
         self._game_repository.update(game)
 
     def perform_move(self, game_id, player_id, move_location):
         game = self._game_repository.find_by_id(game_id)
-        game.register_turn_change_listener(self._update_game_async)
         game.move(player_id, move_location)
         self._game_repository.update(game)
 
-    def _update_game_async(self, game, player, next_action):
+
+class UpdateOnTurnChangeInteractor:
+    """ Interactor class which persists asynchronous turn changes. """
+    def __init__(self, game_repository):
+        self._game_repository = game_repository
+        self._game_repository.register_game_created_listener(self._on_game_creation)
+
+    def _on_game_creation(self, game):
+        game.register_turn_change_listener(self._update_player_action_async)
+
+    def _update_player_action_async(self, game, player, next_action):
         if not has_request_context():
-            with DatabaseGateway() as gateway:
+            with self._game_repository.managed_gateway() as gateway:
+                # game has to be fetched, so other changes are not overwritten
+                game = gateway.load_game(game.identifier)
+                if game is None:
+                    raise exceptions.GameNotFoundException
+                game.turns.set_next(PlayerAction(player, next_action))
                 gateway.update_game(game.identifier, game)
 
 
@@ -64,7 +78,8 @@ class OverduePlayerInteractor:
         game.register_turn_change_listener(self._turn_change_listener)
 
     def _turn_change_listener(self, game, player, next_action):
-        self._game_repository.update_action_timestamp(game, datetime.now())
+        if next_action == PlayerAction.PREPARE:
+            self._game_repository.update_action_timestamp(game, datetime.now())
 
 
 class ObserveGameInteractor:
@@ -134,3 +149,10 @@ class GameRepository:
 
     def register_game_created_listener(self, listener):
         self._data_access.register_game_created_listener(listener)
+
+    def managed_gateway(self):
+        """ Creates a database gateway as a context manager
+
+        It should only be necessary to retrieve this in non-request contexts.
+        """
+        return DatabaseGateway(self._data_access.settings)
