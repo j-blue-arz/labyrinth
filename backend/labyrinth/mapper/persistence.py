@@ -3,6 +3,7 @@
 These DTOs are structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
+import copy
 from datetime import timedelta
 
 from labyrinth.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
@@ -29,6 +30,13 @@ def game_to_dto(game: Game):
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
         PREVIOUS_SHIFT_LOCATION: _board_location_to_dto(game.previous_shift_location)
     }
+
+
+def replace_turn_state(game_dto, player_action):
+    """ Returns a copy of the given game DTO, with the next action replaced by the given PlayerAction """
+    result = copy.deepcopy(game_dto)
+    result[NEXT_ACTION] = _player_action_to_dto(player_action)
+    return result
 
 
 def dto_to_game(game_dto):
@@ -98,6 +106,10 @@ def _turns_to_next_action_dto(turns: Turns):
     only the next action.
     """
     player_action = turns.next_player_action()
+    return _player_action_to_dto(player_action)
+
+
+def _player_action_to_dto(player_action):
     if not player_action:
         return None
     return {PLAYER_ID: player_action.player.identifier,

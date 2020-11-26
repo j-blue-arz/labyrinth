@@ -2,7 +2,7 @@
 import json
 import sqlite3
 from flask import current_app, g
-from .mapper.persistence import dto_to_game, game_to_dto
+from .mapper.persistence import dto_to_game, game_to_dto, replace_turn_state
 
 
 class DatabaseGateway:
@@ -109,6 +109,22 @@ class DatabaseGateway:
     def update_game(self, game_id, game):
         """ Updates a game in the database """
         game_json = json.dumps(game_to_dto(game))
+        self._db().execute(
+            "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
+        )
+
+    def update_turn_state(self, game_id, turn_state):
+        """ Updates only the turn state in a game in the database """
+        game_row = (
+            self._db()
+            .execute("SELECT game_state, last_observed_timestamp FROM games WHERE id=?", (game_id,))
+            .fetchone()
+        )
+        if game_row is None:
+            return False
+        game_dto = json.loads(game_row["game_state"])
+        game_dto = replace_turn_state(game_dto, turn_state)
+        game_json = json.dumps(game_dto)
         self._db().execute(
             "UPDATE games SET game_state=? WHERE ID=?", (game_json, game_id)
         )

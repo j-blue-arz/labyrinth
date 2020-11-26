@@ -44,11 +44,7 @@ class UpdateOnTurnChangeInteractor:
     def _update_player_action_async(self, game, player, next_action):
         if not has_request_context():
             with self._game_repository.managed_gateway() as gateway:
-                # game has to be fetched, so other changes are not overwritten
-                game = gateway.load_game(game.identifier)
-                if game is not None:
-                    game.turns.set_next(PlayerAction(player, next_action))
-                    gateway.update_game(game.identifier, game)
+                gateway.update_turn_state(game.identifier, PlayerAction(player, next_action))
 
 
 class OverduePlayerInteractor:
