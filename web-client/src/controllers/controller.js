@@ -5,6 +5,8 @@ import { setInterval, clearInterval } from "timers";
 import Player from "@/model/player";
 import WasmPlayer from "@/model/wasmPlayer";
 
+const POLL_INTERVAL_MS = 850;
+
 export default class Controller {
     constructor(useStorage) {
         this._game = new Game();
@@ -117,7 +119,7 @@ export default class Controller {
         this.stopPolling();
         if (this._timer === 0) {
             this.fetchApiState();
-            this._timer = setInterval(() => this.fetchApiState(), 800);
+            this._timer = setInterval(() => this.fetchApiState(), POLL_INTERVAL_MS);
         }
     }
 

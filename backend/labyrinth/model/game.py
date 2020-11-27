@@ -666,7 +666,7 @@ class Game:
         self._id = identifier
         self._players = players or []
         self._board = board or Board()
-        self._turns = turns or Turns(prepare_delay=timedelta(seconds=1))
+        self._turns = turns or Turns(prepare_delay=timedelta(milliseconds=800))
         self._turns.register_turn_changed_listener(self._notify_turn_listeners)
         self.previous_shift_location = None
         self._turn_listeners = []

@@ -134,14 +134,14 @@ export default {
         },
         xPos: function(newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
-                TweenLite.to(this.$data, 1, { xPosAnimated: newValue, ease: Power3.easeInOut });
+                TweenLite.to(this.$data, 0.9, { xPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.xPosAnimated = newValue;
             }
         },
         yPos: function(newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
-                TweenLite.to(this.$data, 1, { yPosAnimated: newValue, ease: Power3.easeInOut });
+                TweenLite.to(this.$data, 0.9, { yPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.yPosAnimated = newValue;
             }
