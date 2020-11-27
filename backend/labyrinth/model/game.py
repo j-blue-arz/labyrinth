@@ -467,13 +467,15 @@ class PlayerAction:
 
     MOVE_ACTION = "MOVE"
     SHIFT_ACTION = "SHIFT"
-    PREPARE = "PREPARE"
+    PREPARE_SHIFT = "PREPARE_SHIFT"
+    PREPARE_MOVE = "PREPARE_MOVE"
 
     def __init__(self, player, action, turn_callback=None):
         """
         :param player: a Player instance
         :param action: PlayerAction.MOVE_ACTION or PlayerAction.SHIFT_ACTION
-        :param turn_callback: a method which is called with no arguments, if it is the player's turn.
+        :param turn_callback: a method which is called if it is the player's turn.
+                the method will be called with the required action.
         """
         self._player = player
         self._action = action
@@ -493,6 +495,9 @@ class PlayerAction:
     def turn_callback(self):
         """ Getter of turn_callback """
         return self._turn_callback
+
+    def is_prepare(self):
+        return self.action in [self.PREPARE_SHIFT, self.PREPARE_MOVE]
 
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
@@ -524,7 +529,7 @@ class Turns:
         self._prepare_delay = prepare_delay
         self.init(players)
         self._next = self._turn_states.index(next_action) if next_action else 0
-        if self._is_next_action(PlayerAction.PREPARE) and not self._prepare_delay:
+        if self._next_action_is_prepare() and not self._prepare_delay:
             self._next += 1
 
     def init(self, players=None):
@@ -544,9 +549,9 @@ class Turns:
             for player_action in self._turn_states
         )
         if not already_present:
-            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE, turn_callback))
+            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE_SHIFT, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.SHIFT_ACTION, turn_callback))
-            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE, turn_callback))
+            self._turn_states.append(PlayerAction(player, PlayerAction.PREPARE_MOVE, turn_callback))
             self._turn_states.append(PlayerAction(player, PlayerAction.MOVE_ACTION, turn_callback))
 
     def remove_player(self, player_to_remove):
@@ -562,7 +567,7 @@ class Turns:
                              if player_action.player != player_to_remove]
         if self._turn_states:
             if old_next_player_action.player == player_to_remove:
-                new_next_player_action = PlayerAction(next_player(old_player_actions), PlayerAction.PREPARE)
+                new_next_player_action = PlayerAction(next_player(old_player_actions), PlayerAction.PREPARE_SHIFT)
                 self.set_next(new_next_player_action)
             else:
                 self._next = self._turn_states.index(old_next_player_action)
@@ -596,8 +601,8 @@ class Turns:
                 player.identifier, action))
         self.set_next()
 
-    def _is_next_action(self, action):
-        return self.next_player_action() and self.next_player_action().action is action
+    def _next_action_is_prepare(self):
+        return self.next_player_action() and self.next_player_action().is_prepare()
 
     def set_next(self, player_action=None, index=None):
         assert self._turn_states
@@ -608,7 +613,7 @@ class Turns:
         else:
             next_index = (self._next + 1) % len(self._turn_states)
         self._next = next_index
-        if self.next_player_action().action is PlayerAction.PREPARE:
+        if self.next_player_action().is_prepare():
             if self._prepare_delay:
                 self._notify_turn_changed_listeners()
                 Thread(target=self._delay_next_state, args=[self.next_player_action()]).start()
@@ -801,10 +806,8 @@ class Game:
     def _notify_turn_listeners(self):
         next_player_action = self._turns.next_player_action()
         if next_player_action:
-            player = next_player_action.player
-            action = next_player_action.action
             for listener in self._turn_listeners:
-                listener(game=self, player=player, next_action=action)
+                listener(game=self, next_player_action=next_player_action)
 
     def next_player(self):
         """ The player who is expected to perform the next action """

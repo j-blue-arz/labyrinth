@@ -9,7 +9,6 @@ from flask import has_request_context
 from labyrinth.database import DatabaseGateway
 
 from labyrinth.model import exceptions
-from labyrinth.model.game import PlayerAction
 
 
 class PlayerActionInteractor:
@@ -41,10 +40,10 @@ class UpdateOnTurnChangeInteractor:
     def _on_game_creation(self, game):
         game.register_turn_change_listener(self._update_player_action_async)
 
-    def _update_player_action_async(self, game, player, next_action):
+    def _update_player_action_async(self, game, next_player_action):
         if not has_request_context():
             with self._game_repository.managed_gateway() as gateway:
-                gateway.update_turn_state(game.identifier, PlayerAction(player, next_action))
+                gateway.update_turn_state(game.identifier, next_player_action)
 
 
 class OverduePlayerInteractor:
@@ -72,8 +71,8 @@ class OverduePlayerInteractor:
     def _on_game_creation(self, game):
         game.register_turn_change_listener(self._turn_change_listener)
 
-    def _turn_change_listener(self, game, player, next_action):
-        if next_action == PlayerAction.PREPARE:
+    def _turn_change_listener(self, game, next_player_action):
+        if next_player_action.is_prepare():
             self._game_repository.update_action_timestamp(game, datetime.now())
 
 

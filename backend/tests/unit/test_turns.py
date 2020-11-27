@@ -193,7 +193,7 @@ def given_delay__when_start__is_in_prepare_state():
     turns = Turns(prepare_delay=timedelta(milliseconds=10), players=[player])
     turns.start()
 
-    assert turns.next_player_action().action == PlayerAction.PREPARE
+    assert turns.next_player_action().action == PlayerAction.PREPARE_SHIFT
 
 
 def given_prepare_state__when_player_tries_shift__raises_exception():
@@ -212,7 +212,7 @@ def given_delay__when_start__calls_callback_on_player():
     turns.start()
 
     assert player.callback.call_count == 1
-    player.callback.assert_called_with(PlayerAction.PREPARE)
+    player.callback.assert_called_with(PlayerAction.PREPARE_SHIFT)
 
 
 def given_delay__when_waiting_long_enough__then_is_in_shift_state():
@@ -251,7 +251,7 @@ def test_given_delay_with_two_players__when_player1_leaves_during_wait__has_prep
 
     assert player2.callback.call_count == 1
     assert turns.next_player_action().player == player2
-    assert turns.next_player_action().action == PlayerAction.PREPARE
+    assert turns.next_player_action().action == PlayerAction.PREPARE_SHIFT
 
 
 def test_given_delay_with_two_players__when_player1_leaves_during_wait__another_wait_leads_to_player2_shift():

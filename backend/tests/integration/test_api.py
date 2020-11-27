@@ -375,31 +375,31 @@ def test_turn_action_progression(client):
     player_id_0 = _assert_ok_retrieve_id(_post_player(client))
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_SHIFT"
     player_id_1 = _assert_ok_retrieve_id(_post_player(client))
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_SHIFT"
     _wait_for(client, "SHIFT")
     _post_shift(client, player_id_0, 0, 1, 270)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_MOVE"
     _wait_for(client, "MOVE")
     _post_move(client, player_id_0, 0, 0)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_SHIFT"
     _wait_for(client, "SHIFT")
     _post_shift(client, player_id_1, 0, 1, 270)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_1
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_MOVE"
     _wait_for(client, "MOVE")
     _post_move(client, player_id_1, 0, 6)
     state = _get_state(client).get_json()
     assert state["nextAction"]["playerId"] == player_id_0
-    assert state["nextAction"]["action"] == "PREPARE"
+    assert state["nextAction"]["action"] == "PREPARE_SHIFT"
     _wait_for(client, "SHIFT")
 
 

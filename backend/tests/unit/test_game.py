@@ -64,7 +64,7 @@ def test_given_empty_game__when_player_is_added__initializes_turns():
     player = Player(game.unused_player_id())
     game.add_player(player)
 
-    game.turns.next_player_action() == PlayerAction(player, PlayerAction.PREPARE)
+    game.turns.next_player_action() == PlayerAction(player, PlayerAction.PREPARE_SHIFT)
 
 
 def test_add_player_validation():
@@ -199,7 +199,7 @@ def given_empty_game__when_first_player_is_added__turn_listener_is_notified():
 
     listener.reset_mock()
     game.add_player(player)
-    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.SHIFT_ACTION)
+    listener.assert_called_once_with(game=game, next_player_action=PlayerAction(player, PlayerAction.SHIFT_ACTION))
 
 
 def test_register_turn_listener__when_current_player_is_deleted__listener_is_notified():
@@ -208,7 +208,7 @@ def test_register_turn_listener__when_current_player_is_deleted__listener_is_not
 
     listener.reset_mock()
     game.remove_player(players[0].identifier)
-    listener.assert_called_once_with(game=game, player=players[1], next_action=PlayerAction.SHIFT_ACTION)
+    listener.assert_called_once_with(game=game, next_player_action=PlayerAction(players[1], PlayerAction.SHIFT_ACTION))
 
 
 def test_register_turn_listener__when_first_player_is_added__listener_is_notified():
@@ -218,7 +218,7 @@ def test_register_turn_listener__when_first_player_is_added__listener_is_notifie
 
     listener.reset_mock()
     game.add_player(player)
-    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.SHIFT_ACTION)
+    listener.assert_called_once_with(game=game, next_player_action=PlayerAction(player, PlayerAction.SHIFT_ACTION))
 
 
 def test_register_turn_listener__when_player_shifts__listener_is_notified():
@@ -227,7 +227,7 @@ def test_register_turn_listener__when_player_shifts__listener_is_notified():
 
     listener.reset_mock()
     game.shift(0, BoardLocation(0, 1), 0)
-    listener.assert_called_once_with(game=game, player=player, next_action=PlayerAction.MOVE_ACTION)
+    listener.assert_called_once_with(game=game, next_player_action=PlayerAction(player, PlayerAction.MOVE_ACTION))
 
 
 def test_register_turn_listener__when_player_moves__listener_is_notified():
@@ -237,4 +237,4 @@ def test_register_turn_listener__when_player_moves__listener_is_notified():
 
     listener.reset_mock()
     game.move(0, BoardLocation(0, 0))
-    listener.assert_called_once_with(game=game, player=players[1], next_action=PlayerAction.SHIFT_ACTION)
+    listener.assert_called_once_with(game=game, next_player_action=PlayerAction(players[1], PlayerAction.SHIFT_ACTION))

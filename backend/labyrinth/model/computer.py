@@ -81,11 +81,13 @@ class ComputerPlayer(Player, Thread):
         self._shift_url = shift_url
         self._move_url = move_url
         self._url_supplier = url_supplier
+        self._prepare_delay = timedelta(seconds=0)
         self._set_urls()
 
     def register_in_turns(self, turns: Turns):
         """ Registers itself in a Turns manager.
         Overwrites superclass method. """
+        self._prepare_delay = turns.prepare_delay
         turns.add_player(self, turn_callback=self.notify_turn_change)
 
     def set_game(self, game):
@@ -95,13 +97,13 @@ class ComputerPlayer(Player, Thread):
         self._set_urls()
 
     def notify_turn_change(self, action):
-        if action is PlayerAction.SHIFT_ACTION:
+        if action is PlayerAction.PREPARE_SHIFT:
             self.start()
 
     def run(self):
         compute_method = self._library_binding_factory(self._board, self._piece, self._game)
         compute_method.start()
-        time.sleep(self.COMPUTATION_TIMEOUT.total_seconds())
+        time.sleep(max(self.COMPUTATION_TIMEOUT, self._prepare_delay).total_seconds())
         compute_method.abort_search()
         time.sleep(self.WAIT_FOR_RESULT.total_seconds())
         shift_action = compute_method.shift_action
@@ -111,7 +113,7 @@ class ComputerPlayer(Player, Thread):
             shift_action, move_action = self.random_actions()
 
         self._post_shift(*shift_action)
-        time.sleep(self.MOVE_ACTION_IDLE_TIME.total_seconds())
+        time.sleep(max(self.MOVE_ACTION_IDLE_TIME, self._prepare_delay).total_seconds())
         self._post_move(move_action)
 
     @property

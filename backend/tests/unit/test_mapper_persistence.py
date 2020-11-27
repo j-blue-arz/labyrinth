@@ -107,7 +107,7 @@ def test_mapping_turns():
         game.turns.perform_action(game.turns.next_player_action().player, game.turns.next_player_action().action)
         created_game.turns.perform_action(created_game.turns.next_player_action().player,
                                           created_game.turns.next_player_action().action)
-        assert game.turns.next_player_action().action == PlayerAction.PREPARE
+        assert game.turns.next_player_action().is_prepare()
         time.sleep(DELAY.total_seconds() + 0.1)
 
 
