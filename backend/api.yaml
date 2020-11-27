@@ -195,7 +195,9 @@ components:
                         action:
                             type: "string"
                             enum:
+                                - "PREPARE_SHIFT"
                                 - "SHIFT"
+                                - "PREPARE_MOVE"
                                 - "MOVE"
                         playerId:
                             type: "integer"
