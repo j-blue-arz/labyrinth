@@ -4,19 +4,22 @@ import PlayerManager from "@/model/playerManager.js";
 import { setInterval, clearInterval } from "timers";
 import Player from "@/model/player";
 import WasmPlayer from "@/model/wasmPlayer";
+import CountdownTimer from "@/model/countdown";
 
 const POLL_INTERVAL_MS = 850;
+const TURN_SECONDS = 30;
 
 export default class Controller {
     constructor(useStorage) {
         this._game = new Game();
-        this._timer = 0;
+        this._polling_timer = 0;
         this._api = new GameApi(location.protocol + "//" + location.host);
         this._playerManager = new PlayerManager(useStorage);
         this._computationMethods = [];
+        this._turnCountdown = new CountdownTimer(TURN_SECONDS);
 
         this.handleError = this.handleError.bind(this);
-        this.startPolling = this.startPolling.bind(this);
+        this._startPolling = this._startPolling.bind(this);
     }
 
     initialize() {
@@ -30,7 +33,7 @@ export default class Controller {
                     if (!this._playerManager.hasAnyPlayer()) {
                         this.enterGame();
                     } else {
-                        this.startPolling();
+                        this._startPolling();
                     }
                 })
                 .catch(this.handleError);
@@ -68,22 +71,22 @@ export default class Controller {
 
     performShift(shiftAction) {
         this._game.leftoverMazeCard.rotation = shiftAction.leftoverRotation;
-        this.stopPolling();
+        this._stopPolling();
         this._api
             .doShift(shiftAction.playerId, shiftAction.location, shiftAction.leftoverRotation)
             .then(() => this._game.shift(shiftAction.location))
             .catch(this.handleError)
-            .then(this.startPolling);
+            .then(this._startPolling);
     }
 
     performMove(moveAction) {
         // already validated, so we can alter the game state directly
         this._game.move(moveAction.playerId, moveAction.targetLocation);
-        this.stopPolling();
+        this._stopPolling();
         this._api
             .doMove(moveAction.playerId, moveAction.targetLocation)
             .catch(this.handleError)
-            .then(this.startPolling);
+            .then(this._startPolling);
     }
 
     handleError(error) {
@@ -94,12 +97,12 @@ export default class Controller {
                     this._playerManager.removeWasmPlayer();
                     this._playerManager.removeUserPlayer();
                     this._game.reset();
-                    this.stopPolling();
+                    this._stopPolling();
                 } else {
                     console.error("Response error", error.response.data);
                 }
             } else if (error.request) {
-                this.stopPolling();
+                this._stopPolling();
                 console.error("Request error", error.request);
             } else {
                 console.error("Error", error.message);
@@ -107,19 +110,19 @@ export default class Controller {
         }
     }
 
-    stopPolling() {
-        if (this._timer !== 0) {
-            clearInterval(this._timer);
-            this._timer = 0;
+    _stopPolling() {
+        if (this._polling_timer !== 0) {
+            clearInterval(this._polling_timer);
+            this._polling_timer = 0;
             this._api.cancelAllFetches();
         }
     }
 
-    startPolling() {
-        this.stopPolling();
-        if (this._timer === 0) {
+    _startPolling() {
+        this._stopPolling();
+        if (this._polling_timer === 0) {
             this.fetchApiState();
-            this._timer = setInterval(() => this.fetchApiState(), POLL_INTERVAL_MS);
+            this._polling_timer = setInterval(() => this.fetchApiState(), POLL_INTERVAL_MS);
         }
     }
 
@@ -151,7 +154,7 @@ export default class Controller {
 
     enterGame() {
         if (this._playerManager.canUserEnterGame()) {
-            this.stopPolling();
+            this._stopPolling();
             this._api
                 .doAddPlayer()
                 .then(apiResponse => {
@@ -161,7 +164,7 @@ export default class Controller {
                     this._playerManager.addUserPlayer(userPlayer.id);
                 })
                 .catch(this.handleError)
-                .then(this.startPolling);
+                .then(this._startPolling);
         }
     }
 
@@ -171,14 +174,14 @@ export default class Controller {
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
-                .then(this.startPolling);
+                .then(this._startPolling);
             this._playerManager.removeUserPlayer();
         }
     }
 
     addWasmPlayer() {
         if (this._playerManager.canAddWasmPlayer()) {
-            this.stopPolling();
+            this._stopPolling();
             this._api
                 .doAddPlayer()
                 .then(apiResponse => {
@@ -193,7 +196,7 @@ export default class Controller {
                     this._playerManager.addWasmPlayer(wasmPlayer.id);
                 })
                 .catch(this.handleError)
-                .then(this.startPolling);
+                .then(this._startPolling);
         }
     }
 
@@ -203,7 +206,7 @@ export default class Controller {
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
-                .then(this.startPolling);
+                .then(this._startPolling);
             this._playerManager.removeWasmPlayer();
         }
     }
@@ -213,7 +216,7 @@ export default class Controller {
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
-                .then(this.startPolling);
+                .then(this._startPolling);
             this._playerManager.removePlayer(playerId);
         }
     }
@@ -222,21 +225,21 @@ export default class Controller {
         this._api
             .doAddComputerPlayer(computeMethod)
             .catch(this.handleError)
-            .then(this.startPolling);
+            .then(this._startPolling);
     }
 
     removeComputer(playerId) {
         this._api
             .removePlayer(playerId)
             .catch(this.handleError)
-            .then(this.startPolling);
+            .then(this._startPolling);
     }
 
     restartWithSize(size) {
         this._api
             .changeGame(size)
             .catch(this.handleError)
-            .then(this.startPolling);
+            .then(this._startPolling);
     }
 
     beforeDestroy() {
@@ -244,7 +247,7 @@ export default class Controller {
         for (let playerId of playerIds) {
             this._api.removePlayer(playerId);
         }
-        clearInterval(this._timer);
+        clearInterval(this._polling_timer);
     }
 
     getGame() {
@@ -266,5 +269,9 @@ export default class Controller {
                 this._computationMethods = methodsResult.data;
             })
             .catch(this.handleError);
+    }
+
+    get turnCountdown() {
+        return this._turnCountdown;
     }
 }

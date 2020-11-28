@@ -16,19 +16,17 @@ export default {
     },
     data() {
         return {
-            visible: false,
-            remainingSeconds: 0,
-            maxTurnSeconds: 30
+            visible: false
         };
     },
     watch: {
-        userTurn: function(newValue) {
+        userTurn: function(newValue, oldValue) {
             if (newValue !== "NONE") {
+                this.countdown.restartCountdown();
                 this.visible = true;
-                this.restartTimer();
             } else {
                 this.visible = false;
-                this.stopTimer();
+                this.countdown.stopCountdown();
             }
         },
         gameSize: function() {
@@ -37,7 +35,7 @@ export default {
             // but the user turn does not change
             if (this.userTurn !== "NONE") {
                 this.visible = true;
-                this.restartTimer();
+                this.countdown.restartCountdown();
             }
         },
         objectiveId: function() {
@@ -47,7 +45,12 @@ export default {
             // This heuristic might fail!
             if (this.userTurn !== "NONE") {
                 this.visible = true;
-                this.restartTimer();
+                this.countdown.restartCountdown();
+            }
+        },
+        remainingSeconds: function(newValue) {
+            if (newValue <= 0 && (this.userTurn === "MOVE" || this.userTurn === "SHIFT")) {
+                this.removeCurrentPlayer();
             }
         }
     },
@@ -66,29 +69,17 @@ export default {
         },
         objectiveId: function() {
             return this.controller.getGame().objectiveId;
+        },
+        countdown: function() {
+            return this.controller.turnCountdown;
+        },
+        remainingSeconds: function() {
+            return this.countdown.remaining;
         }
     },
     methods: {
         formatTime: function(seconds) {
             return ("0" + seconds).slice(-2);
-        },
-        restartTimer: function() {
-            this.stopTimer();
-            this.remainingSeconds = this.maxTurnSeconds;
-            this.timer = setInterval(() => this.countDown(), 1000);
-        },
-        countDown: function() {
-            this.remainingSeconds--;
-            if (this.remainingSeconds <= 0) {
-                this.removeCurrentPlayer();
-                this.stopTimer();
-            }
-        },
-        stopTimer: function() {
-            if (this.timer !== 0) {
-                clearInterval(this.timer);
-                this.timer = 0;
-            }
         },
         removeCurrentPlayer: function() {
             let currentPlayerId = this.controller.getGame().nextAction.playerId;
