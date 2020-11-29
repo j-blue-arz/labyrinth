@@ -9,7 +9,7 @@ import flushPromises from "flush-promises";
 
 beforeEach(() => {
     const playerManager = new PlayerManager(false);
-    playerManager.addUserPlayer(1);
+    playerManager.addUserPlayerId(1);
     mockGetPlayerManager.mockReturnValue(playerManager);
     mockGetComputationMethods.mockReturnValue([]);
     mockGetComputerPlayers.mockReturnValue([]);
@@ -302,7 +302,7 @@ const givenUserIsNotParticipating = function() {
 
 const givenWasmIsParticipating = function(wasmPlayer) {
     let playerManager = mockGetPlayerManager();
-    playerManager.addWasmPlayer(wasmPlayer.id);
+    playerManager.addWasmPlayerId(wasmPlayer.id);
     mockGetPlayer.mockImplementation(playerId => {
         if (playerId === wasmPlayer.id) {
             return wasmPlayer;

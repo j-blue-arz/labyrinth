@@ -2,95 +2,95 @@ const NOT_PARTICIPATING = -1;
 
 export default class PlayerManager {
     constructor(useStorage) {
-        this.userPlayer = NOT_PARTICIPATING;
-        this.wasmPlayer = NOT_PARTICIPATING;
+        this._userPlayer = NOT_PARTICIPATING;
+        this._wasmPlayer = NOT_PARTICIPATING;
         this._useStorage = useStorage;
         if (useStorage) {
             if (sessionStorage.userPlayerId) {
-                this.userPlayer = parseInt(sessionStorage.userPlayerId);
+                this._userPlayer = parseInt(sessionStorage.userPlayerId);
             }
             if (sessionStorage.wasmPlayerId) {
-                this.wasmPlayer = parseInt(sessionStorage.wasmPlayerId);
+                this._wasmPlayer = parseInt(sessionStorage.wasmPlayerId);
             }
         }
     }
 
-    addUserPlayer(playerId) {
-        this.userPlayer = playerId;
+    addUserPlayerId(playerId) {
+        this._userPlayer = playerId;
         if (this._useStorage) {
             sessionStorage.userPlayerId = playerId;
         }
     }
 
     removeUserPlayer() {
-        this.userPlayer = NOT_PARTICIPATING;
+        this._userPlayer = NOT_PARTICIPATING;
         if (this._useStorage) {
             sessionStorage.userPlayerId = NOT_PARTICIPATING;
         }
     }
 
-    getUserPlayer() {
-        return this.userPlayer;
+    getUserPlayerId() {
+        return this._userPlayer;
     }
 
     hasUserPlayer() {
-        return this.userPlayer !== NOT_PARTICIPATING;
+        return this._userPlayer !== NOT_PARTICIPATING;
     }
 
     canUserEnterGame() {
-        return this.userPlayer === NOT_PARTICIPATING;
+        return this._userPlayer === NOT_PARTICIPATING;
     }
 
-    canAddWasmPlayer() {
-        return this.wasmPlayer === NOT_PARTICIPATING;
+    canAddWasmPlayerId() {
+        return this._wasmPlayer === NOT_PARTICIPATING;
     }
 
     hasWasmPlayer() {
-        return this.wasmPlayer !== NOT_PARTICIPATING;
+        return this._wasmPlayer !== NOT_PARTICIPATING;
     }
 
     removeWasmPlayer() {
-        this.wasmPlayer = NOT_PARTICIPATING;
+        this._wasmPlayer = NOT_PARTICIPATING;
         if (this._useStorage) {
             sessionStorage.wasmPlayerId = NOT_PARTICIPATING;
         }
     }
 
-    addWasmPlayer(playerId) {
-        this.wasmPlayer = playerId;
+    addWasmPlayerId(playerId) {
+        this._wasmPlayer = playerId;
         if (this._useStorage) {
             sessionStorage.wasmPlayerId = playerId;
         }
     }
 
-    getWasmPlayer() {
-        return this.wasmPlayer;
+    getWasmPlayerId() {
+        return this._wasmPlayer;
     }
 
     hasAnyPlayer() {
         return this.hasWasmPlayer() || this.hasUserPlayer();
     }
 
-    getManagedPlayers() {
+    getManagedPlayerIds() {
         let result = [];
         if (this.hasWasmPlayer()) {
-            result.push(this.getWasmPlayer());
+            result.push(this.getWasmPlayerId());
         }
         if (this.hasUserPlayer()) {
-            result.push(this.getUserPlayer());
+            result.push(this.getUserPlayerId());
         }
         return result;
     }
 
-    hasPlayer(playerId) {
-        return this.getUserPlayer() === playerId || this.getWasmPlayer() === playerId;
+    hasPlayerId(playerId) {
+        return this.getUserPlayerId() === playerId || this.getWasmPlayerId() === playerId;
     }
 
-    removePlayer(playerId) {
-        if (this.getUserPlayer() === playerId) {
+    removePlayerId(playerId) {
+        if (this.getUserPlayerId() === playerId) {
             this.removeUserPlayer();
         }
-        if (this.getWasmPlayer() === playerId) {
+        if (this.getWasmPlayerId() === playerId) {
             this.removeWasmPlayer();
         }
     }

@@ -44,16 +44,16 @@ export default class Controller {
     }
 
     _updateUserPlayer() {
-        if (!this._game.hasPlayer(this._playerManager.getUserPlayer())) {
+        if (!this._game.hasPlayer(this._playerManager.getUserPlayerId())) {
             this._playerManager.removeUserPlayer();
         } else {
-            let userPlayerId = this._playerManager.getUserPlayer();
+            let userPlayerId = this._playerManager.getUserPlayerId();
             this._game.getPlayer(userPlayerId).isUser = true;
         }
     }
 
     _updateWasmPlayer() {
-        let wasmPlayerId = this._playerManager.getWasmPlayer();
+        let wasmPlayerId = this._playerManager.getWasmPlayerId();
         if (!this._game.hasPlayer(wasmPlayerId)) {
             this._playerManager.removeWasmPlayer();
         } else {
@@ -136,7 +136,7 @@ export default class Controller {
     createGameFromApi(apiResponse) {
         this._game.createFromApi(apiResponse.data);
         if (this._playerManager.hasUserPlayer()) {
-            let userPlayerId = this._playerManager.getUserPlayer();
+            let userPlayerId = this._playerManager.getUserPlayerId();
             let userPlayer = this._game.getPlayer(userPlayerId);
             if (userPlayer) {
                 userPlayer.isUser = true;
@@ -145,7 +145,7 @@ export default class Controller {
             }
         }
         if (this._playerManager.hasWasmPlayer()) {
-            let wasmPlayer = this._game.getPlayer(this._playerManager.getWasmPlayer());
+            let wasmPlayer = this._game.getPlayer(this._playerManager.getWasmPlayerId());
             if (!wasmPlayer) {
                 this._playerManager.removeWasmPlayer();
             }
@@ -161,7 +161,7 @@ export default class Controller {
                     let userPlayer = new Player(apiResponse.data.id);
                     userPlayer.isUser = true;
                     this._game.addPlayerFromApi(apiResponse.data, userPlayer);
-                    this._playerManager.addUserPlayer(userPlayer.id);
+                    this._playerManager.addUserPlayerId(userPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this._startPolling);
@@ -170,7 +170,7 @@ export default class Controller {
 
     leaveGame() {
         if (this._playerManager.hasUserPlayer()) {
-            let playerId = this._playerManager.getUserPlayer();
+            let playerId = this._playerManager.getUserPlayerId();
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
@@ -180,7 +180,7 @@ export default class Controller {
     }
 
     addWasmPlayer() {
-        if (this._playerManager.canAddWasmPlayer()) {
+        if (this._playerManager.canAddWasmPlayerId()) {
             this._stopPolling();
             this._api
                 .doAddPlayer()
@@ -193,7 +193,7 @@ export default class Controller {
                         moveAction => this.performMove(moveAction)
                     );
                     this._game.addPlayerFromApi(apiResponse.data, wasmPlayer);
-                    this._playerManager.addWasmPlayer(wasmPlayer.id);
+                    this._playerManager.addWasmPlayerId(wasmPlayer.id);
                 })
                 .catch(this.handleError)
                 .then(this._startPolling);
@@ -202,7 +202,7 @@ export default class Controller {
 
     removeWasmPlayer() {
         if (this._playerManager.hasWasmPlayer()) {
-            let playerId = this._playerManager.getWasmPlayer();
+            let playerId = this._playerManager.getWasmPlayerId();
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
@@ -212,12 +212,12 @@ export default class Controller {
     }
 
     removeManagedPlayer(playerId) {
-        if (this._playerManager.hasPlayer(playerId)) {
+        if (this._playerManager.hasPlayerId(playerId)) {
             this._api
                 .removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this._startPolling);
-            this._playerManager.removePlayer(playerId);
+            this._playerManager.removePlayerId(playerId);
         }
     }
 
@@ -243,7 +243,7 @@ export default class Controller {
     }
 
     beforeDestroy() {
-        let playerIds = this._playerManager.getManagedPlayers();
+        let playerIds = this._playerManager.getManagedPlayerIds();
         for (let playerId of playerIds) {
             this._api.removePlayer(playerId);
         }

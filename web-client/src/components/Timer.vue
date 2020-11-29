@@ -56,7 +56,7 @@ export default {
     },
     computed: {
         userTurn: function() {
-            let userPlayerId = this.controller.getPlayerManager().getUserPlayer();
+            let userPlayerId = this.controller.getPlayerManager().getUserPlayerId();
             let player = this.controller.game.getPlayer(userPlayerId);
             if (player) {
                 return player.getTurnAction();

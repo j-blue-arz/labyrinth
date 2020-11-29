@@ -80,7 +80,7 @@ export default {
             return this.game.n;
         },
         userPlayerId: function() {
-            return this.controller.getPlayerManager().getUserPlayer();
+            return this.controller.getPlayerManager().getUserPlayerId();
         },
         reachableMazeCards: function() {
             let player = this.game.getPlayer(this.game.nextAction.playerId);

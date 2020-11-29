@@ -55,7 +55,7 @@ export default {
                         submenu.push(new MenuItem(key, text));
                     });
                 }
-                if (this.playerManager.canAddWasmPlayer()) {
+                if (this.playerManager.canAddWasmPlayerId()) {
                     submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search (1P)"));
                 }
                 menu.push(new MenuItem("add", "Add computer..", submenu));
@@ -69,7 +69,7 @@ export default {
                     submenu.push(new MenuItem(key, text));
                 }
                 if (this.playerManager.hasWasmPlayer()) {
-                    let playerId = this.playerManager.getWasmPlayer();
+                    let playerId = this.playerManager.getWasmPlayerId();
                     let player = this.controller.game.getPlayer(playerId);
                     if (player) {
                         let label = player.getLabel();

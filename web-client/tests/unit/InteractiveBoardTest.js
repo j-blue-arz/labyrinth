@@ -27,7 +27,7 @@ const createMockController = function(game) {
     let controller = new Controller(false);
     controller.game = game;
     let playerManager = new PlayerManager();
-    playerManager.addUserPlayer(5);
+    playerManager.addUserPlayerId(5);
     mockGetPlayerManager.mockReturnValue(playerManager);
     return controller;
 };
