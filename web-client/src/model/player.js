@@ -1,6 +1,6 @@
 export default class Player {
     constructor(id) {
-        this.id = id;
+        this._id = id;
         this.mazeCard = null;
         this.colorIndex = 0;
         this.isComputer = false;
@@ -8,6 +8,10 @@ export default class Player {
         this.isUser = false;
         this._turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
         this.score = 0;
+    }
+
+    get id() {
+        return this._id;
     }
 
     hasToMove() {

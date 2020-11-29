@@ -250,7 +250,7 @@ export default class Controller {
         clearInterval(this._polling_timer);
     }
 
-    getGame() {
+    get game() {
         return this._game;
     }
 

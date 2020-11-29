@@ -57,7 +57,7 @@ export default {
     computed: {
         userTurn: function() {
             let userPlayerId = this.controller.getPlayerManager().getUserPlayer();
-            let player = this.controller.getGame().getPlayer(userPlayerId);
+            let player = this.controller.game.getPlayer(userPlayerId);
             if (player) {
                 return player.getTurnAction();
             } else {
@@ -65,10 +65,10 @@ export default {
             }
         },
         gameSize: function() {
-            return this.controller.getGame().n;
+            return this.controller.game.n;
         },
         objectiveId: function() {
-            return this.controller.getGame().objectiveId;
+            return this.controller.game.objectiveId;
         },
         countdown: function() {
             return this.controller.turnCountdown;
@@ -82,7 +82,7 @@ export default {
             return ("0" + seconds).slice(-2);
         },
         removeCurrentPlayer: function() {
-            let currentPlayerId = this.controller.getGame().nextAction.playerId;
+            let currentPlayerId = this.controller.game.nextAction.playerId;
             this.controller.removeManagedPlayer(currentPlayerId);
         }
     }

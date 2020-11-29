@@ -10,14 +10,12 @@ import Game, { loc } from "@/model/game.js";
 import Controller from "@/controllers/controller.js";
 import PlayerManager from "../../src/model/playerManager.js";
 
-let mockGetGame = jest.fn();
 let mockGetPlayerManager = jest.fn();
 let mockPerformShift = jest.fn();
 let mockPerformMove = jest.fn();
 jest.mock("@/controllers/controller.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
-            getGame: mockGetGame,
             getPlayerManager: mockGetPlayerManager,
             performShift: mockPerformShift,
             performMove: mockPerformMove
@@ -27,7 +25,7 @@ jest.mock("@/controllers/controller.js", () => {
 
 const createMockController = function(game) {
     let controller = new Controller(false);
-    mockGetGame.mockReturnValue(game);
+    controller.game = game;
     let playerManager = new PlayerManager();
     playerManager.addUserPlayer(5);
     mockGetPlayerManager.mockReturnValue(playerManager);
@@ -75,7 +73,6 @@ function findLeftover(board) {
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
     Controller.mockClear();
-    mockGetGame.mockClear();
     mockGetPlayerManager.mockClear();
     mockPerformShift.mockClear();
     mockPerformMove.mockClear();

@@ -6,10 +6,10 @@ jest.mock("@/controllers/controller.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
             initialize: mockInitialize,
-            getGame: jest.fn().mockReturnValue({
+            game: {
                 getPlayers: jest.fn().mockReturnValue([]),
                 hasStarted: jest.fn().mockReturnValue(true)
-            })
+            }
         };
     });
 });

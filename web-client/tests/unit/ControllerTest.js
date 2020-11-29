@@ -63,7 +63,7 @@ describe("Controller", () => {
         let controller = factory();
         await flushPromises();
         expect(mockFetchState).toHaveBeenCalled();
-        var leftOverRotation = controller.getGame().leftoverMazeCard.rotation;
+        var leftOverRotation = controller.game.leftoverMazeCard.rotation;
         expect(leftOverRotation).toBe(270);
     });
 
@@ -130,7 +130,7 @@ describe("Controller", () => {
             await flushPromises();
             // player is on (0, 3)
             controller.performMove(moveEvent(3, 3));
-            let playerLocation = controller.getGame().getPlayer(5).mazeCard.location;
+            let playerLocation = controller.game.getPlayer(5).mazeCard.location;
             expect(playerLocation.row).toEqual(3);
             expect(playerLocation.column).toEqual(3);
         });

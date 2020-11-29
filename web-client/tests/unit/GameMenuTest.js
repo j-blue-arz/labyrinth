@@ -11,7 +11,6 @@ beforeEach(() => {
     const playerManager = new PlayerManager(false);
     playerManager.addUserPlayer(1);
     mockGetPlayerManager.mockReturnValue(playerManager);
-    mockGetGame.mockReturnValue(mockGame);
     mockGetComputationMethods.mockReturnValue([]);
     mockGetComputerPlayers.mockReturnValue([]);
     mockGetPlayer.mockReturnValue(null);
@@ -23,7 +22,6 @@ beforeEach(() => {
     mockEnterGame.mockClear();
     mockLeaveGame.mockClear();
     mockAddComputer.mockClear();
-    mockGetGame.mockClear();
     mockRemoveComputer.mockClear();
     mockRemoveWasmPlayer.mockClear();
     mockRestartWithSize.mockClear();
@@ -253,7 +251,6 @@ let mockGetPlayerManager = jest.fn();
 let mockEnterGame = jest.fn();
 let mockLeaveGame = jest.fn();
 let mockAddComputer = jest.fn();
-let mockGetGame = jest.fn();
 let mockRemoveComputer = jest.fn();
 let mockRemoveWasmPlayer = jest.fn();
 let mockRestartWithSize = jest.fn();
@@ -267,7 +264,7 @@ jest.mock("@/controllers/controller.js", () => {
             enterGame: mockEnterGame,
             leaveGame: mockLeaveGame,
             addComputer: mockAddComputer,
-            getGame: mockGetGame,
+            game: mockGame,
             removeComputer: mockRemoveComputer,
             removeWasmPlayer: mockRemoveWasmPlayer,
             restartWithSize: mockRestartWithSize,

@@ -42,17 +42,13 @@ export default {
     },
     computed: {
         players: function() {
-            return this.controller.getGame().getPlayers();
+            return this.controller.game.getPlayers();
         },
         hasStarted: function() {
-            return (
-                this.controller &&
-                this.controller.getGame() &&
-                this.controller.getGame().hasStarted()
-            );
+            return this.controller && this.controller.game && this.controller.game.hasStarted();
         },
         game: function() {
-            return this.controller.getGame();
+            return this.controller.game;
         }
     },
     created: function() {

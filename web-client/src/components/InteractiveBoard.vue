@@ -74,7 +74,7 @@ export default {
     },
     computed: {
         game: function() {
-            return this.controller.getGame();
+            return this.controller.game;
         },
         mazeSize: function() {
             return this.game.n;

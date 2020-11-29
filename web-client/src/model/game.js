@@ -151,10 +151,10 @@ export default class Game {
     }
 
     addPlayerFromApi(apiPlayer, player = null) {
+        console.assert(player === null || player.id === apiPlayer.id);
         if (!player) {
             player = new Player(apiPlayer.id);
         }
-        player.id = apiPlayer.id;
         player.fillFromApi(apiPlayer);
         let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
         if (playerCard) {

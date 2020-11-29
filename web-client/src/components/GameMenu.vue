@@ -70,7 +70,7 @@ export default {
                 }
                 if (this.playerManager.hasWasmPlayer()) {
                     let playerId = this.playerManager.getWasmPlayer();
-                    let player = this.controller.getGame().getPlayer(playerId);
+                    let player = this.controller.game.getPlayer(playerId);
                     if (player) {
                         let label = player.getLabel();
                         let text = "" + player.colorIndex + " - " + label;
@@ -89,10 +89,10 @@ export default {
             return menu;
         },
         computerPlayers: function() {
-            return this.controller.getGame().getComputerPlayers();
+            return this.controller.game.getComputerPlayers();
         },
         players: function() {
-            return this.controller.getGame().getPlayers();
+            return this.controller.game.getPlayers();
         },
         playerManager: function() {
             return this.controller.getPlayerManager();
