@@ -260,7 +260,7 @@ jest.mock("@/controllers/controller.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
             getComputationMethods: mockGetComputationMethods,
-            getPlayerManager: mockGetPlayerManager,
+            playerManager: mockGetPlayerManager(),
             enterGame: mockEnterGame,
             leaveGame: mockLeaveGame,
             addComputer: mockAddComputer,

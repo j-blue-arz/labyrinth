@@ -1,3 +1,7 @@
+export const MOVE_ACTION = "MOVE";
+export const SHIFT_ACTION = "SHIFT";
+export const NO_ACTION = "NONE";
+
 export default class Player {
     constructor(id) {
         this._id = id;
@@ -6,7 +10,7 @@ export default class Player {
         this.isComputer = false;
         this.computationMethod = "";
         this.isUser = false;
-        this._turnAction = "NONE"; // one of NONE, MOVE, or SHIFT
+        this._turnAction = NO_ACTION; // one of NONE, MOVE, or SHIFT
         this.score = 0;
     }
 
@@ -15,11 +19,15 @@ export default class Player {
     }
 
     hasToMove() {
-        return this._turnAction == "MOVE";
+        return this._turnAction === MOVE_ACTION;
     }
 
     hasToShift() {
-        return this._turnAction == "SHIFT";
+        return this._turnAction === SHIFT_ACTION;
+    }
+
+    isHisTurn() {
+        return this._turnAction !== NO_ACTION;
     }
 
     getTurnAction() {
@@ -30,9 +38,9 @@ export default class Player {
         let previousTurnAction = this._turnAction;
         this._turnAction = newTurnAction;
         if (previousTurnAction !== newTurnAction) {
-            if (newTurnAction === "SHIFT") {
+            if (newTurnAction === SHIFT_ACTION) {
                 this.onHasToShift();
-            } else if (newTurnAction === "MOVE") {
+            } else if (newTurnAction === MOVE_ACTION) {
                 this.onHasToMove();
             }
         }

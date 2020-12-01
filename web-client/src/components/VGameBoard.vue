@@ -31,7 +31,7 @@
 
 <script>
 import VMazeCard from "@/components/VMazeCard.vue";
-import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
+import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 
 export default {
     name: "v-game-board",

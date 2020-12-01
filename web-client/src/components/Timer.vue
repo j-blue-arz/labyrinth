@@ -6,11 +6,20 @@
 
 <script>
 import { setInterval, clearInterval } from "timers";
+import * as action from "@/model/player.js";
+
 export default {
     name: "timer",
     props: {
         controller: {
             type: Object,
+            required: true
+        },
+        countdown: {
+            type: Object,
+            required: true
+        },
+        userPlayer: {
             required: true
         }
     },
@@ -21,7 +30,7 @@ export default {
     },
     watch: {
         userTurn: function(newValue, oldValue) {
-            if (newValue !== "NONE") {
+            if (newValue !== action.NO_ACTION) {
                 this.countdown.restartCountdown();
                 this.visible = true;
             } else {
@@ -33,7 +42,7 @@ export default {
             // this is a heuristic to detect a game restart
             // For the case where a game is restarted with a different size,
             // but the user turn does not change
-            if (this.userTurn !== "NONE") {
+            if (this.userPlayer.isHisTurn()) {
                 this.visible = true;
                 this.countdown.restartCountdown();
             }
@@ -43,38 +52,33 @@ export default {
             // For the case where a game is restarted with the same size,
             // but the user turn does not change
             // This heuristic might fail!
-            if (this.userTurn !== "NONE") {
+            if (this.userPlayer.isHisTurn()) {
                 this.visible = true;
                 this.countdown.restartCountdown();
             }
         },
         remainingSeconds: function(newValue) {
-            if (newValue <= 0 && (this.userTurn === "MOVE" || this.userTurn === "SHIFT")) {
+            if (newValue <= 0 && this.userPlayer.isHisTurn()) {
                 this.removeCurrentPlayer();
             }
         }
     },
     computed: {
-        userTurn: function() {
-            let userPlayerId = this.controller.getPlayerManager().getUserPlayerId();
-            let player = this.controller.game.getPlayer(userPlayerId);
-            if (player) {
-                return player.getTurnAction();
-            } else {
-                return "NONE";
-            }
-        },
         gameSize: function() {
             return this.controller.game.n;
         },
         objectiveId: function() {
             return this.controller.game.objectiveId;
         },
-        countdown: function() {
-            return this.controller.turnCountdown;
-        },
         remainingSeconds: function() {
             return this.countdown.remaining;
+        },
+        userTurn: function() {
+            if (this.userPlayer) {
+                return this.userPlayer.getTurnAction();
+            } else {
+                return action.NO_ACTION;
+            }
         }
     },
     methods: {

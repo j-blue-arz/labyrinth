@@ -1,12 +1,8 @@
 import Vue from "vue";
 import MazeCard from "@/model/mazeCard.js";
-import Player from "@/model/player.js";
+import Player, * as action from "@/model/player.js";
 import Graph from "@/model/mazeAlgorithm.js";
 import ValueError from "@/util/exceptions";
-
-export const MOVE_ACTION = "MOVE";
-export const SHIFT_ACTION = "SHIFT";
-export const NO_ACTION = "NONE";
 
 export function loc(row, column) {
     return { row: row, column: column };
@@ -22,7 +18,7 @@ export default class Game {
         this.mazeCards = [];
         this.leftoverMazeCard = {};
         this._players = [];
-        this.nextAction = { playerId: 0, action: NO_ACTION };
+        this.nextAction = { playerId: 0, action: action.NO_ACTION };
         this._hasStarted = false;
         this.isShifting = false;
         this.disabledShiftLocation = null;
@@ -32,7 +28,7 @@ export default class Game {
     reset() {
         this._hasStarted = false;
         this._players = [];
-        this.nextAction = { playerId: 0, action: NO_ACTION };
+        this.nextAction = { playerId: 0, action: action.NO_ACTION };
     }
 
     hasStarted() {
@@ -213,7 +209,7 @@ export default class Game {
         if (this.nextAction.playerId !== playerId) {
             return false;
         }
-        if (this.nextAction.action !== MOVE_ACTION) {
+        if (this.nextAction.action !== action.MOVE_ACTION) {
             return false;
         }
         let player = this.getPlayer(playerId);
@@ -333,14 +329,14 @@ export default class Game {
             if (nextAction && player.id === nextAction.playerId) {
                 player.setTurnAction(nextAction.action);
             } else {
-                player.setTurnAction(NO_ACTION);
+                player.setTurnAction(action.NO_ACTION);
             }
         }
 
         if (nextAction !== null) {
             this.nextAction = nextAction;
         } else {
-            this.nextAction = { playerId: 0, action: NO_ACTION };
+            this.nextAction = { playerId: 0, action: action.NO_ACTION };
         }
     }
 

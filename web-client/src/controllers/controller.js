@@ -254,7 +254,7 @@ export default class Controller {
         return this._game;
     }
 
-    getPlayerManager() {
+    get playerManager() {
         return this._playerManager;
     }
 

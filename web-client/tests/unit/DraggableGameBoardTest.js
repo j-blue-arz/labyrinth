@@ -1,6 +1,7 @@
 import { mount } from "@vue/test-utils";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import Game, { loc, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
+import Game, { loc } from "@/model/game.js";
+import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import { buildRandomMaze } from "./testutils.js";
 

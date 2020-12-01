@@ -28,6 +28,7 @@ describe("VGameBoard", () => {
     it("renders all VMazeCard components", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
+                mazeSize: 5,
                 boardSize: 500,
                 mazeCards: mazeCardListFactory(5),
                 borderWidth: 100

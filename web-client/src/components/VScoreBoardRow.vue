@@ -92,7 +92,7 @@ export default {
     }
 
     &__score-data {
-        border-left: 1px solid $color-table-border;
+        border-left: 1px solid $color-ui-border;
         text-align: right;
         padding-right: 8px;
         width: 2rem;

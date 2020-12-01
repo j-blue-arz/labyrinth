@@ -95,7 +95,7 @@ export default {
             return this.controller.game.getPlayers();
         },
         playerManager: function() {
-            return this.controller.getPlayerManager();
+            return this.controller.playerManager;
         },
         computationMethods: function() {
             return this.controller.getComputationMethods();

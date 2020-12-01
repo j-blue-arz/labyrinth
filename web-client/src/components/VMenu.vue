@@ -68,7 +68,6 @@ export default {
         padding: 8px 15px;
         align-items: center;
         border-bottom: 1px solid grey;
-        font-family: sans-serif;
         background: $color-menu-background;
         white-space: nowrap;
 

@@ -18,7 +18,7 @@ export default {
 
 <style lang="scss">
 * {
-    font-family: sans-serif;
+    font-family: Cambria, serif;
 }
 
 body {

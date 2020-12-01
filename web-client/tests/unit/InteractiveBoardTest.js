@@ -1,22 +1,22 @@
 import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
-import VGameBoard from "@/components/VGameBoard.vue";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import { copyObjectStructure } from "./testutils.js";
 import Game, { loc } from "@/model/game.js";
 import Controller from "@/controllers/controller.js";
-import PlayerManager from "../../src/model/playerManager.js";
+import PlayerManager from "@/model/playerManager.js";
 
-let mockGetPlayerManager = jest.fn();
+const mockPlayerManager = new PlayerManager();
+
 let mockPerformShift = jest.fn();
 let mockPerformMove = jest.fn();
 jest.mock("@/controllers/controller.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
-            getPlayerManager: mockGetPlayerManager,
+            playerManager: mockPlayerManager,
             performShift: mockPerformShift,
             performMove: mockPerformMove
         };
@@ -26,9 +26,7 @@ jest.mock("@/controllers/controller.js", () => {
 const createMockController = function(game) {
     let controller = new Controller(false);
     controller.game = game;
-    let playerManager = new PlayerManager();
-    playerManager.addUserPlayerId(5);
-    mockGetPlayerManager.mockReturnValue(playerManager);
+    controller.playerManager.addUserPlayerId(5);
     return controller;
 };
 
@@ -73,7 +71,6 @@ function findLeftover(board) {
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
     Controller.mockClear();
-    mockGetPlayerManager.mockClear();
     mockPerformShift.mockClear();
     mockPerformMove.mockClear();
 });

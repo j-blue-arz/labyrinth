@@ -8,13 +8,16 @@
         />
         <div class="game-container__sidebar">
             <div>
-                <timer :controller="controller" />
+                <timer :controller="controller" :countdown="countdown" :user-player="userPlayer" />
             </div>
             <div>
                 <score-board :players="players" />
             </div>
             <div>
                 <game-menu :controller="controller" />
+            </div>
+            <div>
+                <v-message-area :countdown="countdown" :user-player="userPlayer" />
             </div>
         </div>
     </div>
@@ -25,7 +28,9 @@ import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import GameMenu from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import Timer from "@/components/Timer.vue";
+import VMessageArea from "@/components/VMessageArea.vue";
 import Controller from "@/controllers/controller.js";
+import * as action from "@/model/player.js";
 
 export default {
     name: "game-container",
@@ -33,7 +38,8 @@ export default {
         InteractiveBoard,
         GameMenu,
         ScoreBoard,
-        Timer
+        Timer,
+        VMessageArea
     },
     data() {
         return {
@@ -49,6 +55,14 @@ export default {
         },
         game: function() {
             return this.controller.game;
+        },
+        userPlayer: function() {
+            let userPlayerId = this.controller.playerManager.getUserPlayerId();
+            let player = this.controller.game.getPlayer(userPlayerId);
+            return player;
+        },
+        countdown: function() {
+            return this.controller.turnCountdown;
         }
     },
     created: function() {

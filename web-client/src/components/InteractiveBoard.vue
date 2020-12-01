@@ -38,7 +38,7 @@ import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
-import * as action from "@/model/game.js";
+import * as action from "@/model/player.js";
 import Graph from "@/model/mazeAlgorithm.js";
 
 export default {
@@ -80,7 +80,7 @@ export default {
             return this.game.n;
         },
         userPlayerId: function() {
-            return this.controller.getPlayerManager().getUserPlayerId();
+            return this.controller.playerManager.getUserPlayerId();
         },
         reachableMazeCards: function() {
             let player = this.game.getPlayer(this.game.nextAction.playerId);

@@ -56,7 +56,7 @@ describe("Controller", () => {
         let controller = factory();
         expect(mockAddPlayer).toHaveBeenCalledTimes(1);
         await flushPromises();
-        expect(controller.getPlayerManager().getUserPlayerId()).toBe(5);
+        expect(controller.playerManager.getUserPlayerId()).toBe(5);
     });
 
     it("sets leftover maze card according to fetched state", async () => {

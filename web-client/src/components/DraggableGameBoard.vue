@@ -17,7 +17,8 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
-import { locationsEqual, loc, MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/game.js";
+import { locationsEqual, loc } from "@/model/game.js";
+import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import { Vector, bound } from "@/model/2d.js";
 import { ShiftLocation } from "@/model/shift.js";
 
