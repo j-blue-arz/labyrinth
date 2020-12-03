@@ -145,60 +145,60 @@ def test_player_reaches_objective_increase_score():
     assert game.get_player(player_id).score == old_score + 1
 
 
-def given_game_with_two_players__when_replace__then_players_keep_piece_index():
+def given_game_with_two_players__when_restart__then_players_keep_piece_index():
     game = Game(identifier=0)
     add_players(game, 2)
     old_player_pieces = {player.id: player.piece for player in game.players}
 
-    replace_board(game)
+    restart(game)
 
     for player in game.players:
         expected_piece_index = old_player_pieces[player.id].piece_index
         assert player.piece.piece_index == expected_piece_index
 
 
-def given_game_with_two_players__when_replace__then_score_is_reset():
+def given_game_with_two_players__when_restart__then_score_is_reset():
     game = Game(identifier=0)
     add_players(game, 2)
     game.players[0].score = 11
     game.players[1].score = 22
 
-    replace_board(game)
+    restart(game)
 
     assert game.players[0].score == 0
     assert game.players[1].score == 0
 
 
-def given_running_game__when_replace__then_turns_are_started():
+def given_running_game__when_restart__then_turns_are_started():
     turns = Mock()
     game = Game(identifier=0, turns=turns)
     game.add_player(Player(0))
     turns.reset_mock()
 
-    replace_board(game)
+    restart(game)
 
     turns.start.assert_called_once()
 
 
-def given_game_player_with_piece_index_0_removed__when_replace__then_remaining_player_keeps_piece_index():
+def given_game_player_with_piece_index_0_removed__when_restart__then_remaining_player_keeps_piece_index():
     game = Game(identifier=0)
     add_players(game, 2)
     remove_player_with_piece_index(game, 0)
     remaining_piece = game.players[0].piece
 
-    replace_board(game)
+    restart(game)
 
     assert game.players[0].piece.piece_index == remaining_piece.piece_index
 
 
-def given_game_player_with_piece_index_0_removed__when_replace__then_remaining_player_has_same_start_location():
+def given_game_player_with_piece_index_0_removed__when_restart__then_remaining_player_has_same_start_location():
     game = Game(identifier=0)
     add_players(game, 2)
     remove_player_with_piece_index(game, 0)
     old_player_start_location = get_player_piece_location(game, game.players[0])
     set_player_piece_location(game, game.players[0], BoardLocation(4, 4))
 
-    replace_board(game)
+    restart(game)
 
     assert get_player_piece_location(game, game.players[0]) == old_player_start_location
 
@@ -271,9 +271,9 @@ def add_player(game):
     return player_id
 
 
-def replace_board(game):
+def restart(game):
     board = factory.create_board(maze_size=9)
-    game.replace_board(board)
+    game.restart(board)
 
 
 def remove_player_with_piece_index(game, index):

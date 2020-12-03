@@ -138,7 +138,9 @@ class MazeCard:
 
 class Piece:
     """ Represents a player's piece
-    Each piece has a reference to a MazeCard instance as its position.
+
+    A piece is defined by its piece index (in [0..3]), which defines the starting position.
+    Each piece has a reference to a MazeCard instance as its current board position.
     """
 
     def __init__(self, piece_index, maze_card: MazeCard):
@@ -736,15 +738,15 @@ class Game:
         self.turns.remove_player(player)
         self.players.remove(player)
 
-    def replace_board(self, board):
+    def restart(self, new_board):
         """ Replaces the current board with a new one and resets the game.
         For all players, new pieces are created on the board """
-        board.pieces.clear()
+        new_board.pieces.clear()
         for player in self._players:
             player.score = 0
-            player.set_board(board)
+            player.set_board(new_board)
         self.previous_shift_location = None
-        self._board = board
+        self._board = new_board
         self._turns.start()
 
     def shift(self, player_id, new_leftover_location, leftover_rotation):

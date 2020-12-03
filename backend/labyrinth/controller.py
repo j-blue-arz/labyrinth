@@ -67,7 +67,7 @@ def change_game(game_id, game_request_dto):
     _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _load_game_or_throw(game_id)
     new_board = _try(lambda: factory.create_board(maze_size=new_size))
-    _try(lambda: game.replace_board(new_board))
+    _try(lambda: game.restart(new_board))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
 
