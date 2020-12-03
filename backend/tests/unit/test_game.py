@@ -1,7 +1,8 @@
 """ Tests for Game of game.py """
-from unittest.mock import Mock, call, PropertyMock
+from unittest.mock import Mock
 import pytest
 from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board, Turns
+import labyrinth.model.factories as factory
 from labyrinth.model import factories
 from labyrinth.model.exceptions import PlayerNotFoundException, GameFullException
 
@@ -42,19 +43,15 @@ def test_unused_player_id_returns_new_id():
 def test_unused_player_id_raises_exception_on_full_game():
     """ Tests unused_player_id """
     game = Game(identifier=0)
-    for _ in range(game.MAX_PLAYERS):
-        player_id = game.unused_player_id()
-        game.add_player(Player(player_id))
+    add_players(game, game.MAX_PLAYERS)
     with pytest.raises(GameFullException):
-        player_id = game.unused_player_id()
+        _ = game.unused_player_id()
 
 
 def given_empty_game__when_adding_players__creates_pieces_on_board():
     board = Board()
     game = Game(identifier=0, board=board, turns=Mock())
-    for _ in range(4):
-        player_id = game.unused_player_id()
-        game.add_player(Player(player_id))
+    add_players(game, 4)
     assert len(board.pieces) == 4
 
 
@@ -70,9 +67,7 @@ def test_given_empty_game__when_player_is_added__initializes_turns():
 def test_add_player_validation():
     """ Tests that adding more players than MAX_PLAYERS does not add another one """
     game = Game(identifier=0)
-    for _ in range(game.MAX_PLAYERS):
-        player_id = game.unused_player_id()
-        game.add_player(Player(player_id))
+    add_players(game, game.MAX_PLAYERS)
     with pytest.raises(GameFullException):
         game.add_player(Player(42))
 
@@ -80,8 +75,7 @@ def test_add_player_validation():
 def test_shift_raises_error_on_invalid_player_id():
     """ Tests shift validation """
     game = Game(identifier=0, turns=Turns())
-    player_id = game.unused_player_id()
-    game.add_player(Player(player_id))
+    player_id = add_player(game)
     with pytest.raises(PlayerNotFoundException):
         game.shift(player_id + 1, BoardLocation(0, 1), 90)
 
@@ -89,8 +83,7 @@ def test_shift_raises_error_on_invalid_player_id():
 def test_move_raises_error_on_invalid_player_id():
     """ Tests move validation """
     game = Game(identifier=0, turns=Turns())
-    player_id = game.unused_player_id()
-    game.add_player(Player(player_id))
+    player_id = add_player(game)
     with pytest.raises(PlayerNotFoundException):
         game.move(player_id - 1, BoardLocation(5, 5))
 
@@ -101,8 +94,7 @@ def test_move_raises_error_on_invalid_turn():
     turns = Mock()
     turns.is_action_possible.return_value = False
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.unused_player_id()
-    game.add_player(Player(player_id))
+    player_id = add_player(game)
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
     board.move.assert_not_called()
@@ -115,8 +107,7 @@ def test_move_does_not_raise_error_after_shift():
     turns = Mock()
     turns.is_action_possible.return_value = True
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.unused_player_id()
-    game.add_player(Player(player_id))
+    player_id = add_player(game)
     player = game.get_player(player_id)
     game.move(player_id, BoardLocation(0, 0))
     board.move.assert_called_once()
@@ -148,40 +139,68 @@ def test_player_reaches_objective_increase_score():
     turns.is_action_possible.return_value = True
     board.move.return_value = True
     game = Game(identifier=0, board=board, turns=turns)
-    player_id = game.unused_player_id()
-    game.add_player(Player(player_id))
+    player_id = add_player(game)
     old_score = game.get_player(player_id).score
     game.move(player_id, BoardLocation(0, 1))
     assert game.get_player(player_id).score == old_score + 1
 
 
-def test_replace_board():
-    """ Tests replace_board. Asserts that score and all player locations are reset,
-    and that it is the first player's turn
-    """
+def given_game_with_two_players__when_replace__then_players_keep_piece_index():
+    game = Game(identifier=0)
+    add_players(game, 2)
+    old_player_pieces = {player.id: player.piece for player in game.players}
+
+    replace_board(game)
+
+    for player in game.players:
+        expected_piece_index = old_player_pieces[player.id].piece_index
+        assert player.piece.piece_index == expected_piece_index
+
+
+def given_game_with_two_players__when_replace__then_score_is_reset():
+    game = Game(identifier=0)
+    add_players(game, 2)
+    game.players[0].score = 11
+    game.players[1].score = 22
+
+    replace_board(game)
+
+    assert game.players[0].score == 0
+    assert game.players[1].score == 0
+
+
+def given_running_game__when_replace__then_turns_are_started():
     turns = Mock()
     game = Game(identifier=0, turns=turns)
-    player_ids = []
-    for _ in range(2):
-        player_id = game.unused_player_id()
-        game.add_player(Player(player_id))
-        player_ids.append(player_id)
-    players = list(map(game.get_player, player_ids))
-    players[0].score = 11
-    players[1].score = 22
-    players[0].piece.maze_card = game.board.maze[BoardLocation(1, 1)]
-    players[1].piece.maze_card = game.board.maze[BoardLocation(2, 2)]
-    pieces = list(map(lambda player: player.piece, players))
-
-    board = Mock()
-    type(board).pieces = PropertyMock(return_value=pieces)
+    game.add_player(Player(0))
     turns.reset_mock()
-    game.replace_board(board)
 
-    board.create_piece.assert_has_calls([call(), call()])
+    replace_board(game)
+
     turns.start.assert_called_once()
-    assert players[0].score == 0
-    assert players[1].score == 0
+
+
+def given_game_player_with_piece_index_0_removed__when_replace__then_remaining_player_keeps_piece_index():
+    game = Game(identifier=0)
+    add_players(game, 2)
+    remove_player_with_piece_index(game, 0)
+    remaining_piece = game.players[0].piece
+
+    replace_board(game)
+
+    assert game.players[0].piece.piece_index == remaining_piece.piece_index
+
+
+def given_game_player_with_piece_index_0_removed__when_replace__then_remaining_player_has_same_start_location():
+    game = Game(identifier=0)
+    add_players(game, 2)
+    remove_player_with_piece_index(game, 0)
+    old_player_start_location = get_player_piece_location(game, game.players[0])
+    set_player_piece_location(game, game.players[0], BoardLocation(4, 4))
+
+    replace_board(game)
+
+    assert get_player_piece_location(game, game.players[0]) == old_player_start_location
 
 
 def _turn_listener_test_setup(players):
@@ -238,3 +257,33 @@ def test_register_turn_listener__when_player_moves__listener_is_notified():
     listener.reset_mock()
     game.move(0, BoardLocation(0, 0))
     listener.assert_called_once_with(game=game, next_player_action=PlayerAction(players[1], PlayerAction.SHIFT_ACTION))
+
+
+def add_players(game, number_of_players):
+    for _ in range(number_of_players):
+        add_player(game)
+
+
+def add_player(game):
+    """ Adds a player, using the next unused player id """
+    player_id = game.unused_player_id()
+    game.add_player(Player(player_id))
+    return player_id
+
+
+def replace_board(game):
+    board = factory.create_board(maze_size=9)
+    game.replace_board(board)
+
+
+def remove_player_with_piece_index(game, index):
+    player_to_remove = [player for player in game.players if player.piece.piece_index == 0][index]
+    game.remove_player(player_to_remove.id)
+
+
+def get_player_piece_location(game, player):
+    return game.board.maze.maze_card_location(player.piece.maze_card)
+
+
+def set_player_piece_location(game, player, location):
+    player.piece.maze_card = game.board.maze[location]
