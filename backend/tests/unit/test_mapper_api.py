@@ -115,17 +115,17 @@ def test_dto_to_move_action():
 
 def test_dto_to_type():
     """ Tests dto_to_type """
-    player_request_dto = json.loads("""{"isComputerPlayer": true, "computationMethod": "random"}""")
-    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
-    assert is_computer is True
+    player_request_dto = json.loads("""{"isBot": true, "computationMethod": "random"}""")
+    is_bot, computation_method = mapper.dto_to_type(player_request_dto)
+    assert is_bot is True
     assert computation_method == "random"
 
 
 def test_dto_to_type_with_none():
     """ Tests dto_to_type """
     player_request_dto = None
-    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
-    assert is_computer is False
+    is_bot, computation_method = mapper.dto_to_type(player_request_dto)
+    assert is_bot is False
     assert computation_method is None
 
 

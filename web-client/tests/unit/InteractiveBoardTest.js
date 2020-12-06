@@ -679,7 +679,7 @@ var API_STATE = {
     players: [
         {
             id: 5,
-            isComputerPlayer: false,
+            isBot: false,
             mazeCardId: 3
         }
     ],

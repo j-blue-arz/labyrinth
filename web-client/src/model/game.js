@@ -167,10 +167,10 @@ export default class Game {
         }
     }
 
-    getComputerPlayers() {
+    getBots() {
         let result = [];
         for (var player of this._players) {
-            if (player.isComputer) {
+            if (player.isBot) {
                 result.push(player);
             }
         }

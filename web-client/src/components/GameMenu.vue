@@ -58,11 +58,11 @@ export default {
                 if (this.playerManager.canAddWasmPlayerId()) {
                     submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search (1P)"));
                 }
-                menu.push(new MenuItem("add", "Add computer..", submenu));
+                menu.push(new MenuItem("add", "Add bot..", submenu));
             }
-            if (this.computerPlayers.length > 0 || this.playerManager.hasWasmPlayer()) {
+            if (this.bots.length > 0 || this.playerManager.hasWasmPlayer()) {
                 let submenu = [];
-                for (let player of this.computerPlayers) {
+                for (let player of this.bots) {
                     let key = REMOVE_PREFIX + player.id;
                     let label = player.getLabel();
                     let text = "" + player.colorIndex + " - " + label;
@@ -77,7 +77,7 @@ export default {
                         submenu.push(new MenuItem("remove-wasm", text));
                     }
                 }
-                menu.push(new MenuItem("remove", "Remove computer..", submenu));
+                menu.push(new MenuItem("remove", "Remove bot..", submenu));
             }
             menu.push(
                 new MenuItem("restart", "Restart with..", [
@@ -88,8 +88,8 @@ export default {
             );
             return menu;
         },
-        computerPlayers: function() {
-            return this.controller.game.getComputerPlayers();
+        bots: function() {
+            return this.controller.game.getBots();
         },
         players: function() {
             return this.controller.game.getPlayers();
@@ -117,10 +117,10 @@ export default {
                 this.controller.removeWasmPlayer();
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let computeMethod = $event.substr(ADD_PREFIX.length);
-                this.controller.addComputer(computeMethod);
+                this.controller.addBot(computeMethod);
             } else if ($event.startsWith(REMOVE_PREFIX)) {
                 let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
-                this.controller.removeComputer(playerId);
+                this.controller.removeBot(playerId);
             } else if ($event.startsWith(RESTART_PREFIX)) {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
                 this.controller.restartWithSize(size);

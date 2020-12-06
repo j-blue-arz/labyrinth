@@ -8,13 +8,13 @@ import time
 
 import labyrinth.mapper.persistence as mapper
 from labyrinth.model.game import Game, MazeCard, BoardLocation, Turns, Player, PlayerAction, Board
-from labyrinth.model.computer import create_computer_player
+from labyrinth.model.bots import create_bot
 from labyrinth.model.factories import MazeCardFactory
 
 DELAY = timedelta(milliseconds=10)
 
 
-def _create_test_game(with_computer=False):
+def _create_test_game(with_bot=False):
     """ Creates a Game instance by hand """
     card_factory = MazeCardFactory()
     board = Board(leftover_card=MazeCard(0, MazeCard.T_JUNCT, 0))
@@ -30,10 +30,10 @@ def _create_test_game(with_computer=False):
                 board.maze[BoardLocation(row, column)] = card_factory.create_instance(MazeCard.T_JUNCT, 0)
     player_ids = [3, 4]
     players = [Player(identifier=player_id, game=None) for player_id in player_ids]
-    if with_computer:
+    if with_bot:
         player_ids.append(42)
-        players.append(create_computer_player(player_id=42, compute_method="dynamic-foo",
-                                              shift_url="shift-url", move_url="move-url"))
+        players.append(create_bot(player_id=42, compute_method="dynamic-foo",
+                                  shift_url="shift-url", move_url="move-url"))
     board._objective_maze_card = board.maze[BoardLocation(1, 4)]
     turns = Turns(prepare_delay=DELAY, players=players,
                   next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))

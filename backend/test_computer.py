@@ -1,18 +1,18 @@
-""" Tests for module computer in model. The classes contained in this are multithreaded.
+""" Tests for module bots in model. The classes contained in this are multithreaded.
 The tests only run these classes in a single thread, by calling run() directly. """
 import copy
 from unittest.mock import Mock, patch
 
 import labyrinth.model.factories as factory
-from labyrinth.model.computer import ComputerPlayer
+from labyrinth.model.bots import Bot
 from labyrinth.model.game import Board, BoardLocation, Game, Turns
 
 
-def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with_callback():
+def test_bot__when_register_in_turns__calls_add_player_on_turns_with_callback():
     """ Tests that register_in_turns calls method in turns with callback """
     turns = Mock()
-    player = ComputerPlayer(library_binding_factory=Mock(), shift_url="shift-url",
-                            move_url="move-url", identifier=9)
+    player = Bot(library_binding_factory=Mock(), shift_url="shift-url",
+                 move_url="move-url", identifier=9)
     player.register_in_turns(turns)
 
     turns.add_player.assert_called_once()
@@ -21,16 +21,15 @@ def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with
 
 
 @patch('time.sleep', return_value=None)
-@patch.object(ComputerPlayer, "_post_shift")
-@patch.object(ComputerPlayer, "_post_move")
-def given_library_binding__when_computer_player_run__calls_start_on_binding(post_move, post_shift,
-                                                                            time_sleep):
-    """ Tests that the computer player calls start() one its computation method.
+@patch.object(Bot, "_post_shift")
+@patch.object(Bot, "_post_move")
+def given_library_binding__when_bot_run__calls_start_on_binding(post_move, post_shift, time_sleep):
+    """ Tests that the bot calls start() one its computation method.
     """
     game = factory.create_game(with_delay=False)
     library_factory, library = _mock_library_binding()
-    player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
-                            identifier=9)
+    player = Bot(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
+                 identifier=9)
     player.set_game(game)
     player.run()
 
@@ -38,15 +37,15 @@ def given_library_binding__when_computer_player_run__calls_start_on_binding(post
 
 
 @patch('time.sleep', return_value=None)
-@patch.object(ComputerPlayer, "_post_shift")
-@patch.object(ComputerPlayer, "_post_move")
+@patch.object(Bot, "_post_shift")
+@patch.object(Bot, "_post_move")
 def given_library_binding__when_library_finished__calls_post_shift_but_not_post_move(post_move,
                                                                                      post_shift,
                                                                                      time_sleep):
     game = factory.create_game(game_id=7, with_delay=False)
     library_factory, library = _mock_library_binding()
-    player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
-                            identifier=9)
+    player = Bot(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
+                 identifier=9)
     player.set_game(game)
     player.run()
 
@@ -70,10 +69,9 @@ def test_random_actions_computes_valid_actions():
     for _ in range(100):
         board = copy.deepcopy(orig_board)
         game = Game(0, board=board, turns=Turns())
-        computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                         identifier=9)
-        computer_player.set_game(game)
-        shift_action, move_location = computer_player.random_actions()
+        bot = Bot(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url", identifier=9)
+        bot.set_game(game)
+        shift_action, move_location = bot.random_actions()
         shift_location, shift_rotation = shift_action
         assert shift_rotation in [0, 90, 180, 270]
         assert shift_location in board.shift_locations
@@ -96,26 +94,25 @@ def test_random_actions_computes_valid_actions():
 
 
 @patch('time.sleep', return_value=None)
-@patch.object(ComputerPlayer, "_post_shift")
-@patch.object(ComputerPlayer, "_post_move")
-def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, post_shift, time_sleep):
+@patch.object(Bot, "_post_shift")
+@patch.object(Bot, "_post_move")
+def test_bot_random_algorith_when_piece_is_pushed_out(post_move, post_shift, time_sleep):
     """ Tests case where piece is positioned on a shift location, so that it is pushed out.
     Runs computation 100 times. Push-out expectation rate is 1/12.
     Probability that no push-out takes place in 100 runs is negligible
     .start() is patched so that the compute method runs sequentially.
     This test recreates a bug, where the pushed-out piece is not updated correctly, leading
-    to exceptions thrown when computer makes a move.
+    to exceptions thrown when bot makes a move.
     """
     board = create_board()
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
     game = Game(0, board=board, turns=Turns())
-    computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                     identifier=9, piece=piece)
-    computer_player.set_game(game)
+    bot = Bot(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url", identifier=9, piece=piece)
+    bot.set_game(game)
 
     for _ in range(100):
-        shift_action, move_location = computer_player.random_actions()
+        shift_action, move_location = bot.random_actions()
         shift_location, _ = shift_action
         allowed_coordinates = [(3, 6)]
         if shift_location == BoardLocation(3, 6):
@@ -136,10 +133,9 @@ def test_random_actions_should_respect_no_pushback_rule():
         piece.maze_card = maze[BoardLocation(0, 0)]
         game = Game(0, board=board, turns=Turns())
         game.previous_shift_location = BoardLocation(0, 3)
-        computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                         identifier=9, piece=piece)
-        computer_player.set_game(game)
-        shift_action, _ = computer_player.random_actions()
+        bot = Bot(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url", identifier=9, piece=piece)
+        bot.set_game(game)
+        shift_action, _ = bot.random_actions()
         shift_location, _ = shift_action
         assert shift_location != BoardLocation(6, 3)
 

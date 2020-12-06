@@ -11,7 +11,7 @@ from labyrinth.database import DatabaseGateway
 from labyrinth.model.exceptions import LabyrinthDomainException
 from labyrinth.model import interactors
 from labyrinth.model.game import Player
-from labyrinth.model import computer
+from labyrinth.model import bots
 
 
 def add_player(game_id, player_request_dto):
@@ -26,14 +26,14 @@ def add_player(game_id, player_request_dto):
     _ = interactors.OverduePlayerInteractor(game_repository())
     _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _get_or_create_game(game_id)
-    is_computer, computation_method = mapper.dto_to_type(player_request_dto)
+    is_bot, computation_method = mapper.dto_to_type(player_request_dto)
     player_id = _try(game.unused_player_id)
     player = None
-    if not is_computer:
+    if not is_bot:
         player = Player(player_id)
     else:
-        player = _try(lambda: computer.create_computer_player(compute_method=computation_method,
-                                                              url_supplier=URLSupplier(), player_id=player_id))
+        player = _try(lambda: bots.create_bot(compute_method=computation_method,
+                                              url_supplier=URLSupplier(), player_id=player_id))
     _try(lambda: game.add_player(player))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
@@ -106,8 +106,8 @@ def perform_move(game_id, player_id, move_dto):
 def get_computation_methods():
     """ Retrieves the available computation methods.
 
-    These can be used to add computer players. """
-    return computer.get_available_computation_methods()
+    These can be used to add bots. """
+    return bots.get_available_computation_methods()
 
 
 def remove_overdue_players(overdue_timedelta):

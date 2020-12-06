@@ -7,7 +7,7 @@ export default class Player {
         this._id = id;
         this.mazeCard = null;
         this.colorIndex = 0;
-        this.isComputer = false;
+        this.isBot = false;
         this.computationMethod = "";
         this.isUser = false;
         this._turnAction = NO_ACTION; // one of NONE, MOVE, or SHIFT
@@ -53,8 +53,8 @@ export default class Player {
     fillFromApi(apiPlayer) {
         this.score = apiPlayer.score;
         this.colorIndex = apiPlayer.pieceIndex;
-        if (apiPlayer.isComputerPlayer) {
-            this.isComputer = true;
+        if (apiPlayer.isBot) {
+            this.isBot = true;
             this.computationMethod = apiPlayer.computationMethod;
         }
     }
@@ -62,7 +62,7 @@ export default class Player {
     getLabel() {
         if (this.isUser) {
             return "You";
-        } else if (this.isComputer) {
+        } else if (this.isBot) {
             return Player.computationMethodLabel(this.computationMethod);
         }
         return "";

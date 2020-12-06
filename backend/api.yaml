@@ -19,7 +19,7 @@ paths:
                 - $ref: "#/components/parameters/gameId"
             requestBody:
                 description: "An optional request body specifies the type of player. 
-                    The body is required if the added player should be a computer player. Without a body, a human player is added."
+                    The body is required if the added player should be a bot. Without a body, a human player is added."
                 required: false
                 content:
                     application/json:
@@ -126,12 +126,12 @@ paths:
         get:
             tags:
                 - "players"
-            summary: "Available computation methods for computer players."
+            summary: "Available computation methods for bots."
             operationId: "getComputationMethods"
             responses:
                 200:
                     description: "A list of possible computation methods. 
-                        Only these can be used as the `computationMethod` required for adding computer player with 
+                        Only these can be used as the `computationMethod` required for adding a bot with 
                         `POST /games/{game_id}/players`."
                     content:
                         application/json:
@@ -145,13 +145,13 @@ components:
         addPlayerObject:
             type: "object"
             properties:
-                isComputerPlayer:
+                isBot:
                     type: "boolean"
                     required: false
                     default: false
                 computationMethod:
                     type: "string"
-                    description: "Method a computer player uses to determine game actions. 
+                    description: "Method a bot uses to determine game actions. 
                                   The available computation methods can be fetched with `GET /computation-methods`."
                     example: "exhaustive-search"
         errorObject:
@@ -542,7 +542,7 @@ components:
                 objectiveMazeCardId: 48
                 players:
                     - id: 1
-                      isComputerPlayer: false
+                      isBot: false
                       mazeCardId: 34
                       score: 0
         boardLocation:
@@ -593,11 +593,11 @@ components:
                 id:
                     type: "integer"
                     description: "A player's identifier, unique in the application. This identifier is used as path parameter `player_id` or the query parameter `p_id`."
-                isComputerPlayer:
+                isBot:
                     type: "boolean"
                 computationMethod:
                     type: "string"
-                    description: "Only present if `isComputerPlayer` is true. This will be one of the available computation methods, 
+                    description: "Only present if `isBot` is true. This will be one of the available computation methods, 
                                   which can be retrieved by `GET /computation-methods`."
                 mazeCardId:
                     type: "integer"

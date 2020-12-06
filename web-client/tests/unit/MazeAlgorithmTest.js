@@ -529,7 +529,7 @@ let GAME_STATE_GENERATED_WITH_LINE_LEFTOVER = `{
     "objectiveMazeCardId": 34,
     "players": [{
       "id": 1,
-      "isComputerPlayer": false,
+      "isBot": false,
       "mazeCardId": 0
     }],
     "enabledShiftLocations": [

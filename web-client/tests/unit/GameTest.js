@@ -174,21 +174,21 @@ describe("Game", () => {
         });
     });
 
-    describe(".getComputerPlayers()", () => {
-        it("returns all computer players", () => {
+    describe(".getBots()", () => {
+        it("returns all bots", () => {
             let game = new Game();
             buildRandomMaze(game);
             _addPlayer(game, loc(1, 1), 7);
             let player1 = _addPlayer(game, loc(1, 1), 42);
-            player1.isComputer = true;
+            player1.isBot = true;
             let player2 = _addPlayer(game, loc(1, 1), 99);
-            player2.isComputer = true;
+            player2.isBot = true;
             let expected = [player1, player2];
 
-            let computerPlayers = game.getComputerPlayers();
+            let bots = game.getBots();
 
-            expect(computerPlayers).toEqual(expect.arrayContaining(expected));
-            expect(computerPlayers.length).toBe(2);
+            expect(bots).toEqual(expect.arrayContaining(expected));
+            expect(bots.length).toBe(2);
         });
     });
 
@@ -336,14 +336,14 @@ describe("Game", () => {
             expect(game.getPlayer(17).colorIndex).toEqual(1);
         });
 
-        it("sets attributes for computer players", () => {
+        it("sets attributes for bots", () => {
             let game = new Game();
             game.createFromApi(JSON.parse(GET_STATE_RESULT_FOR_N_3));
-            let computerPlayer = game.getPlayer(42);
-            expect(computerPlayer.isComputer).toBe(true);
-            expect(computerPlayer.computationMethod).toBe("random");
+            let bot = game.getPlayer(42);
+            expect(bot.isBot).toBe(true);
+            expect(bot.computationMethod).toBe("random");
             let player = game.getPlayer(17);
-            expect(player.isComputer).toBe(false);
+            expect(player.isBot).toBe(false);
         });
 
         it("disables shift location, if enabled locations is missing one", () => {
@@ -482,7 +482,7 @@ let GET_STATE_RESULT_FOR_N_3 = `{
     "id": 42,
     "mazeCardId": 16,
     "pieceIndex": 0,
-    "isComputerPlayer": true,
+    "isBot": true,
     "computationMethod": "random"
   },{
     "id": 17,

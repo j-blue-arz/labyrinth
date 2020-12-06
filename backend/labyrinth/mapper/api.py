@@ -5,11 +5,11 @@ instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
 from labyrinth.model.game import Game, Turns, Player
-import labyrinth.model.computer
+import labyrinth.model.bots
 from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
                                         MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                        MAZE_SIZE, SCORE, PIECE_INDEX, IS_COMPUTER, COMPUTATION_METHOD)
+                                        MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD)
 
 
 def game_state_to_dto(game: Game):
@@ -66,9 +66,9 @@ def dto_to_type(player_request_dto):
 
     More specifically, returns two values.  """
     if isinstance(player_request_dto, dict):
-        is_computer = _value_or_false(player_request_dto, IS_COMPUTER)
+        is_bot = _value_or_false(player_request_dto, IS_BOT)
         computation_method = _value_or_none(player_request_dto, COMPUTATION_METHOD)
-        return is_computer, computation_method
+        return is_bot, computation_method
     return False, None
 
 
@@ -119,11 +119,11 @@ def player_to_dto(player: Player):
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
                   PIECE_INDEX: player.piece.piece_index}
-    if type(player) is labyrinth.model.computer.ComputerPlayer:
-        player_dto[IS_COMPUTER] = True
+    if type(player) is labyrinth.model.bots.Bot:
+        player_dto[IS_BOT] = True
         player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME
     else:
-        player_dto[IS_COMPUTER] = False
+        player_dto[IS_BOT] = False
     return player_dto
 
 

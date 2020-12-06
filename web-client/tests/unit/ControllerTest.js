@@ -636,7 +636,7 @@ var state = {
     players: [
         {
             id: 5,
-            isComputerPlayer: false,
+            isBot: false,
             mazeCardId: 3
         }
     ],

@@ -1,8 +1,8 @@
-""" This module implements functionality for a computer to play the game.
+""" This module implements functionality for artifical players ('bots') to play the game.
 
-ComputerPlayer is a subclass of model.game.Player, which handles board state and time-keeping.
+Bot is a subclass of model.game.Player, which handles board state and time-keeping.
 The computation of player actions is performed by external shared libraries (LibraryBinding).
-Clients should use the factory method create_computer_player() to create a ComputerPlayer instance.
+Clients should use the factory method create_bot() to create a Bot instance.
 """
 
 import copy
@@ -25,9 +25,9 @@ from .reachable import Graph
 from .game import Player, Turns, PlayerAction
 
 
-def create_computer_player(player_id, compute_method, full_path=None,
-                           url_supplier=None, shift_url=None, move_url=None, piece=None):
-    """ This is a factory method creating a ComputerPlayer.
+def create_bot(player_id, compute_method, full_path=None,
+               url_supplier=None, shift_url=None, move_url=None, piece=None):
+    """ This is a factory method creating a Bot.
 
     :param player_id: the identifier of the player to create.
     :param compute_method: is used to determine the action computation method and its parameters.
@@ -40,9 +40,9 @@ def create_computer_player(player_id, compute_method, full_path=None,
     :raises InvalidComputeMethodException: if compute_method cannot identify an existing library.
     """
     library_binding_factory = _create_library_binding_factory(expected_library=compute_method, full_path=full_path)
-    return ComputerPlayer(library_binding_factory, url_supplier=url_supplier,
-                          shift_url=shift_url, move_url=move_url,
-                          identifier=player_id, piece=piece)
+    return Bot(library_binding_factory, url_supplier=url_supplier,
+               shift_url=shift_url, move_url=move_url,
+               identifier=player_id, piece=piece)
 
 
 def get_available_computation_methods():
@@ -58,10 +58,10 @@ def get_available_computation_methods():
     return [extract_basename(filename) for filename in filenames]
 
 
-class ComputerPlayer(Player, Thread):
-    """ This class represents a computer player.
+class Bot(Player, Thread):
+    """ This class represents an artifical player.
 
-    If the player is requested to make its action, it starts a thread for time keeping,
+    If the bot is requested to make its action, it starts a thread for time keeping,
     and a thread for letting the compute method determine the next shift and move action.
     Computation methods are time-restricted. After the computation timeout, they will be asked to abort.
     They will then receive a short grace period to finish their current work and return a result.

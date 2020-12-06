@@ -11,7 +11,7 @@ def test_post_player_returns_player(client):
     assert response.status_code == 200
     player = response.get_json()
     assert player["id"] >= 0
-    assert player["isComputerPlayer"] is False
+    assert player["isBot"] is False
     assert "pieceIndex" in player
     assert player["pieceIndex"] >= 0
     _wait_for(client, "SHIFT")
@@ -35,20 +35,20 @@ def test_post_players_four_times(client):
     _wait_for(client, "SHIFT")
 
 
-def test_post_players_library_computer_player(client):
-    """ Tests POST for /api/games/0/players with computer player
+def test_post_players_library_bot(client):
+    """ Tests POST for /api/games/0/players with bot
 
-    Adds a human player and a computer player with compute method 'libexhsearch'
+    Adds a human player and a bot with compute method 'libexhsearch'
     Expects an OK response with a single int in the body.
-    Checks if the game state respects the added computer player.
+    Checks if the game state respects the added bot.
     """
     _post_player(client)
-    response = _post_player(client, is_computer=True, computation_method="libexhsearch")
+    response = _post_player(client, is_bot=True, computation_method="libexhsearch")
     assert response.content_type == "application/json"
     _assert_ok_retrieve_id(response)
     response = _get_state(client)
     state = response.get_json()
-    assert state["players"][1]["isComputerPlayer"] is True
+    assert state["players"][1]["isBot"] is True
     assert state["players"][1]["computationMethod"] == "libexhsearch"
     _wait_for(client, "SHIFT")
 
@@ -58,7 +58,7 @@ def test_post_players_unknown_compute_method(client):
 
     Expects an 400 response with the requested compute method in the message.
     """
-    response = _post_player(client, is_computer=True, computation_method="FOO")
+    response = _post_player(client, is_bot=True, computation_method="FOO")
     _assert_error_response(response, user_message_contains="FOO", key="INVALID_ARGUMENTS", status=400)
 
 
@@ -556,8 +556,8 @@ def _post_move(client, player_id, row, column):
     return client.post("/api/games/0/move?p_id={}".format(player_id), data=data, mimetype="application/json")
 
 
-def _post_player(client, is_computer=False, computation_method=None, game_id=0):
-    player_data = _player_data(is_computer, computation_method)
+def _post_player(client, is_bot=False, computation_method=None, game_id=0):
+    player_data = _player_data(is_bot, computation_method)
     return client.post("/api/games/{}/players".format(game_id), data=player_data, mimetype="application/json")
 
 
@@ -580,11 +580,11 @@ def _get_computation_methods(client):
     return client.get("/api/computation-methods")
 
 
-def _player_data(is_computer=False, computation_method=None):
+def _player_data(is_bot=False, computation_method=None):
     data = None
-    if is_computer:
+    if is_bot:
         data = {
-            "isComputerPlayer": is_computer,
+            "isBot": is_bot,
             "computationMethod": computation_method
         }
     if data:

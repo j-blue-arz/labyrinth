@@ -221,14 +221,14 @@ export default class Controller {
         }
     }
 
-    addComputer(computeMethod) {
+    addBot(computeMethod) {
         this._api
-            .doAddComputerPlayer(computeMethod)
+            .doAddBot(computeMethod)
             .catch(this.handleError)
             .then(this._startPolling);
     }
 
-    removeComputer(playerId) {
+    removeBot(playerId) {
         this._api
             .removePlayer(playerId)
             .catch(this.handleError)

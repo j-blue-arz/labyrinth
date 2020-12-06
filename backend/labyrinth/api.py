@@ -20,13 +20,12 @@ def post_player(game_id):
     """ Adds a player to an existing game. Creates the game if it does not exist.
     The request can contain a body of the form
     {
-        'isComputerPlayer': <boolean>,
+        'isBot': <boolean>,
         'computationMethod': <string>
     },
     """
     request_body = request.get_json(silent=True, force=True)
-    player = controller.add_player(game_id, request_body)
-    return player
+    return controller.add_player(game_id, request_body)
 
 
 @API.route('/games/<int:game_id>/players/<int:player_id>', methods=["DELETE"])

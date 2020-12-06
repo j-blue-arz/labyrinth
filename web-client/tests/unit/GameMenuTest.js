@@ -12,7 +12,7 @@ beforeEach(() => {
     playerManager.addUserPlayerId(1);
     mockGetPlayerManager.mockReturnValue(playerManager);
     mockGetComputationMethods.mockReturnValue([]);
-    mockGetComputerPlayers.mockReturnValue([]);
+    mockGetBots.mockReturnValue([]);
     mockGetPlayer.mockReturnValue(null);
     mockGetPlayers.mockReturnValue([]);
     // Clear all instances and calls to constructor and all methods:
@@ -21,12 +21,12 @@ beforeEach(() => {
     mockGetPlayerManager.mockClear();
     mockEnterGame.mockClear();
     mockLeaveGame.mockClear();
-    mockAddComputer.mockClear();
-    mockRemoveComputer.mockClear();
+    mockAddBot.mockClear();
+    mockRemoveBot.mockClear();
     mockRemoveWasmPlayer.mockClear();
     mockRestartWithSize.mockClear();
     mockAddWasmPlayer.mockClear();
-    mockGetComputerPlayers.mockClear();
+    mockGetBots.mockClear();
     mockGetPlayer.mockClear();
     mockGetPlayers.mockClear();
 });
@@ -111,7 +111,7 @@ describe("GameMenu", () => {
         });
     });
 
-    describe("Add computer submenu", () => {
+    describe("Add bot submenu", () => {
         it("has entries corresponding to API computation methods", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             let gameMenu = factory();
@@ -123,13 +123,13 @@ describe("GameMenu", () => {
             expect(menu.find({ ref: "add-alpha-beta" }).exists()).toBe(false);
         });
 
-        it("calls addComputer() on controller with computation method", () => {
+        it("calls addBot() on controller with computation method", () => {
             givenComputationMethods(["exhaustive-search"]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             clickInMenu(gameMenu, "add-exhaustive-search");
-            expect(mockAddComputer).toHaveBeenCalledWith("exhaustive-search");
+            expect(mockAddBot).toHaveBeenCalledWith("exhaustive-search");
         });
 
         it("has WASM entry when there is no WASM player participating", () => {
@@ -187,11 +187,11 @@ describe("GameMenu", () => {
         });
     });
 
-    describe("Remove computer submenu", () => {
-        it("offers all computer players for removal", () => {
-            let exhaustiveSearch = createComputerPlayer(10, "libexhsearch");
-            let alphaBeta = createComputerPlayer(11, "libminimax");
-            givenComputerPlayers([exhaustiveSearch, alphaBeta]);
+    describe("Remove bot submenu", () => {
+        it("offers all bots for removal", () => {
+            let exhaustiveSearch = createBot(10, "libexhsearch");
+            let alphaBeta = createBot(11, "libminimax");
+            givenBots([exhaustiveSearch, alphaBeta]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
@@ -200,13 +200,13 @@ describe("GameMenu", () => {
             expectMenuDoesNotContainLabelContaining(gameMenu, "WASM: Exhaustive Search");
         });
 
-        it("calls removeComputer() on controller with correct player ID for backend players", () => {
-            givenComputerPlayers([createComputerPlayer(11, "alpha-beta")]);
+        it("calls removeBot() on controller with correct player ID for backend players", () => {
+            givenBots([createBot(11, "alpha-beta")]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
             clickInMenu(gameMenu, "remove-11");
-            expect(mockRemoveComputer).toHaveBeenCalledWith(11);
+            expect(mockRemoveBot).toHaveBeenCalledWith(11);
         });
 
         it("calls removeWasmPlayer() on controller for WASM player", () => {
@@ -218,8 +218,8 @@ describe("GameMenu", () => {
             expect(mockRemoveWasmPlayer).toHaveBeenCalled();
         });
 
-        it("is invisible if no computer exists", () => {
-            givenComputerPlayers([]);
+        it("is invisible if no bot exists", () => {
+            givenBots([]);
             let gameMenu = factory();
             toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "remove" });
@@ -250,8 +250,8 @@ let mockGetComputationMethods = jest.fn();
 let mockGetPlayerManager = jest.fn();
 let mockEnterGame = jest.fn();
 let mockLeaveGame = jest.fn();
-let mockAddComputer = jest.fn();
-let mockRemoveComputer = jest.fn();
+let mockAddBot = jest.fn();
+let mockRemoveBot = jest.fn();
 let mockRemoveWasmPlayer = jest.fn();
 let mockRestartWithSize = jest.fn();
 let mockAddWasmPlayer = jest.fn();
@@ -263,9 +263,9 @@ jest.mock("@/controllers/controller.js", () => {
             playerManager: mockGetPlayerManager(),
             enterGame: mockEnterGame,
             leaveGame: mockLeaveGame,
-            addComputer: mockAddComputer,
+            addBot: mockAddBot,
             game: mockGame,
-            removeComputer: mockRemoveComputer,
+            removeBot: mockRemoveBot,
             removeWasmPlayer: mockRemoveWasmPlayer,
             restartWithSize: mockRestartWithSize,
             addWasmPlayer: mockAddWasmPlayer
@@ -282,11 +282,11 @@ const factory = function() {
     });
 };
 
-const mockGetComputerPlayers = jest.fn();
+const mockGetBots = jest.fn();
 const mockGetPlayer = jest.fn();
 const mockGetPlayers = jest.fn();
 const mockGame = {
-    getComputerPlayers: mockGetComputerPlayers,
+    getBots: mockGetBots,
     getPlayer: mockGetPlayer,
     getPlayers: mockGetPlayers
 };
@@ -322,14 +322,14 @@ const givenWasmIsNotParticipating = function() {
     playerManager.removeWasmPlayer();
 };
 
-const givenComputerPlayers = function(players) {
-    mockGetComputerPlayers.mockReturnValue(players);
+const givenBots = function(players) {
+    mockGetBots.mockReturnValue(players);
     mockGetPlayers.mockReturnValue(players);
 };
 
-const createComputerPlayer = function(id, computationMethod) {
+const createBot = function(id, computationMethod) {
     let player = new Player(id);
-    player.isComputer = true;
+    player.isBot = true;
     player.computationMethod = computationMethod;
     return player;
 };
