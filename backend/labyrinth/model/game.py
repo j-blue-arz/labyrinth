@@ -317,13 +317,23 @@ class Board:
     def create_piece(self):
         """ Creates and places a piece on the board.
         Generates new objective, because the old one could be the same as the new piece's starting location. """
-        next_index = self._next_free_piece_index()
-        start_locations = self._start_locations()
-        next_location = start_locations[next_index % len(start_locations)]
-        piece = Piece(next_index, self._maze[next_location])
+        piece_index = self._next_free_piece_index()
+        piece = Piece(piece_index, None)
+        self.add_piece(piece)
+        return piece
+
+    def add_piece(self, piece):
+        """ Adds an existing piece to the board, on a start location """
+        assert piece not in self._pieces
+        self._place_piece_start_location(piece)
         self._pieces.append(piece)
         self._objective_maze_card = self._find_new_objective_maze_card()
-        return piece
+
+    def _place_piece_start_location(self, piece):
+        piece_index = piece.piece_index
+        start_locations = self._start_locations()
+        start_location = start_locations[piece_index % len(start_locations)]
+        piece.maze_card = self._maze[start_location]
 
     def _start_locations(self):
         maze_size = self.maze.maze_size
@@ -413,13 +423,19 @@ class Board:
 
 
 class Player:
-    """ This class represents a player playing a game """
+    """ This class represents a player playing a game
 
-    def __init__(self, identifier=None, game=None, piece=None, board=None):
+    Invariants: Board and Game are either both set or both None.
+    If both are set, piece is set as well. """
+
+    def __init__(self, identifier, game=None, piece=None):
+        """ board and game can only be set together. """
         self._id = identifier
-        self._board = board
         self._piece = piece
-        self._game = game
+        self._board = None
+        self._game = None
+        if game:
+            self.set_game(game)
         self.score = 0
 
     @property
@@ -432,22 +448,23 @@ class Player:
         """ Getter for identifier """
         return self._id
 
-    @property
-    def board(self):
-        """ Getter for board """
-        return self._board
-
     def set_game(self, game):
         """ Sets the game this player is part of
         Also sets the board and the player's piece """
+        assert not self._game and not self._board
         self._game = game
-        self.set_board(game.board)
+        self._set_board(game.board)
 
-    def set_board(self, board: Board):
-        """ Setter for board """
+    def _set_board(self, board: Board):
         self._board = board
-        if not self._piece or self._piece not in board.pieces:
+        if not self._piece:
             self._piece = board.create_piece()
+        assert self._piece in self._board.pieces
+
+    def reset_board(self, board: Board):
+        self._board = board
+        if self._piece not in board.pieces:
+            self._board.add_piece(self._piece)
 
     def register_in_turns(self, turns):
         """ registers itself in a Turns manager """
@@ -744,7 +761,7 @@ class Game:
         new_board.pieces.clear()
         for player in self._players:
             player.score = 0
-            player.set_board(new_board)
+            player.reset_board(new_board)
         self.previous_shift_location = None
         self._board = new_board
         self._turns.start()

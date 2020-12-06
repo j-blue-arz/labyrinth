@@ -50,7 +50,7 @@ def dto_to_game(game_dto):
     maze, leftover_card, maze_card_by_id = _dto_to_maze_cards_and_dictionary(game_dto[MAZE])
     objective_maze_card = maze_card_by_id[game_dto[OBJECTIVE]]
     board = Board(maze, leftover_card, objective_maze_card=objective_maze_card)
-    players = [_dto_to_player(player_dto, None, board, maze_card_by_id)
+    players = [_dto_to_player(player_dto, board, maze_card_by_id)
                for player_dto in game_dto[PLAYERS]]
     board._pieces = [player.piece for player in players]
     turns_prepare_delay = _dto_to_timedelta(game_dto[TURN_PREPARE_DELAY])
@@ -58,7 +58,7 @@ def dto_to_game(game_dto):
     identifier = game_dto[ID]
     game = Game(identifier, board=board, players=players, turns=turns)
     for player in players:
-        player._game = game
+        player.set_game(game)
     game.previous_shift_location = _dto_to_board_location(game_dto[PREVIOUS_SHIFT_LOCATION])
     return game
 
@@ -120,7 +120,7 @@ def _timedelta_to_dto_(delta: timedelta):
     return str(delta.total_seconds())
 
 
-def _dto_to_player(player_dto, game, board, maze_card_dict):
+def _dto_to_player(player_dto, board, maze_card_dict):
     """ maps a DTO to a Player
 
     :param player: a dictionary representing game's (sub-)structure of a player,
@@ -137,13 +137,11 @@ def _dto_to_player(player_dto, game, board, maze_card_dict):
             full_path=player_dto[LIBRARY_PATH],
             url_supplier=None,
             player_id=player_dto[ID],
-            game=game,
             shift_url=player_dto[SHIFT_URL],
             move_url=player_dto[MOVE_URL],
             piece=piece)
     else:
-        player = Player(identifier=player_dto[ID], game=game, piece=piece)
-    player._board = board
+        player = Player(identifier=player_dto[ID], piece=piece)
     player.score = player_dto[SCORE]
     return player
 

@@ -34,20 +34,18 @@ def _create_test_game(with_computer=False):
         player_ids.append(42)
         players.append(create_computer_player(player_id=42, compute_method="dynamic-foo",
                                               shift_url="shift-url", move_url="move-url"))
+    board._objective_maze_card = board.maze[BoardLocation(1, 4)]
+    turns = Turns(prepare_delay=DELAY, players=players,
+                  next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
+    game = Game(identifier=7, turns=turns, board=board, players=players)
     for player in players:
-        player.set_board(board)
+        player.set_game(game)
     players[0].piece.maze_card = board.maze[BoardLocation(3, 3)]
     players[1].piece.maze_card = board.maze[BoardLocation(5, 5)]
     players[0].piece.piece_index = 1
     players[1].piece.piece_index = 0
     players[0].score = 7
     players[1].score = 8
-    board._objective_maze_card = board.maze[BoardLocation(1, 4)]
-    turns = Turns(prepare_delay=DELAY, players=players,
-                  next_action=PlayerAction(players[1], PlayerAction.MOVE_ACTION))
-    game = Game(identifier=7, turns=turns, board=board, players=players)
-    for player in players:
-        player._game = game
     game.previous_shift_location = BoardLocation(0, 3)
     return game, player_ids
 

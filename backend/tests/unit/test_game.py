@@ -3,8 +3,9 @@ from unittest.mock import Mock
 import pytest
 from labyrinth.model.game import Game, BoardLocation, Player, PlayerAction, Board, Turns
 import labyrinth.model.factories as factory
+from tests.unit.mazes import ALL_CONNECTED_3
 from labyrinth.model import factories
-from labyrinth.model.exceptions import PlayerNotFoundException, GameFullException
+from labyrinth.model.exceptions import PlayerNotFoundException, GameFullException, TurnActionViolationException
 
 
 def test_add_get_player():
@@ -88,30 +89,22 @@ def test_move_raises_error_on_invalid_player_id():
         game.move(player_id - 1, BoardLocation(5, 5))
 
 
-def test_move_raises_error_on_invalid_turn():
-    """ Tests turn validation """
-    board = Mock()
-    turns = Mock()
-    turns.is_action_possible.return_value = False
-    game = Game(identifier=0, board=board, turns=turns)
-    player_id = add_player(game)
-    player = game.get_player(player_id)
-    game.move(player_id, BoardLocation(0, 0))
-    board.move.assert_not_called()
-    turns.is_action_possible.assert_called_once_with(player, PlayerAction.MOVE_ACTION)
+def given_move_action_is_not_valid__when_move__then_no_move_is_performed_and_raises_exception():
+    game = game_with_board_and_one_player()
+    with_next_action(game, PlayerAction.SHIFT_ACTION)
+
+    with pytest.raises(TurnActionViolationException):
+        when_move_to(game, BoardLocation(0, 2))
+    assert get_player_piece_location(game) == BoardLocation(0, 0)
 
 
-def test_move_does_not_raise_error_after_shift():
-    """ Tests turn validation """
-    board = Mock()
-    turns = Mock()
-    turns.is_action_possible.return_value = True
-    game = Game(identifier=0, board=board, turns=turns)
-    player_id = add_player(game)
-    player = game.get_player(player_id)
-    game.move(player_id, BoardLocation(0, 0))
-    board.move.assert_called_once()
-    turns.is_action_possible.assert_called_once_with(player, PlayerAction.MOVE_ACTION)
+def given_move_action_is_valid__when_move__then_move_is_performed():
+    game = game_with_board_and_one_player()
+    with_next_action(game, PlayerAction.MOVE_ACTION)
+
+    when_move_to(game, BoardLocation(0, 2))
+
+    assert get_player_piece_location(game) == BoardLocation(0, 2)
 
 
 def test_get_enabled_shift_locations_without_previous_shift():
@@ -132,28 +125,26 @@ def test_get_enabled_shift_locations_with_previous_shift():
     assert expected_disabled not in enabled_shift_locations
 
 
-def test_player_reaches_objective_increase_score():
+def given_game__when_move_to_objective__player_score_is_increased():
     """ Tests that the score on a player is increased once he reaches an objective """
-    board = Mock()
-    turns = Mock()
-    turns.is_action_possible.return_value = True
-    board.move.return_value = True
-    game = Game(identifier=0, board=board, turns=turns)
-    player_id = add_player(game)
-    old_score = game.get_player(player_id).score
-    game.move(player_id, BoardLocation(0, 1))
-    assert game.get_player(player_id).score == old_score + 1
+    game = game_with_board_and_one_player()
+    with_next_action(game, PlayerAction.MOVE_ACTION)
+    objective_location = find_objective_location(game)
+
+    when_move_to(game, objective_location)
+
+    assert game.get_player(0).score == 1
 
 
 def given_game_with_two_players__when_restart__then_players_keep_piece_index():
     game = Game(identifier=0)
     add_players(game, 2)
-    old_player_pieces = {player.id: player.piece for player in game.players}
+    old_player_pieces = {player.identifier: player.piece for player in game.players}
 
     restart(game)
 
     for player in game.players:
-        expected_piece_index = old_player_pieces[player.id].piece_index
+        expected_piece_index = old_player_pieces[player.identifier].piece_index
         assert player.piece.piece_index == expected_piece_index
 
 
@@ -192,15 +183,14 @@ def given_game_player_with_piece_index_0_removed__when_restart__then_remaining_p
 
 
 def given_game_player_with_piece_index_0_removed__when_restart__then_remaining_player_has_same_start_location():
-    game = Game(identifier=0)
-    add_players(game, 2)
+    game = game_with_board_and_two_players()
     remove_player_with_piece_index(game, 0)
-    old_player_start_location = get_player_piece_location(game, game.players[0])
-    set_player_piece_location(game, game.players[0], BoardLocation(4, 4))
+    old_player_start_location = get_player_piece_location(game, player=game.players[0])
+    set_player_piece_location(game, game.players[0], BoardLocation(1, 1))
 
-    restart(game)
+    restart(game, maze_size=3)
 
-    assert get_player_piece_location(game, game.players[0]) == old_player_start_location
+    assert get_player_piece_location(game, player=game.players[0]) == old_player_start_location
 
 
 def _turn_listener_test_setup(players):
@@ -271,19 +261,57 @@ def add_player(game):
     return player_id
 
 
-def restart(game):
-    board = factory.create_board(maze_size=9)
+def restart(game, maze_size=9):
+    board = factory.create_board(maze_size=maze_size)
     game.restart(board)
 
 
 def remove_player_with_piece_index(game, index):
     player_to_remove = [player for player in game.players if player.piece.piece_index == 0][index]
-    game.remove_player(player_to_remove.id)
+    game.remove_player(player_to_remove.identifier)
 
 
-def get_player_piece_location(game, player):
-    return game.board.maze.maze_card_location(player.piece.maze_card)
+def get_player_piece_location(game, player_id=0, player=None):
+    if player:
+        return game.board.maze.maze_card_location(player.piece.maze_card)
+    else:
+        return game.board.maze.maze_card_location(game.get_player(player_id).piece.maze_card)
 
 
 def set_player_piece_location(game, player, location):
     player.piece.maze_card = game.board.maze[location]
+
+
+def when_move_to(game, location, player_id=0):
+    game.move(player_id, location)
+
+
+def game_with_board_and_one_player():
+    game = game_with_board()
+    game.add_player(Player(0))
+    return game
+
+
+def game_with_board_and_two_players():
+    game = game_with_board()
+    game.add_player(Player(0))
+    game.add_player(Player(1))
+    return game
+
+
+def create_board(maze_string=ALL_CONNECTED_3):
+    maze = factories.create_maze(maze_string)
+    return Board(maze=maze)
+
+
+def game_with_board():
+    return Game(identifier=0, board=create_board(), turns=Turns())
+
+
+def with_next_action(game, action, player_id=0):
+    player = game.get_player(player_id)
+    game.turns.set_next(PlayerAction(player, action))
+
+
+def find_objective_location(game):
+    return game.board.maze.maze_card_location(game.board.objective_maze_card)

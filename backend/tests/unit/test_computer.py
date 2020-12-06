@@ -3,8 +3,8 @@ The tests only run these classes in a single thread, by calling run() directly. 
 import copy
 from unittest.mock import Mock, patch, PropertyMock
 
+import labyrinth.model.factories as factory
 from labyrinth.model.computer import ComputerPlayer
-from labyrinth.model.factories import create_maze, MazeCardFactory
 from labyrinth.model.game import Board, BoardLocation, Game, Turns
 
 
@@ -12,7 +12,7 @@ def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with
     """ Tests that register_in_turns calls method in turns with callback """
     turns = Mock()
     player = ComputerPlayer(library_binding_factory=Mock(), shift_url="shift-url",
-                            move_url="move-url", game=None, identifier=9)
+                            move_url="move-url", identifier=9)
     player.register_in_turns(turns)
 
     turns.add_player.assert_called_once()
@@ -23,16 +23,15 @@ def test_computer_player__when_register_in_turns__calls_add_player_on_turns_with
 @patch('time.sleep', return_value=None)
 @patch.object(ComputerPlayer, "_post_shift")
 @patch.object(ComputerPlayer, "_post_move")
-def test_given_library_binding__when_computer_player_run__calls_start_on_binding(post_move, post_shift,
-                                                                                 time_sleep):
+def given_library_binding__when_computer_player_run__calls_start_on_binding(post_move, post_shift,
+                                                                            time_sleep):
     """ Tests that the computer player calls start() one its computation method.
     """
-    board = Mock()
-    piece = Mock()
-    game = Mock()
-    library_factory, library = _mock_library_binding(board, piece)
+    game = factory.create_game(with_delay=False)
+    library_factory, library = _mock_library_binding()
     player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
-                            game=game, identifier=9, board=board, piece=piece)
+                            identifier=9)
+    player.set_game(game)
     player.run()
 
     library.start.assert_called_once()
@@ -41,23 +40,21 @@ def test_given_library_binding__when_computer_player_run__calls_start_on_binding
 @patch('time.sleep', return_value=None)
 @patch.object(ComputerPlayer, "_post_shift")
 @patch.object(ComputerPlayer, "_post_move")
-def test_given_library_binding__when_library_finished__calls_post_shift_but_not_post_move(post_move,
-                                                                                          post_shift,
-                                                                                          time_sleep):
-    board = Mock()
-    piece = Mock()
-    game = Mock()
-    type(game).identifier = PropertyMock(return_value=7)
-    library_factory, library = _mock_library_binding(board, piece)
+def given_library_binding__when_library_finished__calls_post_shift_but_not_post_move(post_move,
+                                                                                     post_shift,
+                                                                                     time_sleep):
+    game = factory.create_game(game_id=7, with_delay=False)
+    library_factory, library = _mock_library_binding()
     player = ComputerPlayer(library_binding_factory=library_factory, move_url="move-url", shift_url="shift-url",
-                            game=game, identifier=9, board=board, piece=piece)
+                            identifier=9)
+    player.set_game(game)
     player.run()
 
     post_shift.assert_called_once_with(BoardLocation(0, 1), 90)
     post_move.assert_called_once_with(BoardLocation(0, 0))
 
 
-def _mock_library_binding(board, piece):
+def _mock_library_binding():
     mock_computation_method = Mock()
     mock_computation_method.start = Mock()
     mock_computation_method.shift_action = BoardLocation(0, 1), 90
@@ -69,18 +66,13 @@ def _mock_library_binding(board, piece):
 
 def test_random_actions_computes_valid_actions():
     """ Runs computation 100 times and expects that it returns valid actions in each run """
-    card_factory = MazeCardFactory()
-    orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
+    orig_board = create_board()
     for _ in range(100):
         board = copy.deepcopy(orig_board)
-        maze = board.maze
-        piece = board.create_piece()
-        piece.maze_card = maze[BoardLocation(0, 0)]
-        game = Mock()
-        game.get_enabled_shift_locations.return_value = board.shift_locations
-        game.board = board
+        game = Game(0, board=board, turns=Turns())
         computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                         game=game, identifier=9, board=board, piece=piece)
+                                         identifier=9)
+        computer_player.set_game(game)
         shift_action, move_location = computer_player.random_actions()
         shift_location, shift_rotation = shift_action
         assert shift_rotation in [0, 90, 180, 270]
@@ -114,15 +106,13 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
     This test recreates a bug, where the pushed-out piece is not updated correctly, leading
     to exceptions thrown when computer makes a move.
     """
-    card_factory = MazeCardFactory()
-    board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
+    board = create_board()
     piece = board.create_piece()
     piece.maze_card = board.maze[BoardLocation(3, 6)]
-    game = Mock()
-    game.get_enabled_shift_locations.return_value = board.shift_locations
-    game.board = board
+    game = Game(0, board=board, turns=Turns())
     computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                     game=game, identifier=9, board=board, piece=piece)
+                                     identifier=9, piece=piece)
+    computer_player.set_game(game)
 
     for _ in range(100):
         shift_action, move_location = computer_player.random_actions()
@@ -138,22 +128,28 @@ def test_computer_player_random_algorith_when_piece_is_pushed_out(post_move, pos
 
 def test_random_actions_should_respect_no_pushback_rule():
     """ Runs computation 50 times and checks that none of the computed shifts reverts the previous shift action """
-
-    card_factory = MazeCardFactory()
-    orig_board = Board(create_maze(MAZE_STRING, card_factory), leftover_card=card_factory.create_instance("NE", 0))
+    orig_board = create_board()
     for _ in range(50):
         board = copy.deepcopy(orig_board)
         maze = board.maze
         piece = board.create_piece()
         piece.maze_card = maze[BoardLocation(0, 0)]
-        game = Game(0, board=orig_board, turns=Turns())
+        game = Game(0, board=board, turns=Turns())
         game.previous_shift_location = BoardLocation(0, 3)
         computer_player = ComputerPlayer(library_binding_factory=Mock(), move_url="move-url", shift_url="shift-url",
-                                         game=game, identifier=9, board=board, piece=piece)
+                                         identifier=9, piece=piece)
+        computer_player.set_game(game)
         shift_action, _ = computer_player.random_actions()
         shift_location, _ = shift_action
         assert shift_location != BoardLocation(6, 3)
 
+
+def create_board():
+    card_factory = factory.MazeCardFactory()
+    maze = factory.create_maze(MAZE_STRING, card_factory)
+    leftover = card_factory.create_instance("NE", 0)
+    return Board(maze=maze, leftover_card=leftover)
+    
 
 MAZE_STRING = """
 ###|#.#|#.#|###|#.#|#.#|###|

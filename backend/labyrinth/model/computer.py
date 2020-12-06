@@ -26,7 +26,7 @@ from .game import Player, Turns, PlayerAction
 
 
 def create_computer_player(player_id, compute_method, full_path=None,
-                           url_supplier=None, game=None, shift_url=None, move_url=None, piece=None):
+                           url_supplier=None, shift_url=None, move_url=None, piece=None):
     """ This is a factory method creating a ComputerPlayer.
 
     :param player_id: the identifier of the player to create.
@@ -42,7 +42,7 @@ def create_computer_player(player_id, compute_method, full_path=None,
     library_binding_factory = _create_library_binding_factory(expected_library=compute_method, full_path=full_path)
     return ComputerPlayer(library_binding_factory, url_supplier=url_supplier,
                           shift_url=shift_url, move_url=move_url,
-                          identifier=player_id, game=game, piece=piece)
+                          identifier=player_id, piece=piece)
 
 
 def get_available_computation_methods():
@@ -67,7 +67,8 @@ class ComputerPlayer(Player, Thread):
     They will then receive a short grace period to finish their current work and return a result.
     :param library_binding_factory: a method creating a LibraryBinding,
         It is expected to take a board, a piece, and a game as its parameters.
-    :param kwargs: keyword arguments, which are passed to the Player initializer.
+    :param kwargs: keyword arguments, which are passed to the Player initializer. game must not be
+        contained in kwargs. Set the game afterwards via set_game instead.
      """
 
     COMPUTATION_TIMEOUT = timedelta(seconds=3)
@@ -82,7 +83,6 @@ class ComputerPlayer(Player, Thread):
         self._move_url = move_url
         self._url_supplier = url_supplier
         self._prepare_delay = timedelta(seconds=0)
-        self._set_urls()
 
     def register_in_turns(self, turns: Turns):
         """ Registers itself in a Turns manager.
