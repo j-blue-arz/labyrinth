@@ -1,7 +1,7 @@
 """ Tests for module computer in model. The classes contained in this are multithreaded.
 The tests only run these classes in a single thread, by calling run() directly. """
 import copy
-from unittest.mock import Mock, patch, PropertyMock
+from unittest.mock import Mock, patch
 
 import labyrinth.model.factories as factory
 from labyrinth.model.computer import ComputerPlayer
@@ -149,7 +149,7 @@ def create_board():
     maze = factory.create_maze(MAZE_STRING, card_factory)
     leftover = card_factory.create_instance("NE", 0)
     return Board(maze=maze, leftover_card=leftover)
-    
+
 
 MAZE_STRING = """
 ###|#.#|#.#|###|#.#|#.#|###|
