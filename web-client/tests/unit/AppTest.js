@@ -1,5 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
-import GameContainer from "@/components/GameContainer.vue";
+import App from "@/components/App.vue";
 import CountdownTimer from "@/model/countdown.js";
 
 const mockCountdownTimer = new CountdownTimer(30);
@@ -28,10 +28,10 @@ beforeEach(() => {
 });
 
 const factory = function() {
-    return shallowMount(GameContainer);
+    return shallowMount(App);
 };
 
-describe("GameContainer", () => {
+describe("App", () => {
     it("Creates and initializes controller on startup", () => {
         factory();
         expect(mockInitialize).toHaveBeenCalled();

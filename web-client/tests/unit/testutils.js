@@ -6,8 +6,8 @@ export function assertConsistentLocation(game, location) {
     expect(game.getMazeCard(location).location).toEqual(location);
 }
 
-export function extractIdMatrix(gameContainer) {
-    var vMazeCards = gameContainer
+export function extractIdMatrix(app) {
+    var vMazeCards = app
         .find({ ref: "interactive-board" })
         .find(VGameBoard)
         .findAll(VMazeCard);
