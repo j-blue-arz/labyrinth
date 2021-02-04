@@ -1,22 +1,23 @@
 <template>
     <div class="app">
-        <interactive-board
-            v-if="hasStarted"
-            :controller="controller"
-            ref="interactive-board"
-            class="app__main-content"
-        />
-        <div class="app__sidebar">
-            <div>
+        <div class="app__menubar">
+            <v-menu-bar :controller="controller" />
+        </div>
+        <div class="app__game">
+            <div class="game__board">
+                <interactive-board
+                    v-if="hasStarted"
+                    :controller="controller"
+                    ref="interactive-board"
+                />
+            </div>
+            <div class="game__timer">
                 <timer :controller="controller" :countdown="countdown" :user-player="userPlayer" />
             </div>
-            <div>
+            <div class="game__score">
                 <score-board :players="players" />
             </div>
-            <div>
-                <game-menu :controller="controller" />
-            </div>
-            <div>
+            <div class="game__message">
                 <v-message-area :countdown="countdown" :user-player="userPlayer" />
             </div>
         </div>
@@ -25,7 +26,7 @@
 
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
-import GameMenu from "@/components/GameMenu.vue";
+import VMenuBar from "@/components/GameMenu.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import Timer from "@/components/Timer.vue";
 import VMessageArea from "@/components/VMessageArea.vue";
@@ -36,7 +37,7 @@ export default {
     name: "app",
     components: {
         InteractiveBoard,
-        GameMenu,
+        VMenuBar,
         ScoreBoard,
         Timer,
         VMessageArea
@@ -82,6 +83,16 @@ export default {
     font-family: Cambria, serif;
 }
 
+*,
+::after,
+::before {
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+}
+
 body {
     height: 100vh;
     width: 100vw;
@@ -89,58 +100,63 @@ body {
 }
 
 .app {
-    box-sizing: border-box;
-    width: 100%;
     height: 100%;
-    display: flex;
-    position: relative;
-    justify-content: space-evenly;
-    align-items: center;
-    align-content: flex-start;
+    display: grid;
+    grid-template-columns: $menubar-width 1fr;
+    grid-template-areas: "menubar game";
+    grid-gap: 2vmin;
 
-    &__main-content {
-        flex: 1 100%;
-        order: 1;
+    &__game {
+        grid-area: game;
+        display: grid;
+        grid-template-columns: 1fr minmax(70vmin, 100vh) 1fr $menubar-width;
+        grid-template-rows: 1fr auto 4 * $score-row-height 230px 1fr;
+        grid-template-areas:
+            ". board . ."
+            ". board timer timer"
+            ". board score score"
+            ". board message message"
+            ". board . .";
+        grid-gap: 2vmin;
     }
 
-    &__sidebar {
-        flex-grow: 1;
-        order: 2;
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-
-        div {
-            flex: 1;
-        }
+    &__menubar {
+        grid-area: menubar;
     }
 }
 
-@media all and (orientation: landscape) {
-    .app {
-        flex-flow: column wrap;
+.game {
+    &__board {
+        grid-area: board;
+        position: relative;
+        display: block;
+        height: 0;
+        padding-bottom: 100%;
+        width: 100%;
     }
 
-    .app__main-content {
+    &__timer {
+        grid-area: timer;
+    }
+
+    &__score {
+        grid-area: score;
+    }
+
+    &__message {
+        grid-area: message;
+    }
+}
+
+/*@media all and (orientation: landscape) {
+    .game__board {
         height: 100%;
-    }
-
-    .app__sidebar {
-        flex-flow: column nowrap;
     }
 }
 
 @media all and (orientation: portrait) {
-    .app {
-        flex-flow: row wrap;
-    }
-
-    .app__main-content {
+    .game__board {
         width: 100%;
     }
-
-    .app__sidebar {
-        flex-flow: row nowrap;
-    }
-}
+}*/
 </style>

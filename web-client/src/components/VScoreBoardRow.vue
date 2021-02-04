@@ -49,7 +49,7 @@ export default {
 
 <style lang="scss">
 .score-row {
-    height: 40px;
+    height: $score-row-height;
 
     &--player-0 td:not(&__current-player) {
         background: $color-player-0-secondary;
