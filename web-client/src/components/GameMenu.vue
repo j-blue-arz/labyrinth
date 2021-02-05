@@ -1,16 +1,5 @@
 <template>
-    <div class="game-menu">
-        <div class="game-menu__button">
-            <span @click.self="onToggleMenu" ref="game-menu-button" class="game-menu__button-text"
-                >Menu</span
-            >
-        </div>
-        <v-menu
-            @item-click="onItemClick($event)"
-            :visible="menuIsVisible"
-            :menu-items="menuItems"
-        />
-    </div>
+    <v-menu @item-click="onItemClick($event)" :menu-items="menuItems" />
 </template>
 
 <script>
@@ -33,11 +22,6 @@ export default {
     components: {
         VMenu
     },
-    data() {
-        return {
-            menuIsVisible: false
-        };
-    },
     computed: {
         menuItems: function() {
             let menu = [];
@@ -56,7 +40,7 @@ export default {
                     });
                 }
                 if (this.playerManager.canAddWasmPlayerId()) {
-                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search (1P)"));
+                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search\u00A0(1P)"));
                 }
                 menu.push(new MenuItem("add", "Add bot..", submenu));
             }
@@ -102,11 +86,7 @@ export default {
         }
     },
     methods: {
-        onToggleMenu: function() {
-            this.menuIsVisible = !this.menuIsVisible;
-        },
         onItemClick: function($event) {
-            this.closeMenu();
             if ($event === "leave") {
                 this.controller.leaveGame();
             } else if ($event === "enter") {
@@ -125,33 +105,10 @@ export default {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
                 this.controller.restartWithSize(size);
             }
-        },
-        closeMenu: function() {
-            this.menuIsVisible = false;
         }
     }
 };
 </script>
 
 <style lang="scss">
-.game-menu {
-    position: relative;
-
-    &__button {
-        text-align: center;
-        display: table;
-        width: 6rem;
-        background-color: $color-menu-button;
-        height: 4rem;
-
-        &:hover {
-            background-color: $color-menu-hover;
-        }
-    }
-
-    &__button-text {
-        display: table-cell;
-        vertical-align: middle;
-    }
-}
 </style>

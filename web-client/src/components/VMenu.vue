@@ -1,11 +1,11 @@
 <template>
-    <ul class="menu" v-show="visible">
+    <ul class="menu" @click="reset">
         <li
             v-for="item in visibleMenuItems"
             :key="item.key"
             :ref="item.key"
             class="menu__item"
-            @click="onItemClick(item)"
+            @click.stop="onItemClick(item)"
         >
             {{ item.text }}
         </li>
@@ -16,22 +16,8 @@
 export default {
     name: "v-menu",
     props: {
-        visible: {
-            type: Boolean,
-            required: true
-        },
         menuItems: {
             required: true
-        }
-    },
-    watch: {
-        visible: function(newValue, oldValue) {
-            if (!oldValue && newValue) {
-                this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
-                for (var item of this.menuItems) {
-                    this.visibleMenuItems.push(item);
-                }
-            }
         }
     },
     data() {
@@ -41,7 +27,9 @@ export default {
     },
     methods: {
         onItemClick(item) {
+            console.log("onclick");
             if (item.hasSubmenu()) {
+                console.log("hassub" + item.submenu.length);
                 this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
                 this.visibleMenuItems.push(item);
                 for (var subItem of item.submenu) {
@@ -50,17 +38,29 @@ export default {
             } else {
                 this.$emit("item-click", item.key);
             }
+        },
+        reset() {
+            console.log("reset");
+            this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
+            for (var item of this.menuItems) {
+                this.visibleMenuItems.push(item);
+            }
         }
+    },
+    created: function() {
+        this.reset();
     }
 };
 </script>
 
 <style lang="scss">
 .menu {
+    width: 100%;
+    height: 100%;
+
     list-style: none;
-    position: absolute;
-    left: -3rem;
-    top: 2rem;
+    padding: 1rem 0;
+    margin: 0;
 
     &__item {
         display: flex;
@@ -69,7 +69,6 @@ export default {
         align-items: center;
         border-bottom: 1px solid grey;
         background: $color-menu-background;
-        white-space: nowrap;
 
         &:hover {
             background: $color-menu-hover;

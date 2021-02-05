@@ -1,0 +1,4 @@
+@mixin panel {
+    border: 1px solid $color-ui-border;
+    box-shadow: 2px 2px 2px 0 $color-ui-border-shadow;
+}

@@ -122,6 +122,8 @@ body {
 
     &__menubar {
         grid-area: menubar;
+
+        @include panel;
     }
 }
 

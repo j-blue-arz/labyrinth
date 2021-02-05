@@ -46,7 +46,6 @@ export default {
     padding: 1rem;
     font-size: 1.2rem;
 
-    border: 1px solid $color-ui-border;
-    box-shadow: 2px 2px 2px 0 $color-ui-border-shadow;
+    @include panel;
 }
 </style>
