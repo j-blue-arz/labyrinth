@@ -2,7 +2,11 @@ export default class MenuItem {
     constructor(key, text, submenu = null) {
         this.key = key;
         this.text = text;
-        this.submenu = submenu;
+        this._submenu = submenu;
+    }
+
+    get submenu() {
+        return this._submenu;
     }
 
     hasSubmenu() {

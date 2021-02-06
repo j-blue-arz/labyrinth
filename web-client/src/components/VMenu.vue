@@ -22,33 +22,54 @@ export default {
     },
     data() {
         return {
-            visibleMenuItems: []
+            activeMenuKey: null
         };
     },
-    methods: {
-        onItemClick(item) {
-            console.log("onclick");
-            if (item.hasSubmenu()) {
-                console.log("hassub" + item.submenu.length);
-                this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
-                this.visibleMenuItems.push(item);
-                for (var subItem of item.submenu) {
-                    this.visibleMenuItems.push(subItem);
-                }
+    computed: {
+        visibleMenuItems: function() {
+            if (this.activeMenuKey === null) {
+                return this.menuItems;
             } else {
-                this.$emit("item-click", item.key);
-            }
-        },
-        reset() {
-            console.log("reset");
-            this.visibleMenuItems.splice(0, this.visibleMenuItems.length);
-            for (var item of this.menuItems) {
-                this.visibleMenuItems.push(item);
+                let activeMenu = this.findMenuitem(this.activeMenuKey, this.menuItems);
+                if (activeMenu) {
+                    let result = [];
+                    result.push(activeMenu);
+                    for (var subItem of activeMenu.submenu) {
+                        result.push(subItem);
+                    }
+                    return result;
+                } else {
+                    return this.menuItems;
+                }
             }
         }
     },
-    created: function() {
-        this.reset();
+    methods: {
+        findMenuitem(searchKey, menuItems) {
+            for (let menuItem of menuItems) {
+                if (menuItem.key === searchKey) {
+                    return menuItem;
+                }
+                if (menuItem.hasSubmenu()) {
+                    let recurseResult = this.findMenuitem(searchKey, menuItem.submenu);
+                    if (recurseResult) {
+                        return recurseResult;
+                    }
+                }
+            }
+            return null;
+        },
+        onItemClick(item) {
+            if (item.hasSubmenu()) {
+                this.activeMenuKey = item.key;
+            } else {
+                this.$emit("item-click", item.key);
+                this.reset();
+            }
+        },
+        reset() {
+            this.activeMenuKey = null;
+        }
     }
 };
 </script>

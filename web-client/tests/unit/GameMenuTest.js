@@ -32,36 +32,9 @@ beforeEach(() => {
 });
 
 describe("GameMenu", () => {
-    it("shows menu button", () => {
-        let gameMenu = factory();
-        expect(gameMenu.find(".game-menu__button").exists()).toBe(true);
-    });
-
-    it("menu is initially closed", () => {
-        let gameMenu = factory();
-        expect(gameMenu.find(".menu").isVisible()).toBe(false);
-    });
-
-    it("Opens menu when button is clicked", () => {
-        let gameMenu = factory();
-        toggleMenu(gameMenu);
-        expect(gameMenu.find(".menu").isVisible()).toBe(true);
-    });
-
-    it("Closes menu when button is clicked twice", done => {
-        let gameMenu = factory();
-        toggleMenu(gameMenu);
-        toggleMenu(gameMenu);
-        Vue.nextTick(() => {
-            expect(gameMenu.find(".menu").isVisible()).toBe(false);
-            done();
-        });
-    });
-
     describe("entry leave game", () => {
         it("is visible if user is participating", () => {
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "leave" });
             expect(entry.exists()).toBe(true);
         });
@@ -69,7 +42,6 @@ describe("GameMenu", () => {
         it("is invisible if user is not participating", () => {
             givenUserIsNotParticipating();
             let gameMenu = factory();
-            toggleMenu(gameMenu);
 
             let entry = gameMenu.find(VMenu).find({ ref: "leave" });
             expect(entry.exists()).toBe(false);
@@ -77,35 +49,21 @@ describe("GameMenu", () => {
 
         it("calls method on controller", () => {
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "leave");
             expect(mockLeaveGame).toHaveBeenCalled();
         });
     });
 
     describe("entry enter game", () => {
-        it("closes menu", done => {
-            givenUserIsNotParticipating();
-            let gameMenu = factory();
-            toggleMenu(gameMenu);
-            clickInMenu(gameMenu, "enter");
-            Vue.nextTick(() => {
-                expect(gameMenu.find(".menu").isVisible()).toBe(false);
-                done();
-            });
-        });
-
         it("calls method on controller", () => {
             givenUserIsNotParticipating();
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "enter");
             expect(mockEnterGame).toHaveBeenCalled();
         });
 
         it("is not visible if user participating", () => {
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "enter-game" });
             expect(entry.exists()).toBe(false);
         });
@@ -115,7 +73,6 @@ describe("GameMenu", () => {
         it("has entries corresponding to API computation methods", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
             expect(menu.find({ ref: "add-libminimax-distance" }).exists()).toBe(true);
@@ -126,7 +83,6 @@ describe("GameMenu", () => {
         it("calls addBot() on controller with computation method", () => {
             givenComputationMethods(["exhaustive-search"]);
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             clickInMenu(gameMenu, "add-exhaustive-search");
             expect(mockAddBot).toHaveBeenCalledWith("exhaustive-search");
@@ -135,7 +91,6 @@ describe("GameMenu", () => {
         it("has WASM entry when there is no WASM player participating", () => {
             givenWasmIsNotParticipating();
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
             expect(menu.find({ ref: "add-wasm" }).exists()).toBe(true);
@@ -144,7 +99,6 @@ describe("GameMenu", () => {
         it("has no WASM entry when there is already a WASM player participating", () => {
             givenWasmIsParticipating(new Player(7));
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
             expect(menu.find({ ref: "add-wasm" }).exists()).toBe(false);
@@ -153,7 +107,6 @@ describe("GameMenu", () => {
         it("calls addWasmPlayer for WASM menu entry", () => {
             givenWasmIsNotParticipating();
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             clickInMenu(gameMenu, "add-wasm");
             expect(mockAddWasmPlayer).toHaveBeenCalled();
@@ -164,16 +117,15 @@ describe("GameMenu", () => {
             givenWasmIsNotParticipating();
             let gameMenu = factory();
             await flushPromises();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
             let entries = menu.findAll("li");
             let labels = entries.wrappers.map(wrapper => wrapper.text());
             expect(labels).toEqual(
                 expect.arrayContaining([
-                    "Minimax (2P) - Distance Heuristic",
-                    "Exhaustive Search (1P)",
-                    "WASM: Exhaustive Search (1P)"
+                    Player.computationMethodLabel("libminimax-distance"),
+                    Player.computationMethodLabel("libexhsearch"),
+                    "WASM: Exhaustive Search\u00A0(1P)"
                 ])
             );
         });
@@ -181,7 +133,6 @@ describe("GameMenu", () => {
         it("is invisible if game is full", () => {
             givenGameIsFull();
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "add" });
             expect(entry.exists()).toBe(false);
         });
@@ -193,7 +144,6 @@ describe("GameMenu", () => {
             let alphaBeta = createBot(11, "libminimax");
             givenBots([exhaustiveSearch, alphaBeta]);
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
             expectMenuContainsLabelContaining(gameMenu, "Minimax");
             expectMenuContainsLabelContaining(gameMenu, "Exhaustive Search");
@@ -203,7 +153,6 @@ describe("GameMenu", () => {
         it("calls removeBot() on controller with correct player ID for backend players", () => {
             givenBots([createBot(11, "alpha-beta")]);
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
             clickInMenu(gameMenu, "remove-11");
             expect(mockRemoveBot).toHaveBeenCalledWith(11);
@@ -212,7 +161,6 @@ describe("GameMenu", () => {
         it("calls removeWasmPlayer() on controller for WASM player", () => {
             givenWasmIsParticipating(new Player(4));
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "remove");
             clickInMenu(gameMenu, "remove-wasm");
             expect(mockRemoveWasmPlayer).toHaveBeenCalled();
@@ -221,7 +169,6 @@ describe("GameMenu", () => {
         it("is invisible if no bot exists", () => {
             givenBots([]);
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "remove" });
             expect(entry.exists()).toBe(false);
         });
@@ -229,7 +176,6 @@ describe("GameMenu", () => {
         it("is visible if WASM player exists", () => {
             givenWasmIsParticipating(new Player(4));
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             let entry = gameMenu.find(VMenu).find({ ref: "remove" });
             expect(entry.exists()).toBe(true);
         });
@@ -238,7 +184,6 @@ describe("GameMenu", () => {
     describe("change game size", () => {
         it("calls restartWithSize() on controller with correct size", () => {
             let gameMenu = factory();
-            toggleMenu(gameMenu);
             clickInMenu(gameMenu, "restart");
             clickInMenu(gameMenu, "restart-9");
             expect(mockRestartWithSize).toHaveBeenCalledWith(9);
@@ -346,10 +291,6 @@ const expectMenuDoesNotContainLabelContaining = function(gameMenu, expectedText)
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
     expect(entries.find(entry => entry.text().includes(expectedText))).toBeUndefined();
-};
-
-const toggleMenu = function(gameMenu) {
-    gameMenu.find({ ref: "game-menu-button" }).trigger("click");
 };
 
 const clickInMenu = function(gameMenu, ref) {
