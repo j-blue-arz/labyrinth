@@ -80,13 +80,15 @@ export default {
 
 <style lang="scss">
 * {
-    font-family: Cambria, serif;
+    font-family: Helvetica, sans-serif;
 }
 
 *,
 ::after,
 ::before {
     box-sizing: inherit;
+    padding: 0;
+    margin: 0;
 }
 
 html {
@@ -97,6 +99,7 @@ body {
     height: 100vh;
     width: 100vw;
     margin: 0;
+    color: $text-color;
 }
 
 .app {
@@ -109,8 +112,8 @@ body {
     &__game {
         grid-area: game;
         display: grid;
-        grid-template-columns: 1fr minmax(70vmin, 100vh) 1fr $menubar-width;
-        grid-template-rows: 1fr auto 4 * $score-row-height 230px 1fr;
+        grid-template-columns: 1fr minmax(70vmin, 100vh) 1fr $game-widget-width;
+        grid-template-rows: 1fr 4rem 4 * $score-row-height 8rem 1fr;
         grid-template-areas:
             ". board . ."
             ". board timer timer"
@@ -123,7 +126,7 @@ body {
     &__menubar {
         grid-area: menubar;
 
-        @include panel;
+        @include drop-shadow;
     }
 }
 
@@ -139,10 +142,12 @@ body {
 
     &__timer {
         grid-area: timer;
+        @include game-widget;
     }
 
     &__score {
         grid-area: score;
+        @include game-widget;
     }
 
     &__message {

@@ -69,6 +69,7 @@ export default {
 
     &__current-player {
         position: relative;
+        text-align: center;
     }
 
     &__current-player--marker {

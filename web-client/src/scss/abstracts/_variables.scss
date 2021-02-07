@@ -13,7 +13,7 @@ $color-walls: grey;
 $color-game-board: lightblue;
 
 $color-ui-border: grey;
-$color-ui-border-shadow: lightblue;
+$color-ui-border-shadow: darkgrey;
 
 $rotation-animation-duration: 0.5s;
 
@@ -26,15 +26,17 @@ $color-menu-background: white;
 $color-menu-hover: orange;
 $color-menu-button: lightblue;
 
+$text-color: #202020;
+
 $color-player-0: #274594;
 $color-player-0-secondary: lighten($color-player-0, 50%);
 $text-color-player-0: white;
 $color-player-1: #931717;
 $color-player-1-secondary: lighten($color-player-1, 50%);
-$text-color-player-1: black;
+$text-color-player-1: $text-color;
 $color-player-2: #efb520;
 $color-player-2-secondary: lighten($color-player-2, 30%);
-$text-color-player-2: black;
+$text-color-player-2: $text-color;
 $color-player-3: #50a28c;
 $color-player-3-secondary: lighten($color-player-3, 40%);
 $text-color-player-3: white;
@@ -42,5 +44,6 @@ $text-color-player-3: white;
 $color-glow: $interaction-color;
 
 $menubar-width: 230px;
+$game-widget-width: 230px;
 
 $score-row-height: 40px;

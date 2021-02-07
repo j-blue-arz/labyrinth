@@ -42,10 +42,9 @@ export default {
 
 <style lang="scss">
 .message-area {
-    width: 12rem;
     padding: 1rem;
     font-size: 1.2rem;
 
-    @include panel;
+    @include game-widget;
 }
 </style>

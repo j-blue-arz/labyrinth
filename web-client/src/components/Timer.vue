@@ -1,7 +1,7 @@
 <template>
-    <p class="timer" :class="{ 'timer--invisible': !visible }">
-        00:{{ formatTime(remainingSeconds) }}
-    </p>
+    <div class="timer" :class="{ 'timer--invisible': !visible }">
+        0<span class="timer__separator">:</span>{{ formatTime(remainingSeconds) }}
+    </div>
 </template>
 
 <script>
@@ -95,11 +95,23 @@ export default {
 
 <style lang="scss">
 .timer {
+    height: 100%;
+    width: 100%;
     font-size: 3rem;
     user-select: none;
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     &--invisible {
         visibility: hidden;
+    }
+
+    &__separator {
+        font-size: 0.7em;
+        font-weight: bold;
+        vertical-align: middle;
     }
 }
 </style>
