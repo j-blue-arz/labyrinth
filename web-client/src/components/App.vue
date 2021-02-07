@@ -26,7 +26,7 @@
 
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
-import VMenuBar from "@/components/GameMenu.vue";
+import VMenuBar from "@/components/VMenuBar.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import Timer from "@/components/Timer.vue";
 import VMessageArea from "@/components/VMessageArea.vue";
@@ -125,8 +125,6 @@ body {
 
     &__menubar {
         grid-area: menubar;
-
-        @include drop-shadow;
     }
 }
 

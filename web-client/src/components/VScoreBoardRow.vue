@@ -13,7 +13,9 @@
                 class="score-row__piece-symbol"
             />
         </td>
-        <td class="score-row__player-name">{{ playerName }}</td>
+        <td class="score-row__player-name">
+            <p class="score-row__player-name-text">{{ playerName }}</p>
+        </td>
         <td class="score-row__score-data">{{ player.score }}</td>
     </tr>
 </template>
@@ -50,6 +52,7 @@ export default {
 <style lang="scss">
 .score-row {
     height: $score-row-height;
+    line-height: $score-row-height / 3;
 
     &--player-0 td:not(&__current-player) {
         background: $color-player-0-secondary;
@@ -90,6 +93,10 @@ export default {
 
     &__player-name {
         width: 6rem;
+    }
+
+    &__player-name-text {
+        overflow: hidden;
     }
 
     &__score-data {

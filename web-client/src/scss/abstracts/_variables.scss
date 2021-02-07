@@ -1,3 +1,4 @@
+// COLORS
 $interaction-color: hsl(104, 25%, 45%);
 $interaction-color-secondary: lighten($interaction-color, 40%);
 $disabled-color: hsl(14, 45%, 45%);
@@ -10,40 +11,47 @@ $color-pathways: white;
 
 $color-walls: grey;
 
-$color-game-board: lightblue;
+$color-game-board: hsl(195, 53%, 79%);
 
 $color-ui-border: grey;
 $color-ui-border-shadow: darkgrey;
-
-$rotation-animation-duration: 0.5s;
+$color-widget: hsl(194, 25%, 90%);
 
 $color-player-stroke: black;
 $text-opacity-player-not-user: 0.8;
 
 $objective-color: #ff3399;
 
-$color-menu-background: white;
+$color-menu-background: $color-widget;
 $color-menu-hover: orange;
-$color-menu-button: lightblue;
 
 $text-color: #202020;
 
-$color-player-0: #274594;
-$color-player-0-secondary: lighten($color-player-0, 50%);
+$color-player-0: hsl(223, 58%, 37%);
+$color-player-0-secondary:  hsl(223, 59%, 87%);
 $text-color-player-0: white;
-$color-player-1: #931717;
-$color-player-1-secondary: lighten($color-player-1, 50%);
+$color-player-1: hsl(0, 73%, 33%);
+$color-player-1-secondary: hsl(0, 74%, 84%);
 $text-color-player-1: $text-color;
-$color-player-2: #efb520;
+$color-player-2: hsl(43, 87%, 53%);
 $color-player-2-secondary: lighten($color-player-2, 30%);
 $text-color-player-2: $text-color;
-$color-player-3: #50a28c;
+$color-player-3: hsl(164, 34%, 47%);
 $color-player-3-secondary: lighten($color-player-3, 40%);
 $text-color-player-3: white;
 
 $color-glow: $interaction-color;
 
+$as: hsl(223, 58%, 37%);
+$asd: hsl(0, 74%, 84%)
+;
+
+// LENGTHS
+
 $menubar-width: 230px;
 $game-widget-width: 230px;
 
-$score-row-height: 40px;
+$score-row-height: 3em;
+
+// OTHER
+$rotation-animation-duration: 0.5s;

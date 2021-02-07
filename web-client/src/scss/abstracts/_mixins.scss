@@ -1,9 +1,9 @@
 @mixin drop-shadow {
-    border: 1px solid $color-ui-border;
     box-shadow: 2px 2px 2px 0 $color-ui-border-shadow;
 }
 
 @mixin game-widget {
     @include drop-shadow;
     width: $game-widget-width;
+    background: $color-widget;
 }

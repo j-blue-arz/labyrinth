@@ -1,5 +1,7 @@
 <template>
-    <game-menu :controller="controller" />
+    <div class="menubar">
+        <game-menu :controller="controller" />
+    </div>
 </template>
 
 <script>
@@ -22,5 +24,10 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+.menubar {
+    @include drop-shadow;
+    height: 100%;
+    border: 1px solid $color-ui-border;
+}
 </style>

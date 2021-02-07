@@ -70,17 +70,17 @@ export default class Player {
 
     static computationMethodLabel(computationMethod) {
         if (computationMethod === "libexhsearch") {
-            return "Exhaustive Search\u00A0(1P)";
+            return "Exhaustive Search (1P)";
         } else if (computationMethod === "libminimax") {
-            return "Minimax\u00A0(2P)";
+            return "Minimax (2P)";
         } else if (computationMethod.startsWith("libminimax-")) {
             let suffix = computationMethod.replace("libminimax-", "");
             if (suffix === "distance") {
-                return "Minimax\u00A0(2P) - Distance\u00A0Heuristic";
+                return "Minimax (2P) - Distance Heuristic";
             } else if (suffix === "reachable") {
-                return "Minimax\u00A0(2P) - Reachable\u00A0Heuristic";
+                return "Minimax (2P) - Reachable Heuristic";
             } else {
-                return "Minimax\u00A0(2P) - heuristic: " + suffix;
+                return "Minimax (2P) - heuristic: " + suffix;
             }
         } else {
             return computationMethod;
