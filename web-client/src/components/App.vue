@@ -1,8 +1,6 @@
 <template>
     <div class="app">
-        <div class="app__menubar">
-            <v-menu-bar :controller="controller" />
-        </div>
+        <v-menu-bar class="app__menubar" :controller="controller" />
         <div class="app__game">
             <div class="game__board">
                 <interactive-board
@@ -11,9 +9,12 @@
                     ref="interactive-board"
                 />
             </div>
-            <div class="game__timer">
-                <timer :controller="controller" :countdown="countdown" :user-player="userPlayer" />
-            </div>
+            <timer
+                class="game__timer"
+                :controller="controller"
+                :countdown="countdown"
+                :user-player="userPlayer"
+            />
             <div class="game__score">
                 <score-board :players="players" />
             </div>

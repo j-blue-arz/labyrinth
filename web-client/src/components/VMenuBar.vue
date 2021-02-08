@@ -1,11 +1,13 @@
 <template>
     <div class="menubar">
         <game-menu :controller="controller" />
+        <v-footer />
     </div>
 </template>
 
 <script>
 import GameMenu from "@/components/GameMenu.vue";
+import VFooter from "@/components/VFooter.vue";
 
 export default {
     name: "v-menu-bar",
@@ -16,10 +18,8 @@ export default {
         }
     },
     components: {
-        GameMenu
-    },
-    data() {
-        return {};
+        GameMenu,
+        VFooter
     }
 };
 </script>
@@ -27,7 +27,10 @@ export default {
 <style lang="scss">
 .menubar {
     @include drop-shadow;
-    height: 100%;
     border: 1px solid $color-ui-border;
+    padding: 1rem 0;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
 }
 </style>

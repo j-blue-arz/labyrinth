@@ -77,10 +77,8 @@ export default {
 <style lang="scss">
 .menu {
     width: 100%;
-    height: 100%;
 
     list-style: none;
-    padding: 1rem 0;
     margin: 0;
 
     &__item {

@@ -1,11 +1,22 @@
+const webpack = require("webpack");
+
 const path = require("path");
 const compressionPlugin = require("compression-webpack-plugin");
+
+const version = require("./package.json").version;
 
 module.exports = {
     outputDir: path.resolve(__dirname, "../backend/static"),
     assetsDir: "assets",
     configureWebpack: {
-        devtool: "source-map"
+        devtool: "source-map",
+        plugins: [
+            new webpack.DefinePlugin({
+                "process.env": {
+                    VERSION: '"' + version + '"'
+                }
+            })
+        ]
     },
     lintOnSave: true,
     css: {
@@ -15,5 +26,7 @@ module.exports = {
             }
         }
     },
-    chainWebpack: config => {config.plugin("CompressionPlugin").use(compressionPlugin);}
+    chainWebpack: config => {
+        config.plugin("CompressionPlugin").use(compressionPlugin);
+    }
 };
