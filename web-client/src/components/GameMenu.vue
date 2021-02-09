@@ -105,6 +105,7 @@ export default {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
                 this.controller.restartWithSize(size);
             }
+            this.$emit("item-click");
         }
     }
 };

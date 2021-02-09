@@ -48,7 +48,11 @@ $asd: hsl(0, 74%, 84%)
 
 // LENGTHS
 
-$menubar-width: 230px;
+:root {
+    --menubar-toggle-size: calc(min(4rem, 10vmin));
+}
+
+$menubar-width: calc(min(230px, 60vw));
 $game-widget-width: 230px;
 
 $score-row-height: 3em;
