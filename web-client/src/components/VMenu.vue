@@ -1,5 +1,5 @@
 <template>
-    <ul class="menu" @click="reset">
+    <ul class="menu" v-click-outside="reset">
         <li
             v-for="item in visibleMenuItems"
             :key="item.key"
