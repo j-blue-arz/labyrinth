@@ -54,7 +54,12 @@ export default {
 
 <style lang="scss">
 .menubar {
+    z-index: 1;
+
     &__slider {
+        z-index: 3;
+
+        background: $color-background;
         width: $menubar-width;
         height: 100%;
 
@@ -80,6 +85,8 @@ export default {
     }
 
     &__toggle {
+        z-index: 2;
+
         background-color: $color-menu-background;
         height: var(--menubar-toggle-size);
         width: var(--menubar-toggle-size);

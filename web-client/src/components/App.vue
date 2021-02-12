@@ -101,31 +101,28 @@ body {
     width: 100vw;
     margin: 0;
     color: $text-color;
+    background: $color-background;
+    overflow: hidden;
 }
 
 .app {
     height: 100%;
-    display: grid;
-    grid-template-columns: $menubar-width 1fr;
-    grid-template-areas: "menubar game";
-    grid-gap: 2vmin;
+    width: 100%;
 
     &__game {
-        grid-area: game;
+        z-index: 0;
+        height: 100%;
+        width: 100%;
         display: grid;
-        grid-template-columns: 1fr minmax(70vmin, 100vh) 1fr $game-widget-width;
+        grid-template-columns: 1fr minmax(70vmin, 100vh) 1fr;
         grid-template-rows: 1fr 4rem 4 * $score-row-height 8rem 1fr;
         grid-template-areas:
-            ". board . ."
-            ". board timer timer"
-            ". board score score"
-            ". board message message"
-            ". board . .";
+            ". board . "
+            ". board timer"
+            ". board score"
+            ". board message"
+            ". board .";
         grid-gap: 2vmin;
-    }
-
-    &__menubar {
-        grid-area: menubar;
     }
 }
 
