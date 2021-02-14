@@ -14,7 +14,9 @@
             />
         </td>
         <td class="score-row__player-name">
-            <p class="score-row__player-name-text">{{ playerName }}</p>
+            <div class="player-name">
+                <p class="player-name__text">{{ playerName }}</p>
+            </div>
         </td>
         <td class="score-row__score-data">{{ player.score }}</td>
     </tr>
@@ -92,18 +94,26 @@ export default {
     }
 
     &__player-name {
-        width: 6rem;
-    }
-
-    &__player-name-text {
-        overflow: hidden;
+        width: 6.5rem;
     }
 
     &__score-data {
         border-left: 1px solid $color-ui-border;
         text-align: right;
-        padding-right: 8px;
-        width: 2rem;
+        padding-right: 0.5rem;
+        width: 1.5rem;
+    }
+}
+
+.player-name {
+    height: 3rem;
+    overflow: hidden;
+
+    &__text {
+        overflow: hidden;
+        height: 3rem;
+        vertical-align: middle;
+        display: table-cell;
     }
 }
 </style>

@@ -151,6 +151,18 @@ body {
     }
 }
 
+html {
+    font-size: 12px;
+
+    @media only screen and (min-width: 1200px) {
+        font-size: 16px;
+    }
+
+    @media only screen and (min-width: 320px) {
+        font-size: calc(12px + 4 * (100vw - 320px) / 880);
+    }
+}
+
 /*@media all and (orientation: landscape) {
     .game__board {
         height: 100%;

@@ -84,7 +84,7 @@ export default {
     &__item {
         display: flex;
         cursor: pointer;
-        padding: 8px 15px;
+        padding: 0.5rem 1rem;
         align-items: center;
         border-bottom: 1px solid grey;
         background: $color-menu-background;
