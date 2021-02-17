@@ -87,20 +87,23 @@ export default {
 .game {
     z-index: 0;
     display: grid;
-    grid-gap: 2vmin;
 
     --timer-height: 4rem;
 
     @media (orientation: landscape) {
-        grid-template-columns: 1fr minmax(70vh, 100vh) 1fr;
-        grid-template-rows: 1fr 1px var(--timer-height) 4 * $score-row-height 8rem 1fr;
+        --gap: 2vh;
+
+        grid-template-columns: 1fr minmax(70vh, 100vh) var(--gap) 1fr;
+        grid-template-rows: 1fr 1px var(--timer-height) var(--gap) 4 * $score-row-height var(--gap) 8rem 1fr;
         grid-template-areas:
-            ". board ."
-            ". board leftover"
-            ". board timer"
-            ". board score"
-            ". board message"
-            ". board .";
+            ". board . ."
+            ". board . leftover"
+            ". board . timer"
+            ". board . ."
+            ". board . score"
+            ". board . ."
+            ". board . message"
+            ". board . .";
     }
 
     @media (orientation: portrait) {
@@ -111,6 +114,7 @@ export default {
             "board board board"
             "score score score"
             "message message message";
+        grid-gap: 1vw;
     }
 
     &__board {
@@ -140,7 +144,7 @@ export default {
         grid-area: leftover;
 
         @media (orientation: landscape) {
-            transform: translate(calc(-100% - 1vmin), -50%);
+            transform: translate(calc(-100% - var(--gap) / 2), -50%);
         }
     }
 }
