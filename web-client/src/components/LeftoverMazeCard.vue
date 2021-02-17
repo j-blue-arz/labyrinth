@@ -1,5 +1,5 @@
 <template>
-    <svg height="100" width="100" viewBox="0 0 100 100" class="leftover">
+    <svg viewBox="0 0 100 100" class="leftover">
         <v-maze-card
             @click.native="onLeftoverClick"
             v-if="hasStarted"
@@ -30,11 +30,6 @@ export default {
             type: MazeCard,
             required: true
         },
-        isLandscape: {
-            type: Boolean,
-            required: false,
-            default: true
-        },
         interaction: {
             type: Boolean,
             required: false,
@@ -44,37 +39,6 @@ export default {
     computed: {
         hasStarted: function() {
             return this.mazeCard instanceof MazeCard;
-        },
-        leftoverSize: function() {
-            return this.$ui.cardSize * 1.6;
-        },
-        width: function() {
-            if (this.isLandscape) {
-                return this.$ui.cardSize * 1.5;
-            } else {
-                return this.$ui.cardSize;
-            }
-        },
-        height: function() {
-            if (this.isLandscape) {
-                return this.$ui.cardSize;
-            } else {
-                return this.$ui.cardSize * 1.5;
-            }
-        },
-        mazeCardX: function() {
-            if (this.isLandscape) {
-                return this.$ui.cardSize;
-            } else {
-                return 0;
-            }
-        },
-        mazeCardY: function() {
-            if (this.isLandscape) {
-                return 0;
-            } else {
-                return this.$ui.cardSize;
-            }
         },
         arrowPath: function() {
             let radius = 40;

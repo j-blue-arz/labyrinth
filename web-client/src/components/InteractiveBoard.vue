@@ -1,5 +1,5 @@
 <template>
-    <svg :viewBox="`0 0 ${interactionWidth} ${interactionHeight}`" class="interactive-board">
+    <svg :viewBox="`0 0 ${interactionSize} ${interactionSize}`" class="interactive-board">
         <v-svg-defs></v-svg-defs>
         <draggable-game-board
             @player-move="onPlayerMove"
@@ -21,19 +21,11 @@
             :interaction="isMyTurnToShift"
             :game="game"
         ></insert-panels>
-        <leftover-maze-card
-            :x="leftoverX"
-            :y="leftoverY"
-            :is-landscape="!isLandscape"
-            :maze-card="leftoverMazeCard"
-            :interaction="isMyTurnToShift"
-        ></leftover-maze-card>
     </svg>
 </template>
 
 <script>
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
@@ -49,8 +41,7 @@ export default {
         InsertPanels,
         VMazeCard,
         VMoveAnimation,
-        VSvgDefs,
-        LeftoverMazeCard
+        VSvgDefs
     },
     props: {
         controller: {
@@ -60,17 +51,10 @@ export default {
     },
     data() {
         return {
-            interactionWidth: 900,
-            interactionHeight: 900,
             leftoverX: 0,
             leftoverY: 0,
             isLandscape: true
         };
-    },
-    watch: {
-        mazeSize: function() {
-            this.handleResize();
-        }
     },
     computed: {
         game: function() {
@@ -102,9 +86,6 @@ export default {
                 this.game.nextAction.action === action.SHIFT_ACTION
             );
         },
-        leftoverMazeCard: function() {
-            return this.game.leftoverMazeCard;
-        },
         players: function() {
             return this.game.getPlayers();
         },
@@ -114,6 +95,9 @@ export default {
                 return player.getTurnAction();
             }
             return action.NO_ACTION;
+        },
+        interactionSize: function() {
+            return this.$ui.cardSize * (this.mazeSize + 2);
         }
     },
     methods: {
@@ -137,7 +121,7 @@ export default {
             let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
-                leftoverRotation: this.leftoverMazeCard.rotation
+                leftoverRotation: this.game.leftoverMazeCard.rotation
             };
             this.controller.performShift(shiftAction);
         },
@@ -152,35 +136,7 @@ export default {
                 };
                 this.controller.performMove(moveAction);
             }
-        },
-        interactiveBoardSize: function() {
-            return this.$ui.cardSize * (this.mazeSize + 2);
-        },
-        leftoverSize: function() {
-            return this.$ui.cardSize;
-        },
-        handleResize: function() {
-            if (window.innerWidth > window.innerHeight) {
-                this.interactionWidth = this.interactiveBoardSize() + this.leftoverSize() - 45;
-                this.interactionHeight = this.interactiveBoardSize();
-                this.leftoverX = this.interactiveBoardSize() - 60;
-                this.leftoverY = 50;
-                this.isLandscape = true;
-            } else {
-                this.interactionWidth = this.interactiveBoardSize();
-                this.interactionHeight = this.interactiveBoardSize() + this.leftoverSize() - 45;
-                this.leftoverX = 50;
-                this.leftoverY = this.interactiveBoardSize() - 60;
-                this.isLandscape = false;
-            }
         }
-    },
-    created() {
-        window.addEventListener("resize", this.handleResize);
-        this.handleResize();
-    },
-    destroyed() {
-        window.removeEventListener("resize", this.handleResize);
     }
 };
 </script>
