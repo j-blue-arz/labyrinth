@@ -4,6 +4,6 @@
 
 @mixin game-widget {
     @include drop-shadow;
-    width: $game-widget-width;
+    width: 100%;
     background: $color-widget;
 }

@@ -53,8 +53,8 @@ export default {
 
 <style lang="scss">
 .score-row {
-    height: $score-row-height;
-    line-height: $score-row-height / 3;
+    height: var(--score-row-height);
+    line-height: calc(var(--score-row-height) / 3);
 
     &--player-0 td:not(&__current-player) {
         background: $color-player-0-secondary;

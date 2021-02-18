@@ -52,12 +52,13 @@ $asd: hsl(0, 74%, 84%)
 
 :root {
     --menubar-toggle-size: calc(min(4rem, 8vmin));
+    --score-row-height: 3rem;
 }
 
 $menubar-width: calc(min(14rem, 60vw));
 $game-widget-width: 14rem;
 
-$score-row-height: 3rem;
+
 
 // OTHER
 $rotation-animation-duration: 0.5s;

@@ -1,7 +1,9 @@
 <template>
     <div class="app">
         <v-menu-bar class="app__menubar" :controller="controller" />
-        <v-game class="app__game" :controller="controller" />
+        <div class="app__main">
+            <v-game class="app__game" :controller="controller" />
+        </div>
     </div>
 </template>
 
@@ -63,7 +65,23 @@ body {
     height: 100%;
     width: 100%;
 
+    &__main {
+        height: 100%;
+        width: 100%;
+        display: grid;
+
+        @media (orientation: landscape) {
+            grid-template-columns: 1fr auto 1fr;
+            grid-template-areas: ". game .";
+        }
+
+        @media (orientation: portrait) {
+            grid-template-areas: "game";
+        }
+    }
+
     &__game {
+        grid-area: game;
         height: 100%;
         width: 100%;
     }

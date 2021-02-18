@@ -93,28 +93,33 @@ export default {
     @media (orientation: landscape) {
         --gap: 2vh;
 
-        grid-template-columns: 1fr minmax(70vh, 100vh) var(--gap) 1fr;
-        grid-template-rows: 1fr 1px var(--timer-height) var(--gap) 4 * $score-row-height var(--gap) 8rem 1fr;
+        grid-template-columns: minmax(70vh, 100vh) $game-widget-width;
+        grid-template-rows:
+            0 1fr var(--timer-height) var(--gap) calc(4 * var(--score-row-height)) var(--gap)
+            auto 1fr;
+        column-gap: var(--gap);
         grid-template-areas:
-            ". board . ."
-            ". board . leftover"
-            ". board . timer"
-            ". board . ."
-            ". board . score"
-            ". board . ."
-            ". board . message"
-            ". board . .";
+            "board leftover"
+            "board ."
+            "board timer"
+            "board ."
+            "board score"
+            "board ."
+            "board message"
+            "board .";
     }
 
     @media (orientation: portrait) {
         grid-template-columns: 1fr 2fr 1fr;
-        grid-template-rows: var(--timer-height) minmax(70vw, 100vw) 2 * $score-row-height 1fr;
+        grid-template-rows:
+            var(--timer-height) minmax(70vw, 100vw) calc(2 * var(--score-row-height))
+            1fr;
         grid-template-areas:
             ". timer leftover"
             "board board board"
             "score score score"
             "message message message";
-        grid-gap: 1vw;
+        gap: 1vw;
     }
 
     &__board {
@@ -144,7 +149,7 @@ export default {
         grid-area: leftover;
 
         @media (orientation: landscape) {
-            transform: translate(calc(-100% - var(--gap) / 2), -50%);
+            transform: translate(calc(-100% - var(--gap) / 2), 50%);
         }
     }
 }
