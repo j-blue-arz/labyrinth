@@ -91,8 +91,8 @@ export default {
         height: var(--menubar-toggle-size);
         width: var(--menubar-toggle-size);
         position: fixed;
-        top: 2vmin;
-        left: 2vmin;
+        top: 1vmin;
+        left: 1vmin;
         @include drop-shadow;
         text-align: center;
         cursor: pointer;

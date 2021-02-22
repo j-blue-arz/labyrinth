@@ -69,8 +69,8 @@ body {
         display: grid;
 
         @media (orientation: landscape) {
-            grid-template-columns: 1fr auto 1fr;
-            grid-template-areas: ". game .";
+            grid-template-columns: 1vmin 1fr auto 1fr 1vmin;
+            grid-template-areas: ". . game . .";
         }
 
         @media (orientation: portrait) {

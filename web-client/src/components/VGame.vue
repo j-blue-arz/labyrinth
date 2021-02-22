@@ -150,6 +150,12 @@ export default {
         @media (orientation: landscape) {
             transform: translate(calc(-100% - var(--gap) / 2), 50%);
         }
+
+        @media (orientation: portrait) {
+            height: 11vmin;
+            place-self: end;
+            transform: translate(0px, 100%);
+        }
     }
 }
 </style>
