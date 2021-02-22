@@ -96,7 +96,6 @@ export default {
 <style lang="scss">
 .timer {
     height: 100%;
-    width: 100%;
     font-size: 3rem;
     user-select: none;
     letter-spacing: 0.1em;

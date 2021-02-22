@@ -95,7 +95,7 @@ export default {
 
         grid-template-columns: minmax(70vh, 100vh) $game-widget-width;
         grid-template-rows:
-            0 1fr var(--timer-height) var(--gap) calc(4 * var(--score-row-height)) var(--gap)
+            0 1fr var(--timer-height) var(--gap) calc(4 * var(--score-row-height) + 1px) var(--gap)
             auto 1fr;
         column-gap: var(--gap);
         grid-template-areas:
@@ -112,7 +112,7 @@ export default {
     @media (orientation: portrait) {
         grid-template-columns: 1fr 2fr 1fr;
         grid-template-rows:
-            var(--timer-height) minmax(70vw, 100vw) calc(2 * var(--score-row-height))
+            var(--timer-height) minmax(70vw, 100vw) calc(2 * var(--score-row-height) + 1px)
             1fr;
         grid-template-areas:
             ". timer leftover"
@@ -128,7 +128,6 @@ export default {
         display: block;
         height: 0;
         padding-bottom: 100%;
-        width: 100%;
     }
 
     &__timer {

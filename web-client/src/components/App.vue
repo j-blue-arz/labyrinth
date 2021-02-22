@@ -63,11 +63,9 @@ body {
 
 .app {
     height: 100%;
-    width: 100%;
 
     &__main {
         height: 100%;
-        width: 100%;
         display: grid;
 
         @media (orientation: landscape) {
@@ -76,38 +74,31 @@ body {
         }
 
         @media (orientation: portrait) {
-            grid-template-areas: "game";
+            grid-template-columns: 1vmin 1fr 1vmin;
+            grid-template-rows: 1vmin 1fr 1vmin;
+            grid-template-areas: ". . . " ". game ." ". . .";
         }
     }
 
     &__game {
         grid-area: game;
         height: 100%;
-        width: 100%;
     }
 }
 
 html {
-    font-size: 12px;
+    font-size: 11px;
+
+    @media (min-width: 320px) {
+        font-size: calc(11px + (100vw - 320px) / 40);
+    }
+
+    @media (min-width: 360px) {
+        font-size: calc(12px + 4 * (100vw - 360px) / 840);
+    }
 
     @media (min-width: 1200px) {
         font-size: 16px;
     }
-
-    @media (min-width: 320px) {
-        font-size: calc(12px + 4 * (100vw - 320px) / 880);
-    }
 }
-
-/*@media all and (orientation: landscape) {
-    .game__board {
-        height: 100%;
-    }
-}
-
-@media all and (orientation: portrait) {
-    .game__board {
-        width: 100%;
-    }
-}*/
 </style>

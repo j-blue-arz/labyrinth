@@ -1,25 +1,19 @@
 <template>
-    <tr class="score-row" :class="colorIndexClass">
-        <td class="score-row__current-player">
-            <span v-if="isTurn" class="score-row__current-player--marker"></span>
-        </td>
-        <td class="score-row__player-piece">
-            <v-player-piece
-                :xCenterPos="15"
-                :yCenterPos="15"
-                :maxSize="25"
-                :player="player"
-                :svgSize="30"
-                class="score-row__piece-symbol"
-            />
-        </td>
-        <td class="score-row__player-name">
-            <div class="player-name">
-                <p class="player-name__text">{{ playerName }}</p>
-            </div>
-        </td>
-        <td class="score-row__score-data">{{ player.score }}</td>
-    </tr>
+    <div class="score-row" :class="[colorIndexClass, { 'score-row--is-turn': isTurn }]">
+        <span v-if="isTurn" class="score-row__current-player--marker"></span>
+        <v-player-piece
+            :xCenterPos="15"
+            :yCenterPos="15"
+            :maxSize="25"
+            :player="player"
+            :svgSize="30"
+            class="score-row__piece-symbol"
+        />
+        <div class="score-row__player-name">
+            <p>{{ playerName }}</p>
+        </div>
+        <p class="score-row__score-data">{{ player.score }}</p>
+    </div>
 </template>
 
 <script>
@@ -54,66 +48,63 @@ export default {
 <style lang="scss">
 .score-row {
     height: var(--score-row-height);
-    line-height: calc(var(--score-row-height) / 3);
+    width: $game-widget-width;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    border: 2px solid transparent;
 
-    &--player-0 td:not(&__current-player) {
+    &--is-turn {
+        border: 2px solid $interaction-color;
+    }
+
+    &--player-0 {
         background: $color-player-0-secondary;
     }
 
-    &--player-1 td:not(&__current-player) {
+    &--player-1 {
         background: $color-player-1-secondary;
     }
 
-    &--player-2 td:not(&__current-player) {
+    &--player-2 {
         background: $color-player-2-secondary;
     }
 
-    &--player-3 td:not(&__current-player) {
+    &--player-3 {
         background: $color-player-3-secondary;
-    }
-
-    &__current-player {
-        position: relative;
-        text-align: center;
-    }
-
-    &__current-player--marker {
-        border: 10px solid $interaction-color;
-        border-radius: 50%;
-        display: inline-block;
     }
 
     &__player-piece {
         width: 3rem;
-        text-align: center;
+        display: flex;
+        align-items: center;
     }
 
     &__piece-symbol {
-        display: block;
-        margin: auto;
+        width: 3rem;
     }
 
     &__player-name {
-        width: 6.5rem;
+        --text-height: calc(var(--score-row-height) - 0.2rem);
+        width: 8rem;
+        line-height: calc(var(--text-height) / 3);
+        height: var(--text-height);
+        overflow: hidden;
+        border-right: 1px solid $color-ui-border;
+
+        & p {
+            overflow: hidden;
+            height: var(--text-height);
+            vertical-align: middle;
+            display: table-cell;
+        }
     }
 
     &__score-data {
-        border-left: 1px solid $color-ui-border;
         text-align: right;
         padding-right: 0.5rem;
-        width: 1.5rem;
-    }
-}
-
-.player-name {
-    height: 3rem;
-    overflow: hidden;
-
-    &__text {
-        overflow: hidden;
-        height: 3rem;
-        vertical-align: middle;
-        display: table-cell;
+        width: 2rem;
     }
 }
 </style>

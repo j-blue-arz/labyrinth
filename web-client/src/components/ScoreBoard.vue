@@ -1,11 +1,11 @@
 <template>
-    <table class="score-board">
+    <div class="score-board">
         <v-score-board-row
             v-for="player in players"
             :key="'score-row-' + player.id"
             :player="player"
         />
-    </table>
+    </div>
 </template>
 
 <script>
@@ -27,8 +27,11 @@ export default {
 
 <style lang="scss">
 .score-board {
-    width: 14rem;
-    border-collapse: collapse;
-    table-layout: fixed;
+    height: 100%;
+    display: flex;
+    flex-flow: column wrap;
+    align-items: flex-start;
+    align-content: center;
+    justify-content: start;
 }
 </style>

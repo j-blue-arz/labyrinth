@@ -16,7 +16,6 @@ export default {
 <style lang="scss">
 .footer__version {
     font-size: 0.8em;
-    width: 100%;
     text-align: center;
 }
 </style>

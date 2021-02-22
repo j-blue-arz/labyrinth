@@ -42,9 +42,19 @@ export default {
 
 <style lang="scss">
 .message-area {
-    padding: 1rem;
-    font-size: 1.2rem;
+    --line-height: 1.2;
+    --padding: 1rem;
+    --font-size: 1.2rem;
+    --num-lines: 3;
 
+    @media (orientation: portrait) {
+        --num-lines: 2;
+    }
+
+    padding: var(--padding);
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    min-height: calc(var(--font-size) * var(--line-height) * var(--num-lines) + var(--padding) * 2);
     @include game-widget;
 }
 </style>
