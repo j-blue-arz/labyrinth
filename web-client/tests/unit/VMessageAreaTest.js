@@ -86,7 +86,7 @@ const whenCountdownReaches = function(seconds) {
 };
 
 const thenMessageBoardIsInvisible = function() {
-    expect(wrapper.find("div").exists()).toBe(false);
+    expect(wrapper.find("div").isVisible()).toBe(false);
 };
 
 const thenMessageBoardIsVisible = function() {

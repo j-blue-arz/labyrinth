@@ -1,12 +1,18 @@
 <template>
     <svg
-        :x="$ui.boardOffset - borderWidth"
-        :y="$ui.boardOffset - borderWidth"
+        :x="-borderWidth"
+        :y="-borderWidth"
         :width="boardSize + 2 * borderWidth"
         :height="boardSize + 2 * borderWidth"
+        :viewBox="
+            `${-borderWidth} ${-borderWidth} ${boardSize + 2 * borderWidth} ${boardSize +
+                2 * borderWidth}`
+        "
     >
         <g>
             <rect
+                :x="-borderWidth"
+                :y="-borderWidth"
                 :width="boardSize + 2 * borderWidth"
                 :height="boardSize + 2 * borderWidth"
                 class="game-board__background"
@@ -26,20 +32,32 @@
                 ></v-maze-card>
             </transition-group>
         </g>
+        <v-move-animation
+            v-for="player in players"
+            :key="'player-' + player.id"
+            :player="player"
+            :maze-card-id="player.mazeCard.id"
+            :game="game"
+        ></v-move-animation>
     </svg>
 </template>
 
 <script>
 import VMazeCard from "@/components/VMazeCard.vue";
+import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 
 export default {
     name: "v-game-board",
     components: {
-        /* eslint-disable vue/no-unused-components */
-        VMazeCard
+        VMazeCard,
+        VMoveAnimation
     },
     props: {
+        game: {
+            type: Object,
+            required: true
+        },
         mazeSize: {
             type: Number,
             required: true
@@ -77,6 +95,9 @@ export default {
         },
         borderWidth: function() {
             return Math.floor(this.$ui.cardSize / 6);
+        },
+        players: function() {
+            return this.game.getPlayers();
         }
     },
     methods: {
@@ -99,14 +120,14 @@ export default {
             return null;
         },
         xPos(mazeCard) {
-            let xPos = this.$ui.cardSize * mazeCard.location.column + this.borderWidth;
+            let xPos = this.$ui.cardSize * mazeCard.location.column;
             if (this.drag.row === mazeCard.location.row) {
                 xPos += this.drag.offset;
             }
             return xPos;
         },
         yPos(mazeCard) {
-            let yPos = this.$ui.cardSize * mazeCard.location.row + this.borderWidth;
+            let yPos = this.$ui.cardSize * mazeCard.location.row;
             if (this.drag.column === mazeCard.location.column) {
                 yPos += this.drag.offset;
             }

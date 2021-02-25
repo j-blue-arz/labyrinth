@@ -75,8 +75,7 @@ export default {
             }
         },
         locationToPosition: function(location) {
-            let cardMidpoint = this.$ui.cardSize / 2;
-            let offset = cardMidpoint + this.$ui.boardOffset;
+            let offset = this.$ui.cardSize / 2;
             let x = location.column * this.$ui.cardSize + offset;
             let y = location.row * this.$ui.cardSize + offset;
             return [x, y];

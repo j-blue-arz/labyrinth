@@ -51,10 +51,10 @@ export default {
     },
     methods: {
         xPos(insertPanel) {
-            return this.$ui.cardSize * insertPanel.displayLocation.column + this.$ui.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.column;
         },
         yPos(insertPanel) {
-            return this.$ui.cardSize * insertPanel.displayLocation.row + this.$ui.boardOffset;
+            return this.$ui.cardSize * insertPanel.displayLocation.row;
         },
         onClick: function(event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {

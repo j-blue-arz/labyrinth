@@ -4,8 +4,7 @@ import App from "@/components/App.vue";
 Vue.config.productionTip = false;
 
 Vue.prototype.$ui = Object.freeze({
-    cardSize: 100,
-    boardOffset: 100
+    cardSize: 100
 });
 
 // https://stackoverflow.com/questions/36170425/detect-click-outside-element

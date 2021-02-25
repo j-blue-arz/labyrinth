@@ -1,5 +1,7 @@
 <template>
-    <div class="message-area" v-if="visible">{{ text }}</div>
+    <div class="message-area" :style="{ visibility: visible ? 'visible' : 'hidden' }">
+        {{ text }}
+    </div>
 </template>
 
 <script>
@@ -51,6 +53,7 @@ export default {
         --num-lines: 2;
     }
 
+    user-select: none;
     padding: var(--padding);
     font-size: var(--font-size);
     line-height: var(--line-height);

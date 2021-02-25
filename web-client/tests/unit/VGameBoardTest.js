@@ -1,4 +1,5 @@
 import { mount } from "@vue/test-utils";
+import Game from "@/model/game.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import MazeCard from "@/model/mazeCard.js";
@@ -28,6 +29,7 @@ describe("VGameBoard", () => {
     it("renders all VMazeCard components", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
+                game: new Game(),
                 mazeSize: 5,
                 boardSize: 500,
                 mazeCards: mazeCardListFactory(5),
@@ -38,26 +40,28 @@ describe("VGameBoard", () => {
         expect(gameBoard.findAll(VMazeCard).length).toBe(5 * 5);
     });
 
-    it("renders leftmost v-maze-card exactly at given borderWidth prop", () => {
+    it("renders leftmost v-maze-card exactly at 0", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
+                game: new Game(),
                 mazeSize: 7,
                 mazeCards: mazeCardListFactory(7)
             }
         });
 
         var xPos = findLowestPositionOfMazeCard(gameBoard, "x");
-        expect(xPos).toBe(16);
+        expect(xPos).toBe(0);
     });
 
-    it("renders topmost v-maze-card exactly at given borderWidth prop", () => {
+    it("renders topmost v-maze-card exactly at 0", () => {
         var gameBoard = mount(VGameBoard, {
             propsData: {
+                game: new Game(),
                 mazeSize: 5,
                 mazeCards: mazeCardListFactory(5)
             }
         });
         var yPos = findLowestPositionOfMazeCard(gameBoard, "y");
-        expect(yPos).toBe(16);
+        expect(yPos).toBe(0);
     });
 });

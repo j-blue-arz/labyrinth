@@ -1,6 +1,5 @@
 import { config } from "@vue/test-utils";
 
 config.mocks["$ui"] = Object.freeze({
-    cardSize: 100,
-    boardOffset: 0
+    cardSize: 100
 });

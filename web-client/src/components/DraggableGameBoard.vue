@@ -1,12 +1,17 @@
 <template>
     <v-game-board
-        @mousedown.native="startDrag($event)"
-        @mousemove.native="drag($event)"
-        @mouseup.native="endDrag($event)"
-        @mouseleave.native="endDrag($event)"
+        @mousedown.native="mouseDown($event)"
+        @mousemove.native="mouseMove($event)"
+        @mouseup.native="endDrag()"
+        @mouseleave.native="endDrag()"
+        @touchstart.native="startTouch($event)"
+        @touchmove.native="moveTouch($event)"
+        @touchend.native="endDrag()"
+        @touchcancel.native="endDrag()"
         :maze-size="mazeSize"
         :maze-cards="mazeCards"
         :interactive-maze-cards="interactiveMazeCards"
+        :game="game"
         :current-player-color="currentPlayerColor"
         :reachable-cards="reachableCards"
         :required-action="userAction"
@@ -48,7 +53,7 @@ export default {
     },
     data() {
         return {
-            mouseStart: null,
+            dragStart: null,
             dragLocation: null,
             dragOffset: 0,
             dragRow: null,
@@ -107,35 +112,30 @@ export default {
         }
     },
     methods: {
-        startDrag: function($event) {
-            this.endDrag();
+        startDrag: function(svgPosition) {
+            this.resetDrag();
             if (this.userAction === SHIFT_ACTION) {
-                let mousePosition = this.getMousePosition($event);
-                let location = this.getLocation(mousePosition);
+                let location = this.getLocation(svgPosition);
                 let mazeCard = this.getMazeCard(location);
                 if (mazeCard) {
                     if (this.isDraggable(location)) {
                         this.dragLocation = location;
-                        this.mouseStart = mousePosition;
+                        this.dragStart = svgPosition;
                     }
                 }
             }
         },
-        drag: function($event) {
-            if (this.dragLocation !== null) {
-                $event.preventDefault();
-                let mousePosition = this.getMousePosition($event);
-                let offset = this.mouseStart.to(mousePosition);
-                for (let direction of ["N", "S", "E", "W"]) {
-                    if (!this.possibleDragDirections.includes(direction)) {
-                        offset = offset.removeDirectionComponent(direction);
-                    }
+        drag: function(svgPosition) {
+            let offset = this.dragStart.to(svgPosition);
+            for (let direction of ["N", "S", "E", "W"]) {
+                if (!this.possibleDragDirections.includes(direction)) {
+                    offset = offset.removeDirectionComponent(direction);
                 }
-                if (Math.abs(offset.x) >= Math.abs(offset.y)) {
-                    this.dragHorizontally(offset);
-                } else {
-                    this.dragVertically(offset);
-                }
+            }
+            if (Math.abs(offset.x) >= Math.abs(offset.y)) {
+                this.dragHorizontally(offset);
+            } else {
+                this.dragVertically(offset);
             }
         },
         dragHorizontally: function(offset) {
@@ -151,15 +151,38 @@ export default {
         bound: function(value) {
             return bound(value, -this.DRAG_BOUND, this.DRAG_BOUND);
         },
-        endDrag: function($event) {
+        endDrag: function() {
             if (Math.abs(this.dragOffset) > this.SHIFT_DRAG_THRESHOLD) {
                 this.emitShiftEvent();
             }
+            this.resetDrag();
+        },
+        resetDrag: function() {
             this.dragRow = null;
             this.dragColumn = null;
-            this.mouseStart = null;
+            this.dragStart = null;
             this.dragLocation = null;
             this.dragOffset = 0;
+        },
+        mouseDown: function($event) {
+            this.startDrag(this.getMousePosition($event));
+        },
+        mouseMove: function($event) {
+            if (this.dragLocation !== null) {
+                $event.preventDefault();
+                this.drag(this.getMousePosition($event));
+            }
+        },
+        startTouch: function($event) {
+            if (this.userAction === SHIFT_ACTION) {
+                $event.preventDefault();
+            }
+            this.startDrag(this.getTouchPosition($event));
+        },
+        moveTouch: function($event) {
+            if (this.dragLocation !== null) {
+                this.drag(this.getTouchPosition($event));
+            }
         },
         isDraggable: function(location) {
             for (let shiftLocation of this.shiftLocations) {
@@ -190,13 +213,20 @@ export default {
         },
         getMousePosition: function(evt) {
             const svg = evt.currentTarget;
-            const CTM = svg.getScreenCTM();
-            return new Vector((evt.clientX - CTM.e) / CTM.a, (evt.clientY - CTM.f) / CTM.d);
+            return this.getSVGPosition(evt.clientX, evt.clientY, svg);
         },
-        getLocation: function(mousePosition) {
-            let locationVector = mousePosition
-                .minus(this.BOARD_OFFSET_VECTOR)
-                .dividedBy(this.$ui.cardSize);
+        getTouchPosition: function(evt) {
+            const clientX = evt.touches.item(0).clientX;
+            const clientY = evt.touches.item(0).clientY;
+            const svg = evt.currentTarget;
+            return this.getSVGPosition(clientX, clientY, svg);
+        },
+        getSVGPosition: function(clientX, clientY, svg) {
+            const CTM = svg.getScreenCTM();
+            return new Vector((clientX - CTM.e) / CTM.a, (clientY - CTM.f) / CTM.d);
+        },
+        getLocation: function(svgPosition) {
+            let locationVector = svgPosition.dividedBy(this.$ui.cardSize);
             let column = Math.floor(locationVector.x);
             let row = Math.floor(locationVector.y);
             return loc(row, column);
@@ -212,7 +242,6 @@ export default {
         }
     },
     created() {
-        this.BOARD_OFFSET_VECTOR = new Vector(this.$ui.boardOffset, this.$ui.boardOffset);
         this.DRAG_BOUND = 100;
         this.SHIFT_DRAG_THRESHOLD = this.$ui.cardSize / 2;
     }

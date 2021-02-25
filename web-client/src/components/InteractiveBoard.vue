@@ -1,5 +1,5 @@
 <template>
-    <svg :viewBox="`0 0 ${interactionSize} ${interactionSize}`" class="interactive-board">
+    <svg :viewBox="viewBox" class="interactive-board">
         <v-svg-defs></v-svg-defs>
         <draggable-game-board
             @player-move="onPlayerMove"
@@ -9,14 +9,8 @@
             :reachable-cards="reachableMazeCards"
             :user-action="userAction"
         ></draggable-game-board>
-        <v-move-animation
-            v-for="player in players"
-            :key="'player-' + player.id"
-            :player="player"
-            :maze-card-id="player.mazeCard.id"
-            :game="game"
-        ></v-move-animation>
         <insert-panels
+            v-if="!isTouchDevice"
             @player-shift="onPlayerShift"
             :interaction="isMyTurnToShift"
             :game="game"
@@ -28,7 +22,6 @@
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
-import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
 import * as action from "@/model/player.js";
 import Graph from "@/model/mazeAlgorithm.js";
@@ -40,7 +33,6 @@ export default {
         DraggableGameBoard,
         InsertPanels,
         VMazeCard,
-        VMoveAnimation,
         VSvgDefs
     },
     props: {
@@ -86,9 +78,6 @@ export default {
                 this.game.nextAction.action === action.SHIFT_ACTION
             );
         },
-        players: function() {
-            return this.game.getPlayers();
-        },
         userAction: function() {
             let player = this.game.getPlayer(this.userPlayerId);
             if (player) {
@@ -96,8 +85,18 @@ export default {
             }
             return action.NO_ACTION;
         },
-        interactionSize: function() {
-            return this.$ui.cardSize * (this.mazeSize + 2);
+        isTouchDevice: function() {
+            // https://stackoverflow.com/a/4819886/359287
+            return (
+                "ontouchstart" in window ||
+                navigator.maxTouchPoints > 0 ||
+                navigator.msMaxTouchPoints > 0
+            );
+        },
+        viewBox: function() {
+            const offset = this.isTouchDevice ? -16 : -100;
+            const interactionSize = this.$ui.cardSize * this.mazeSize + 2 * -offset;
+            return `${offset} ${offset} ${interactionSize} ${interactionSize}`;
         }
     },
     methods: {
