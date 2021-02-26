@@ -42,7 +42,7 @@ export default {
             // this is a heuristic to detect a game restart
             // For the case where a game is restarted with a different size,
             // but the user turn does not change
-            if (this.userPlayer.isHisTurn()) {
+            if (this.userPlayer && this.userPlayer.isHisTurn()) {
                 this.visible = true;
                 this.countdown.restartCountdown();
             }
@@ -52,7 +52,7 @@ export default {
             // For the case where a game is restarted with the same size,
             // but the user turn does not change
             // This heuristic might fail!
-            if (this.userPlayer.isHisTurn()) {
+            if (this.userPlayer && this.userPlayer.isHisTurn()) {
                 this.visible = true;
                 this.countdown.restartCountdown();
             }
