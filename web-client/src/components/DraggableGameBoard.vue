@@ -1,13 +1,9 @@
 <template>
     <v-game-board
-        @mousedown.native="mouseDown($event)"
-        @mousemove.native="mouseMove($event)"
-        @mouseup.native="endDrag()"
-        @mouseleave.native="endDrag()"
-        @touchstart.native="startTouch($event)"
-        @touchmove.native="moveTouch($event)"
-        @touchend.native="endDrag()"
-        @touchcancel.native="endDrag()"
+        @pointerdown.native="pointerDown($event)"
+        @pointermove.native="pointerMove($event)"
+        @pointerup.native="endDrag()"
+        @pointercancel.native="pointercancel($event)"
         :maze-size="mazeSize"
         :maze-cards="mazeCards"
         :interactive-maze-cards="interactiveMazeCards"
@@ -164,24 +160,12 @@ export default {
             this.dragLocation = null;
             this.dragOffset = 0;
         },
-        mouseDown: function($event) {
-            this.startDrag(this.getMousePosition($event));
+        pointerDown: function($event) {
+            this.startDrag(this.getPointerPosition($event));
         },
-        mouseMove: function($event) {
+        pointerMove: function($event) {
             if (this.dragLocation !== null) {
-                $event.preventDefault();
-                this.drag(this.getMousePosition($event));
-            }
-        },
-        startTouch: function($event) {
-            if (this.userAction === SHIFT_ACTION) {
-                $event.preventDefault();
-            }
-            this.startDrag(this.getTouchPosition($event));
-        },
-        moveTouch: function($event) {
-            if (this.dragLocation !== null) {
-                this.drag(this.getTouchPosition($event));
+                this.drag(this.getPointerPosition($event));
             }
         },
         isDraggable: function(location) {
@@ -211,15 +195,9 @@ export default {
                 this.$emit("player-shift", shiftLocation);
             }
         },
-        getMousePosition: function(evt) {
+        getPointerPosition: function(evt) {
             const svg = evt.currentTarget;
             return this.getSVGPosition(evt.clientX, evt.clientY, svg);
-        },
-        getTouchPosition: function(evt) {
-            const clientX = evt.touches.item(0).clientX;
-            const clientY = evt.touches.item(0).clientY;
-            const svg = evt.currentTarget;
-            return this.getSVGPosition(clientX, clientY, svg);
         },
         getSVGPosition: function(clientX, clientY, svg) {
             const CTM = svg.getScreenCTM();
