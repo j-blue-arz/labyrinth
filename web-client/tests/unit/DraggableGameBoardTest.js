@@ -175,7 +175,7 @@ const givenMouseDownAt = function(location) {
     const clientX = location.column * 100 + 50;
     const clientY = location.row * 100 + 50;
     mousePosition = { clientX: clientX, clientY: clientY };
-    wrapper.trigger("mousedown", mousePosition);
+    wrapper.trigger("pointerdown", mousePosition);
 };
 
 const givenMouseIsMoved = function(offset) {
@@ -186,11 +186,11 @@ const whenMouseIsMoved = function(offset) {
     const clientX = mousePosition.clientX + offset.x;
     const clientY = mousePosition.clientY + offset.y;
     mousePosition = { clientX: clientX, clientY: clientY };
-    wrapper.trigger("mousemove", mousePosition);
+    wrapper.trigger("pointermove", mousePosition);
 };
 
 const whenMouseIsReleased = function() {
-    wrapper.trigger("mouseup");
+    wrapper.trigger("pointerup");
 };
 
 const thenRowIsDragged = function(expectedRow) {
