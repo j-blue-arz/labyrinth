@@ -1,5 +1,8 @@
 <template>
-    <div class="footer__version">Version: {{ version }}</div>
+    <footer class="footer__version">
+        Version: {{ version }}&nbsp;&ndash;&nbsp;
+        <a href="help.html" target="_blank" rel="noopener noreferrer">Help</a>
+    </footer>
 </template>
 
 <script>

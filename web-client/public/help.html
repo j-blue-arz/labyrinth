@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta
+            name="description"
+            content="Play the labyrinth game, with your friends, against bots, or simply by yourself."
+        />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+        <title>Labyrinth</title>
+        <style>
+            .objective {
+                stroke: #f39;
+                fill: #f39;
+            }
+
+            .objective line {
+                stroke-width: 2px
+            }
+
+            .player-piece circle {
+                fill: #284795;
+                stroke: #000;
+                stroke-width: 3px
+            }
+
+            .player-piece text {
+                fill: #fff;
+                font-weight: bold;
+                font-family: sans-serif;
+            }
+
+            .inline {
+                height: 1.2em;
+                width: 1.2em;
+                vertical-align: bottom;
+            }
+        </style>
+    </head>
+    <body>
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol id="objective" class="objective" viewBox="-10 -30 40 60">
+                <title>objective</title> 
+                <desc>score of reaching player is increased by one</desc>
+                <line x1="-4" y1="25" x2="-4" y2="-25"></line><polygon points="-4,-25, 22,-12.5, -4,0"></polygon>
+            </symbol>
+            <symbol id="player-piece" viewBox="-20 -20 40 40" class="player-piece">
+                <circle cx="0" cy="0" r="14"></circle>
+                <text x="0" y="0" textLength="14" font-size="25" dominant-baseline="central" text-anchor="middle">0</text>
+            </symbol>
+        </svg>
+        <section>
+            <h3>What game is this?</h3>
+            This game is an adaption of a board game called <cite><a href="https://en.wikipedia.org/wiki/Labyrinth_(board_game)">Labyrinth</a></cite>.
+            The rules follow the rules of the original game, with the notable exception that all players have the same objective.
+        </section>
+        <section>
+            <h3>What is the objective?</h3>
+            Move your piece <svg class="inline"><use xlink:href="#player-piece" /></svg> through the labyrinth and reach the objective <svg class="inline"><use xlink:href="#objective" /></svg>.
+            You can play alone, trying to find the minimum number of moves to reach the <svg class="inline"><use xlink:href="#objective" /></svg>.
+            You can also play against others and prevent them from reaching the <svg class="inline"><use xlink:href="#objective" /></svg>.
+            The pathways of the labyrinth are altered at each player's turn.
+        </section>
+        <section>
+            <h3>What do I have to do?</h3>
+            When it is your turn to play (as marked by the green box in the score board), you need to perform two actions:
+            <ul>
+                <li>First, rearrange the labyrinth.
+                    To do so, drag the maze cards along a row or column. Every second row and column is draggable.
+                    This action inserts the leftover maze card.
+                    You can also rotate leftover before inserting it.</li>
+                <li>Then move your piece, by clicking on a maze card connected to your current position. The available cards are marked with your color.</li>
+            </ul>
+            The no-pushback rule disallows reverting the previous player's shift.
+            When the <svg class="inline"><use xlink:href="#objective" /></svg> is reached, a new objective location is chosen randomly.
+        </section>
+        
+    </body>
+</html>
