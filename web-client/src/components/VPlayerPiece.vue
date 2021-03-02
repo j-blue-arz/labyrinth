@@ -2,15 +2,18 @@
     <svg
         ref="playerPiece"
         class="player-piece"
-        :class="[
-            { 'player-piece__user': isUser, 'player-piece__user--to-move': isUser && interaction },
-            colorIndexClass
-        ]"
+        :class="colorIndexClass"
         :viewBox="`0 0 ${svgSize} ${svgSize}`"
         :height="`${svgSize}px`"
         :width="`${svgSize}px`"
     >
-        <circle :cx="xCenterPos" :cy="yCenterPos" :r="maxSize / 2" class="player-piece__shape" />
+        <circle
+            :cx="xCenterPos"
+            :cy="yCenterPos"
+            :r="maxSize / 2"
+            class="player-piece__shape"
+            :class="{ 'player-piece--is-user': isUser }"
+        />
         <circle
             v-if="interaction && isUser"
             :cx="xCenterPos"
@@ -24,6 +27,7 @@
             :textLength="maxSize / 2"
             :font-size="maxSize - 3"
             class="player-piece__text"
+            :class="{ 'player-piece--is-user': isUser }"
             dominant-baseline="central"
             text-anchor="middle"
         >
@@ -90,9 +94,9 @@ export default {
         pointer-events: none;
         font-weight: bold;
         font-family: sans-serif;
-        opacity: $text-opacity-player-not-user;
+        opacity: 0.8;
 
-        .player-piece__user {
+        &.player-piece--is-user {
             opacity: 1;
         }
     }
@@ -107,11 +111,8 @@ export default {
     &__player-0 {
         .player-piece__shape {
             fill: $color-player-0;
-
-            .player-piece__user {
-                fill: $color-player-0-secondary;
-            }
         }
+
         .player-piece__text {
             fill: $text-color-player-0;
         }
@@ -120,11 +121,8 @@ export default {
     &__player-1 {
         .player-piece__shape {
             fill: $color-player-1;
-
-            .player-piece__user {
-                fill: $color-player-1-secondary;
-            }
         }
+
         .player-piece__text {
             fill: $text-color-player-1;
         }
@@ -133,11 +131,8 @@ export default {
     &__player-2 {
         .player-piece__shape {
             fill: $color-player-2;
-
-            .player-piece__user {
-                fill: $color-player-2-secondary;
-            }
         }
+
         .player-piece__text {
             fill: $text-color-player-2;
         }
@@ -146,11 +141,8 @@ export default {
     &__player-3 {
         .player-piece__shape {
             fill: $color-player-3;
-
-            .player-piece__user {
-                fill: $color-player-3-secondary;
-            }
         }
+
         .player-piece__text {
             fill: $text-color-player-3;
         }

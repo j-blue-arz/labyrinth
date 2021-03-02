@@ -31,8 +31,8 @@ describe("VPlayerPiece", () => {
         player.isUser = true;
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
-        let expectedClass = "player-piece__user";
-        expect(svgElement.classes()).toContain(expectedClass);
+        let textElement = svgElement.find("text");
+        expect(textElement.classes()).toContain("player-piece--is-user");
     });
 
     it("does not assign user class to pieces who are not owned by the user", () => {
@@ -41,17 +41,7 @@ describe("VPlayerPiece", () => {
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
         svgElement.classes().forEach(elementClass => {
-            expect(elementClass).toEqual(expect.not.stringContaining("player-piece__user"));
+            expect(elementClass).toEqual(expect.not.stringContaining("player-piece--is-user"));
         });
-    });
-
-    it("assigns a class to the piece of the user, when it is his time to move", () => {
-        let player = new Player(0);
-        player.isUser = true;
-        player._turnAction = "MOVE";
-        let playerPiece = wrapperFactory(player);
-        let svgElement = playerPiece.find({ ref: "playerPiece" });
-        let expectedClass = "player-piece__user--to-move";
-        expect(svgElement.classes()).toContain(expectedClass);
     });
 });
