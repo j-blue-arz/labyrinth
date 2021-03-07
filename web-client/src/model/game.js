@@ -143,6 +143,9 @@ export default class Game {
     addPlayer(player) {
         if (!this.hasPlayer(player.id)) {
             this._players.push(player);
+            this._players.sort(function(p1, p2) {
+                return p1.id - p2.id;
+            });
         }
     }
 
@@ -281,9 +284,6 @@ export default class Game {
 
     _playersFromApi(apiState) {
         let toRemove = new Set(this._players.map(player => player.id));
-        apiState.players.sort(function(p1, p2) {
-            return p1.id - p2.id;
-        });
         for (let index = 0; index < apiState.players.length; index++) {
             let apiPlayer = apiState.players[index];
             let playerCard = this.mazeCardById(apiPlayer.mazeCardId);
