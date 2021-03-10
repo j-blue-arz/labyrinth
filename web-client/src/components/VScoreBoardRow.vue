@@ -1,6 +1,5 @@
 <template>
     <div class="score-row" :class="[colorIndexClass, { 'score-row--is-turn': isTurn }]">
-        <span v-if="isTurn" class="score-row__current-player--marker"></span>
         <v-player-piece
             :xCenterPos="15"
             :yCenterPos="15"
@@ -39,7 +38,7 @@ export default {
             return this.player.getLabel();
         },
         isTurn: function() {
-            return this.player.hasToMove() || this.player.hasToShift();
+            return this.player.isHisTurn();
         }
     }
 };
@@ -57,6 +56,9 @@ export default {
 
     &--is-turn {
         border: 2px solid $interaction-color;
+        @include drop-shadow;
+        transform: scale(1.05);
+        z-index: 10;
     }
 
     &--player-0 {

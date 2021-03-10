@@ -30,7 +30,7 @@ export default {
     height: 100%;
     display: flex;
     flex-flow: column wrap;
-    align-items: flex-start;
+    align-items: center;
     align-content: center;
     justify-content: start;
 }
