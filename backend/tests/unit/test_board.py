@@ -41,9 +41,7 @@ def test_after_series_of_creates_and_removes_no_corners_empty():
     board.create_piece()
     board.create_piece()
     assert len(board.pieces) == 4
-    piece_cards = set()
-    for piece in board.pieces:
-        piece_cards.add(piece.maze_card)
+    piece_cards = {piece.maze_card for piece in board.pieces}
     assert len(piece_cards) == 4
 
 
@@ -88,9 +86,7 @@ def test_move_new_objective_locations_after_reaching_location():
 
 def _assert_all_piece_and_objective_location_different(board):
     """ asserts for a given Board instance """
-    card_ids = set()
-    for piece in board.pieces:
-        card_ids.add(piece.maze_card.identifier)
+    card_ids = {piece.maze_card.identifier for piece in board.pieces}
     card_ids.add(board.objective_maze_card.identifier)
     assert len(card_ids) == len(board.pieces) + 1
 

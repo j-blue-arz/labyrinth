@@ -327,7 +327,6 @@ class Board:
         assert piece not in self._pieces
         self._place_piece_start_location(piece)
         self._pieces.append(piece)
-        self._objective_maze_card = self._find_new_objective_maze_card()
 
     def _place_piece_start_location(self, piece):
         piece_index = piece.piece_index
@@ -415,8 +414,10 @@ class Board:
 
     def _find_new_objective_maze_card(self):
         """ Finds a random maze card not occupied by a player's piece """
+        start_locations = self._start_locations()
+        possible_locations = [location for location in self._maze.maze_locations if location not in start_locations]
         maze_cards = set([self._maze[location]
-                          for location in self._maze.maze_locations] + [self._leftover_card])
+                          for location in possible_locations] + [self._leftover_card])
         for piece in self._pieces:
             maze_cards.discard(piece.maze_card)
         return random.choice(tuple(maze_cards))
