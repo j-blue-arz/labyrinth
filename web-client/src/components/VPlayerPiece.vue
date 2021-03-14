@@ -1,31 +1,25 @@
 <template>
-    <svg
-        ref="playerPiece"
-        class="player-piece"
-        :class="colorIndexClass"
-        :viewBox="`0 0 ${svgSize} ${svgSize}`"
-        :height="`${svgSize}px`"
-        :width="`${svgSize}px`"
-    >
+    <svg ref="playerPiece" class="player-piece" :class="colorIndexClass" viewBox="0 0 30 30">
         <circle
-            :cx="xCenterPos"
-            :cy="yCenterPos"
-            :r="maxSize / 2"
+            cx="15"
+            cy="15"
+            r="12.5"
             class="player-piece__shape"
             :class="{ 'player-piece--is-user': isUser }"
+            :filter="interaction ? 'url(#drop-shadow)' : ''"
         />
         <circle
             v-if="interaction && isUser"
-            :cx="xCenterPos"
-            :cy="yCenterPos"
-            :r="maxSize / 2 + 2"
+            cx="15"
+            cy="15"
+            r="14.5"
             class="player-piece__halo"
         ></circle>
         <text
-            :x="xCenterPos"
-            :y="yCenterPos"
-            :textLength="maxSize / 2"
-            :font-size="maxSize - 3"
+            x="15"
+            y="15"
+            textLength="12.5"
+            font-size="22"
             class="player-piece__text"
             :class="{ 'player-piece--is-user': isUser }"
             dominant-baseline="central"
@@ -54,15 +48,6 @@ export default {
             type: Number,
             required: true
         },
-        maxSize: {
-            type: Number,
-            required: true
-        },
-        svgSize: {
-            type: Number,
-            required: false,
-            default: 100
-        },
         interaction: {
             type: Boolean,
             required: false,
@@ -85,6 +70,8 @@ export default {
 
 <style lang="scss">
 .player-piece {
+    overflow: visible;
+
     &__shape {
         stroke: $color-player-stroke;
         stroke-width: 3px;

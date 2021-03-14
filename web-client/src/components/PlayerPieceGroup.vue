@@ -2,12 +2,13 @@
     <g>
         <v-player-piece
             v-for="(player, index) in players"
-            :xCenterPos="pieceCenters[index].x"
-            :yCenterPos="pieceCenters[index].y"
-            :maxSize="pieceSize"
+            :x="pieceOrigins[index].x"
+            :y="pieceOrigins[index].y"
             :key="'piece-' + player.id"
             :player="player"
-            :interaction="player.hasToMove()"
+            :interaction="player.isHisTurn()"
+            :width="pieceSizes[index]"
+            :height="pieceSizes[index]"
         />
     </g>
 </template>
@@ -16,7 +17,7 @@
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 
 const smallPieceSizeFactor = 0.7;
-const smallPieceCircleRadiusFactor = 0.6;
+const smallPieceCircleRadiusFactor = 0.5;
 
 export default {
     name: "player-piece-group",
@@ -38,12 +39,19 @@ export default {
         }
     },
     computed: {
-        pieceSize: function() {
-            if (this.players.length === 1) {
-                return Math.floor(this.maxSize);
-            } else {
-                return Math.floor(this.maxSize * smallPieceSizeFactor);
-            }
+        pieceSizes: function() {
+            const pieceSize =
+                this.players.length === 1 ? this.maxSize : this.maxSize * smallPieceSizeFactor;
+            const turnFactor = 1.1;
+            return this.players
+                .map(player => (player.isHisTurn() ? pieceSize * turnFactor : pieceSize))
+                .map(size => Math.floor(size));
+        },
+        pieceOrigins: function() {
+            return this.pieceCenters.map((center, index) => ({
+                x: center.x - this.pieceSizes[index] / 2,
+                y: center.y - this.pieceSizes[index] / 2
+            }));
         },
         pieceCenters: function() {
             var numPieces = this.players.length;

@@ -85,6 +85,7 @@ export default {
 
     &__piece-symbol {
         width: 3rem;
+        height: 2rem;
     }
 
     &__player-name {

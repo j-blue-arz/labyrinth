@@ -54,26 +54,6 @@ describe("VMazeCard", () => {
         expect(wrapper.findAll(".player-piece").length).toBe(1);
     });
 
-    it("renders two players without overlap", () => {
-        var mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.addPlayer(Player.withId(0));
-        mazeCard.addPlayer(Player.withId(1));
-        const wrapper = wrapperFactory({
-            mazeCard: mazeCard
-        });
-        var playerPieces = wrapper.findAll(".player-piece__shape");
-        expect(playerPieces.length).toBe(2);
-        var cx0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("cx"));
-        var cy0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("cy"));
-        var cx1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("cx"));
-        var cy1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("cy"));
-        var r0 = Number.parseFloat(playerPieces.at(0).element.getAttribute("r"));
-        var r1 = Number.parseFloat(playerPieces.at(1).element.getAttribute("r"));
-        var distance = Math.sqrt(Math.pow(cx0 - cx1, 2) + Math.pow(cy0 - cy1, 2));
-        var radiusSums = r0 + r1;
-        expect(distance).toBeGreaterThan(radiusSums);
-    });
-
     it("renders an objective if MazeCard has one", () => {
         let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
         mazeCard.hasObject = true;

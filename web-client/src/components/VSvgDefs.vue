@@ -1,5 +1,22 @@
 <template>
     <defs>
+        <filter
+            id="drop-shadow"
+            x="-50%"
+            y="-50%"
+            width="200%"
+            height="200%"
+            filterUnits="userSpaceOnUse"
+        >
+            <feGaussianBlur result="shadowBlur" in="SourceAlpha" stdDeviation="5" />
+            <feOffset result="shadow" in="shadowBlur" dx="6" dy="6" />
+            <feFlood flood-color="#000000" />
+            <feComposite in2="shadow" operator="in" />
+            <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
         <filter id="plasticity" x="0" y="0" width="150%" height="150%" filterUnits="userSpaceOnUse">
             <feGaussianBlur result="blur" in="SourceAlpha" stdDeviation="3" />
             <feSpecularLighting

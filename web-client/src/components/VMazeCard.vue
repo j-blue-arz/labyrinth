@@ -120,7 +120,7 @@ export default {
             xPosAnimated: 0,
             yPosAnimated: 0,
             pathWidth: 37,
-            piecesSize: 28,
+            piecesSize: 33,
             positionAnimationThreshold: 40
         };
     },
