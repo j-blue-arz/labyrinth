@@ -37,7 +37,7 @@ export default {
 
 <style lang="scss">
 * {
-    font-family: Helvetica, sans-serif;
+    font-family: "Play", Helvetica, sans-serif;
 }
 
 *,
