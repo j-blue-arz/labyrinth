@@ -11,12 +11,7 @@ import numpy as np
 import pandas as pd
 
 
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
+@click.command()
 @click.argument('benchmark_file')
 @click.argument('outimage')
 @click.option("--nrows", default=2, show_default=True)
@@ -56,4 +51,4 @@ def plot(benchmark_file, outimage, nrows, ncols, algo_name):
 
 
 if __name__ == "__main__":
-    cli()
+    plot()

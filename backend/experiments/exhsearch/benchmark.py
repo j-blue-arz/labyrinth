@@ -1,9 +1,4 @@
-""" This module runs benchmarks for an external library.
-
-There are two commands:
-- testcases runs the instances defined in the tests,
-- instances runs the instances from a given folder, defined by a json-format.
-"""
+""" This module runs benchmarks for an external library."""
 import csv
 import glob
 import os
@@ -11,41 +6,18 @@ import timeit
 
 import click
 
-from tests.unit.test_exhaustive_search import CASES_PARAMS
 from experiments import serialization
 import labyrinth.model.external_library as external
-import tests.unit.factories as setup
 
 
-@click.group()
-def cli():
-    pass
-
-
-@cli.command(name="testcases")
-@click.option("--case", "case_name", default="",
-              help="Name of a specific test-case. If none given, all test-cases are run.")
-@click.option("--repeats", default=5)
-@click.option("--outfile", required=True)
-@click.option("--library", required=True)
-@click.option("--only-min/--all-values", default=False)
-def benchmark_testcases(case_name, repeats, outfile, library, only_min):
-    cases = [case_name] if case_name else CASES_PARAMS.keys()
-    benchmark_results = [benchmark(library, repeats, testcase_key=case_name) for case_name in cases]
-    result = {name: value for name, value in benchmark_results}
-    if only_min:
-        result = {case_name: [min(values)] for case_name, values in result.items()}
-    _write_csv(result, outfile)
-
-
-@cli.command(name="instances")
+@click.command()
 @click.option("--folder", "instance_folder", required=True)
 @click.option("--outfile", required=True)
 @click.option("--library", required=True)
 @click.option("--pattern", default="*.json",
               help="Name of a specific test-case. If none given, all test-cases are run.")
 @click.option("--repeats", default=5)
-@click.option("--only-min/--all-values", default=False)
+@click.option("--only-min/--all-values", default=True)
 def benchmark_instances(instance_folder, outfile, library, pattern, repeats, only_min):
     instance_files = glob.glob(os.path.join(instance_folder, pattern))
     print(f"Running {len(instance_files)} benchmarks..")
@@ -56,24 +28,15 @@ def benchmark_instances(instance_folder, outfile, library, pattern, repeats, onl
     _write_csv(result, outfile)
 
 
-def benchmark(library, repeats, testcase_key=None, instance_file=None):
+def benchmark(library, repeats, instance_file):
     """ Runs the benchmark for the given test case.
 
     Reports <repeat> runs in seconds.
     """
-    if testcase_key:
-        board, piece, name = _create_board_from_test_key(testcase_key)
-    elif instance_file:
-        board, piece, name = _create_board_from_instance_file(instance_file)
+    board, piece, name = _create_board_from_instance_file(instance_file)
     print(f"Running benchmark {name}..")
     optimizer = external.ExternalLibraryBinding(library, board, piece)
     return name, timeit.Timer(optimizer.find_optimal_action).repeat(repeats, 1)
-
-
-def _create_board_from_test_key(key):
-    param_dict = setup.param_tuple_to_param_dict(*(CASES_PARAMS[key]))
-    board = setup.create_board_and_pieces(**param_dict)
-    return board, board.pieces[0], key
 
 
 def _create_board_from_instance_file(filename):
@@ -94,4 +57,4 @@ def _write_csv(result_dict, outfile):
 
 
 if __name__ == "__main__":
-    cli()
+    benchmark_instances()

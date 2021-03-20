@@ -158,11 +158,7 @@ def _get_bench_names(files):
 
 
 def _longest_common_prefix(filenames):
-    result = ""
-    for chars in zip(*filenames):
-        if len(set(chars)) == 1:
-            result += chars[0]
-    return result
+    return "".join(chars[0] for chars in zip(*filenames) if len(set(chars)) == 1)
 
 
 def _label_depths(fig, depths):

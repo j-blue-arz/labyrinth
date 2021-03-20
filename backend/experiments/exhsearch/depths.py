@@ -1,4 +1,13 @@
-""" Measures the correlation between maze size and required search depth. """
+""" Measures the correlation between maze size and required search depth.
+
+Usage:
+    python depths.py count --outfile temp.csv --library ../../instance/lib/libexhsearch.so
+    python depths.py plot temp.csv depths.png
+
+See
+    python depths.py --help
+for further instructions.
+"""
 import csv
 import time
 from random import randint
@@ -35,7 +44,7 @@ def cli():
 
 
 @cli.command()
-@click.option("--outfile", required=True)
+@click.option("--outfile", help='Path to a .csv file', required=True)
 @click.option("--maze-size", "-ms", "maze_sizes", default=[7], multiple=True, show_default=True,
               type=int, help='Multiple values possible, e.g. -ms 7 -ms 9')
 @click.option("--runs", default=1000, show_default=True)

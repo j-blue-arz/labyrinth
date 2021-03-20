@@ -6,8 +6,8 @@ class CompletePathLibraryBinding(external.ExternalLibraryBinding):
     which reach the objective. This subclass repeatedly calls the library to create such a path."""
 
     def __init__(self, path, board, previous_shift_location=None):
-        piece = board.pieces[0]
-        external.ExternalLibraryBinding.__init__(self, path, board, piece, previous_shift_location)
+        self._piece = board.pieces[0]
+        external.ExternalLibraryBinding.__init__(self, path, board, self._piece, previous_shift_location)
 
     def find_optimal_actions(self):
         """ repeatedly calls library to retrieve all actions to reach the objective """
