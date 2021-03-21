@@ -269,6 +269,8 @@ private:
 
 std::list<IterativeDeepening> iterative_deepening_searches{};
 
+SearchStatus last_search_status{0, false};
+
 } // namespace
 
 inline bool operator>(const Evaluation& lhs, const Evaluation& rhs) noexcept {
@@ -303,6 +305,7 @@ PlayerAction iterateMinimax(const SolverInstance& solver_instance, std::unique_p
     auto iterative_deepening =
         iterative_deepening_searches.emplace(iterative_deepening_searches.end(), std::move(evaluator), solver_instance);
     auto result = iterative_deepening->iterateMinimax();
+    last_search_status = SearchStatus{iterative_deepening->getCurrentSearchDepth(), iterative_deepening->currentResultIsTerminal()};
     iterative_deepening_searches.erase(iterative_deepening);
     return result;
 }
@@ -316,7 +319,7 @@ SearchStatus getSearchStatus() {
         auto& search = iterative_deepening_searches.back();
         return SearchStatus{search.getCurrentSearchDepth(), search.currentResultIsTerminal()};
     } else {
-        return SearchStatus{0, false};
+        return last_search_status;
     }
 }
 
