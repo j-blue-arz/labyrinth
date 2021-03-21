@@ -58,8 +58,8 @@ def _get_increment(sample_row):
 @click.argument("infile")
 @click.argument("outimage")
 @click.option("--threshold", default=3.0, show_default=True,
-              help="A sample time point. A vertical line will be drawn at this point, it \
-              will be annotated with the number of achieved depth up to this sample point")
+              help="""A sample time point. A vertical line will be drawn at this point, it
+              will be annotated with the number of achieved depth up to this sample point""")
 @click.option("--min", "min_time", default=0.1, show_default=True)
 @click.option("--max", "max_time", default=10.0, show_default=True)
 def plot(infile, outimage, threshold, min_time, max_time):

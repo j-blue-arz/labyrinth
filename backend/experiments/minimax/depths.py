@@ -12,21 +12,18 @@ from experiments.minimax.sampler import observe_search_status
 from experiments import serialization
 
 
-@click.group()
-def cli():
-    pass
-
-
-@cli.command()
-@click.option("--folder", "instance_folder", required=True)
+@click.command()
+@click.option("--folder", "instance_folder", required=True, metavar="<folder>")
 @click.option("--outfile", required=True)
 @click.option("--library", required=True)
 @click.option("--pattern", default="*.json",
               help="Name of a specific test-case. If none given, all test-cases are run.")
-@click.option("--limit", "limit_seconds", default=10.0, help="maximum search time in seconds")
-@click.option("--interval", "sampling_interval", default=100, help="sampling interval in milliseconds")
+@click.option("--limit", "limit_seconds", default=10.0, help="maximum search time in seconds", metavar="<limit>")
+@click.option("--interval", "sampling_interval", default=100, help="sampling interval in milliseconds",
+              metavar="<interval>")
 def sample(instance_folder, outfile, library, pattern, limit_seconds, sampling_interval):
-    """ Runs all instances in FOLDER for LIMIT seconds and samples the depth with the given sampling time INTERVAL. """
+    """ Runs all instances in <folder> for <limit> seconds and
+    samples the depth with the given sampling time <interval>. """
     instance_files = glob.glob(os.path.join(instance_folder, pattern))
     append = False
     num_samples = int(limit_seconds / sampling_interval * 1000)
@@ -69,4 +66,4 @@ def write_csv(result, outfile, append, fieldnames):
 
 
 if __name__ == "__main__":
-    cli()
+    sample()

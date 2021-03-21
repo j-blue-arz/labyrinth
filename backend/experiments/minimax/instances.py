@@ -6,9 +6,9 @@ from tqdm import tqdm
 from random import randint
 
 from experiments import serialization
+from experiments.minimax.sampler import determine_search_depth
 from labyrinth.model import factories
 from labyrinth.model.game import BoardLocation, Piece
-from experiments.minimax.runner import determine_search_depth
 
 
 @click.command()
@@ -25,7 +25,7 @@ def generate_nontrivial(outfolder, library, maze_sizes, num_instances):
         num_generated = 0
         while num_generated < num_instances:
             board = generate_board(maze_size)
-            depth, terminated = determine_search_depth(library, board, limit_timedelta=timedelta(milliseconds=200))
+            depth = determine_search_depth(library, board, limit_timedelta=timedelta(milliseconds=200))
             if depth > 1:
                 serialize_instance_json(board, depth, num_generated, outfolder)
                 num_generated += 1

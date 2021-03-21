@@ -36,6 +36,13 @@ def observe_search_status(library, board, limit_timedelta, observe_timedelta):
     yield sample, search_status["current_search_depth"], search_status["search_terminated"]
 
 
+def determine_search_depth(library, board, limit_timedelta):
+    """ Runs the external library algorithm for a given timedelta, returns the search depth at that point """
+    samples = list(observe_search_status(library, board, limit_timedelta*3, limit_timedelta))
+    depths = [depth for (sample, depth, terminated) in samples]
+    return depths[-1]
+
+
 class ConcurrentExternalLibraryBinding(threading.Thread):
     def __init__(self, external_binding, search_ended_event):
         threading.Thread.__init__(self)
