@@ -9,7 +9,7 @@ The minimax implementation uses iterative deepening without an upper bound on th
 observe and plot the search depth increments of minimax runs for multiple instances.
 
 To observe the search depths, run
-    python depths.py --folder instances/ --outfile sample_depths.csv --library ../../instance/lib/libminimax.so
+    python depths.py --folder instances/ --outfile sample_depths.csv --library ../lib/libminimax.so
 The instances to run can be selected with the `--pattern` option, e.g. `--pattern minimax_s7*.json`.
 
 After that determine the depth increments with

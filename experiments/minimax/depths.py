@@ -8,8 +8,8 @@ import os
 import click
 from tqdm import tqdm
 
-from experiments.minimax.sampler import observe_search_status
-from experiments import serialization
+from minimax.sampler import observe_search_status
+import serialization
 
 
 @click.command()

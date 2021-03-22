@@ -5,8 +5,8 @@ import click
 from tqdm import tqdm
 from random import randint
 
-from experiments import serialization
-from experiments.minimax.sampler import determine_search_depth
+import serialization
+from minimax.sampler import determine_search_depth
 from labyrinth.model import factories
 from labyrinth.model.game import BoardLocation, Piece
 

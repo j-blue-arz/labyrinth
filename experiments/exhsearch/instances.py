@@ -1,7 +1,7 @@
 """ Generates instances for exhaustive search algorithm.
 
 New instances can be generated with
-    python instances.py --outfolder instances/ --library ../../instance/lib/libexhsearch.so
+    python instances.py --outfolder instances/ --library ../lib/libexhsearch.so
 
 Try
     python instances.py --help
@@ -11,8 +11,8 @@ for further instructions
 import click
 from tqdm import tqdm
 
-from experiments.exhsearch import depths as exhsearch_depths
-from experiments import serialization
+from exhsearch import depths as exhsearch_depths
+import serialization
 
 
 @click.command()

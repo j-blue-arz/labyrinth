@@ -1,7 +1,7 @@
 """ Measures the correlation between maze size and required search depth.
 
 Usage:
-    python depths.py count --outfile temp.csv --library ../../instance/lib/libexhsearch.so
+    python depths.py count --outfile temp.csv --library ../lib/libexhsearch.so
     python depths.py plot temp.csv depths.png
 
 See
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 from labyrinth.model.game import BoardLocation, Piece
 from labyrinth.model import factories
-from experiments.exhsearch import optimizers
+from exhsearch import optimizers
 
 
 def generate_board(maze_size):

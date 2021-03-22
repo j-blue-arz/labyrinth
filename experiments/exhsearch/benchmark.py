@@ -6,7 +6,7 @@ import timeit
 
 import click
 
-from experiments import serialization
+import serialization
 import labyrinth.model.external_library as external
 
 

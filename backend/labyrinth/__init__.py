@@ -1,12 +1,6 @@
 """ This package is the backend of the labyrinth game.
 It serves the Vue application
 and defines a set of API methods to play the game """
-import mimetypes
-import os
-
-from flask import Flask
-from werkzeug.middleware.profiler import ProfilerMiddleware
-
 
 version_info = (0, 2, 2)
 __version__ = '.'.join(map(str, version_info))
@@ -14,6 +8,14 @@ __version__ = '.'.join(map(str, version_info))
 
 def create_app(test_config=None):
     """ basic Flask app setup. Creates the instance folder if not existing """
+
+    # Imports inside here so the package can be imported without the dependency to Flask #
+    import mimetypes
+    import os
+
+    from flask import Flask
+    from werkzeug.middleware.profiler import ProfilerMiddleware
+
     app = Flask(__name__,
                 instance_relative_config=True,
                 static_folder="../static",
