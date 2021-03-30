@@ -1,8 +1,10 @@
 """ This package is the backend of the labyrinth game.
 It serves the Vue application
 and defines a set of API methods to play the game """
+from collections import namedtuple
 
-version_info = (0, 2, 2)
+Version = namedtuple("Version", ["milestone", "major", "minor"])
+version_info = Version(0, 2, 2)
 __version__ = '.'.join(map(str, version_info))
 
 
@@ -24,6 +26,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         PROFILE=False,
+        JSON_SORT_KEYS=False,
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
         LIBRARY_PATH=os.path.join(app.instance_path, 'lib'),
     )
@@ -59,4 +62,8 @@ def create_app(test_config=None):
         """ Serves the 'static' part, i.e. the Vue application """
         return app.send_static_file("index.html")
 
+    @app.route('/version')
+    def version():
+        """ Returns version as 3-tuple """
+        return version_info._asdict()
     return app
