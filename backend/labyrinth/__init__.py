@@ -17,6 +17,8 @@ def create_app(test_config=None):
 
     from flask import Flask
     from werkzeug.middleware.profiler import ProfilerMiddleware
+    from werkzeug.middleware.dispatcher import DispatcherMiddleware
+    from prometheus_client import make_wsgi_app, Gauge
 
     app = Flask(__name__,
                 instance_relative_config=True,
@@ -66,4 +68,16 @@ def create_app(test_config=None):
     def version():
         """ Returns version as 3-tuple """
         return version_info._asdict()
+
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+         '/metrics': make_wsgi_app()
+    })
+
+    info = Gauge(
+        "app_version",
+        "Version number of labyrinth project",
+        labelnames=version_info._fields + ("version",)
+    )
+    info.labels(str(version_info.milestone), str(version_info.major), str(version_info.minor), __version__).set(1)
+
     return app
