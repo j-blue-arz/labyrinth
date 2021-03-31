@@ -5,3 +5,4 @@ flake8
 pip-tools
 rope
 black
+python-dotenv

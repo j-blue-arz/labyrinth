@@ -11,3 +11,5 @@ htmlcov/
 
 **/lib/*.dll
 **/lib/*.so
+
+.env
