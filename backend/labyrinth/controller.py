@@ -13,6 +13,8 @@ from labyrinth.model import interactors
 from labyrinth.model.game import Player
 from labyrinth.model import bots
 
+import labyrinth.event_logging as logging
+
 
 def add_player(game_id, player_request_dto):
     """ Adds a player to a game.
@@ -37,6 +39,7 @@ def add_player(game_id, player_request_dto):
     _try(lambda: game.add_player(player))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
+    logging.get_logger().add_player(player_id, is_bot)
     return mapper.player_to_dto(player)
 
 
@@ -52,6 +55,7 @@ def delete_player(game_id, player_id):
     _try(lambda: game.remove_player(player_id))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
+    logging.get_logger().remove_player(player_id)
     return ""
 
 
@@ -120,7 +124,9 @@ def remove_overdue_players(overdue_timedelta):
 def remove_unobserved_games(unobserved_period):
     """ Uses UnobservedGamesInteractor to remove games which have not been observed for the given period """
     interactor = interactors.UnobservedGamesInteractor(game_repository())
-    _try(lambda: interactor.remove_unobserved_games(unobserved_period))
+    removed_ids = _try(lambda: interactor.remove_unobserved_games(unobserved_period))
+    for game_id in removed_ids:
+        logging.get_logger().remove_game(game_id)
     DatabaseGateway.get_instance().commit()
 
 
@@ -138,6 +144,7 @@ def _get_or_create_game(game_id):
 def _create_game(game_id):
     game = factory.create_game(game_id=game_id)
     DatabaseGateway.get_instance().create_game(game, game_id)
+    logging.get_logger().add_game(game_id)
     return game
 
 

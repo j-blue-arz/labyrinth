@@ -101,10 +101,12 @@ class UnobservedGamesInteractor:
         self._game_repository = game_repository
 
     def remove_unobserved_games(self, unobserved_period=timedelta(hours=1)):
+        """ Removes the unobserved games, returns identifiers of removed games """
         threshold = datetime.now() - unobserved_period
         games = self._game_repository.find_all_before_observed_timestamp(threshold)
         for game in games:
             self._game_repository.remove(game)
+        return [game.identifier for game in games]
 
 
 class GameRepository:

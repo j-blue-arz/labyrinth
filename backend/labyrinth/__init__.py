@@ -20,6 +20,8 @@ def create_app(test_config=None):
     from werkzeug.middleware.dispatcher import DispatcherMiddleware
     from prometheus_client import make_wsgi_app, Gauge
 
+    import labyrinth.event_logging as logging
+
     app = Flask(__name__,
                 instance_relative_config=True,
                 static_folder="../static",
@@ -37,6 +39,9 @@ def create_app(test_config=None):
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
+
+    if app.config["INFLUXDB_URL"] and app.config["INFLUXDB_TOKEN"]:
+        app.before_request(lambda: logging.create_logger(app.config["INFLUXDB_URL"], app.config["INFLUXDB_TOKEN"]))
 
     if app.config["PROFILE"]:
         app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir=os.path.join(app.instance_path),

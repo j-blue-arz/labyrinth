@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 import click
-from flask import Blueprint
+from flask import Blueprint, current_app
 
 from . import controller
 
@@ -12,6 +12,7 @@ GAME_MANAGEMENT = Blueprint("game-management", __name__, cli_group="game-managem
 @GAME_MANAGEMENT.cli.command("remove-overdue-players")
 @click.option("-s", "--seconds", type=int, default=60)
 def remove_overdue_players(seconds=60):
+    _init_app()
     overdue_timedelta = timedelta(seconds=seconds)
     controller.remove_overdue_players(overdue_timedelta)
 
@@ -19,5 +20,12 @@ def remove_overdue_players(seconds=60):
 @GAME_MANAGEMENT.cli.command("remove-unobserved-games")
 @click.option("-s", "--seconds", type=int, default=3600)
 def remove_unobserved_games(seconds=3600):
+    _init_app()
     unobserved_period = timedelta(seconds=seconds)
     controller.remove_unobserved_games(unobserved_period)
+
+
+def _init_app():
+    ctx = current_app.test_request_context()
+    ctx.push()
+    current_app.preprocess_request()
