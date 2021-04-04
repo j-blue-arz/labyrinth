@@ -45,8 +45,8 @@ jobs:
           uses: lukka/get-cmake@latest
         - name: Run cmake and build shared library
           run: |
-            export CC=gcc-8
-            export CXX=g++-8
+            export CC=gcc-9
+            export CXX=g++-9
             mkdir builds
             cmake -S. -Bbuilds/shared -DCMAKE_BUILD_TYPE=RELEASE
             cmake --build builds/shared
