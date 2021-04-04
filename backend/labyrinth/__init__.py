@@ -29,6 +29,7 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         SECRET_KEY='dev',
+        PROMETHEUS=True,
         PROFILE=False,
         JSON_SORT_KEYS=False,
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
@@ -74,15 +75,16 @@ def create_app(test_config=None):
         """ Returns version as 3-tuple """
         return version_info._asdict()
 
-    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
-         '/metrics': make_wsgi_app()
-    })
+    if app.config["PROMETHEUS"]:
+        app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+            '/metrics': make_wsgi_app()
+        })
 
-    info = Gauge(
-        "app_version",
-        "Version number of labyrinth project",
-        labelnames=version_info._fields + ("version",)
-    )
-    info.labels(str(version_info.milestone), str(version_info.major), str(version_info.minor), __version__).set(1)
+        info = Gauge(
+            "app_version",
+            "Version number of labyrinth project",
+            labelnames=version_info._fields + ("version",)
+        )
+        info.labels(str(version_info.milestone), str(version_info.major), str(version_info.minor), __version__).set(1)
 
     return app
