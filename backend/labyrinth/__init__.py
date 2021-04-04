@@ -40,7 +40,7 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    if app.config["INFLUXDB_URL"] and app.config["INFLUXDB_TOKEN"]:
+    if "INFLUXDB_URL" in app.config and "INFLUXDB_TOKEN" in app.config:
         app.before_request(lambda: logging.create_logger(app.config["INFLUXDB_URL"], app.config["INFLUXDB_TOKEN"]))
 
     if app.config["PROFILE"]:
