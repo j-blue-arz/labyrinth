@@ -17,7 +17,6 @@ def app():
     file_descriptor, db_path = tempfile.mkstemp()
     app = create_app({
         'TESTING': True,
-        'PROMETHEUS': False,
         'DATABASE': db_path,
     })
     yield app

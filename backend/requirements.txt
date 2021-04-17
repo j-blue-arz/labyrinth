@@ -13,7 +13,6 @@ influxdb-client==1.16.0   # via -r requirements.in
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.3            # via flask
 markupsafe==1.1.1         # via jinja2
-prometheus-client==0.10.0  # via -r requirements.in
 python-dateutil==2.8.1    # via influxdb-client
 pytz==2021.1              # via influxdb-client
 requests==2.24.0          # via -r requirements.in
