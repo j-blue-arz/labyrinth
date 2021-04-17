@@ -39,7 +39,7 @@ def add_player(game_id, player_request_dto):
     _try(lambda: game.add_player(player))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
-    logging.get_logger().add_player(player_id, is_bot)
+    logging.get_logger().add_player(player_id, game_id=game_id, is_bot=is_bot, num_players=len(game.players))
     return mapper.player_to_dto(player)
 
 
@@ -55,7 +55,7 @@ def delete_player(game_id, player_id):
     _try(lambda: game.remove_player(player_id))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
-    logging.get_logger().remove_player(player_id)
+    logging.get_logger().remove_player(player_id, game_id=game_id, num_players=len(game.players))
     return ""
 
 

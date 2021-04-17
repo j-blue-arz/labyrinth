@@ -9,6 +9,7 @@ from flask import has_request_context
 from labyrinth.database import DatabaseGateway
 
 from labyrinth.model import exceptions
+import labyrinth.event_logging as logging
 
 
 class PlayerActionInteractor:
@@ -67,6 +68,8 @@ class OverduePlayerInteractor:
                 player_id_to_remove = game.next_player().identifier
                 game.remove_player(player_id_to_remove)
                 self._game_repository.update(game)
+                logging.get_logger().remove_player(player_id_to_remove, game_id=game.identifier,
+                                                   num_players=len(game.players))
 
     def _on_game_creation(self, game):
         game.register_turn_change_listener(self._turn_change_listener)
