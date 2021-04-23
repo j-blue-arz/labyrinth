@@ -9,7 +9,6 @@ from flask import has_request_context
 from labyrinth.database import DatabaseGateway
 
 from labyrinth.model import exceptions
-import labyrinth.event_logging as logging
 
 
 class PlayerActionInteractor:
