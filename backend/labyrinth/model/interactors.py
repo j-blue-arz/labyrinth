@@ -51,9 +51,10 @@ class OverduePlayerInteractor:
     """ This interactor detects and removes players who are expected to perform an action,
     but have failed to do so for some period of time. """
 
-    def __init__(self, game_repository):
+    def __init__(self, game_repository, logger):
         self._game_repository = game_repository
         self._game_repository.register_game_created_listener(self._on_game_creation)
+        self._logger = logger
 
     def remove_overdue_players(self, overdue_timedelta=timedelta(seconds=60)):
         """ Detects and removes players which are required to play next.
@@ -68,8 +69,8 @@ class OverduePlayerInteractor:
                 player_id_to_remove = game.next_player().identifier
                 game.remove_player(player_id_to_remove)
                 self._game_repository.update(game)
-                logging.get_logger().remove_player(player_id_to_remove, game_id=game.identifier,
-                                                   num_players=len(game.players))
+                self._logger.remove_player(player_id_to_remove, game_id=game.identifier,
+                                           num_players=len(game.players))
 
     def _on_game_creation(self, game):
         game.register_turn_change_listener(self._turn_change_listener)

@@ -7,11 +7,14 @@ from labyrinth.model import factories
 from labyrinth.model.game import Player
 from tests.unit import matchers
 
+logger = Mock()
+
 
 def setup_test():
     game = factories.create_game(game_id=5)
     player = Player(3)
     game.add_player(player)
+    logger.reset_mock()
     return game, player
 
 
@@ -20,10 +23,11 @@ def test_remove_overdue_players__with_one_blocking_player__removes_current_playe
     game.remove_player = Mock()
     game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
-    interactor = interactors.OverduePlayerInteractor(game_repository)
+    interactor = interactors.OverduePlayerInteractor(game_repository, logger)
     interactor.remove_overdue_players()
 
     game.remove_player.assert_called_once_with(3)
+    logger.remove_player.assert_called_once()
 
 
 def test_remove_overdue_players__with_player_just_removed__does_not_raise_exception():
@@ -34,7 +38,7 @@ def test_remove_overdue_players__with_player_just_removed__does_not_raise_except
     game.remove_player(player.identifier)
     game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
-    interactor = interactors.OverduePlayerInteractor(game_repository)
+    interactor = interactors.OverduePlayerInteractor(game_repository, logger)
     interactor.remove_overdue_players()
 
 
@@ -43,7 +47,7 @@ def test_interactor__when_game_notifies_turn_listeners__updates_player_action_ti
     data_access = DatabaseGateway(settings={"DATABASE": "foo"})
     game_repository = interactors.GameRepository(data_access)
     game_repository.update_action_timestamp = Mock()
-    _ = interactors.OverduePlayerInteractor(game_repository)
+    _ = interactors.OverduePlayerInteractor(game_repository, logger)
     data_access._notify_listeners(game)
     game._notify_turn_listeners()
 
