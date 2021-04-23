@@ -67,8 +67,8 @@ class InfluxLogger(EventLogger):
         point = Point(self._PLAYER_COUNTER) \
             .tag("change", "add") \
             .tag("game_id", str(game_id)) \
+            .tag("player_type", player_type) \
             .field("player_id", player_id) \
-            .field("player_type", player_type) \
             .field("value", 1) \
             .field("count_game_players", num_players) \
             .time(datetime.utcnow(), WritePrecision.NS)
