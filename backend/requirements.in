@@ -1,3 +1,4 @@
 Flask
 requests
 influxdb-client
+python-dotenv
