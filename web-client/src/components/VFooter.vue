@@ -1,7 +1,10 @@
 <template>
     <footer class="footer__version">
         Version: {{ version }}&nbsp;&ndash;&nbsp;
-        <a href="help.html" target="_blank" rel="noopener noreferrer">Help</a>
+        <a href="help.html" target="_blank" rel="noopener noreferrer">Help</a>&nbsp;&ndash;&nbsp;
+        <a href="https://github.com/j-blue-arz/labyrinth" target="_blank" rel="noopener noreferrer">
+            GitHub
+        </a>
     </footer>
 </template>
 

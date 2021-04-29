@@ -10,7 +10,13 @@
         <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
         <title>Labyrinth</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Play&display=swap" rel="stylesheet">
         <style>
+            * {
+                font-family: "Play", Helvetica, sans-serif;
+            }
+
             .objective {
                 stroke: #f39;
                 fill: #f39;
@@ -75,6 +81,13 @@
             </ul>
             The no-pushback rule disallows reverting the previous player's shift.
             When the <svg class="inline"><use xlink:href="#objective" /></svg> is reached, a new objective location is chosen randomly.
+        </section>
+        <section>
+            <h3>Is it for free?</h3>
+            <p>
+            Yes! No cost, ad-free, no cookies, and the <a href="https://github.com/j-blue-arz/labyrinth" target="_blank" rel="noopener noreferrer">source is free</a> as well.
+            </p>
+            It's currently hosted on a free tier. If the hosting costs ever get too high for me to pay, I might either take it down, or ask for donations.
         </section>
         
     </body>
