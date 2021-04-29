@@ -1,3 +1,7 @@
+# Labyrinth
+
+Play it at [maze-solver.com](https://maze-solver.com).
+
 Labyrinth is a family board game. This project aims to recreate the game as a online multiplayer game, develop understanding of the game's complexity and implement practical search algorithms. There is one major difference to the [original game](https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf): all players have the same objective.
 
 ![A live game](.github/labyrinth.png)
@@ -23,7 +27,7 @@ install required packages:
     python -m pytest ./tests
 
 ## Running server  
-Flask comes with a built-in server, which is perfectly fine for testing and developement of algorithms
+Flask comes with a built-in server, which is perfectly fine for testing and development of algorithms
 
     cd ../backend
     export FLASK_APP=server
