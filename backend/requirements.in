@@ -2,3 +2,4 @@ Flask
 requests
 influxdb-client
 python-dotenv
+Flask-APScheduler

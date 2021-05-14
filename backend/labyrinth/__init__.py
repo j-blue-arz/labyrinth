@@ -30,7 +30,7 @@ def create_app(test_config=None):
         PROFILE=False,
         JSON_SORT_KEYS=False,
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
-        LIBRARY_PATH=os.path.join(app.instance_path, 'lib'),
+        LIBRARY_PATH=os.path.join(app.instance_path, 'lib')
     )
 
     if test_config is None:
@@ -44,6 +44,13 @@ def create_app(test_config=None):
     if app.config["PROFILE"]:
         app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir=os.path.join(app.instance_path),
                                           stream=None)
+
+    if test_config is None:
+        from labyrinth.scheduler import scheduler, schedule_remove_overdue_players, schedule_remove_unobserved_games
+        scheduler.init_app(app)
+        schedule_remove_overdue_players()
+        schedule_remove_unobserved_games()
+        scheduler.start()
 
     try:
         os.makedirs(app.instance_path)

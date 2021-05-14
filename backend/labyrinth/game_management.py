@@ -11,7 +11,7 @@ GAME_MANAGEMENT = Blueprint("game-management", __name__, cli_group="game-managem
 
 @GAME_MANAGEMENT.cli.command("remove-overdue-players")
 @click.option("-s", "--seconds", type=int, default=60)
-def remove_overdue_players(seconds=60):
+def cli_remove_overdue_players(seconds=60):
     _init_app()
     overdue_timedelta = timedelta(seconds=seconds)
     controller.remove_overdue_players(overdue_timedelta)
@@ -19,8 +19,18 @@ def remove_overdue_players(seconds=60):
 
 @GAME_MANAGEMENT.cli.command("remove-unobserved-games")
 @click.option("-s", "--seconds", type=int, default=3600)
-def remove_unobserved_games(seconds=3600):
+def cli_remove_unobserved_games(seconds=3600):
     _init_app()
+    unobserved_period = timedelta(seconds=seconds)
+    controller.remove_unobserved_games(unobserved_period)
+
+
+def remove_overdue_players(seconds=60):
+    overdue_timedelta = timedelta(seconds=seconds)
+    controller.remove_overdue_players(overdue_timedelta)
+
+
+def remove_unobserved_games(seconds=3600):
     unobserved_period = timedelta(seconds=seconds)
     controller.remove_unobserved_games(unobserved_period)
 
