@@ -173,18 +173,17 @@ class URLSupplier:
 
     def get_shift_url(self, game_id, player_id):
         """ Generates a URL for the shift operation """
-        if current_app.config['INTERNAL_URL']:
-            return current_app.config['INTERNAL_URL'] + url_for("api.post_shift", game_id=game_id,
-                       p_id=player_id, _external=False)
-        else:
-            return url_for("api.post_shift", game_id=game_id,
-                        p_id=player_id, _external=True)
+        return self._get_url(game_id, player_id, "api.post_shift")
 
     def get_move_url(self, game_id, player_id):
         """ Generates a URL for the move operation """
-        if current_app.config['INTERNAL_URL']:
-            return current_app.config['INTERNAL_URL'] + url_for("api.post_move", game_id=game_id,
-                       p_id=player_id, _external=False)
+        return self._get_url(game_id, player_id, "api.post_move")
+
+    def _get_url(self, game_id, player_id, api_method):
+        internal_url = current_app.config['INTERNAL_URL']
+        if internal_url:
+            return internal_url + url_for(api_method, game_id=game_id,
+                                          p_id=player_id, _external=False)
         else:
-            return url_for("api.post_move", game_id=game_id,
-                       p_id=player_id, _external=True)
+            return url_for(api_method, game_id=game_id,
+                           p_id=player_id, _external=True)
