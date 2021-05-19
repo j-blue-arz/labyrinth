@@ -180,7 +180,7 @@ class URLSupplier:
         return self._get_url(game_id, player_id, "api.post_move")
 
     def _get_url(self, game_id, player_id, api_method):
-        internal_url = current_app.config['INTERNAL_URL']
+        internal_url = current_app.config["INTERNAL_URL"] if "INTERNAL_URL" in current_app.config else None
         if internal_url:
             return internal_url + url_for(api_method, game_id=game_id,
                                           p_id=player_id, _external=False)

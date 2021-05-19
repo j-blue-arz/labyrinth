@@ -28,6 +28,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         PROFILE=False,
+        ENABLE_INFLUXDB_LOGGING=False,
         JSON_SORT_KEYS=False,
         DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
         LIBRARY_PATH=os.path.join(app.instance_path, 'lib')
