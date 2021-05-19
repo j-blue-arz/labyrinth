@@ -1,3 +1,9 @@
+""" This module sends important events to InfluxDB.
+
+To activate it, set the environment variables
+ENABLE_INFLUXDB_LOGGING, INFLUXDB_URL, and INFLUXDB_TOKEN to appropriate values.
+The InfluxDB instance is expected to have an org 'labyrinth' and a bucket 'game'."""
+
 from datetime import datetime
 
 from influxdb_client import InfluxDBClient, Point, WritePrecision

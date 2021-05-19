@@ -2,7 +2,7 @@
 
 handles database access, calls functions on entities or use cases, performs exception mapping
 Should not contain business logic"""
-from flask import url_for
+from flask import url_for, current_app
 
 import labyrinth.model.factories as factory
 import labyrinth.mapper.api as mapper
@@ -173,10 +173,18 @@ class URLSupplier:
 
     def get_shift_url(self, game_id, player_id):
         """ Generates a URL for the shift operation """
-        return url_for("api.post_shift", game_id=game_id,
-                       p_id=player_id, _external=True)
+        if current_app.config['INTERNAL_URL']:
+            return current_app.config['INTERNAL_URL'] + url_for("api.post_shift", game_id=game_id,
+                       p_id=player_id, _external=False)
+        else:
+            return url_for("api.post_shift", game_id=game_id,
+                        p_id=player_id, _external=True)
 
     def get_move_url(self, game_id, player_id):
         """ Generates a URL for the move operation """
-        return url_for("api.post_move", game_id=game_id,
+        if current_app.config['INTERNAL_URL']:
+            return current_app.config['INTERNAL_URL'] + url_for("api.post_move", game_id=game_id,
+                       p_id=player_id, _external=False)
+        else:
+            return url_for("api.post_move", game_id=game_id,
                        p_id=player_id, _external=True)
