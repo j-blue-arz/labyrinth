@@ -112,3 +112,5 @@ jobs:
               backend/labyrinth
               backend/requirements.txt
               backend/labyrinth_main.py
+              backend/uwsgi-docker.ini
+              backend/Dockerfile
