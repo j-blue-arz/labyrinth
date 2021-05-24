@@ -1,5 +1,6 @@
 """Initialize scheduler."""
 
+from flask import current_app
 from flask_apscheduler import APScheduler
 
 from labyrinth.game_management import remove_overdue_players, remove_unobserved_games
@@ -32,9 +33,17 @@ def schedule_remove_unobserved_games():
 
 def _remove_overdue_players(seconds):
     with scheduler.app.app_context():
+        _init_app()
         remove_overdue_players(seconds)
 
 
 def _remove_unobserved_games(seconds):
     with scheduler.app.app_context():
+        _init_app()
         remove_unobserved_games(seconds)
+
+
+def _init_app():
+    ctx = current_app.test_request_context()
+    ctx.push()
+    current_app.preprocess_request()
