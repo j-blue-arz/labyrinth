@@ -31,6 +31,18 @@ class PlayerActionInteractor:
         self._game_repository.update(game)
 
 
+class PlayerInteractor:
+    """ Interactor class for changing the name of a player """
+    def __init__(self, game_repository):
+        self._game_repository = game_repository
+
+    def change_name(self, game_id, player_id, new_name):
+        game = self._game_repository.find_by_id(game_id)
+        player = game.get_player(player_id)
+        player.player_name = new_name
+        self._game_repository.update(game)
+
+
 class UpdateOnTurnChangeInteractor:
     """ Interactor class which persists asynchronous turn changes. """
     def __init__(self, game_repository):

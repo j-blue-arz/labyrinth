@@ -429,7 +429,7 @@ class Player:
     Invariants: Board and Game are either both set or both None.
     If both are set, piece is set as well. """
 
-    def __init__(self, identifier, game=None, piece=None):
+    def __init__(self, identifier, game=None, piece=None, player_name=None):
         """ board and game can only be set together. """
         self._id = identifier
         self._piece = piece
@@ -438,6 +438,7 @@ class Player:
         if game:
             self.set_game(game)
         self.score = 0
+        self.player_name = player_name
 
     @property
     def piece(self):
@@ -448,7 +449,7 @@ class Player:
     def identifier(self):
         """ Getter for identifier """
         return self._id
-
+    
     def set_game(self, game):
         """ Sets the game this player is part of
         Also sets the board and the player's piece """

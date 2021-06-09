@@ -12,7 +12,7 @@ from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
                                         PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
                                         PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD,
-                                        TURN_PREPARE_DELAY, LIBRARY_PATH)
+                                        TURN_PREPARE_DELAY, LIBRARY_PATH, PLAYER_NAME)
 
 
 def game_to_dto(game: Game):
@@ -91,7 +91,8 @@ def _player_to_dto(player: Player):
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
-                  PIECE_INDEX: player.piece.piece_index}
+                  PIECE_INDEX: player.piece.piece_index,
+                  PLAYER_NAME: player.player_name}
     if type(player) is bots.Bot:
         player_dto[IS_BOT] = True
         player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME
@@ -130,6 +131,7 @@ def _dto_to_player(player_dto, board, maze_card_dict):
     :return: a Player instance
     """
     piece = Piece(player_dto[PIECE_INDEX], maze_card_dict[player_dto[MAZE_CARD_ID]])
+    player_name = player_dto[PLAYER_NAME]
     player = None
     if IS_BOT in player_dto and player_dto[IS_BOT]:
         player = bots.create_bot(
@@ -139,9 +141,10 @@ def _dto_to_player(player_dto, board, maze_card_dict):
             player_id=player_dto[ID],
             shift_url=player_dto[SHIFT_URL],
             move_url=player_dto[MOVE_URL],
-            piece=piece)
+            piece=piece,
+            player_name=player_name)
     else:
-        player = Player(identifier=player_dto[ID], piece=piece)
+        player = Player(identifier=player_dto[ID], piece=piece, player_name=player_name)
     player.score = player_dto[SCORE]
     return player
 

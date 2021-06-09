@@ -29,13 +29,15 @@ def add_player(game_id, player_request_dto):
     _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
     game = _get_or_create_game(game_id)
     is_bot, computation_method = mapper.dto_to_type(player_request_dto)
+    player_name = mapper.dto_to_player_name(player_request_dto)
     player_id = _try(game.unused_player_id)
     player = None
     if not is_bot:
-        player = Player(player_id)
+        player = Player(player_id, player_name=player_name)
     else:
         player = _try(lambda: bots.create_bot(compute_method=computation_method,
-                                              url_supplier=URLSupplier(), player_id=player_id))
+                                              url_supplier=URLSupplier(), player_id=player_id,
+                                              player_name=player_name))
     _try(lambda: game.add_player(player))
     DatabaseGateway.get_instance().update_game(game_id, game)
     DatabaseGateway.get_instance().commit()
@@ -57,6 +59,17 @@ def delete_player(game_id, player_id):
     DatabaseGateway.get_instance().commit()
     logging.get_logger().remove_player(player_id, game_id=game_id, num_players=len(game.players))
     return ""
+
+
+def change_player_name(game_id, player_id, player_name_dto):
+    """ Renames a player
+
+    :param game_id: specifies the game
+    :param player_id: specifies the player to remove
+    :param player_name_dto: contains the new player name."""
+    new_name = mapper.dto_to_player_name(player_name_dto)
+    interactors.PlayerInteractor(game_repository()).change_name(game_id, player_id, new_name)
+    DatabaseGateway.get_instance().commit()
 
 
 def change_game(game_id, game_request_dto):

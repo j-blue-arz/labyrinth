@@ -43,11 +43,24 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/gameId"
                 - $ref: "#/components/parameters/playerPathId"
+            requestBody:
+                description: "The new name."
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/playerNameObject'
             responses:
                 200:
                     description: "If no error occurred."
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/players/{player_id}/name:
+        put:
+            tags:
+                - "players"
+            summary: "Renames a player"
+            parameters:
     /games/{game_id}/state:
         get:
             tags:
@@ -154,6 +167,11 @@ components:
                     description: "Method a bot uses to determine game actions. 
                                   The available computation methods can be fetched with `GET /computation-methods`."
                     example: "exhaustive-search"
+                    required: false
+                name:
+                    type: "string"
+                    description: "An optional name of the player, which will be shown to all other users."
+                    required: false
         errorObject:
             type: "object"
             properties:
@@ -610,6 +628,9 @@ components:
                     minimum: 0
                     description: "Each piece on the board is assigned an index, unique to the respective game. This index should be used e.g. for coloring the pieces, as it is guaranteed to be
                     consecutive even if players are removed and added."
+                name:
+                    type: "string"
+                    description: "A user-provided name of the player."
         shiftObject:
             type: "object"
             properties:
@@ -632,6 +653,12 @@ components:
                     minimum: 3
                     maximum: 31
                     example: 9
+        playerNameObject:
+            type: "object"
+            properties:
+                name:
+                    type: string
+                    description: "The name of the player."
 
     parameters:
         playerQueryId:

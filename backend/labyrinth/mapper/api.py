@@ -9,7 +9,7 @@ import labyrinth.model.bots
 from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
                                         MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
-                                        MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD)
+                                        MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD, PLAYER_NAME)
 
 
 def game_state_to_dto(game: Game):
@@ -77,6 +77,13 @@ def dto_to_maze_size(game_options_dto):
     return game_options_dto[MAZE_SIZE]
 
 
+def dto_to_player_name(player_name_dto):
+    """ Maps a DTO for the rename player api method to a player name """
+    if isinstance(player_name_dto, dict):
+        return _value_or_none(player_name_dto, PLAYER_NAME)
+    return None
+
+
 def _value_or_none(dto, key):
     if key in dto:
         return dto[key]
@@ -110,15 +117,13 @@ def exception_to_dto(api_exception):
 
 
 def player_to_dto(player: Player):
-    """Maps a player to a DTO
-
-    :param piece: an instance of model.Piece
-    :return: a structure whose JSON representation is valid for the API
-    """
+    """Maps a player to an API DTO """
     player_dto = {ID: player.identifier,
                   MAZE_CARD_ID: player.piece.maze_card.identifier,
                   SCORE: player.score,
                   PIECE_INDEX: player.piece.piece_index}
+    if player.player_name:
+        player_dto[PLAYER_NAME] = player.player_name
     if type(player) is labyrinth.model.bots.Bot:
         player_dto[IS_BOT] = True
         player_dto[COMPUTATION_METHOD] = player.compute_method_factory.SHORT_NAME

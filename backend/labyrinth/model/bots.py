@@ -26,7 +26,7 @@ from .game import Player, Turns, PlayerAction
 
 
 def create_bot(player_id, compute_method, full_path=None,
-               url_supplier=None, shift_url=None, move_url=None, piece=None):
+               url_supplier=None, shift_url=None, move_url=None, **kwargs):
     """ This is a factory method creating a Bot.
 
     :param player_id: the identifier of the player to create.
@@ -37,12 +37,13 @@ def create_bot(player_id, compute_method, full_path=None,
         get_move_url(game_id, player_id).
     :param shift_url: use this instead of url_supplier, if you already know the final url to call for a shift.
     :param move_url: use this instead of url_supplier, if you already know the final url to call for a move.
+    :param kwargs: is passed to the Player constructor
     :raises InvalidComputeMethodException: if compute_method cannot identify an existing library.
     """
     library_binding_factory = _create_library_binding_factory(expected_library=compute_method, full_path=full_path)
     return Bot(library_binding_factory, url_supplier=url_supplier,
                shift_url=shift_url, move_url=move_url,
-               identifier=player_id, piece=piece)
+               identifier=player_id, **kwargs)
 
 
 def get_available_computation_methods():

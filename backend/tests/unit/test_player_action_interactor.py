@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
+import tests.unit.game_repository_mocks as game_repository_coach
 from labyrinth.model import interactors
 from labyrinth.model.exceptions import InvalidShiftLocationException, TurnActionViolationException
 from labyrinth.model.game import BoardLocation, Game, Player, Turns
@@ -11,7 +12,7 @@ from labyrinth.model.game import BoardLocation, Game, Player, Turns
 def test_setup():
     def _setup():
         game = Game(5, turns=Turns())
-        game_repository = when_game_repository_find_by_id_then_return(game)
+        game_repository = game_repository_coach.when_game_repository_find_by_id_then_return(game)
         game_repository.update = Mock()
         interactor = interactors.PlayerActionInteractor(game_repository=game_repository)
         return game, interactor, game_repository
@@ -121,17 +122,3 @@ def when_game_move_then_increase_player_score(game):
         game.players[0].score += 1
 
     game.move = Mock(side_effect=mock_move)
-
-
-def when_game_repository_find_by_id_then_return(game):
-    game_repository_mock = Mock(spec=interactors.GameRepository)
-    game_id = game.identifier
-
-    def return_game(requested_game_id):
-        if requested_game_id == game_id:
-            return game
-        else:
-            return None
-
-    game_repository_mock.find_by_id = Mock(side_effect=return_game)
-    return game_repository_mock

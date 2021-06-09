@@ -82,6 +82,41 @@ def test_post_players_five_times(client):
     _wait_for(client, "SHIFT")
 
 
+def test_delete_player(client):
+    """ Tests GET for /api/games/0/state and delete for /api/games/0/players/<player_id>
+
+    After a player was deleted, he should not be able to see the game state.
+    """
+    _post_player(client)
+    player_id_1 = _assert_ok_retrieve_id(_post_player(client))
+    _delete_player(client, player_id_1)
+    state = _get_state(client).get_json()
+    assert len(state["players"]) == 1
+    _wait_for(client, "SHIFT")
+
+
+def test_player_name(client):
+    """ Tests creating a player without a specific name """
+    _post_player(client)
+    state = _get_state(client).get_json()
+    assert "name" not in state["players"][0]
+
+
+def test_name_player(client):
+    """ Tests giving a name to a created player """
+    _post_player(client, name="myname")
+    state = _get_state(client).get_json()
+    assert state["players"][0]["name"] == "myname"
+
+
+def test_rename_player(client):
+    """ Tests PUT for /api/games/0/player/<player_id> to rename a player """
+    player_id = _assert_ok_retrieve_id(_post_player(client, name="myname"))
+    _put_player_name(client, player_id, name="anothername")
+    state = _get_state(client).get_json()
+    assert state["players"][0]["name"] == "anothername"
+
+
 def test_get_state(client):
     """ Tests GET for /api/games/0/state
 
@@ -418,19 +453,6 @@ def test_no_pushback_rule(client):
     _assert_invalid_action_and_unchanged_state(client, lambda: _post_shift(client, player_id_1, 6, 1, 270))
 
 
-def test_delete_player(client):
-    """ Tests GET for /api/games/0/state and delete for /api/games/0/players/<player_id>
-
-    After a player was deleted, he should not be able to see the game state.
-    """
-    _post_player(client)
-    player_id_1 = _assert_ok_retrieve_id(_post_player(client))
-    _delete_player(client, player_id_1)
-    state = _get_state(client).get_json()
-    assert len(state["players"]) == 1
-    _wait_for(client, "SHIFT")
-
-
 def test_get_computation_methods_contains_library(library_path, client):
     """ Tests GET for /api/computationMethods
 
@@ -556,13 +578,18 @@ def _post_move(client, player_id, row, column):
     return client.post("/api/games/0/move?p_id={}".format(player_id), data=data, mimetype="application/json")
 
 
-def _post_player(client, is_bot=False, computation_method=None, game_id=0):
-    player_data = _player_data(is_bot, computation_method)
+def _post_player(client, is_bot=False, computation_method=None, game_id=0, name=None):
+    player_data = _player_data(is_bot, computation_method, name)
     return client.post("/api/games/{}/players".format(game_id), data=player_data, mimetype="application/json")
 
 
 def _delete_player(client, player_id):
     return client.delete("/api/games/0/players/{}".format(player_id))
+
+
+def _put_player_name(client, player_id, name, game_id=0):
+    name_data = json.dumps({"name": name})
+    return client.put(f"/api/games/{game_id}/players/{player_id}/name", data=name_data, mimetype="application/json")
 
 
 def _put_game(client, game_id=0, size=7):
@@ -580,16 +607,16 @@ def _get_computation_methods(client):
     return client.get("/api/computation-methods")
 
 
-def _player_data(is_bot=False, computation_method=None):
-    data = None
+def _player_data(is_bot=False, computation_method=None, name=None):
+    data = {}
     if is_bot:
         data = {
             "isBot": is_bot,
             "computationMethod": computation_method
         }
-    if data:
-        data = json.dumps(data)
-    return data
+    if name:
+        data["name"] = name
+    return json.dumps(data) if len(data) else None
 
 
 def _cli_remove_overdue_players(cli_runner, seconds):

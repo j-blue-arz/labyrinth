@@ -21,8 +21,10 @@ def post_player(game_id):
     The request can contain a body of the form
     {
         'isBot': <boolean>,
-        'computationMethod': <string>
-    },
+        'computationMethod': <string>,
+        'name': <string>
+    }
+    All fields are optional.
     """
     request_body = request.get_json(silent=True, force=True)
     return controller.add_player(game_id, request_body)
@@ -32,6 +34,19 @@ def post_player(game_id):
 def delete_player(game_id, player_id):
     """ Removes a player from a game. Game has to exist, player has to exist in game. """
     controller.delete_player(game_id, player_id)
+    return ""
+
+
+@API.route('/games/<int:game_id>/players/<int:player_id>/name', methods=["PUT"])
+def rename_player(game_id, player_id):
+    """ Changes the name of a player from a game. Game has to exist, player has to exist in game.
+    Request body is expected to be
+    {
+        'name': <string>
+    }
+    """
+    request_body = request.get_json(force=True)
+    controller.change_player_name(game_id, player_id, request_body)
     return ""
 
 
