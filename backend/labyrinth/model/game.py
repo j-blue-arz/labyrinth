@@ -449,7 +449,7 @@ class Player:
     def identifier(self):
         """ Getter for identifier """
         return self._id
-    
+
     def set_game(self, game):
         """ Sets the game this player is part of
         Also sets the board and the player's piece """
