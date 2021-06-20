@@ -40,14 +40,6 @@ export default {
             type: Player,
             required: true
         },
-        xCenterPos: {
-            type: Number,
-            required: true
-        },
-        yCenterPos: {
-            type: Number,
-            required: true
-        },
         interaction: {
             type: Boolean,
             required: false,

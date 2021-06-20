@@ -7,7 +7,7 @@ beforeEach(() => {
     wrapper = factory();
 });
 
-describe("VMessageBoard", () => {
+describe("VMessageArea", () => {
     it("is invisible if not player's turn", async () => {
         givenNotPlayersTurn();
 

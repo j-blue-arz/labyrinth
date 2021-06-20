@@ -6,8 +6,6 @@ const wrapperFactory = function(player) {
     return shallowMount(VPlayerPiece, {
         propsData: {
             player: player,
-            xCenterPos: 50,
-            yCenterPos: 50,
             maxSize: 30,
             interaction: player.hasToMove()
         }

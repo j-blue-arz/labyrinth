@@ -1,8 +1,6 @@
 <template>
     <div class="score-row" :class="[colorIndexClass, { 'score-row--is-turn': isTurn }]">
         <v-player-piece
-            :xCenterPos="15"
-            :yCenterPos="15"
             :maxSize="25"
             :player="player"
             :svgSize="30"
