@@ -1,7 +1,6 @@
 import Game from "@/model/game.js";
 import GameApi from "@/api/gameApi.js";
 import PlayerManager from "@/model/playerManager.js";
-import { setInterval, clearInterval } from "timers";
 import Player from "@/model/player";
 import WasmPlayer from "@/model/wasmPlayer";
 import CountdownTimer from "@/model/countdown";
