@@ -43,6 +43,19 @@ paths:
             parameters:
                 - $ref: "#/components/parameters/gameId"
                 - $ref: "#/components/parameters/playerPathId"
+            responses:
+                200:
+                    description: "If no error occurred."
+                ">=400":
+                    $ref: "#/components/responses/errorResponse"
+    /games/{game_id}/players/{player_id}/name:
+        put:
+            tags:
+                - "players"
+            summary: "Renames a player"
+            parameters:
+                - $ref: "#/components/parameters/gameId"
+                - $ref: "#/components/parameters/playerPathId"
             requestBody:
                 description: "The new name."
                 required: true
@@ -55,12 +68,6 @@ paths:
                     description: "If no error occurred."
                 ">=400":
                     $ref: "#/components/responses/errorResponse"
-    /games/{game_id}/players/{player_id}/name:
-        put:
-            tags:
-                - "players"
-            summary: "Renames a player"
-            parameters:
     /games/{game_id}/state:
         get:
             tags:
