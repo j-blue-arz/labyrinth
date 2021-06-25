@@ -10,7 +10,7 @@
             :user-player="userPlayer"
         />
         <div class="game__score">
-            <score-board :players="players" />
+            <score-board :players="players" :controller="controller" />
         </div>
         <div class="game__message">
             <v-message-area :countdown="countdown" :user-player="userPlayer" />

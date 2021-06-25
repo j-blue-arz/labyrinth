@@ -30,23 +30,24 @@ describe("VEditableField", () => {
         thenInputIsVisible();
     });
 
-    it("has set text as content", () => {
-        givenTextSet("asdf");
+    it("emits set text as event", () => {
+        givenTextSet("some text");
 
         whenFocusIsLost();
 
-        thenContentIs("asdf");
+        thenInputEventContentIs("some text");
     });
 });
 
 let wrapper = null;
 
-let placeholder = "XYZ";
+let placeholder = "some placeholder";
 
 const factory = function() {
     let wrapper = mount(VEditableField, {
         propsData: {
-            placeholder: placeholder
+            placeholder: placeholder,
+            value: ""
         }
     });
     return wrapper;
@@ -80,6 +81,11 @@ const thenContentIs = function(expectedText) {
         .at(0)
         .text();
     expect(actualText).toEqual(expectedText);
+};
+
+const thenInputEventContentIs = function(expectedText) {
+    expect(wrapper.emitted().input).toBeTruthy();
+    expect(wrapper.emitted().input[0]).toEqual([expectedText]);
 };
 
 const thenShowsOnlyOneSpan = function() {

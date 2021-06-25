@@ -4,6 +4,7 @@
             v-for="player in players"
             :key="'score-row-' + player.id"
             :player="player"
+            :controller="controller"
         />
     </div>
 </template>
@@ -19,6 +20,10 @@ export default {
     props: {
         players: {
             type: Array,
+            required: true
+        },
+        controller: {
+            type: Object,
             required: true
         }
     }

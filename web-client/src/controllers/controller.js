@@ -249,6 +249,15 @@ export default class Controller {
         clearInterval(this._polling_timer);
     }
 
+    changeUserPlayerName(newName) {
+        if (this._playerManager.hasUserPlayer()) {
+            const userPlayerId = this._playerManager.getUserPlayerId();
+            let userPlayer = this._game.getPlayer(userPlayerId);
+            userPlayer.playerName = newName;
+            this._api.changePlayerName(userPlayerId, newName).catch(this.handleError);
+        }
+    }
+
     get game() {
         return this._game;
     }

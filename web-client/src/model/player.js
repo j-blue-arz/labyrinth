@@ -12,6 +12,7 @@ export default class Player {
         this.isUser = false;
         this._turnAction = NO_ACTION; // one of NONE, MOVE, or SHIFT
         this.score = 0;
+        this.playerName = "";
     }
 
     get id() {
@@ -57,13 +58,14 @@ export default class Player {
             this.isBot = true;
             this.computationMethod = apiPlayer.computationMethod;
         }
+        this.playerName = apiPlayer.name || "";
     }
 
     getLabel() {
-        if (this.isUser) {
-            return "You";
-        } else if (this.isBot) {
+        if (this.isBot) {
             return Player.computationMethodLabel(this.computationMethod);
+        } else if (this.playerName) {
+            return this.playerName;
         }
         return "";
     }

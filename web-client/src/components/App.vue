@@ -61,6 +61,11 @@ body {
     overflow: hidden;
 }
 
+input {
+    font-family: inherit;
+    font-size: inherit;
+}
+
 .app {
     height: 100%;
 

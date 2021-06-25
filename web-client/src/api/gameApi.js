@@ -39,6 +39,13 @@ export default class GameApi {
         return axios.delete(deletePlayerPath);
     }
 
+    changePlayerName(playerId, name) {
+        const changePlayerNamePath = this.apiPath + "/games/0/players/" + playerId + "/name";
+        return axios.put(changePlayerNamePath, {
+            name: name
+        });
+    }
+
     changeGame(size) {
         let putGamePath = this.apiPath + "/games/0";
         return axios.put(putGamePath, {

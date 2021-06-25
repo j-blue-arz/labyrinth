@@ -7,7 +7,7 @@
             class="score-row__piece-symbol"
         />
         <div class="score-row__player-name">
-            <p>{{ playerName }}</p>
+            <player-name-panel :controller="controller" :player="player" />
         </div>
         <p class="score-row__score-data">{{ player.score }}</p>
     </div>
@@ -15,16 +15,22 @@
 
 <script>
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import PlayerNamePanel from "@/components/PlayerNamePanel.vue";
 import Player from "@/model/player.js";
 
 export default {
     name: "v-score-board-row",
     components: {
-        VPlayerPiece
+        VPlayerPiece,
+        PlayerNamePanel
     },
     props: {
         player: {
             type: Player,
+            required: true
+        },
+        controller: {
+            type: Object,
             required: true
         }
     },
