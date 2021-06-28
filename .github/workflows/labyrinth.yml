@@ -28,10 +28,12 @@ jobs:
           run: |
             npm run build
         - name: Archive web-client
-          uses: actions/upload-artifact@v1
+          uses: actions/upload-artifact@v2
           with:
             name: webClient
-            path: backend/static
+            path: |
+              dist
+              docker
 
     algolibs:
         runs-on: ubuntu-latest
@@ -88,11 +90,6 @@ jobs:
           run: |
             . venv/bin/activate
             flake8 . --count --max-line-length=120 --max-complexity=10 --show-source --statistics --exclude __pycache__,venv
-        - name: Restore web-client artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: webClient
-            path: backend/static
         - name: Restore shared library artifact
           uses: actions/download-artifact@v1
           with:
