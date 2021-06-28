@@ -32,8 +32,8 @@ jobs:
           with:
             name: webClient
             path: |
-              dist
-              docker
+              dist/
+              docker/
 
     algolibs:
         runs-on: ubuntu-latest
