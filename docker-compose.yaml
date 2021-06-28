@@ -1,0 +1,12 @@
+version: '3'
+services:
+    backend:
+        image: labyrinth:0.3.0
+        container_name: backend
+        expose:
+        - 9112
+    nginx:
+        image: labyrinth-nginx:0.3.0
+        container_name: nginx
+        ports:
+        - "80:80"

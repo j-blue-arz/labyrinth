@@ -15,9 +15,6 @@ COPY labyrinth_main.py .
 
 COPY uwsgi-docker.ini .
 
-# flask app serves web-client
-COPY static ./static
-
 # setup 
 RUN python instance/create_secret.py >> instance/config.py
 

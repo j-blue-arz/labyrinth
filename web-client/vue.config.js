@@ -6,7 +6,6 @@ const compressionPlugin = require("compression-webpack-plugin");
 const version = require("./package.json").version;
 
 module.exports = {
-    outputDir: path.resolve(__dirname, "../backend/static"),
     assetsDir: "assets",
     configureWebpack: {
         devtool: "source-map",
