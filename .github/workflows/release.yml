@@ -1,6 +1,10 @@
-name: labyrinth
+name: release
 
-on: [push]
+on: 
+    workflow_dispatch
+    push:
+        tags:
+            '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
     web-client:
@@ -27,13 +31,25 @@ jobs:
           - name: Build web-client
             run: |
               npm run build
-          - name: Archive web-client
-            uses: actions/upload-artifact@v2
+          - name: Log in to Docker Hub
+            uses: docker/login-action@v1
             with:
-                name: webClient
-                path: |
-                  dist/
-                  docker/
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          - name: Extract metadata (tags, labels) for Docker
+            id: meta
+            uses: docker/metadata-action@v3
+            with:
+                images: julianarz/labyrinth-web-client
+                tags: |
+                  type=match,pattern=\d.\d.\d
+          - name: Build and push Docker image
+            uses: docker/build-push-action@v2
+            with:
+                context: .
+                push: true
+                tags: ${{ steps.meta.outputs.tags }}
+                labels: ${{ steps.meta.outputs.labels }}
 
     algolibs:
         runs-on: ubuntu-latest
@@ -99,15 +115,23 @@ jobs:
             run: |
               . venv/bin/activate
               pytest . --junitxml=../test-results/backend-results.xml --cov=backend --cov-report=xml:../test-results/backend-coverage.xml
-          - name: Archive deployment
-            uses: actions/upload-artifact@v2
+            
+          - name: Log in to Docker Hub
+            uses: docker/login-action@v1
             with:
-                name: deployment
-                path: |
-                  backend/instance
-                  backend/static
-                  backend/labyrinth
-                  backend/requirements.txt
-                  backend/labyrinth_main.py
-                  backend/uwsgi-docker.ini
-                  backend/Dockerfile
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          - name: Extract metadata (tags, labels) for Docker
+            id: meta
+            uses: docker/metadata-action@v3
+            with:
+                images: julianarz/labyrinth-backend
+                tags: |
+                  type=match,pattern=\d.\d.\d
+          - name: Build and push Docker image
+            uses: docker/build-push-action@v2
+            with:
+                context: .
+                push: true
+                tags: ${{ steps.meta.outputs.tags }}
+                labels: ${{ steps.meta.outputs.labels }}
