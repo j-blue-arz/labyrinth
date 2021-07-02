@@ -5,6 +5,8 @@ on:
     push:
         tags:
             '[0-9]+.[0-9]+.[0-9]+'
+        branches:
+            master
 
 jobs:
     web-client:
@@ -42,7 +44,9 @@ jobs:
             with:
                 images: julianarz/labyrinth-web-client
                 tags: |
-                  type=match,pattern=\d.\d.\d
+                  type=ref,priority=600,event=branch
+                  type=match,priority=600,pattern=\d.\d.\d
+                  type=raw,priority=200,value=latest
           - name: Build and push Docker image
             uses: docker/build-push-action@v2
             with:
@@ -127,7 +131,9 @@ jobs:
             with:
                 images: julianarz/labyrinth-backend
                 tags: |
-                  type=match,pattern=\d.\d.\d
+                  type=ref,priority=600,event=branch
+                  type=match,priority=600,pattern=\d.\d.\d
+                  type=raw,priority=200,value=latest
           - name: Build and push Docker image
             uses: docker/build-push-action@v2
             with:
