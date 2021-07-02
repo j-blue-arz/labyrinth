@@ -49,6 +49,7 @@ jobs:
             uses: docker/build-push-action@v2
             with:
                 context: ./web-client
+                file: ./web-client/Dockerfile
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
@@ -136,6 +137,7 @@ jobs:
             uses: docker/build-push-action@v2
             with:
                 context: ./backend
+                file: ./backend/Dockerfile
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
