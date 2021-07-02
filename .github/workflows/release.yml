@@ -5,8 +5,6 @@ on:
     push:
         tags:
             '[0-9]+.[0-9]+.[0-9]+'
-        branches:
-            master
 
 jobs:
     web-client:
@@ -50,7 +48,7 @@ jobs:
           - name: Build and push Docker image
             uses: docker/build-push-action@v2
             with:
-                context: .
+                context: ./web-client
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
@@ -137,7 +135,7 @@ jobs:
           - name: Build and push Docker image
             uses: docker/build-push-action@v2
             with:
-                context: .
+                context: ./backend
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}

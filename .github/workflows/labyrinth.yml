@@ -1,6 +1,6 @@
 name: labyrinth
 
-on: [push]
+on: workflow_dispatch
 
 jobs:
     web-client:
