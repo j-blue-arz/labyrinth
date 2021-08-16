@@ -1,3 +1,7 @@
+if(TARGET BUILDER)
+    return()
+endif(TARGET BUILDER)
+
 set(
     SOURCES 
 		"graph_builder.h"

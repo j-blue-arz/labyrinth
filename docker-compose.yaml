@@ -1,12 +1,19 @@
 version: '3'
 services:
     backend:
-        image: labyrinth:0.3.0
-        container_name: backend
+        build:
+            context: .
+            dockerfile: docker/backend.Dockerfile
+            target: release
+        image: labyrinth:latest
+        container_name: labyrinth
         expose:
         - 9112
     nginx:
-        image: labyrinth-nginx:0.3.0
-        container_name: nginx
+        build: 
+            context: ./web-client
+            target: release
+        image: labyrinth-nginx:latest
+        container_name: labyrinth-nginx
         ports:
         - "80:80"

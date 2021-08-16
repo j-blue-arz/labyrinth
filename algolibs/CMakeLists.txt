@@ -4,7 +4,16 @@ project (algolibs VERSION ${PROJECT_VERSION} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
-option(COMPILE_TO_WASM "Compiles to WebAssembly" OFF)
+# options: building wasm is only possible when building solvers, and will deactivate build of tests and benchmarks.
+include(CMakeDependentOption)
+option(BUILD_SOLVERS "Will build the solvers as libraries or wasm." ON)
+cmake_dependent_option(COMPILE_TO_WASM "Compiles to WebAssembly. This will only build the solvers to .wasm, and omit tests and benchmarks." OFF
+                       "BUILD_SOLVERS" OFF)
+cmake_dependent_option(BUILD_TESTS "Will build the tests. This might take a while due to gtest download." ON
+                       "NOT COMPILE_TO_WASM" OFF)
+cmake_dependent_option(BUILD_BENCHMARKS "Will build the benchmarks." ON
+                       "NOT COMPILE_TO_WASM" OFF)
+
 
 if (MSVC)
     # warning level 4 - requires to replace compiler option, because cmake sets /W3 by default
@@ -24,7 +33,7 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 endif()
 
-if(NOT COMPILE_TO_WASM)
+if(BUILD_TESTS)
     include(FetchContent)
     FetchContent_Declare(
         googletest
@@ -40,8 +49,14 @@ if(NOT COMPILE_TO_WASM)
     enable_testing()
     add_subdirectory(test)
     add_subdirectory(graphbuilder)
-    add_subdirectory(benchmark)
-endif(NOT COMPILE_TO_WASM)
+endif(BUILD_TESTS)
 
-add_subdirectory(solvers)
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
+    add_subdirectory(graphbuilder)
+endif(BUILD_BENCHMARKS)
+
+if(BUILD_SOLVERS OR COMPILE_TO_WASM OR BUILD_TESTS)
+    add_subdirectory(solvers)
+endif(BUILD_SOLVERS OR COMPILE_TO_WASM OR BUILD_TESTS)
 

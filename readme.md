@@ -6,38 +6,11 @@ Labyrinth is a family board game. This project aims to recreate the game as a on
 
 ![A live game](.github/labyrinth.png)
 
-# Quick start
-Build the client and run the flask web server.
-## Build web-client
-    cd web-client
-    npm install
-    npm run test:unit
-    npm run build
+# Run locally
 
-    cd ../backend
+    docker compose up
 
-Now is a good time to create and activate a virtual environment, e.g. on Linux:
-
-    python -m venv venv
-    . venv/bin/activate
-
-install required packages:
-
-    pip install -r dev-requirements.txt
-    python -m pytest ./tests
-
-## Running server  
-Flask comes with a built-in server, which is perfectly fine for testing and development of algorithms
-
-    cd ../backend
-    export FLASK_APP=server
-    flask run --port=5000
-
-Open localhost:5000 in your browser. Edge and IE are not supported.
-
-If you want the server to be visible in your local network:
-
-    flask run --host=0.0.0.0 --port=5000
+Open `localhost` in your browser. Edge and IE are not supported.
 
 # Bots
 Bots are implemented in C++. They are not required to run the game. They are either called by the backend as shared libraries or compiled to WebAssembly to be used by the web-client. See [readme in algolibs](algolibs/readme.md) for build steps.
