@@ -57,8 +57,8 @@ elseif(NOT COMPILE_TO_WASM)
     set_target_properties(libexhsearch PROPERTIES OUTPUT_NAME exhsearch)
 
     add_libminimax_with_evaluator(MINIMAX_WIN_EVALUATOR "")
-    #add_libminimax_with_evaluator(MINIMAX_REACHABLE_HEURISTIC -reachable)
-    #add_libminimax_with_evaluator(MINIMAX_DISTANCE_HEURISTIC -distance)
+    add_libminimax_with_evaluator(MINIMAX_REACHABLE_HEURISTIC -reachable)
+    add_libminimax_with_evaluator(MINIMAX_DISTANCE_HEURISTIC -distance)
 endif(COMPILE_TO_WASM)
 
 
