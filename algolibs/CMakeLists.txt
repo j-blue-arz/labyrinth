@@ -48,13 +48,15 @@ if(BUILD_TESTS)
 
     enable_testing()
     add_subdirectory(test)
-    add_subdirectory(graphbuilder)
 endif(BUILD_TESTS)
 
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmark)
-    add_subdirectory(graphbuilder)
 endif(BUILD_BENCHMARKS)
+
+if(BUILD_TESTS OR BUILD_BENCHMARKS)
+    add_subdirectory(graphbuilder)
+endif(BUILD_TESTS OR BUILD_BENCHMARKS)
 
 if(BUILD_SOLVERS OR COMPILE_TO_WASM OR BUILD_TESTS)
     add_subdirectory(solvers)
