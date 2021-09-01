@@ -136,7 +136,7 @@ def remove_overdue_players(overdue_timedelta):
 
 def remove_unobserved_games(unobserved_period):
     """ Uses UnobservedGamesInteractor to remove games which have not been observed for the given period """
-    interactor = interactors.UnobservedGamesInteractor(game_repository())
+    interactor = interactors.UnobservedGamesInteractor(game_repository(), logging.get_logger())
     removed_ids = _try(lambda: interactor.remove_unobserved_games(unobserved_period))
     for game_id in removed_ids:
         logging.get_logger().remove_game(game_id)

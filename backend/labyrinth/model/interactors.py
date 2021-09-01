@@ -112,8 +112,9 @@ class ObserveGameInteractor:
 
 class UnobservedGamesInteractor:
     """ Removes games which have not been observed for a certain time period """
-    def __init__(self, game_repository):
+    def __init__(self, game_repository, logger):
         self._game_repository = game_repository
+        self._logger = logger
 
     def remove_unobserved_games(self, unobserved_period=timedelta(hours=1)):
         """ Removes the unobserved games, returns identifiers of removed games """
@@ -121,7 +122,14 @@ class UnobservedGamesInteractor:
         games = self._game_repository.find_all_before_observed_timestamp(threshold)
         for game in games:
             self._game_repository.remove(game)
+            self._log_player_removal(game)
         return [game.identifier for game in games]
+
+    def _log_player_removal(self, game):
+        for index, player in enumerate(game.players):
+            remaining_players = len(game.players) - index - 1
+            self._logger.remove_player(player.identifier, game_id=game.identifier,
+                                       num_players=remaining_players)
 
 
 class GameRepository:
