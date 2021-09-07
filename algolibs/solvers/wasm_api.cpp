@@ -1,6 +1,7 @@
 #include "exhsearch.h"
 #include "graph_algorithms.h"
 #include "maze_graph.h"
+#include "solvers.h"
 
 #include <iostream>
 
@@ -18,7 +19,7 @@ Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, short ro
 
 solvers::PlayerAction errorAction() {
     Location errorLocation{-1, -1};
-    return PlayerAction{solvers::ShiftAction{errorLocation, 0}, errorLocation};
+    return solvers::PlayerAction{solvers::ShiftAction{errorLocation, RotationDegreeType::_0}, errorLocation};
 }
 
 struct LocationValueObject {
@@ -55,13 +56,13 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
         .property("row", &Location::getRow)
         .property("column", &Location::getColumn);
 
-    emscripten::value_object<exhsearch::ShiftAction>("ShiftAction")
-        .field("location", &exhsearch::ShiftAction::location)
-        .field("rotation", &exhsearch::ShiftAction::rotation);
+    emscripten::value_object<solvers::ShiftAction>("ShiftAction")
+        .field("location", &solvers::ShiftAction::location)
+        .field("rotation", &solvers::ShiftAction::rotation);
 
-    emscripten::value_object<PlayerAction>("PlayerAction")
-        .field("shift", &PlayerAction::shift)
-        .field("move_location", &PlayerAction::move_location);
+    emscripten::value_object<solvers::PlayerAction>("PlayerAction")
+        .field("shift", &solvers::PlayerAction::shift)
+        .field("move_location", &solvers::PlayerAction::move_location);
 
     emscripten::value_object<LocationValueObject>("LocationValueObject")
         .field("row", &LocationValueObject::row)

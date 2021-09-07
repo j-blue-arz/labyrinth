@@ -26,13 +26,6 @@ else()
     add_compile_options(-Wall -Wextra)
 endif()
 
-# always debug info
-if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-endif()
-
 if(BUILD_TESTS)
     include(FetchContent)
     FetchContent_Declare(

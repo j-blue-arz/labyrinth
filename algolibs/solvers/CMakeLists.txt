@@ -35,13 +35,13 @@ endmacro()
 if(COMPILE_TO_WASM)
 	add_executable(libexhsearch ${EXHSEARCH_SOURCES} wasm_api.cpp)
     string(CONCAT EXHSEARCH_LINK_FLAGS
-                             " -s WASM=1"
-                             " -o libexhsearch.js"
+                             " --bind"
                              " -s ALLOW_MEMORY_GROWTH=1"
                              " -s MODULARIZE=1"
                              " -s EXPORT_NAME=libexhsearch"
-                             " -s \"EXTRA_EXPORTED_RUNTIME_METHODS=['addOnPostRun']\""
-                             " --bind")
+                             " -s FILESYSTEM=0 "
+                             " -s ENVIRONMENT=web"
+                             " -o libexhsearch.js")
     set_target_properties(libexhsearch PROPERTIES
             SUFFIX ".js"
             LINK_FLAGS ${EXHSEARCH_LINK_FLAGS}
