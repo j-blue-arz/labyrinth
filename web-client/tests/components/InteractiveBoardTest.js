@@ -2,7 +2,7 @@ import { shallowMount, mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import { copyObjectStructure } from "./testutils.js";
+import { copyObjectStructure } from "../testutils.js";
 import Game, { loc } from "@/model/game.js";
 import Controller from "@/controllers/controller.js";
 import PlayerManager from "@/model/playerManager.js";

@@ -2,7 +2,7 @@ import { shallowMount, mount } from "@vue/test-utils";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import MazeCard from "@/model/mazeCard.js";
-import { copyObjectStructure } from "./testutils.js";
+import { copyObjectStructure } from "../testutils.js";
 
 beforeEach(() => {
     leftoverMazeCard = factory();

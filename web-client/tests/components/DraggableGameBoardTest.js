@@ -3,7 +3,7 @@ import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import Game, { loc } from "@/model/game.js";
 import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import VGameBoard from "@/components/VGameBoard.vue";
-import { buildRandomMaze } from "./testutils.js";
+import { buildRandomMaze } from "../testutils.js";
 
 beforeEach(() => {
     wrapper = factory();

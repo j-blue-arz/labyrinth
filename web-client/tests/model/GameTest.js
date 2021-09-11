@@ -2,7 +2,7 @@ import Game, { loc } from "@/model/game";
 import MazeCard from "@/model/mazeCard";
 import Player from "@/model/player";
 import ValueError from "@/util/exceptions";
-import { assertConsistentLocation, buildRandomMaze } from "./testutils.js";
+import { assertConsistentLocation, buildRandomMaze } from "../testutils.js";
 
 describe("Game", () => {
     describe(".mazeCardsAsList()", () => {

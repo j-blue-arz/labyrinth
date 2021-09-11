@@ -1,6 +1,6 @@
 import { loc } from "@/model/game";
 import flushPromises from "flush-promises";
-import { copyObjectStructure } from "./testutils.js";
+import { copyObjectStructure } from "../testutils.js";
 import Controller from "@/controllers/controller.js";
 import GameApi from "@/api/gameApi.js";
 
