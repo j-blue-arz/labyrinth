@@ -1,7 +1,7 @@
 import Vue from "vue";
 import MazeCard from "@/model/mazeCard.js";
 import Player, * as action from "@/model/player.js";
-import Graph from "@/model/mazeAlgorithm.js";
+import Graph from "@/model/Graph.js";
 import ValueError from "@/util/exceptions";
 
 export function loc(row, column) {

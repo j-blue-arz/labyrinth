@@ -12,7 +12,7 @@
 
 <script>
 import Game from "@/model/game.js";
-import Graph from "@/model/mazeAlgorithm.js";
+import Graph from "@/model/Graph.js";
 import Player from "@/model/player.js";
 
 export default {

@@ -24,7 +24,7 @@ import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
 import * as action from "@/model/player.js";
-import Graph from "@/model/mazeAlgorithm.js";
+import Graph from "@/model/Graph.js";
 
 export default {
     name: "interactive-board",
