@@ -207,15 +207,15 @@ components:
                         $ref: "#/components/schemas/boardLocation"
                 mazeCards:
                     type: "array"
-                    description: "The current layout of the maze, described as an array of maze cards. The leftover maze card is included in this array and has location null. 
-                    Currently, only board size 7 is possible, hence there are always 50 maze cards. "
+                    description: "The current layout of the maze, described as an array of maze cards. 
+                    The leftover maze card is the first in this array and has location null. The other maze cards are consecutive in row-first order."
                     items:
                         $ref: "#/components/schemas/mazeCard"
                     minItems: 50
                     maxItems: 50
                 nextAction:
                     type: "object"
-                    description: "The player whose turn it is, and the action he has to take."
+                    description: "The player whose turn it is, and the action he has to take. `null` if there are no players in the game."
                     properties:
                         action:
                             type: "string"
