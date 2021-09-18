@@ -13,7 +13,8 @@
     "core-js": "^3.6.5",
     "gsap": "^3.6.0",
     "terser": "^3.14.1",
-    "vue": "^2.6.12"
+    "vue": "^2.6.12",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.5.8",

@@ -2,6 +2,10 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import VGameBoard from "@/components/VGameBoard.vue";
 import MazeCard from "@/model/mazeCard";
 
+export function loc(row, column) {
+    return { row: row, column: column };
+}
+
 export function assertConsistentLocation(game, location) {
     expect(game.getMazeCard(location).location).toEqual(location);
 }
