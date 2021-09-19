@@ -2,7 +2,7 @@ import { loc } from "@/model/game";
 import flushPromises from "flush-promises";
 import { copyObjectStructure } from "../testutils.js";
 import Controller from "@/controllers/controller.js";
-import GameApi from "@/api/gameApi.js";
+import API from "@/services/game-api.js";
 
 jest.useFakeTimers();
 
@@ -13,19 +13,15 @@ var mockMove = jest.fn();
 var mockCancel = jest.fn();
 var mockErrorWasThrownByCancel = jest.fn();
 var mockFetchComputationMethods = jest.fn();
-jest.mock("@/api/gameApi.js", () => {
-    return jest.fn().mockImplementation(() => {
-        return {
-            fetchState: mockFetchState,
-            doAddPlayer: mockAddPlayer,
-            doShift: mockShift,
-            doMove: mockMove,
-            cancelAllFetches: mockCancel,
-            errorWasThrownByCancel: mockErrorWasThrownByCancel,
-            fetchComputationMethods: mockFetchComputationMethods
-        };
-    });
-});
+jest.mock("@/services/game-api.js", () => jest.fn());
+
+API.fetchState = mockFetchState;
+API.doAddPlayer = mockAddPlayer;
+API.doShift = mockShift;
+API.doMove = mockMove;
+API.cancelAllFetches = mockCancel;
+API.errorWasThrownByCancel = mockErrorWasThrownByCancel;
+API.fetchComputationMethods = mockFetchComputationMethods;
 
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
@@ -42,7 +38,6 @@ beforeEach(() => {
     mockShift.mockClear();
     mockMove.mockClear();
     mockCancel.mockClear();
-    GameApi.mockClear();
 });
 
 const factory = function() {

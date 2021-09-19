@@ -1,5 +1,5 @@
 import Game from "@/model/game.js";
-import GameApi from "@/api/gameApi.js";
+import API from "@/services/game-api.js";
 import PlayerManager from "@/model/playerManager.js";
 import Player from "@/model/player";
 import WasmPlayer from "@/model/wasmPlayer";
@@ -12,7 +12,6 @@ export default class Controller {
     constructor(useStorage) {
         this._game = new Game();
         this._polling_timer = 0;
-        this._api = new GameApi();
         this._playerManager = new PlayerManager(useStorage);
         this._computationMethods = [];
         this._turnCountdown = new CountdownTimer(TURN_SECONDS);
@@ -23,8 +22,7 @@ export default class Controller {
 
     initialize() {
         if (this._playerManager.hasAnyPlayer()) {
-            this._api
-                .fetchState() //
+            API.fetchState() //
                 .then(state => {
                     this.createGameFromApi(state);
                     this._updateUserPlayer();
@@ -71,8 +69,7 @@ export default class Controller {
     performShift(shiftAction) {
         this._game.leftoverMazeCard.rotation = shiftAction.leftoverRotation;
         this._stopPolling();
-        this._api
-            .doShift(shiftAction.playerId, shiftAction.location, shiftAction.leftoverRotation)
+        API.doShift(shiftAction.playerId, shiftAction.location, shiftAction.leftoverRotation)
             .then(() => this._game.shift(shiftAction.location))
             .catch(this.handleError)
             .then(this._startPolling);
@@ -82,14 +79,13 @@ export default class Controller {
         // already validated, so we can alter the game state directly
         this._game.move(moveAction.playerId, moveAction.targetLocation);
         this._stopPolling();
-        this._api
-            .doMove(moveAction.playerId, moveAction.targetLocation)
+        API.doMove(moveAction.playerId, moveAction.targetLocation)
             .catch(this.handleError)
             .then(this._startPolling);
     }
 
     handleError(error) {
-        if (!this._api.errorWasThrownByCancel(error)) {
+        if (!API.errorWasThrownByCancel(error)) {
             if (error.response) {
                 if (error.response.data.key === "GAME_NOT_FOUND") {
                     console.log("Game not found, resetting.");
@@ -113,7 +109,7 @@ export default class Controller {
         if (this._polling_timer !== 0) {
             clearInterval(this._polling_timer);
             this._polling_timer = 0;
-            this._api.cancelAllFetches();
+            API.cancelAllFetches();
         }
     }
 
@@ -126,8 +122,7 @@ export default class Controller {
     }
 
     fetchApiState() {
-        this._api
-            .fetchState()
+        API.fetchState()
             .then(response => this.createGameFromApi(response))
             .catch(this.handleError);
     }
@@ -154,8 +149,7 @@ export default class Controller {
     enterGame() {
         if (this._playerManager.canUserEnterGame()) {
             this._stopPolling();
-            this._api
-                .doAddPlayer()
+            API.doAddPlayer()
                 .then(apiResponse => {
                     let userPlayer = new Player(apiResponse.data.id);
                     userPlayer.isUser = true;
@@ -170,8 +164,7 @@ export default class Controller {
     leaveGame() {
         if (this._playerManager.hasUserPlayer()) {
             let playerId = this._playerManager.getUserPlayerId();
-            this._api
-                .removePlayer(playerId)
+            API.removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this._startPolling);
             this._playerManager.removeUserPlayer();
@@ -181,8 +174,7 @@ export default class Controller {
     addWasmPlayer() {
         if (this._playerManager.canAddWasmPlayerId()) {
             this._stopPolling();
-            this._api
-                .doAddPlayer()
+            API.doAddPlayer()
                 .then(apiResponse => {
                     let playerId = parseInt(apiResponse.data.id);
                     let wasmPlayer = new WasmPlayer(
@@ -202,8 +194,7 @@ export default class Controller {
     removeWasmPlayer() {
         if (this._playerManager.hasWasmPlayer()) {
             let playerId = this._playerManager.getWasmPlayerId();
-            this._api
-                .removePlayer(playerId)
+            API.removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this._startPolling);
             this._playerManager.removeWasmPlayer();
@@ -212,8 +203,7 @@ export default class Controller {
 
     removeManagedPlayer(playerId) {
         if (this._playerManager.hasPlayerId(playerId)) {
-            this._api
-                .removePlayer(playerId)
+            API.removePlayer(playerId)
                 .catch(this.handleError)
                 .then(this._startPolling);
             this._playerManager.removePlayerId(playerId);
@@ -221,22 +211,19 @@ export default class Controller {
     }
 
     addBot(computeMethod) {
-        this._api
-            .doAddBot(computeMethod)
+        API.doAddBot(computeMethod)
             .catch(this.handleError)
             .then(this._startPolling);
     }
 
     removeBot(playerId) {
-        this._api
-            .removePlayer(playerId)
+        API.removePlayer(playerId)
             .catch(this.handleError)
             .then(this._startPolling);
     }
 
     restartWithSize(size) {
-        this._api
-            .changeGame(size)
+        API.changeGame(size)
             .catch(this.handleError)
             .then(this._startPolling);
     }
@@ -244,7 +231,7 @@ export default class Controller {
     beforeDestroy() {
         let playerIds = this._playerManager.getManagedPlayerIds();
         for (let playerId of playerIds) {
-            this._api.removePlayer(playerId);
+            API.removePlayer(playerId);
         }
         clearInterval(this._polling_timer);
     }
@@ -254,7 +241,7 @@ export default class Controller {
             const userPlayerId = this._playerManager.getUserPlayerId();
             let userPlayer = this._game.getPlayer(userPlayerId);
             userPlayer.playerName = newName;
-            this._api.changePlayerName(userPlayerId, newName).catch(this.handleError);
+            API.changePlayerName(userPlayerId, newName).catch(this.handleError);
         }
     }
 
@@ -271,8 +258,7 @@ export default class Controller {
     }
 
     _initComputationMethods() {
-        this._api
-            .fetchComputationMethods()
+        API.fetchComputationMethods()
             .then(methodsResult => {
                 this._computationMethods = methodsResult.data;
             })

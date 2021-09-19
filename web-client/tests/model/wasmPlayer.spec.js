@@ -1,5 +1,5 @@
 import WasmPlayer from "@/model/wasmPlayer.js";
-import WasmGateway from "@/api/wasmGateway.js";
+import WasmGateway from "@/services/wasmGateway.js";
 
 const mockHasLibexhsearch = jest.fn().mockReturnValue(true);
 const mockLoadLibexhsearch = jest.fn();
@@ -8,7 +8,7 @@ const mockComputeActions = jest.fn();
 const spyPerformShift = jest.fn();
 const spyPerformMove = jest.fn();
 
-jest.mock("@/api/wasmGateway.js", () => {
+jest.mock("@/services/wasmGateway.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
             hasLibexhsearch: mockHasLibexhsearch,

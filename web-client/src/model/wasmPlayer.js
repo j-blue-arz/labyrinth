@@ -1,4 +1,4 @@
-import WasmGateway from "@/api/wasmGateway.js";
+import WasmGateway from "@/services/wasmGateway.js";
 import Player from "@/model/player.js";
 
 export default class WasmPlayer extends Player {
