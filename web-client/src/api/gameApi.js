@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export default class GameApi {
-    constructor(serverUrl) {
-        this.apiPath = serverUrl + "/api";
+    constructor() {
+        this.apiPath = "/api";
         this.fetchSource = axios.CancelToken.source();
     }
 

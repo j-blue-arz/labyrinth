@@ -12,7 +12,7 @@ export default class Controller {
     constructor(useStorage) {
         this._game = new Game();
         this._polling_timer = 0;
-        this._api = new GameApi(location.protocol + "//" + location.host);
+        this._api = new GameApi();
         this._playerManager = new PlayerManager(useStorage);
         this._computationMethods = [];
         this._turnCountdown = new CountdownTimer(TURN_SECONDS);
