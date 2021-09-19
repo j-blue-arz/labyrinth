@@ -11,7 +11,7 @@ const getters = {};
 const actions = {};
 
 export const mutations = {
-    setBoardFromApi(state, apiState) {
+    update(state, apiState) {
         const n = apiState.maze.mazeSize;
         state.mazeSize = n;
         const apiMazeCards = apiState.maze.mazeCards;

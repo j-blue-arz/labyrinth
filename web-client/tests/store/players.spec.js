@@ -1,7 +1,7 @@
 import { state, mutations } from "@/store/modules/players.js";
 
 describe("mutations", () => {
-    describe("setPlayersFromApi", () => {
+    describe("update", () => {
         beforeEach(() => {
             apiPlayers = [];
             givenApiPlayer({
@@ -101,7 +101,7 @@ describe("mutations", () => {
     });
 });
 
-const { setPlayersFromApi } = mutations;
+const { update } = mutations;
 
 let players;
 let apiPlayers = [];
@@ -120,7 +120,7 @@ const givenApiPlayer = function(apiPlayer) {
 };
 
 const whenSetPlayersFromApi = function() {
-    setPlayersFromApi(players, apiPlayers);
+    update(players, apiPlayers);
 };
 
 const thenPlayerExists = function(id) {

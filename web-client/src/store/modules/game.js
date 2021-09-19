@@ -1,7 +1,8 @@
 import * as action from "@/model/player.js";
+import API from "@/services/game-api.js";
 
 export const state = () => ({
-    playerIds: [], // check if needed
+    playerIds: [],
     nextAction: { playerId: 0, action: action.NO_ACTION },
     isServed: false,
     objectiveId: -1
@@ -9,10 +10,22 @@ export const state = () => ({
 
 const getters = {};
 
-const actions = {};
+const actions = {
+    async updateFromApi({ commit }) {
+        const apiState = await API.fetchState;
+        commit("update", apiState);
+        commit("players/update", apiState.players, { root: true });
+        const boardState = {
+            mazeSize: apiState.mazeSize,
+            mazeCards: apiState.mazeCards,
+            enabledShiftLocations: apiState.enabledShiftLocations
+        };
+        commit("board/update", boardState, { root: true });
+    }
+};
 
 export const mutations = {
-    setGameFromApi(state, apiState) {
+    update(state, apiState) {
         state.playerIds = apiState.players.map(player => player.id);
         state.objectiveId = apiState.objectiveMazeCardId;
         if (apiState.nextAction !== null) {

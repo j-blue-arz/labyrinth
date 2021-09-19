@@ -2,7 +2,7 @@ import { state, getters, mutations } from "@/store/modules/board.js";
 import { loc } from "../testutils.js";
 
 describe("mutations", () => {
-    describe("setBoardFromApi", () => {
+    describe("update", () => {
         it("sets maze size correctly", () => {
             givenInitialBoardState();
             givenApiStateWithSize3();
@@ -67,7 +67,7 @@ describe("mutations", () => {
     });
 });
 
-const { setBoardFromApi } = mutations;
+const { update } = mutations;
 
 let board;
 let apiState;
@@ -86,7 +86,7 @@ const givenApiStateWithoutDisabledShiftLocations = function() {
 };
 
 const whenSetBoardFromApi = function() {
-    setBoardFromApi(board, apiState);
+    update(board, apiState);
 };
 
 const getMazeCard = function(location) {
@@ -175,7 +175,6 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 0
       }]
     },
-    "objectiveMazeCardId": 8,
     "enabledShiftLocations": [
       {"column": 1, "row": 0},
       {"column": 0, "row": 1},

@@ -1,8 +1,7 @@
-import { state, getters, mutations } from "@/store/modules/game.js";
-import { loc } from "../testutils.js";
+import { state, mutations } from "@/store/modules/game.js";
 
 describe("mutations", () => {
-    describe("setGameFromApi", () => {
+    describe("update", () => {
         it("results in a game with two players", () => {
             givenInitialGameState();
             givenApiStateWithSize3();
@@ -42,7 +41,7 @@ describe("mutations", () => {
     });
 });
 
-const { setGameFromApi } = mutations;
+const { update } = mutations;
 
 let game;
 let apiState;
@@ -56,7 +55,7 @@ const givenApiStateWithSize3 = function() {
 };
 
 const whenCreateFromApi = function() {
-    setGameFromApi(game, apiState);
+    update(game, apiState);
 };
 
 const GET_STATE_RESULT_FOR_N_3 = `{

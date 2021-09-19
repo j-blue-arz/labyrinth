@@ -10,7 +10,7 @@ const getters = {};
 const actions = {};
 
 export const mutations = {
-    setPlayersFromApi(state, apiPlayers) {
+    update(state, apiPlayers) {
         const apiIds = apiPlayers.map(apiPlayer => apiPlayer.id);
         const removedPlayerIds = state.allIds.filter(id => !apiIds.includes(id));
         removedPlayerIds.forEach(id => Vue.delete(state.byId, id));
