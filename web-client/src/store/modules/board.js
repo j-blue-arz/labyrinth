@@ -17,17 +17,21 @@ export const mutations = {
         const apiMazeCards = apiState.maze.mazeCards;
         state.leftoverId = apiMazeCards[0].id;
         state.cardsById[state.leftoverId] = apiMazeCards[0];
-        var index = 1;
-        for (var row = 0; row < n; row++) {
+        let index = 1;
+        for (let row = 0; row < n; row++) {
             state.boardLayout.push([]);
-            for (var col = 0; col < n; col++) {
+            for (let col = 0; col < n; col++) {
                 state.boardLayout[row].push(apiMazeCards[index].id);
                 state.cardsById[apiMazeCards[index].id] = apiMazeCards[index];
+                state.cardsById[apiMazeCards[index].id].playerIds = [];
                 index++;
             }
         }
         const enabledShiftLocations = apiState.enabledShiftLocations;
         state.disabledShiftLocation = findDisabledShiftLocation(n, enabledShiftLocations);
+        for (const player of apiState.players) {
+            state.cardsById[player.mazeCardId].playerIds.push(player.id);
+        }
     }
 };
 

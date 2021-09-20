@@ -27,15 +27,17 @@ describe("mutations", () => {
 
             whenSetBoardFromApi();
 
-            expect(board.cardsById["7"]).toEqual({
-                outPaths: "NE",
-                id: 7,
-                location: {
-                    column: 0,
-                    row: 1
-                },
-                rotation: 180
-            });
+            expect(board.cardsById["7"]).toEqual(
+                expect.objectContaining({
+                    outPaths: "NE",
+                    id: 7,
+                    location: {
+                        column: 0,
+                        row: 1
+                    },
+                    rotation: 180
+                })
+            );
         });
 
         it("sets leftover maze card id correctly", () => {
@@ -63,6 +65,25 @@ describe("mutations", () => {
             whenSetBoardFromApi();
 
             expect(board.disabledShiftLocation).toEqual(null);
+        });
+
+        it("puts player ids on maze card", () => {
+            givenInitialBoardState();
+            givenApiStateWithSize3();
+
+            whenSetBoardFromApi();
+            const playerIds = board.cardsById["16"].playerIds;
+            expect(Array.isArray(playerIds)).toBe(true);
+            expect(new Set(playerIds)).toEqual(new Set([42, 17]));
+            expect(playerIds.length).toBe(2);
+        });
+
+        it("leaves empty maze card player-ids empty", () => {
+            givenInitialBoardState();
+            givenApiStateWithSize3();
+
+            whenSetBoardFromApi();
+            expect(board.cardsById["2"].playerIds).toEqual([]);
         });
     });
 });
@@ -179,5 +200,14 @@ const GET_STATE_RESULT_FOR_N_3 = `{
       {"column": 1, "row": 0},
       {"column": 0, "row": 1},
       {"column": 2, "row": 1}
-    ]
+    ],
+    "players": [{
+            "id": 42,
+            "mazeCardId": 16,
+            "pieceIndex": 0
+          },{
+            "id": 17,
+            "pieceIndex": 1,
+            "mazeCardId": 16
+          }]
   }`;

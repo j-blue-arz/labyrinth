@@ -18,7 +18,8 @@ const actions = {
         const boardState = {
             mazeSize: apiState.mazeSize,
             mazeCards: apiState.mazeCards,
-            enabledShiftLocations: apiState.enabledShiftLocations
+            enabledShiftLocations: apiState.enabledShiftLocations,
+            players: apiState.players
         };
         commit("board/update", boardState, { root: true });
     }
