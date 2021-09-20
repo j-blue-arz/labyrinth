@@ -9,7 +9,7 @@ describe("mutations", () => {
 
             whenSetBoardFromApi();
 
-            expect(board.mazeSize).toEqual(3);
+            thenBoardSizeIs(3);
         });
 
         it("sets maze card id in 2d array correctly", () => {
@@ -18,7 +18,7 @@ describe("mutations", () => {
 
             whenSetBoardFromApi();
 
-            expect(getMazeCard(loc(1, 0))).toBe(7);
+            expect(getMazeCard(loc(1, 0))).toBe(3);
         });
 
         it("sets card by id correctly", () => {
@@ -27,10 +27,10 @@ describe("mutations", () => {
 
             whenSetBoardFromApi();
 
-            expect(board.cardsById["7"]).toEqual(
+            expect(board.cardsById["3"]).toEqual(
                 expect.objectContaining({
                     outPaths: "NE",
-                    id: 7,
+                    id: 3,
                     location: {
                         column: 0,
                         row: 1
@@ -46,7 +46,7 @@ describe("mutations", () => {
 
             whenSetBoardFromApi();
 
-            expect(board.leftoverId).toBe(49);
+            expect(board.leftoverId).toBe(9);
         });
 
         it("disables shift location, if enabled locations is missing one", () => {
@@ -72,7 +72,7 @@ describe("mutations", () => {
             givenApiStateWithSize3();
 
             whenSetBoardFromApi();
-            const playerIds = board.cardsById["16"].playerIds;
+            const playerIds = board.cardsById["2"].playerIds;
             expect(Array.isArray(playerIds)).toBe(true);
             expect(new Set(playerIds)).toEqual(new Set([42, 17]));
             expect(playerIds.length).toBe(2);
@@ -83,7 +83,20 @@ describe("mutations", () => {
             givenApiStateWithSize3();
 
             whenSetBoardFromApi();
-            expect(board.cardsById["2"].playerIds).toEqual([]);
+            expect(board.cardsById["3"].playerIds).toEqual([]);
+        });
+
+        it("overwrites existing state", () => {
+            givenExistingBoardStateWithSize5();
+            givenApiStateWithSize3();
+
+            whenSetBoardFromApi();
+
+            thenBoardSizeIs(3);
+            expect(board.boardLayout[0][0]).toEqual(0);
+            expect(board.cardsById).not.toHaveProperty("100");
+            expect(board.cardsById).toHaveProperty("1");
+            expect(board.cardsById["8"].playerIds).toEqual([]);
         });
     });
 });
@@ -95,6 +108,28 @@ let apiState;
 
 const givenInitialBoardState = function() {
     board = state();
+};
+
+const givenExistingBoardStateWithSize5 = function() {
+    board = state();
+    board.mazeSize = 5;
+    let id = 8;
+    for (let row = 0; row < board.mazeSize; row++) {
+        board.boardLayout.push([]);
+        for (let col = 0; col < board.mazeSize; col++) {
+            const card = {
+                id: id,
+                location: { row: row, column: col },
+                rotation: 0,
+                outPaths: "NES"
+            };
+            board.boardLayout[row].push(card.id);
+            board.cardsById[card.id] = card;
+            board.cardsById[card.id].playerIds = [];
+            id++;
+        }
+    }
+    board.cardsById[8].playerIds = [1, 2, 3, 4, 5];
 };
 
 const givenApiStateWithSize3 = function() {
@@ -110,6 +145,14 @@ const whenSetBoardFromApi = function() {
     update(board, apiState);
 };
 
+const thenBoardSizeIs = function(size) {
+    expect(board.mazeSize).toEqual(size);
+    expect(board.boardLayout.length).toEqual(size);
+    for (let row = 0; row < size; row++) {
+        expect(board.boardLayout[row].length).toEqual(size);
+    }
+};
+
 const getMazeCard = function(location) {
     return board.boardLayout[location.row][location.column];
 };
@@ -119,7 +162,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
       "mazeSize": 3,
       "mazeCards": [{
           "outPaths": "NES",
-          "id": 49,
+          "id": 9,
           "location": null,
           "rotation": 0
       }, {
@@ -148,7 +191,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 90
       }, {
           "outPaths": "NE",
-          "id": 7,
+          "id": 3,
           "location": {
           "column": 0,
           "row": 1
@@ -156,7 +199,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 180
       }, {
           "outPaths": "NE",
-          "id": 8,
+          "id": 4,
           "location": {
           "column": 1,
           "row": 1
@@ -164,7 +207,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 270
       }, {
           "outPaths": "NS",
-          "id": 9,
+          "id": 5,
           "location": {
           "column": 2,
           "row": 1
@@ -172,7 +215,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 0
       }, {
           "outPaths": "NS",
-          "id": 14,
+          "id": 6,
           "location": {
           "column": 0,
           "row": 2
@@ -180,7 +223,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 180
       }, {
           "outPaths": "NES",
-          "id": 15,
+          "id": 7,
           "location": {
           "column": 1,
           "row": 2
@@ -188,7 +231,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
           "rotation": 180
       }, {
           "outPaths": "NE",
-          "id": 16,
+          "id": 8,
           "location": {
           "column": 2,
           "row": 2
@@ -203,11 +246,11 @@ const GET_STATE_RESULT_FOR_N_3 = `{
     ],
     "players": [{
             "id": 42,
-            "mazeCardId": 16,
+            "mazeCardId": 2,
             "pieceIndex": 0
           },{
             "id": 17,
             "pieceIndex": 1,
-            "mazeCardId": 16
+            "mazeCardId": 2
           }]
   }`;

@@ -16,8 +16,10 @@ export const mutations = {
         state.mazeSize = n;
         const apiMazeCards = apiState.maze.mazeCards;
         state.leftoverId = apiMazeCards[0].id;
+        state.cardsById = {};
         state.cardsById[state.leftoverId] = apiMazeCards[0];
         let index = 1;
+        state.boardLayout.splice(0, state.boardLayout.length);
         for (let row = 0; row < n; row++) {
             state.boardLayout.push([]);
             for (let col = 0; col < n; col++) {
