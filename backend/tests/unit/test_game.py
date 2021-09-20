@@ -193,6 +193,15 @@ def given_game_player_with_piece_index_0_removed__when_restart__then_remaining_p
     assert get_player_piece_location(game, player=game.players[0]) == old_player_start_location
 
 
+def given_game_with_two_players__when_get_players__players_are_returned_sorted_by_piece_index():
+    game = game_with_board_and_two_players()
+    game.remove_player(1)
+    game.add_player(Player(2))
+    game.add_player(Player(1))
+
+    assert game.players[0].piece.piece_index < game.players[1].piece.piece_index < game.players[2].piece.piece_index
+
+
 def _turn_listener_test_setup(players):
     game = factories.create_game(game_id=7, with_delay=False)
     listener = Mock()
@@ -294,8 +303,8 @@ def game_with_board_and_one_player():
 
 def game_with_board_and_two_players():
     game = game_with_board()
-    game.add_player(Player(0))
     game.add_player(Player(1))
+    game.add_player(Player(0))
     return game
 
 

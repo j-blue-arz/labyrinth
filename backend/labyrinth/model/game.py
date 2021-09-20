@@ -730,6 +730,7 @@ class Game:
         player.set_game(self)
         player.register_in_turns(self._turns)
         self._players.append(player)
+        self._players.sort(key=lambda player: player.piece.piece_index)
         if len(self.players) == 1:
             self._turns.start()
 

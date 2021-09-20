@@ -13,8 +13,8 @@ def _create_test_game():
     returns this instance and one of the player's identifier """
     game = create_game(game_id=3)
     game.previous_shift_location = BoardLocation(0, 1)
-    game.add_player(Player(identifier=0))
     game.add_player(Player(identifier=1))
+    game.add_player(Player(identifier=0))
     game.get_player(0).score = 9
     return game
 
@@ -35,6 +35,18 @@ def test_mapping_players():
         assert keys.SCORE in player_dto
         assert player_dto[keys.SCORE] == player_game.score
         assert player_dto[keys.PIECE_INDEX] == player_game.piece.piece_index
+
+
+def test_mapping_players_sort_order():
+    """ Tests that players are sorted by piece index """
+    game = _create_test_game()
+    game.remove_player(1)
+    game.add_player(Player(identifier=2))
+    game.add_player(Player(identifier=1))
+    game_dto = mapper.game_state_to_dto(game)
+
+    assert game_dto[keys.PLAYERS][0][keys.PIECE_INDEX] < game_dto[keys.PLAYERS][1][keys.PIECE_INDEX]
+    assert game_dto[keys.PLAYERS][1][keys.PIECE_INDEX] < game_dto[keys.PLAYERS][2][keys.PIECE_INDEX]
 
 
 def test_mapping_leftover():

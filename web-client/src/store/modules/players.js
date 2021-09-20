@@ -25,7 +25,6 @@ export const mutations = {
             Vue.set(state.byId, player.id, player);
         });
         state.allIds = apiIds;
-        state.allIds.sort();
     }
 };
 

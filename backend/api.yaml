@@ -231,7 +231,7 @@ components:
                     description: "One of the identifiers of the elements of `mazeCards`, specifying the current location of the objective."
                 players:
                     type: "array"
-                    description: "The players currently playing in this game."
+                    description: "The players currently playing in this game. The array is sorted by the piece index of a player."
                     items:
                         $ref: "#/components/schemas/player"
             example:
