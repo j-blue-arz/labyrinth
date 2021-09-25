@@ -36,7 +36,7 @@ describe("mutations", () => {
 
             const botPlayer = playerWithId(42);
             expect(botPlayer.id).toBe(42);
-            expect(botPlayer.mazeCardId).toBe(16);
+            expect(botPlayer.mazeCard).toBe(16);
             expect(botPlayer.pieceIndex).toBe(0);
             expect(botPlayer.isBot).toBe(true);
             expect(botPlayer.computationMethod).toBe("random");
@@ -50,7 +50,7 @@ describe("mutations", () => {
 
             const player = playerWithId(17);
             expect(player.id).toBe(17);
-            expect(player.mazeCardId).toBe(15);
+            expect(player.mazeCard).toBe(15);
             expect(player.pieceIndex).toBe(1);
             expect(player.score).toBe(12);
             expect(player.isBot).toBe(false);

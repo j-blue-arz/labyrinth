@@ -12,16 +12,30 @@ const getters = {};
 
 const actions = {
     async updateFromApi({ commit }) {
-        const apiState = await API.fetchState;
+        const apiResult = await API.fetchState();
+        const apiState = apiResult.data;
         commit("update", apiState);
         commit("players/update", apiState.players, { root: true });
         const boardState = {
-            mazeSize: apiState.mazeSize,
-            mazeCards: apiState.mazeCards,
+            maze: apiState.maze,
             enabledShiftLocations: apiState.enabledShiftLocations,
             players: apiState.players
         };
         commit("board/update", boardState, { root: true });
+    },
+    move({ commit, rootGetters }, moveAction) {
+        // already validated, so we can alter the game state directly
+        const targetCard = rootGetters["board/mazeCard"](moveAction.targetLocation);
+        const sourceCard = rootGetters["players/mazeCard"](moveAction.playerId);
+        const boardMove = {
+            sourceCardId: sourceCard.id,
+            targetCardId: targetCard.id,
+            playerId: moveAction.playerId
+        };
+        commit("board/move", boardMove, { root: true });
+
+        const playerMove = { playerId: moveAction.playerId, mazeCardId: targetCard.id };
+        commit("players/move", playerMove, { root: true });
     }
 };
 

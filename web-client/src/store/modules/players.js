@@ -5,7 +5,15 @@ export const state = () => ({
     allIds: []
 });
 
-const getters = {};
+const getters = {
+    find: state => id => {
+        return state.byId[id];
+    },
+    mazeCard: (state, _, __, rootGetters) => id => {
+        const player = state.byId[id];
+        return rootGetters["board/find"](player.mazeCard);
+    }
+};
 
 const actions = {};
 
@@ -22,6 +30,8 @@ export const mutations = {
                 player = { id: apiPlayer.id, isUser: false, isBot: false, name: "" };
             }
             player = { ...player, ...apiPlayer };
+            Object.assign(player, { mazeCard: player["mazeCardId"] });
+            delete player["mazeCardId"];
             Vue.set(state.byId, player.id, player);
         });
         state.allIds = apiIds;

@@ -6,7 +6,27 @@ export const state = () => ({
     disabledShiftLocation: null
 });
 
-const getters = {};
+export const getters = {
+    find: state => id => {
+        return state.cardsById[id];
+    },
+    mazeCard: (state, getters) => location => {
+        if (getters.isInside(location)) {
+            const id = state.boardLayout[location.row][location.column];
+            return state.cardsById[id];
+        } else {
+            throw new RangeError();
+        }
+    },
+    isInside: state => location => {
+        return (
+            location.row >= 0 &&
+            location.row < state.mazeSize &&
+            location.column >= 0 &&
+            location.column < state.mazeSize
+        );
+    }
+};
 
 const actions = {};
 
@@ -19,6 +39,14 @@ export const mutations = {
         const enabledShiftLocations = apiState.enabledShiftLocations;
         state.disabledShiftLocation = findDisabledShiftLocation(n, enabledShiftLocations);
         setPlayersOnCards(state, apiState.players);
+    },
+    move(state, move) {
+        const sourceId = move.sourceCardId;
+        const targetId = move.targetCardId;
+        const player = move.playerId;
+        const index = state.cardsById[sourceId].playerIds.indexOf(player);
+        state.cardsById[sourceId].playerIds.splice(index, 1);
+        state.cardsById[targetId].playerIds.push(player);
     }
 };
 

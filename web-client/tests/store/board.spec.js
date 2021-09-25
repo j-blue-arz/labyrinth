@@ -1,110 +1,159 @@
-import { state, getters, mutations } from "@/store/modules/board.js";
+import boardConfig from "@/store/modules/board.js";
 import { loc } from "../testutils.js";
+import { createLocalVue } from "@vue/test-utils";
+import Vuex from "vuex";
+import { cloneDeep } from "lodash";
 
-describe("mutations", () => {
-    describe("update", () => {
-        it("sets maze size correctly", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
+describe("board Vuex module", () => {
+    describe("mutations", () => {
+        describe("update", () => {
+            it("sets maze size correctly", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
 
-            whenSetBoardFromApi();
+                whenSetBoardFromApi();
 
-            thenBoardSizeIs(3);
+                thenBoardSizeIs(3);
+            });
+
+            it("sets maze card id in 2d array correctly", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+
+                expect(getMazeCard(loc(1, 0))).toBe(3);
+            });
+
+            it("sets card by id correctly", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+
+                expect(board.cardsById["3"]).toEqual(
+                    expect.objectContaining({
+                        outPaths: "NE",
+                        id: 3,
+                        location: {
+                            column: 0,
+                            row: 1
+                        },
+                        rotation: 180
+                    })
+                );
+            });
+
+            it("sets leftover maze card id correctly", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+
+                expect(board.leftoverId).toBe(9);
+            });
+
+            it("disables shift location, if enabled locations is missing one", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+
+                expect(board.disabledShiftLocation).toEqual(loc(2, 1));
+            });
+
+            it("sets disabled shift location to null if all locations are enabled", () => {
+                givenInitialBoardState();
+                givenApiStateWithoutDisabledShiftLocations();
+
+                whenSetBoardFromApi();
+
+                expect(board.disabledShiftLocation).toEqual(null);
+            });
+
+            it("puts player ids on maze card", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+                const playerIds = board.cardsById["2"].playerIds;
+                expect(Array.isArray(playerIds)).toBe(true);
+                expect(new Set(playerIds)).toEqual(new Set([42, 17]));
+                expect(playerIds.length).toBe(2);
+            });
+
+            it("leaves empty maze card player-ids empty", () => {
+                givenInitialBoardState();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+                expect(board.cardsById["3"].playerIds).toEqual([]);
+            });
+
+            it("overwrites existing state", () => {
+                givenExistingBoardStateWithSize5();
+                givenApiStateWithSize3();
+
+                whenSetBoardFromApi();
+
+                thenBoardSizeIs(3);
+                expect(board.boardLayout[0][0]).toEqual(0);
+                expect(board.cardsById).not.toHaveProperty("100");
+                expect(board.cardsById).toHaveProperty("1");
+                expect(board.cardsById["8"].playerIds).toEqual([]);
+            });
         });
 
-        it("sets maze card id in 2d array correctly", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
+        describe("move", () => {
+            it("moves player to correct location", () => {
+                givenBoardFromApi();
 
-            whenSetBoardFromApi();
+                whenMove({ sourceCardId: 2, targetCardId: 5, playerId: 42 });
 
-            expect(getMazeCard(loc(1, 0))).toBe(3);
+                expect(playersOnCard(2)).not.toContain(42);
+                expect(playersOnCard(5)).toContain(42);
+            });
+        });
+    });
+
+    describe("getters", () => {
+        // getters run against real store, because they can call other getters.
+        beforeEach(() => {
+            const localVue = createLocalVue();
+            localVue.use(Vuex);
+            store = new Vuex.Store(cloneDeep(boardConfig));
         });
 
-        it("sets card by id correctly", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
+        describe("mazeCard", () => {
+            it("returns the card for a given location", () => {
+                givenStoreFromApi();
 
-            whenSetBoardFromApi();
+                const card = whenGetMazeCard({ column: 1, row: 1 });
 
-            expect(board.cardsById["3"]).toEqual(
-                expect.objectContaining({
-                    outPaths: "NE",
-                    id: 3,
-                    location: {
-                        column: 0,
-                        row: 1
-                    },
-                    rotation: 180
-                })
-            );
-        });
+                expect(card).toEqual(
+                    expect.objectContaining({
+                        location: { column: 1, row: 1 }
+                    })
+                );
+            });
 
-        it("sets leftover maze card id correctly", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
+            it("throws RangeError on invalid location", () => {
+                givenStoreFromApi();
 
-            whenSetBoardFromApi();
-
-            expect(board.leftoverId).toBe(9);
-        });
-
-        it("disables shift location, if enabled locations is missing one", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
-
-            whenSetBoardFromApi();
-
-            expect(board.disabledShiftLocation).toEqual(loc(2, 1));
-        });
-
-        it("sets disabled shift location to null if all locations are enabled", () => {
-            givenInitialBoardState();
-            givenApiStateWithoutDisabledShiftLocations();
-
-            whenSetBoardFromApi();
-
-            expect(board.disabledShiftLocation).toEqual(null);
-        });
-
-        it("puts player ids on maze card", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
-
-            whenSetBoardFromApi();
-            const playerIds = board.cardsById["2"].playerIds;
-            expect(Array.isArray(playerIds)).toBe(true);
-            expect(new Set(playerIds)).toEqual(new Set([42, 17]));
-            expect(playerIds.length).toBe(2);
-        });
-
-        it("leaves empty maze card player-ids empty", () => {
-            givenInitialBoardState();
-            givenApiStateWithSize3();
-
-            whenSetBoardFromApi();
-            expect(board.cardsById["3"].playerIds).toEqual([]);
-        });
-
-        it("overwrites existing state", () => {
-            givenExistingBoardStateWithSize5();
-            givenApiStateWithSize3();
-
-            whenSetBoardFromApi();
-
-            thenBoardSizeIs(3);
-            expect(board.boardLayout[0][0]).toEqual(0);
-            expect(board.cardsById).not.toHaveProperty("100");
-            expect(board.cardsById).toHaveProperty("1");
-            expect(board.cardsById["8"].playerIds).toEqual([]);
+                expect(() => whenGetMazeCard({ column: 7, row: 7 })).toThrow(RangeError);
+            });
         });
     });
 });
 
-const { update } = mutations;
+const { state, mutations } = boardConfig;
+const { update, move } = mutations;
 
+let store;
 let board;
 let apiState;
+
+const WITH_STORE = "with_store";
 
 const givenInitialBoardState = function() {
     board = state();
@@ -141,8 +190,27 @@ const givenApiStateWithoutDisabledShiftLocations = function() {
     apiState.enabledShiftLocations.push(loc(2, 1));
 };
 
+const givenStoreFromApi = function() {
+    givenApiStateWithSize3();
+    store.commit("update", apiState);
+};
+
+const givenBoardFromApi = function() {
+    givenInitialBoardState();
+    givenApiStateWithSize3();
+    update(board, apiState);
+};
+
 const whenSetBoardFromApi = function() {
     update(board, apiState);
+};
+
+function whenMove(moveObject) {
+    move(board, moveObject);
+}
+
+const whenGetMazeCard = function(location) {
+    return store.getters.mazeCard(location);
 };
 
 const thenBoardSizeIs = function(size) {
@@ -155,6 +223,10 @@ const thenBoardSizeIs = function(size) {
 
 const getMazeCard = function(location) {
     return board.boardLayout[location.row][location.column];
+};
+
+const playersOnCard = function(id) {
+    return board.cardsById[id].playerIds;
 };
 
 const GET_STATE_RESULT_FOR_N_3 = `{
