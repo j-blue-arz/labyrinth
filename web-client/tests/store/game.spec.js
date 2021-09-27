@@ -5,6 +5,7 @@ import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
+import { loc } from "../testutils.js";
 
 describe("game Vuex module", () => {
     describe("mutations", () => {
@@ -62,19 +63,75 @@ describe("game Vuex module", () => {
             });
         });
 
-        describe("move", () => {
-            it("moves player to correct location", async () => {
+        describe("update", () => {
+            it("places players on card ids", async () => {
                 givenAPIreturnsStateWithSize3();
 
                 await store.dispatch("game/updateFromApi");
 
-                store.dispatch("game/move", {
-                    targetLocation: { row: 1, column: 2 },
-                    playerId: 42
-                });
+                expect(playersOnCard(loc(1, 2))).toContain(42);
+                expect(playersOnCard(loc(1, 2))).toContain(17);
+            });
+        });
 
-                expect(playersOnCard(2)).not.toContain(42);
-                expect(playersOnCard(5)).toContain(42);
+        describe("update", () => {
+            it("places cards on correct locations", async () => {
+                givenAPIreturnsStateWithSize3();
+
+                await store.dispatch("game/updateFromApi");
+
+                thenCardLocationsAreConsistent();
+            });
+        });
+
+        describe("move", () => {
+            it("updates players on maze cards", async () => {
+                await givenStoreFromApi();
+
+                whenDispatchMove(loc(0, 2), 42);
+
+                expect(playersOnCard(loc(1, 2))).not.toContain(42);
+                expect(playersOnCard(loc(0, 2))).toContain(42);
+            });
+
+            it("updates card of players", async () => {
+                await givenStoreFromApi();
+
+                whenDispatchMove(loc(0, 2), 42);
+
+                expect(player(42).mazeCard).toEqual(2);
+            });
+        });
+
+        describe("shift", () => {
+            it("places maze cards correctly", async () => {
+                await givenStoreFromApi();
+
+                whenDispatchShift(loc(0, 1));
+
+                thenCardLocationsAreConsistent();
+                expect(cardOnLocation(loc(0, 1))).toHaveProperty("id", 9);
+                expect(cardOnLocation(loc(1, 1))).toHaveProperty("id", 1);
+                expect(cardOnLocation(loc(2, 1))).toHaveProperty("id", 4);
+            });
+
+            it("transfers players to pushed-in card", async () => {
+                await givenStoreFromApi();
+
+                whenDispatchShift(loc(1, 0));
+
+                expect(leftoverMazeCard().playerIds).toHaveLength(0);
+                expect(playersOnCard(loc(1, 0))).toContain(42);
+                expect(playersOnCard(loc(1, 0))).toContain(17);
+            });
+
+            it("updates player's maze card correctly", async () => {
+                await givenStoreFromApi();
+
+                whenDispatchShift(loc(1, 0));
+
+                expect(player(42).mazeCard).toEqual(9);
+                expect(player(17).mazeCard).toEqual(9);
             });
         });
     });
@@ -95,8 +152,24 @@ const givenApiStateWithSize3 = function() {
     apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
 };
 
+const givenStoreFromApi = async function() {
+    givenAPIreturnsStateWithSize3();
+    await store.dispatch("game/updateFromApi");
+};
+
 const whenCreateFromApi = function() {
     update(game, apiState);
+};
+
+const whenDispatchMove = function(targetLocation, playerId) {
+    store.dispatch("game/move", {
+        targetLocation: targetLocation,
+        playerId: playerId
+    });
+};
+
+const whenDispatchShift = function(location) {
+    store.dispatch("game/shift", location);
 };
 
 const givenAPIreturnsStateWithSize3 = function() {
@@ -107,8 +180,30 @@ const givenAPIreturnsStateWithSize3 = function() {
     API.fetchState = mockFetchState;
 };
 
-const playersOnCard = function(cardId) {
-    return store.getters["board/find"](cardId).playerIds;
+const thenCardLocationsAreConsistent = function() {
+    const n = store.state.board.mazeSize;
+    for (let row = 0; row < n; row++) {
+        for (let col = 0; col < n; col++) {
+            expect(cardOnLocation(loc(row, col)).location).toEqual(loc(row, col));
+        }
+    }
+    expect(leftoverMazeCard().location).toBeNull();
+};
+
+const playersOnCard = function(location) {
+    return store.getters["board/mazeCard"](location).playerIds;
+};
+
+const cardOnLocation = function(location) {
+    return store.getters["board/mazeCard"](location);
+};
+
+const leftoverMazeCard = function() {
+    return store.getters["board/leftoverMazeCard"];
+};
+
+const player = function(id) {
+    return store.getters["players/find"](id);
 };
 
 const GET_STATE_RESULT_FOR_N_3 = `{
@@ -195,12 +290,12 @@ const GET_STATE_RESULT_FOR_N_3 = `{
       },
       "players": [{
         "id": 42,
-        "mazeCardId": 2,
+        "mazeCardId": 5,
         "pieceIndex": 0
       },{
         "id": 17,
         "pieceIndex": 1,
-        "mazeCardId": 2
+        "mazeCardId": 5
       }],
     "objectiveMazeCardId": 8,
     "enabledShiftLocations": [

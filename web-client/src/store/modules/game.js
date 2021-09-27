@@ -11,20 +11,20 @@ export const state = () => ({
 const getters = {};
 
 const actions = {
-    async updateFromApi({ commit }) {
+    async updateFromApi({ commit, dispatch }) {
         const apiResult = await API.fetchState();
         const apiState = apiResult.data;
         commit("update", apiState);
-        commit("players/update", apiState.players, { root: true });
+        dispatch("players/update", apiState.players, { root: true });
         const boardState = {
             maze: apiState.maze,
             enabledShiftLocations: apiState.enabledShiftLocations,
             players: apiState.players
         };
-        commit("board/update", boardState, { root: true });
+        dispatch("board/update", boardState, { root: true });
     },
-    move({ commit, rootGetters }, moveAction) {
-        // already validated, so we can alter the game state directly
+    move({ dispatch, rootGetters }, moveAction) {
+        // already validated
         const targetCard = rootGetters["board/mazeCard"](moveAction.targetLocation);
         const sourceCard = rootGetters["players/mazeCard"](moveAction.playerId);
         const boardMove = {
@@ -32,10 +32,21 @@ const actions = {
             targetCardId: targetCard.id,
             playerId: moveAction.playerId
         };
-        commit("board/move", boardMove, { root: true });
+        dispatch("board/movePlayer", boardMove, { root: true });
 
-        const playerMove = { playerId: moveAction.playerId, mazeCardId: targetCard.id };
-        commit("players/move", playerMove, { root: true });
+        const cardChange = { playerId: moveAction.playerId, mazeCardId: targetCard.id };
+        dispatch("players/changePlayersCard", cardChange, { root: true });
+    },
+    shift({ dispatch, rootGetters }, shiftLocation) {
+        const oppositeLocation = rootGetters["board/oppositeLocation"](shiftLocation);
+        const pushedOutCard = rootGetters["board/mazeCard"](oppositeLocation);
+        const pushedOutPlayerIds = [...pushedOutCard.playerIds];
+        const leftoverCard = rootGetters["board/leftoverMazeCard"];
+        dispatch("board/shift", shiftLocation, { root: true });
+        for (let playerId of pushedOutPlayerIds) {
+            const cardChange = { playerId: playerId, mazeCardId: leftoverCard.id };
+            dispatch("players/changePlayersCard", cardChange, { root: true });
+        }
     }
 };
 

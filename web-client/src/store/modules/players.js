@@ -11,11 +11,18 @@ const getters = {
     },
     mazeCard: (state, _, __, rootGetters) => id => {
         const player = state.byId[id];
-        return rootGetters["board/find"](player.mazeCard);
+        return rootGetters["board/mazeCardById"](player.mazeCard);
     }
 };
 
-const actions = {};
+const actions = {
+    update({ commit }, apiPlayers) {
+        commit("update", apiPlayers);
+    },
+    changePlayersCard({ commit }, cardChange) {
+        commit("setPlayerCard", cardChange);
+    }
+};
 
 export const mutations = {
     update(state, apiPlayers) {
@@ -35,6 +42,9 @@ export const mutations = {
             Vue.set(state.byId, player.id, player);
         });
         state.allIds = apiIds;
+    },
+    setPlayerCard(state, cardChange) {
+        state.byId[cardChange.playerId].mazeCard = cardChange.mazeCardId;
     }
 };
 
