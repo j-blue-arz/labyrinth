@@ -1,32 +1,17 @@
 const NOT_PARTICIPATING = -1;
 
 export default class PlayerManager {
-    constructor(useStorage) {
+    constructor() {
         this._userPlayer = NOT_PARTICIPATING;
         this._wasmPlayer = NOT_PARTICIPATING;
-        this._useStorage = useStorage;
-        if (useStorage) {
-            if (sessionStorage.userPlayerId) {
-                this._userPlayer = parseInt(sessionStorage.userPlayerId);
-            }
-            if (sessionStorage.wasmPlayerId) {
-                this._wasmPlayer = parseInt(sessionStorage.wasmPlayerId);
-            }
-        }
     }
 
     addUserPlayerId(playerId) {
         this._userPlayer = playerId;
-        if (this._useStorage) {
-            sessionStorage.userPlayerId = playerId;
-        }
     }
 
     removeUserPlayer() {
         this._userPlayer = NOT_PARTICIPATING;
-        if (this._useStorage) {
-            sessionStorage.userPlayerId = NOT_PARTICIPATING;
-        }
     }
 
     getUserPlayerId() {
@@ -51,24 +36,14 @@ export default class PlayerManager {
 
     removeWasmPlayer() {
         this._wasmPlayer = NOT_PARTICIPATING;
-        if (this._useStorage) {
-            sessionStorage.wasmPlayerId = NOT_PARTICIPATING;
-        }
     }
 
     addWasmPlayerId(playerId) {
         this._wasmPlayer = playerId;
-        if (this._useStorage) {
-            sessionStorage.wasmPlayerId = playerId;
-        }
     }
 
     getWasmPlayerId() {
         return this._wasmPlayer;
-    }
-
-    hasAnyPlayer() {
-        return this.hasWasmPlayer() || this.hasUserPlayer();
     }
 
     getManagedPlayerIds() {

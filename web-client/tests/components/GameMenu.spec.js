@@ -8,7 +8,7 @@ import Vue from "vue";
 import flushPromises from "flush-promises";
 
 beforeEach(() => {
-    const playerManager = new PlayerManager(false);
+    const playerManager = new PlayerManager();
     playerManager.addUserPlayerId(1);
     mockGetPlayerManager.mockReturnValue(playerManager);
     mockGetComputationMethods.mockReturnValue([]);

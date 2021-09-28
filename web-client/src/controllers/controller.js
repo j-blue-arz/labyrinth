@@ -9,10 +9,10 @@ const POLL_INTERVAL_MS = 850;
 const TURN_SECONDS = 30;
 
 export default class Controller {
-    constructor(useStorage) {
+    constructor() {
         this._game = new Game();
         this._polling_timer = 0;
-        this._playerManager = new PlayerManager(useStorage);
+        this._playerManager = new PlayerManager();
         this._computationMethods = [];
         this._turnCountdown = new CountdownTimer(TURN_SECONDS);
 
@@ -21,22 +21,7 @@ export default class Controller {
     }
 
     initialize() {
-        if (this._playerManager.hasAnyPlayer()) {
-            API.fetchState() //
-                .then(state => {
-                    this.createGameFromApi(state);
-                    this._updateUserPlayer();
-                    this._updateWasmPlayer();
-                    if (!this._playerManager.hasAnyPlayer()) {
-                        this.enterGame();
-                    } else {
-                        this._startPolling();
-                    }
-                })
-                .catch(this.handleError);
-        } else {
-            this.enterGame();
-        }
+        this.enterGame();
         this._initComputationMethods();
     }
 
