@@ -9,7 +9,6 @@ var mockFetchState = jest.fn();
 var mockAddPlayer = jest.fn();
 var mockShift = jest.fn();
 var mockMove = jest.fn();
-var mockCancel = jest.fn();
 var mockFetchComputationMethods = jest.fn();
 var mockActivatePolling = jest.fn();
 jest.mock("@/services/game-api.js", () => jest.fn());

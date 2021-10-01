@@ -121,7 +121,7 @@ describe("board Vuex module", () => {
             it("updates disabled shift location", () => {
                 givenStoreFromApi();
 
-                whenShift(loc(1, 0));
+                whenShift(loc(1, 0), 90);
 
                 expect(store.state.disabledShiftLocation).toEqual(loc(1, 2));
             });
@@ -209,8 +209,8 @@ const whenMove = function(moveObject) {
     store.dispatch("movePlayer", moveObject);
 };
 
-const whenShift = function(location) {
-    store.dispatch("shift", location);
+const whenShift = function(location, rotation) {
+    store.dispatch("shift", { location: location, leftoverRotation: rotation });
 };
 
 const whenGetMazeCard = function(location) {

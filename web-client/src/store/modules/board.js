@@ -39,7 +39,8 @@ const actions = {
         const playerIndexInSource = sourceCard.playerIds.indexOf(move.playerId);
         commit("movePlayer", { ...move, playerIndex: playerIndexInSource });
     },
-    shift({ commit, getters, state }, location) {
+    shift({ commit, getters, state }, shiftAction) {
+        const location = shiftAction.location;
         if (locationsEqual(location, state.disabledShiftLocation)) {
             throw new ValueError("Shifting at " + location + " is not allowed.");
         }
@@ -48,6 +49,7 @@ const actions = {
 
         let shiftLocations = generateShiftLocations(location, n);
         if (shiftLocations.length === n) {
+            commit("setLeftoverRotation", shiftAction.leftoverRotation);
             commit("shiftAlongLocations", shiftLocations);
             commit("setDisabledShiftLocation", getOppositeLocation(location, n));
             commit("transferPlayers", {
@@ -122,6 +124,9 @@ export const mutations = {
         while (sourceMazeCard.playerIds.length) {
             targetMazeCard.playerIds.push(sourceMazeCard.playerIds.pop());
         }
+    },
+    setLeftoverRotation(state, rotation) {
+        state.cardsById[state.leftoverId].rotation = rotation;
     }
 };
 

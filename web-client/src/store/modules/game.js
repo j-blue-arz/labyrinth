@@ -1,4 +1,5 @@
 import * as action from "@/model/player.js";
+import API from "@/services/game-api.js";
 
 export const state = () => ({
     playerIds: [],
@@ -33,17 +34,25 @@ const actions = {
 
         const cardChange = { playerId: moveAction.playerId, mazeCardId: targetCard.id };
         dispatch("players/changePlayersCard", cardChange, { root: true });
+        API.doMove(moveAction.playerId, moveAction.targetLocation);
     },
-    shift({ dispatch, rootGetters }, shiftLocation) {
+    shift({ dispatch, rootGetters }, shiftAction) {
+        const shiftLocation = shiftAction.location;
         const oppositeLocation = rootGetters["board/oppositeLocation"](shiftLocation);
         const pushedOutCard = rootGetters["board/mazeCard"](oppositeLocation);
         const pushedOutPlayerIds = [...pushedOutCard.playerIds];
         const leftoverCard = rootGetters["board/leftoverMazeCard"];
-        dispatch("board/shift", shiftLocation, { root: true });
+        dispatch("board/shift", shiftAction, { root: true });
         for (let playerId of pushedOutPlayerIds) {
             const cardChange = { playerId: playerId, mazeCardId: leftoverCard.id };
             dispatch("players/changePlayersCard", cardChange, { root: true });
         }
+        API.doShift(
+            shiftAction.playerId,
+            shiftAction.location,
+            shiftAction.leftoverRotation,
+            () => {}
+        );
     }
 };
 

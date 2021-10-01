@@ -8,6 +8,11 @@ import API from "@/services/game-api.js";
 import { loc } from "../testutils.js";
 
 describe("game Vuex module", () => {
+    beforeEach(() => {
+        API.doMove.mockClear();
+        API.doShift.mockClear();
+    });
+
     describe("mutations", () => {
         describe("update", () => {
             it("results in a game with two players", () => {
@@ -101,13 +106,22 @@ describe("game Vuex module", () => {
 
                 expect(player(42).mazeCard).toEqual(2);
             });
+
+            it("calls API", () => {
+                givenStoreFromApi();
+
+                whenDispatchMove(loc(0, 2), 42);
+
+                expect(API.doMove).toHaveBeenCalledTimes(1);
+                expect(API.doMove).toHaveBeenCalledWith(42, loc(0, 2));
+            });
         });
 
         describe("shift", () => {
             it("places maze cards correctly", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(loc(0, 1));
+                whenDispatchShift(17, loc(0, 1), 90);
 
                 thenCardLocationsAreConsistent();
                 expect(cardOnLocation(loc(0, 1))).toHaveProperty("id", 9);
@@ -118,7 +132,7 @@ describe("game Vuex module", () => {
             it("transfers players to pushed-in card", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(loc(1, 0));
+                whenDispatchShift(17, loc(1, 0), 90);
 
                 expect(leftoverMazeCard().playerIds).toHaveLength(0);
                 expect(playersOnCard(loc(1, 0))).toContain(42);
@@ -128,10 +142,19 @@ describe("game Vuex module", () => {
             it("updates player's maze card correctly", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(loc(1, 0));
+                whenDispatchShift(17, loc(1, 0), 90);
 
                 expect(player(42).mazeCard).toEqual(9);
                 expect(player(17).mazeCard).toEqual(9);
+            });
+
+            it("calls API", () => {
+                givenStoreFromApi();
+
+                whenDispatchShift(17, loc(1, 0), 90);
+
+                expect(API.doShift).toHaveBeenCalledTimes(1);
+                expect(API.doShift).toHaveBeenCalledWith(17, loc(1, 0), 90, expect.anything());
             });
         });
     });
@@ -168,8 +191,13 @@ const whenDispatchMove = function(targetLocation, playerId) {
     });
 };
 
-const whenDispatchShift = function(location) {
-    store.dispatch("game/shift", location);
+const whenDispatchShift = function(playerId, shiftLocation, leftoverRotation) {
+    const shiftAction = {
+        playerId: playerId,
+        location: shiftLocation,
+        leftoverRotation: leftoverRotation
+    };
+    store.dispatch("game/shift", shiftAction);
 };
 
 const whenGameUpdate = function() {
@@ -206,6 +234,9 @@ const player = function(id) {
     return store.getters["players/find"](id);
 };
 
+API.doMove = jest.fn();
+API.doShift = jest.fn();
+
 const GET_STATE_RESULT_FOR_N_3 = `{
     "maze": {
         "mazeSize": 3,
@@ -213,7 +244,7 @@ const GET_STATE_RESULT_FOR_N_3 = `{
             "outPaths": "NES",
             "id": 9,
             "location": null,
-            "rotation": 0
+            "rotation": 90
         }, {
             "outPaths": "NES",
             "id": 0,
