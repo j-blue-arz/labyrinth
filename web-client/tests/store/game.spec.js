@@ -64,10 +64,10 @@ describe("game Vuex module", () => {
         });
 
         describe("update", () => {
-            it("places players on card ids", async () => {
-                givenAPIreturnsStateWithSize3();
+            it("places players on card ids", () => {
+                givenApiStateWithSize3();
 
-                await store.dispatch("game/updateFromApi");
+                whenGameUpdate();
 
                 expect(playersOnCard(loc(1, 2))).toContain(42);
                 expect(playersOnCard(loc(1, 2))).toContain(17);
@@ -75,18 +75,18 @@ describe("game Vuex module", () => {
         });
 
         describe("update", () => {
-            it("places cards on correct locations", async () => {
-                givenAPIreturnsStateWithSize3();
+            it("places cards on correct locations", () => {
+                givenApiStateWithSize3();
 
-                await store.dispatch("game/updateFromApi");
+                whenGameUpdate();
 
                 thenCardLocationsAreConsistent();
             });
         });
 
         describe("move", () => {
-            it("updates players on maze cards", async () => {
-                await givenStoreFromApi();
+            it("updates players on maze cards", () => {
+                givenStoreFromApi();
 
                 whenDispatchMove(loc(0, 2), 42);
 
@@ -94,8 +94,8 @@ describe("game Vuex module", () => {
                 expect(playersOnCard(loc(0, 2))).toContain(42);
             });
 
-            it("updates card of players", async () => {
-                await givenStoreFromApi();
+            it("updates card of players", () => {
+                givenStoreFromApi();
 
                 whenDispatchMove(loc(0, 2), 42);
 
@@ -104,8 +104,8 @@ describe("game Vuex module", () => {
         });
 
         describe("shift", () => {
-            it("places maze cards correctly", async () => {
-                await givenStoreFromApi();
+            it("places maze cards correctly", () => {
+                givenStoreFromApi();
 
                 whenDispatchShift(loc(0, 1));
 
@@ -115,8 +115,8 @@ describe("game Vuex module", () => {
                 expect(cardOnLocation(loc(2, 1))).toHaveProperty("id", 4);
             });
 
-            it("transfers players to pushed-in card", async () => {
-                await givenStoreFromApi();
+            it("transfers players to pushed-in card", () => {
+                givenStoreFromApi();
 
                 whenDispatchShift(loc(1, 0));
 
@@ -125,8 +125,8 @@ describe("game Vuex module", () => {
                 expect(playersOnCard(loc(1, 0))).toContain(17);
             });
 
-            it("updates player's maze card correctly", async () => {
-                await givenStoreFromApi();
+            it("updates player's maze card correctly", () => {
+                givenStoreFromApi();
 
                 whenDispatchShift(loc(1, 0));
 
@@ -152,9 +152,9 @@ const givenApiStateWithSize3 = function() {
     apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
 };
 
-const givenStoreFromApi = async function() {
-    givenAPIreturnsStateWithSize3();
-    await store.dispatch("game/updateFromApi");
+const givenStoreFromApi = function() {
+    givenApiStateWithSize3();
+    updateGame();
 };
 
 const whenCreateFromApi = function() {
@@ -172,12 +172,12 @@ const whenDispatchShift = function(location) {
     store.dispatch("game/shift", location);
 };
 
-const givenAPIreturnsStateWithSize3 = function() {
-    jest.mock("@/services/game-api.js", () => jest.fn());
-    let mockFetchState = jest.fn();
-    apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
-    mockFetchState.mockImplementation(() => Promise.resolve({ data: apiState }));
-    API.fetchState = mockFetchState;
+const whenGameUpdate = function() {
+    updateGame();
+};
+
+const updateGame = function() {
+    store.dispatch("game/update", apiState);
 };
 
 const thenCardLocationsAreConsistent = function() {

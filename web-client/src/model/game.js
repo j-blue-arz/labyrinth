@@ -163,13 +163,6 @@ export default class Game {
         this.addPlayer(player);
     }
 
-    replaceWithPlayer(player) {
-        let index = this._players.findIndex(p => p.id == player.id);
-        if (index > -1) {
-            this._players.splice(index, 1, player);
-        }
-    }
-
     getBots() {
         let result = [];
         for (var player of this._players) {

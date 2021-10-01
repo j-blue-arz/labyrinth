@@ -1,5 +1,4 @@
 import * as action from "@/model/player.js";
-import API from "@/services/game-api.js";
 
 export const state = () => ({
     playerIds: [],
@@ -11,9 +10,7 @@ export const state = () => ({
 const getters = {};
 
 const actions = {
-    async updateFromApi({ commit, dispatch }) {
-        const apiResult = await API.fetchState();
-        const apiState = apiResult.data;
+    async update({ commit, dispatch }, apiState) {
         commit("update", apiState);
         dispatch("players/update", apiState.players, { root: true });
         const boardState = {

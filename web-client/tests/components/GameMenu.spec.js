@@ -4,8 +4,6 @@ import VMenu from "@/components/VMenu.vue";
 import Controller from "@/controllers/controller.js";
 import PlayerManager from "@/model/playerManager.js";
 import Player from "@/model/player.js";
-import Vue from "vue";
-import flushPromises from "flush-promises";
 
 beforeEach(() => {
     const playerManager = new PlayerManager();
@@ -112,11 +110,10 @@ describe("GameMenu", () => {
             expect(mockAddWasmPlayer).toHaveBeenCalled();
         });
 
-        it("displays readable labels", async () => {
+        it("displays readable labels", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             givenWasmIsNotParticipating();
             let gameMenu = factory();
-            await flushPromises();
             clickInMenu(gameMenu, "add");
             let menu = gameMenu.find(VMenu);
             let entries = menu.findAll("li");
