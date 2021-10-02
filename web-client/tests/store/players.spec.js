@@ -11,6 +11,7 @@ describe("players Vuex module", () => {
         store = new Vuex.Store(cloneDeep(playerConfig));
         API.doAddPlayer.mockClear();
         API.removePlayer.mockClear();
+        API.changePlayerName.mockClear();
     });
 
     describe("actions", () => {
@@ -221,6 +222,34 @@ describe("players Vuex module", () => {
                 expect(API.removePlayer).toHaveBeenCalledWith(5);
             });
         });
+
+        describe("changeUserPlayerName", () => {
+            it("does not call API if user is not playing", () => {
+                givenPlayerInState({ id: 7, isWasm: false, isUser: false, name: "felix" });
+
+                whenChangeUserPlayerName("gina");
+
+                expect(API.changePlayerName).not.toHaveBeenCalled();
+                expect(store.state.byId[7].name).toBe("felix");
+            });
+
+            it("changes name if user is playing", () => {
+                givenPlayerInState({ id: 7, isWasm: false, isUser: true, name: "felix" });
+
+                whenChangeUserPlayerName("gina");
+
+                expect(store.state.byId[7].name).toBe("gina");
+            });
+
+            it("calls API if user is playing", () => {
+                givenPlayerInState({ id: 7, isWasm: false, isUser: true, name: "felix" });
+
+                whenChangeUserPlayerName("gina");
+
+                expect(API.changePlayerName).toHaveBeenCalledTimes(1);
+                expect(API.changePlayerName).toHaveBeenCalledWith(7, "gina");
+            });
+        });
     });
 
     describe("mutations", () => {
@@ -330,6 +359,7 @@ const { update } = mutations;
 
 API.doAddPlayer = jest.fn();
 API.removePlayer = jest.fn();
+API.changePlayerName = jest.fn();
 
 let store;
 let players;
@@ -389,7 +419,11 @@ const whenRemoveAllClientPlayers = function() {
 
 const whenRemoveClientPlayer = function(id) {
     store.dispatch("removeClientPlayer", id);
-}
+};
+
+const whenChangeUserPlayerName = function(newName) {
+    store.dispatch("changeUserPlayerName", newName);
+};
 
 const thenPlayerExists = function(id) {
     expect(players.byId).toHaveProperty("" + id);

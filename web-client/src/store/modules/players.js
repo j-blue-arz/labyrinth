@@ -75,6 +75,13 @@ const actions = {
         } else if (getters.wasmPlayerId === playerId) {
             dispatch("removeWasmPlayer");
         }
+    },
+    changeUserPlayerName({ getters, commit }, newName) {
+        if (getters.hasUserPlayer) {
+            const playerId = getters.userPlayerId;
+            API.changePlayerName(playerId, newName);
+            commit("changeName", { id: playerId, name: newName });
+        }
     }
 };
 
@@ -108,6 +115,9 @@ export const mutations = {
         Vue.delete(state.byId, id);
         const index = state.allIds.indexOf(id);
         state.allIds.splice(index, 1);
+    },
+    changeName(state, nameChange) {
+        state.byId[nameChange.id].name = nameChange.name;
     }
 };
 

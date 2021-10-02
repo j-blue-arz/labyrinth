@@ -11,7 +11,6 @@ const TURN_SECONDS = 30;
 export default class Controller {
     constructor() {
         this._game = new Game();
-        this._polling_timer = 0;
         this._playerManager = new PlayerManager();
         this._computationMethods = [];
         this._turnCountdown = new CountdownTimer(TURN_SECONDS);
@@ -146,7 +145,6 @@ export default class Controller {
         for (let playerId of playerIds) {
             API.removePlayer(playerId);
         }
-        clearInterval(this._polling_timer);
     }
 
     changeUserPlayerName(newName) {
