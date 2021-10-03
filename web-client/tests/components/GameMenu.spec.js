@@ -4,18 +4,18 @@ import VMenu from "@/components/VMenu.vue";
 import Controller from "@/controllers/controller.js";
 import PlayerManager from "@/model/playerManager.js";
 import Player from "@/model/player.js";
+import API from "@/services/game-api.js";
 
 beforeEach(() => {
     const playerManager = new PlayerManager();
     playerManager.addUserPlayerId(1);
     mockGetPlayerManager.mockReturnValue(playerManager);
-    mockGetComputationMethods.mockReturnValue([]);
+    API.fetchComputationMethods.mockImplementation(cb => cb([]));
     mockGetBots.mockReturnValue([]);
     mockGetPlayer.mockReturnValue(null);
     mockGetPlayers.mockReturnValue([]);
     // Clear all instances and calls to constructor and all methods:
     Controller.mockClear();
-    mockGetComputationMethods.mockClear();
     mockGetPlayerManager.mockClear();
     mockEnterGame.mockClear();
     mockLeaveGame.mockClear();
@@ -27,6 +27,7 @@ beforeEach(() => {
     mockGetBots.mockClear();
     mockGetPlayer.mockClear();
     mockGetPlayers.mockClear();
+    API.fetchComputationMethods.mockClear();
 });
 
 describe("GameMenu", () => {
@@ -188,7 +189,6 @@ describe("GameMenu", () => {
     });
 });
 
-let mockGetComputationMethods = jest.fn();
 let mockGetPlayerManager = jest.fn();
 let mockEnterGame = jest.fn();
 let mockLeaveGame = jest.fn();
@@ -197,11 +197,11 @@ let mockRemoveBot = jest.fn();
 let mockRemoveWasmPlayer = jest.fn();
 let mockRestartWithSize = jest.fn();
 let mockAddWasmPlayer = jest.fn();
+API.fetchComputationMethods = jest.fn();
 
 jest.mock("@/controllers/controller.js", () => {
     return jest.fn().mockImplementation(() => {
         return {
-            getComputationMethods: mockGetComputationMethods,
             playerManager: mockGetPlayerManager(),
             enterGame: mockEnterGame,
             leaveGame: mockLeaveGame,
@@ -234,7 +234,7 @@ const mockGame = {
 };
 
 const givenComputationMethods = function(computationMethods) {
-    mockGetComputationMethods.mockReturnValue(computationMethods);
+    API.fetchComputationMethods.mockImplementation(cb => cb(computationMethods));
 };
 
 const givenUserIsNotParticipating = function() {

@@ -9,7 +9,6 @@ var mockFetchState = jest.fn();
 var mockAddPlayer = jest.fn();
 var mockShift = jest.fn();
 var mockMove = jest.fn();
-var mockFetchComputationMethods = jest.fn();
 var mockActivatePolling = jest.fn();
 jest.mock("@/services/game-api.js", () => jest.fn());
 
@@ -19,13 +18,11 @@ API.activatePolling = mockActivatePolling;
 API.doAddPlayer = mockAddPlayer;
 API.doShift = mockShift;
 API.doMove = mockMove;
-API.fetchComputationMethods = mockFetchComputationMethods;
 
 beforeEach(() => {
     // Clear all instances and calls to constructor and all methods:
     mockAddPlayer.mockImplementation(cb => cb({ id: 5, pieceIndex: 0, mazeCardId: 0 }));
     mockMove.mockImplementation(() => Promise.resolve({ data: "" }));
-    mockFetchComputationMethods.mockImplementation(() => Promise.resolve([]));
     mockAddPlayer.mockClear();
     mockShift.mockClear();
     mockMove.mockClear();
@@ -54,13 +51,6 @@ describe("Controller", () => {
 
         var leftOverRotation = controller.game.leftoverMazeCard.rotation;
         expect(leftOverRotation).toBe(270);
-    });
-
-    it("determines computation methods on startup", () => {
-        givenApiReturnsComputationMethods(["a", "b", "d"]);
-
-        let controller = factory();
-        expect(controller.getComputationMethods()).toEqual(["a", "b", "d"]);
     });
 
     describe(".performShift", () => {
@@ -112,10 +102,6 @@ describe("Controller", () => {
         });
     });
 });
-
-function givenApiReturnsComputationMethods(list) {
-    mockFetchComputationMethods.mockImplementation(cb => cb(list));
-}
 
 /* GENERATED_WITH_LINE_LEFTOVER =
 ###|#.#|###|#.#|###|###|###|

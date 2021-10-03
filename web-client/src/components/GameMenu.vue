@@ -6,6 +6,7 @@
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
 import Player from "@/model/player.js";
+import API from "@/services/game-api.js";
 
 const REMOVE_PREFIX = "remove-";
 const ADD_PREFIX = "add-";
@@ -18,6 +19,11 @@ export default {
             type: Object,
             required: true
         }
+    },
+    data() {
+        return {
+            computationMethods: []
+        };
     },
     components: {
         VMenu
@@ -80,9 +86,6 @@ export default {
         },
         playerManager: function() {
             return this.controller.playerManager;
-        },
-        computationMethods: function() {
-            return this.controller.getComputationMethods();
         }
     },
     methods: {
@@ -107,6 +110,11 @@ export default {
             }
             this.$emit("item-click");
         }
+    },
+    created: function() {
+        API.fetchComputationMethods(responseList => {
+            this.computationMethods = responseList;
+        });
     }
 };
 </script>

@@ -12,7 +12,6 @@ export default class Controller {
     constructor() {
         this._game = new Game();
         this._playerManager = new PlayerManager();
-        this._computationMethods = [];
         this._turnCountdown = new CountdownTimer(TURN_SECONDS);
 
         this.handleError = this.handleError.bind(this);
@@ -22,7 +21,6 @@ export default class Controller {
 
     initialize() {
         this.enterGame();
-        this._initComputationMethods();
     }
 
     performShift(shiftAction) {
@@ -162,16 +160,6 @@ export default class Controller {
 
     get playerManager() {
         return this._playerManager;
-    }
-
-    getComputationMethods() {
-        return this._computationMethods;
-    }
-
-    _initComputationMethods() {
-        API.fetchComputationMethods(responseList => {
-            this._computationMethods = responseList;
-        });
     }
 
     get turnCountdown() {
