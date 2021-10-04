@@ -19,10 +19,10 @@ beforeEach(() => {
     mockGetPlayerManager.mockClear();
     mockEnterGame.mockClear();
     mockLeaveGame.mockClear();
-    mockAddBot.mockClear();
-    mockRemoveBot.mockClear();
+    API.doAddBot.mockClear();
+    API.removePlayer.mockClear();
     mockRemoveWasmPlayer.mockClear();
-    mockRestartWithSize.mockClear();
+    API.changeGame.mockClear();
     mockAddWasmPlayer.mockClear();
     mockGetBots.mockClear();
     mockGetPlayer.mockClear();
@@ -79,12 +79,12 @@ describe("GameMenu", () => {
             expect(menu.find({ ref: "add-alpha-beta" }).exists()).toBe(false);
         });
 
-        it("calls addBot() on controller with computation method", () => {
+        it("calls addBot() on API with computation method", () => {
             givenComputationMethods(["exhaustive-search"]);
             let gameMenu = factory();
             clickInMenu(gameMenu, "add");
             clickInMenu(gameMenu, "add-exhaustive-search");
-            expect(mockAddBot).toHaveBeenCalledWith("exhaustive-search");
+            expect(API.doAddBot).toHaveBeenCalledWith("exhaustive-search");
         });
 
         it("has WASM entry when there is no WASM player participating", () => {
@@ -148,12 +148,12 @@ describe("GameMenu", () => {
             expectMenuDoesNotContainLabelContaining(gameMenu, "WASM: Exhaustive Search");
         });
 
-        it("calls removeBot() on controller with correct player ID for backend players", () => {
+        it("calls removePlayer() on API with correct player ID for backend players", () => {
             givenBots([createBot(11, "alpha-beta")]);
             let gameMenu = factory();
             clickInMenu(gameMenu, "remove");
             clickInMenu(gameMenu, "remove-11");
-            expect(mockRemoveBot).toHaveBeenCalledWith(11);
+            expect(API.removePlayer).toHaveBeenCalledWith(11);
         });
 
         it("calls removeWasmPlayer() on controller for WASM player", () => {
@@ -180,11 +180,11 @@ describe("GameMenu", () => {
     });
 
     describe("change game size", () => {
-        it("calls restartWithSize() on controller with correct size", () => {
+        it("calls changeGame() on API with correct size", () => {
             let gameMenu = factory();
             clickInMenu(gameMenu, "restart");
             clickInMenu(gameMenu, "restart-9");
-            expect(mockRestartWithSize).toHaveBeenCalledWith(9);
+            expect(API.changeGame).toHaveBeenCalledWith(9);
         });
     });
 });
@@ -192,10 +192,10 @@ describe("GameMenu", () => {
 let mockGetPlayerManager = jest.fn();
 let mockEnterGame = jest.fn();
 let mockLeaveGame = jest.fn();
-let mockAddBot = jest.fn();
-let mockRemoveBot = jest.fn();
+API.doAddBot = jest.fn();
+API.removePlayer = jest.fn();
 let mockRemoveWasmPlayer = jest.fn();
-let mockRestartWithSize = jest.fn();
+API.changeGame = jest.fn();
 let mockAddWasmPlayer = jest.fn();
 API.fetchComputationMethods = jest.fn();
 
@@ -205,11 +205,8 @@ jest.mock("@/controllers/controller.js", () => {
             playerManager: mockGetPlayerManager(),
             enterGame: mockEnterGame,
             leaveGame: mockLeaveGame,
-            addBot: mockAddBot,
             game: mockGame,
-            removeBot: mockRemoveBot,
             removeWasmPlayer: mockRemoveWasmPlayer,
-            restartWithSize: mockRestartWithSize,
             addWasmPlayer: mockAddWasmPlayer
         };
     });

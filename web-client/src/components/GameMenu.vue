@@ -100,13 +100,13 @@ export default {
                 this.controller.removeWasmPlayer();
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let computeMethod = $event.substr(ADD_PREFIX.length);
-                this.controller.addBot(computeMethod);
+                API.doAddBot(computeMethod);
             } else if ($event.startsWith(REMOVE_PREFIX)) {
                 let playerId = Number.parseInt($event.substr(REMOVE_PREFIX.length));
-                this.controller.removeBot(playerId);
+                API.removePlayer(playerId);
             } else if ($event.startsWith(RESTART_PREFIX)) {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
-                this.controller.restartWithSize(size);
+                API.changeGame(size);
             }
             this.$emit("item-click");
         }

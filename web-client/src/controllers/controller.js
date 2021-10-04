@@ -125,18 +125,6 @@ export default class Controller {
         }
     }
 
-    addBot(computeMethod) {
-        API.doAddBot(computeMethod);
-    }
-
-    removeBot(playerId) {
-        API.removePlayer(playerId);
-    }
-
-    restartWithSize(size) {
-        API.changeGame(size);
-    }
-
     beforeDestroy() {
         API.stopPolling();
         let playerIds = this._playerManager.getManagedPlayerIds();
