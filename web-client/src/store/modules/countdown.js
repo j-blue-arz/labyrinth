@@ -6,7 +6,7 @@ export const state = () => ({
 
 const getters = {
     isRunning: state => {
-        state.timer !== 0;
+        return state.timer !== 0;
     }
 };
 const actions = {
@@ -22,8 +22,8 @@ const actions = {
         }, 1000);
         commit("saveTimer", timer);
     },
-    stopCountdown({ state, commit, getters }) {
-        if (getters.isRunning) {
+    stopCountdown({ state, commit }) {
+        if (state.timer !== 0) {
             clearInterval(state.timer);
             commit("clearTimer");
         }

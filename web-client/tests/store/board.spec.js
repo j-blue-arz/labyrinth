@@ -126,10 +126,24 @@ describe("board Vuex module", () => {
                 expect(store.state.disabledShiftLocation).toEqual(loc(1, 2));
             });
         });
+
+        describe("rotateLeftoverClockwise", () => {
+            it("rotates leftover", () => {
+                givenStoreFromApi();
+
+                whenRotateLeftover();
+                expect(store.getters.leftoverMazeCard.rotation).toEqual(90);
+                whenRotateLeftover();
+                expect(store.getters.leftoverMazeCard.rotation).toEqual(180);
+                whenRotateLeftover();
+                expect(store.getters.leftoverMazeCard.rotation).toEqual(270);
+                whenRotateLeftover();
+                expect(store.getters.leftoverMazeCard.rotation).toEqual(0);
+            });
+        });
     });
 
     describe("getters", () => {
-        // getters run against real store
         beforeEach(() => {
             const localVue = createLocalVue();
             localVue.use(Vuex);
@@ -153,6 +167,42 @@ describe("board Vuex module", () => {
                 givenStoreFromApi();
 
                 expect(() => whenGetMazeCard({ column: 7, row: 7 })).toThrow(RangeError);
+            });
+        });
+
+        describe("mazeCardsRowMajorOrder", () => {
+            it("returns 1d-array which contains all the board's maze cards", () => {
+                givenStoreFromApi();
+
+                const cards = whenGetMazeCardsRowMajorOrder();
+
+                expect(cards.length).toBe(9);
+                for (const [id, card] of Object.entries(store.state.cardsById)) {
+                    if (parseInt(id) !== store.state.leftoverId) {
+                        expect(cards).toContain(card);
+                    }
+                }
+            });
+
+            it("returns empty array for empty board", () => {
+                const cards = whenGetMazeCardsRowMajorOrder();
+
+                expect(cards).toBeInstanceOf(Array);
+                expect(cards.length).toBe(0);
+            });
+
+            it("returns 1d-array with the game's maze cards ordered by row, then by column", () => {
+                givenStoreFromApi();
+
+                const cards = whenGetMazeCardsRowMajorOrder();
+
+                let index = 0;
+                for (let row = 0; row < 3; row++) {
+                    for (let col = 0; col < 3; col++) {
+                        expect(cards[index]).toBe(getMazeCard(loc(row, col)));
+                        index++;
+                    }
+                }
             });
         });
     });
@@ -215,6 +265,14 @@ const whenShift = function(location, rotation) {
 
 const whenGetMazeCard = function(location) {
     return getMazeCard(location);
+};
+
+const whenRotateLeftover = function() {
+    store.dispatch("rotateLeftoverClockwise");
+};
+
+const whenGetMazeCardsRowMajorOrder = function() {
+    return store.getters.mazeCardsRowMajorOrder;
 };
 
 const thenBoardSizeIs = function(size) {

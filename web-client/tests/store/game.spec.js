@@ -1,11 +1,12 @@
 import gameConfig from "@/store/modules/game.js";
 import boardConfig from "@/store/modules/board.js";
 import playersConfig from "@/store/modules/players.js";
+import { SHIFT_ACTION } from "@/model/player.js";
 import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
-import { loc } from "../testutils.js";
+import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("game Vuex module", () => {
     beforeEach(() => {
@@ -13,18 +14,33 @@ describe("game Vuex module", () => {
         API.doShift.mockClear();
     });
 
+    describe("getters", () => {
+        beforeEach(() => {
+            const localVue = createLocalVue();
+            localVue.use(Vuex);
+            store = new Vuex.Store({
+                modules: {
+                    game: cloneDeep(gameConfig),
+                    board: cloneDeep(boardConfig),
+                    players: cloneDeep(playersConfig)
+                }
+            });
+        });
+
+        describe("currentPlayer", () => {
+            it("returns player for next action", () => {
+                givenStoreFromApi();
+
+                const player = store.getters["game/currentPlayer"];
+
+                expect(player.id).toEqual(17);
+                expect(player.nextAction).toEqual(SHIFT_ACTION);
+            });
+        });
+    });
+
     describe("mutations", () => {
         describe("update", () => {
-            it("results in a game with two players", () => {
-                givenInitialGameState();
-                givenApiStateWithSize3();
-
-                whenCreateFromApi();
-
-                expect(game.playerIds).toContain(42);
-                expect(game.playerIds).toContain(17);
-            });
-
             it("sets objective flag for maze card id 8", () => {
                 givenInitialGameState();
                 givenApiStateWithSize3();
@@ -77,15 +93,47 @@ describe("game Vuex module", () => {
                 expect(playersOnCard(loc(1, 2))).toContain(42);
                 expect(playersOnCard(loc(1, 2))).toContain(17);
             });
-        });
 
-        describe("update", () => {
             it("places cards on correct locations", () => {
                 givenApiStateWithSize3();
 
                 whenGameUpdate();
 
                 thenCardLocationsAreConsistent();
+            });
+
+            it("leaves nextAction falsy if there are no players", () => {
+                givenApiStateWithoutPlayers();
+
+                whenGameUpdate();
+
+                expect(store.state.game.nextAction).toBeFalsy();
+            });
+        });
+
+        describe("reset", () => {
+            it("resets game state", () => {
+                givenStoreFromApi();
+
+                whenReset();
+
+                thenGameHasInitialState();
+            });
+
+            it("resets board state", () => {
+                givenStoreFromApi();
+
+                whenReset();
+
+                thenBoardIsEmpty();
+            });
+
+            it("resets player state", () => {
+                givenStoreFromApi();
+
+                whenReset();
+
+                thenPlayersAreEmpty();
             });
         });
 
@@ -172,7 +220,13 @@ const givenInitialGameState = function() {
 };
 
 const givenApiStateWithSize3 = function() {
-    apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
+    apiState = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
+};
+
+const givenApiStateWithoutPlayers = function() {
+    givenApiStateWithSize3();
+    apiState.players = [];
+    apiState.nextAction = null;
 };
 
 const givenStoreFromApi = function() {
@@ -204,6 +258,10 @@ const whenGameUpdate = function() {
     updateGame();
 };
 
+const whenReset = function() {
+    store.dispatch("game/reset");
+};
+
 const updateGame = function() {
     store.dispatch("game/update", apiState);
 };
@@ -216,6 +274,21 @@ const thenCardLocationsAreConsistent = function() {
         }
     }
     expect(leftoverMazeCard().location).toBeNull();
+};
+
+const thenGameHasInitialState = function() {
+    expect(store.state.game).toEqual(state());
+};
+
+const thenPlayersAreEmpty = function() {
+    expect(store.state.players.byId).toEqual({});
+    expect(store.state.players.allIds).toEqual([]);
+};
+
+const thenBoardIsEmpty = function() {
+    expect(store.state.board.boardLayout).toEqual([]);
+    expect(store.state.board.cardsById).toEqual({});
+    expect(store.state.board.mazeSize).toEqual(0);
 };
 
 const playersOnCard = function(location) {
@@ -234,108 +307,10 @@ const player = function(id) {
     return store.getters["players/find"](id);
 };
 
+function loc(row, column) {
+    return { row: row, column: column };
+}
+
 API.doMove = jest.fn();
 API.doShift = jest.fn();
 
-const GET_STATE_RESULT_FOR_N_3 = `{
-    "maze": {
-        "mazeSize": 3,
-        "mazeCards": [{
-            "outPaths": "NES",
-            "id": 9,
-            "location": null,
-            "rotation": 90
-        }, {
-            "outPaths": "NES",
-            "id": 0,
-            "location": {
-            "column": 0,
-            "row": 0
-            },
-            "rotation": 180
-        }, {
-            "outPaths": "NE",
-            "id": 1,
-            "location": {
-            "column": 1,
-            "row": 0
-            },
-            "rotation": 180
-        }, {
-            "outPaths": "NS",
-            "id": 2,
-            "location": {
-            "column": 2,
-            "row": 0
-            },
-            "rotation": 90
-        }, {
-            "outPaths": "NE",
-            "id": 3,
-            "location": {
-            "column": 0,
-            "row": 1
-            },
-            "rotation": 180
-        }, {
-            "outPaths": "NE",
-            "id": 4,
-            "location": {
-            "column": 1,
-            "row": 1
-            },
-            "rotation": 270
-        }, {
-            "outPaths": "NS",
-            "id": 5,
-            "location": {
-            "column": 2,
-            "row": 1
-            },
-            "rotation": 0
-        }, {
-            "outPaths": "NS",
-            "id": 6,
-            "location": {
-            "column": 0,
-            "row": 2
-            },
-            "rotation": 180
-        }, {
-            "outPaths": "NES",
-            "id": 7,
-            "location": {
-            "column": 1,
-            "row": 2
-            },
-            "rotation": 180
-        }, {
-            "outPaths": "NE",
-            "id": 8,
-            "location": {
-            "column": 2,
-            "row": 2
-            },
-            "rotation": 0
-        }]
-      },
-      "players": [{
-        "id": 42,
-        "mazeCardId": 5,
-        "pieceIndex": 0
-      },{
-        "id": 17,
-        "pieceIndex": 1,
-        "mazeCardId": 5
-      }],
-    "objectiveMazeCardId": 8,
-    "enabledShiftLocations": [
-      {"column": 1, "row": 0},
-      {"column": 0, "row": 1},
-      {"column": 2, "row": 1}
-    ],
-    "nextAction": {
-      "action": "SHIFT",
-      "playerId": 17
-    }
-  }`;

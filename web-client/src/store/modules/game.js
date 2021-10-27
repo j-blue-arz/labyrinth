@@ -1,23 +1,41 @@
-import * as action from "@/model/player.js";
 import API from "@/services/game-api.js";
 
 export const state = () => ({
-    playerIds: [],
-    nextAction: { playerId: 0, action: action.NO_ACTION },
+    nextAction: null,
     isServed: false,
     objectiveId: -1
 });
 
-const getters = {};
+const stateInitializer = state;
+
+const getters = {
+    currentPlayer: (state, _, __, rootGetters) => {
+        if (state.nextAction) {
+            return rootGetters["players/find"](state.nextAction.playerId);
+        } else {
+            return null;
+        }
+    }
+};
 
 const actions = {
-    async update({ commit, dispatch }, apiState) {
+    update({ commit, dispatch }, apiState) {
         commit("update", apiState);
         dispatch("players/update", apiState.players, { root: true });
         const boardState = {
             maze: apiState.maze,
             enabledShiftLocations: apiState.enabledShiftLocations,
             players: apiState.players
+        };
+        dispatch("board/update", boardState, { root: true });
+    },
+    reset({ commit, dispatch }) {
+        commit("reset");
+        dispatch("players/update", [], { root: true });
+        const boardState = {
+            maze: { mazeSize: 0 },
+            enabledShiftLocations: [],
+            players: []
         };
         dispatch("board/update", boardState, { root: true });
     },
@@ -37,6 +55,13 @@ const actions = {
         API.doMove(moveAction.playerId, moveAction.targetLocation);
     },
     shift({ dispatch, rootGetters }, shiftAction) {
+        API.doShift(
+            shiftAction.playerId,
+            shiftAction.location,
+            shiftAction.leftoverRotation,
+            () => {}
+        );
+
         const shiftLocation = shiftAction.location;
         const oppositeLocation = rootGetters["board/oppositeLocation"](shiftLocation);
         const pushedOutCard = rootGetters["board/mazeCard"](oppositeLocation);
@@ -47,25 +72,17 @@ const actions = {
             const cardChange = { playerId: playerId, mazeCardId: leftoverCard.id };
             dispatch("players/changePlayersCard", cardChange, { root: true });
         }
-        API.doShift(
-            shiftAction.playerId,
-            shiftAction.location,
-            shiftAction.leftoverRotation,
-            () => {}
-        );
     }
 };
 
 export const mutations = {
     update(state, apiState) {
-        state.playerIds = apiState.players.map(player => player.id);
         state.objectiveId = apiState.objectiveMazeCardId;
-        if (apiState.nextAction !== null) {
-            state.nextAction = apiState.nextAction;
-        } else {
-            state.nextAction = { playerId: 0, action: action.NO_ACTION };
-        }
+        state.nextAction = apiState.nextAction;
         state.isServed = true;
+    },
+    reset(state) {
+        Object.assign(state, stateInitializer());
     }
 };
 

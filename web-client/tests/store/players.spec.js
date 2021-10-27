@@ -1,17 +1,80 @@
-import playerConfig from "@/store/modules/players.js";
+import playersConfig from "@/store/modules/players.js";
+import gameConfig from "@/store/modules/game.js";
+import boardConfig from "@/store/modules/board.js";
 import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
+import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 
 describe("players Vuex module", () => {
     beforeEach(() => {
         const localVue = createLocalVue();
         localVue.use(Vuex);
-        store = new Vuex.Store(cloneDeep(playerConfig));
+        store = new Vuex.Store({
+            modules: {
+                game: cloneDeep(gameConfig),
+                board: cloneDeep(boardConfig),
+                players: cloneDeep(playersConfig)
+            }
+        });
         API.doAddPlayer.mockClear();
         API.removePlayer.mockClear();
         API.changePlayerName.mockClear();
+    });
+
+    describe("getters", () => {
+        describe("find", () => {
+            it("returns player with next action if next action is present", () => {
+                const nextAction = { action: SHIFT_ACTION, playerId: 2 };
+                givenPlayerInState({ id: 2, isUser: true, pieceIndex: 1 });
+                givenNextAction(nextAction);
+
+                const player = findPlayer(2);
+
+                expect(player.nextAction).toEqual(SHIFT_ACTION);
+            });
+
+            it("returns player with next action equals to no action, if next action is not present in game", () => {
+                givenPlayerInState({ id: 2, isUser: true, pieceIndex: 1 });
+
+                const player = findPlayer(2);
+
+                expect(player.nextAction).toEqual(NO_ACTION);
+            });
+        });
+
+        describe("bots", () => {
+            it("returns only bots of current list of players", () => {
+                givenPlayersInState([
+                    { id: 2, isUser: true, pieceIndex: 1 },
+                    { id: 3, isBot: true, pieceIndex: 2 },
+                    { id: 4, isBot: true, pieceIndex: 3 }
+                ]);
+
+                const bots = store.getters["players/bots"];
+
+                expect(bots).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({ id: 3, isBot: true, pieceIndex: 2 }),
+                        expect.objectContaining({ id: 4, isBot: true, pieceIndex: 3 })
+                    ])
+                );
+            });
+        });
+
+        describe("userPlayer", () => {
+            it("returns undefined if user is not playing", () => {
+                givenPlayersInState([
+                    { id: 3, isBot: true, pieceIndex: 2 },
+                    { id: 4, isBot: true, pieceIndex: 3 }
+                ]);
+
+                const userPlayer = store.getters.userPlayer;
+
+                expect(userPlayer).toBeUndefined();
+            });
+        });
     });
 
     describe("actions", () => {
@@ -42,8 +105,8 @@ describe("players Vuex module", () => {
 
                 whenEnterGame();
 
-                expect(store.getters.find(42).isUser).toBe(true);
-                expect(store.getters.hasUserPlayer).toBe(true);
+                expect(store.getters["players/find"](42).isUser).toBe(true);
+                expect(store.getters["players/hasUserPlayer"]).toBe(true);
             });
         });
 
@@ -68,11 +131,11 @@ describe("players Vuex module", () => {
 
             it("removes user from players", () => {
                 givenPlayerInState({ id: 2, isUser: true });
-                expect(store.getters.hasUserPlayer).toBe(true);
+                expect(store.getters["players/hasUserPlayer"]).toBe(true);
 
                 whenLeaveGame();
 
-                expect(store.getters.hasUserPlayer).toBe(false);
+                expect(store.getters["players/hasUserPlayer"]).toBe(false);
             });
         });
 
@@ -100,7 +163,7 @@ describe("players Vuex module", () => {
 
                 whenLeaveGame();
 
-                expect(store.getters.hasUserPlayer).toBe(false);
+                expect(store.getters["players/hasUserPlayer"]).toBe(false);
             });
         });
 
@@ -131,10 +194,10 @@ describe("players Vuex module", () => {
 
                 whenAddWasmPlayer();
 
-                expect(store.getters.find(42).isUser).toBeFalsy;
-                expect(store.getters.hasUserPlayer).toBe(false);
-                expect(store.getters.find(42).isWasm).toBe(true);
-                expect(store.getters.hasWasmPlayer).toBe(true);
+                expect(findPlayer(42).isUser).toBeFalsy;
+                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                expect(findPlayer(42).isWasm).toBe(true);
+                expect(store.getters["players/hasWasmPlayer"]).toBe(true);
             });
         });
 
@@ -162,7 +225,7 @@ describe("players Vuex module", () => {
 
                 whenRemoveWasmPlayer();
 
-                expect(store.getters.hasWasmPlayer).toBe(false);
+                expect(store.getters["players/hasWasmPlayer"]).toBe(false);
             });
         });
 
@@ -176,11 +239,11 @@ describe("players Vuex module", () => {
 
                 whenRemoveAllClientPlayers();
 
-                expect(store.getters.hasWasmPlayer).toBe(false);
-                expect(store.getters.hasUserPlayer).toBe(false);
-                expect(store.getters.find(2)).toBeFalsy();
-                expect(store.getters.find(5)).toBeFalsy();
-                expect(store.getters.find(7)).toBeTruthy();
+                expect(store.getters["players/hasWasmPlayer"]).toBe(false);
+                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                expect(findPlayer(2)).toBeFalsy();
+                expect(findPlayer(5)).toBeFalsy();
+                expect(findPlayer(7)).toBeTruthy();
             });
 
             it("removes calls API with players to remove", () => {
@@ -204,7 +267,7 @@ describe("players Vuex module", () => {
 
                 whenRemoveClientPlayer(7);
 
-                expect(store.getters.find(7)).toBeTruthy();
+                expect(findPlayer(7)).toBeTruthy();
                 expect(API.removePlayer).not.toHaveBeenCalled();
             });
 
@@ -217,7 +280,7 @@ describe("players Vuex module", () => {
 
                 whenRemoveClientPlayer(5);
 
-                expect(store.getters.find(5)).toBeFalsy();
+                expect(findPlayer(5)).toBeFalsy();
                 expect(API.removePlayer).toHaveBeenCalledTimes(1);
                 expect(API.removePlayer).toHaveBeenCalledWith(5);
             });
@@ -230,7 +293,7 @@ describe("players Vuex module", () => {
                 whenChangeUserPlayerName("gina");
 
                 expect(API.changePlayerName).not.toHaveBeenCalled();
-                expect(store.state.byId[7].name).toBe("felix");
+                expect(store.state.players.byId[7].name).toBe("felix");
             });
 
             it("changes name if user is playing", () => {
@@ -238,7 +301,7 @@ describe("players Vuex module", () => {
 
                 whenChangeUserPlayerName("gina");
 
-                expect(store.state.byId[7].name).toBe("gina");
+                expect(store.state.players.byId[7].name).toBe("gina");
             });
 
             it("calls API if user is playing", () => {
@@ -354,7 +417,7 @@ describe("players Vuex module", () => {
     });
 });
 
-const { state, mutations } = playerConfig;
+const { state, mutations } = playersConfig;
 const { update } = mutations;
 
 API.doAddPlayer = jest.fn();
@@ -367,13 +430,21 @@ let apiPlayers = [];
 
 const givenNoPlayersInState = function() {
     players = state();
-    store.replaceState(cloneDeep(players));
+    store.replaceState({
+        game: store.state.game,
+        players: cloneDeep(players),
+        board: store.state.board
+    });
 };
 
 const givenPlayerInState = function(player) {
     const playerId = player.id;
     players = { byId: { [playerId]: player }, allIds: [playerId] };
-    store.replaceState(cloneDeep(players));
+    store.replaceState({
+        game: store.state.game,
+        players: cloneDeep(players),
+        board: store.state.board
+    });
 };
 
 const givenPlayersInState = function(players) {
@@ -382,7 +453,19 @@ const givenPlayersInState = function(players) {
         return result;
     }, {});
     players = { byId: byId, allIds: players.map(player => player.id) };
-    store.replaceState(cloneDeep(players));
+    store.replaceState({
+        game: store.state.game,
+        players: cloneDeep(players),
+        board: store.state.board
+    });
+};
+
+const givenNextAction = function(nextAction) {
+    store.commit("game/update", {
+        players: players.allIds.map(id => players.byId[id]),
+        objectiveMazeCardId: 0,
+        nextAction: nextAction
+    });
 };
 
 const givenApiPlayer = function(apiPlayer) {
@@ -398,31 +481,31 @@ const whenSetPlayersFromApi = function() {
 };
 
 const whenEnterGame = function() {
-    store.dispatch("enterGame");
+    store.dispatch("players/enterGame");
 };
 
 const whenLeaveGame = function() {
-    store.dispatch("leaveGame");
+    store.dispatch("players/leaveGame");
 };
 
 const whenAddWasmPlayer = function() {
-    store.dispatch("addWasmPlayer");
+    store.dispatch("players/addWasmPlayer");
 };
 
 const whenRemoveWasmPlayer = function() {
-    store.dispatch("removeWasmPlayer");
+    store.dispatch("players/removeWasmPlayer");
 };
 
 const whenRemoveAllClientPlayers = function() {
-    store.dispatch("removeAllClientPlayers");
+    store.dispatch("players/removeAllClientPlayers");
 };
 
 const whenRemoveClientPlayer = function(id) {
-    store.dispatch("removeClientPlayer", id);
+    store.dispatch("players/removeClientPlayer", id);
 };
 
 const whenChangeUserPlayerName = function(newName) {
-    store.dispatch("changeUserPlayerName", newName);
+    store.dispatch("players/changeUserPlayerName", newName);
 };
 
 const thenPlayerExists = function(id) {
@@ -437,4 +520,8 @@ const thenPlayerDoesNotExist = function(id) {
 
 const playerWithId = function(id) {
     return players.byId[id];
+};
+
+const findPlayer = function(id) {
+    return store.getters["players/find"](id);
 };

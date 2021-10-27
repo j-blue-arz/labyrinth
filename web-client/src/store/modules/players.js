@@ -1,5 +1,6 @@
 import Vue from "vue";
 import API from "@/services/game-api.js";
+import * as action from "@/model/player.js";
 
 export const state = () => ({
     byId: {},
@@ -7,8 +8,23 @@ export const state = () => ({
 });
 
 const getters = {
-    find: state => id => {
-        return state.byId[id];
+    find: (state, _, rootState) => id => {
+        const player = state.byId[id];
+        if (player) {
+            const nextAction = rootState.game.nextAction;
+            return {
+                ...player,
+                nextAction: nextAction?.playerId === id ? nextAction.action : action.NO_ACTION
+            };
+        } else {
+            return undefined;
+        }
+    },
+    all: (state, getters) => {
+        return state.allIds.map(id => getters.find(id));
+    },
+    findByMazeCard: (_, getters) => cardId => {
+        return getters.all.filter(player => player.mazeCard === cardId);
     },
     mazeCard: (state, _, __, rootGetters) => id => {
         const player = state.byId[id];
@@ -20,11 +36,17 @@ const getters = {
     userPlayerId: state => {
         return state.allIds.find(id => state.byId[id].isUser);
     },
+    userPlayer: (_, getters) => {
+        return getters.find(getters.userPlayerId);
+    },
     hasWasmPlayer: state => {
         return state.allIds.some(id => state.byId[id].isWasm);
     },
     wasmPlayerId: state => {
         return state.allIds.find(id => state.byId[id].isWasm);
+    },
+    bots: (_, getters) => {
+        return getters.all.filter(player => player.isBot);
     }
 };
 
