@@ -73,6 +73,7 @@ const actions = {
 
 export const mutations = {
     emptyBoard(state) {
+        Vue.set(state, "cardsById", {});
         state.boardLayout.splice(0, state.boardLayout.length);
     },
     fillBoard(state, apiState) {
