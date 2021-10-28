@@ -1,8 +1,8 @@
-import { mount } from "@vue/test-utils";
-import Game from "@/model/game.js";
+import Vuex from "vuex";
+import { mount, createLocalVue } from "@vue/test-utils";
+import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazeCard.js";
 
 const mazeCardListFactory = function(n) {
     var mazeCards = [];
@@ -27,41 +27,35 @@ const findLowestPositionOfMazeCard = function(vGameBoard, dimension) {
 
 describe("VGameBoard", () => {
     it("renders all VMazeCard components", () => {
-        var gameBoard = mount(VGameBoard, {
-            propsData: {
-                game: new Game(),
-                mazeSize: 5,
-                boardSize: 500,
-                mazeCards: mazeCardListFactory(5),
-                borderWidth: 100
-            }
-        });
+        givenVGameBoard();
 
-        expect(gameBoard.findAll(VMazeCard).length).toBe(5 * 5);
+        expect(vGameBoard.findAll(VMazeCard).length).toBe(3 * 3);
     });
 
     it("renders leftmost v-maze-card exactly at 0", () => {
-        var gameBoard = mount(VGameBoard, {
-            propsData: {
-                game: new Game(),
-                mazeSize: 7,
-                mazeCards: mazeCardListFactory(7)
-            }
-        });
+        givenVGameBoard();
 
-        var xPos = findLowestPositionOfMazeCard(gameBoard, "x");
+        var xPos = findLowestPositionOfMazeCard(vGameBoard, "x");
         expect(xPos).toBe(0);
     });
 
     it("renders topmost v-maze-card exactly at 0", () => {
-        var gameBoard = mount(VGameBoard, {
-            propsData: {
-                game: new Game(),
-                mazeSize: 5,
-                mazeCards: mazeCardListFactory(5)
-            }
-        });
-        var yPos = findLowestPositionOfMazeCard(gameBoard, "y");
+        givenVGameBoard();
+        var yPos = findLowestPositionOfMazeCard(vGameBoard, "y");
         expect(yPos).toBe(0);
     });
 });
+
+let vGameBoard;
+let store;
+
+function givenVGameBoard() {
+    const localVue = createLocalVue();
+    localVue.use(Vuex);
+    store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
+    vGameBoard = mount(VGameBoard, {
+        store,
+        localVue
+    });
+}
+

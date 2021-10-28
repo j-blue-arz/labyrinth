@@ -2,22 +2,21 @@
     <svg viewBox="0 0 100 100" class="leftover">
         <v-maze-card
             @click.native="onLeftoverClick"
-            v-if="hasStarted"
             :maze-card="mazeCard"
             x="0"
             y="0"
-            :moveInteraction="interaction"
+            :interaction="shiftInteraction"
             class="leftover__card"
             ref="leftover"
         ></v-maze-card>
-        <path v-if="interaction" :d="arrowPath" class="leftover__arrow"></path>
-        <polygon v-if="interaction" :points="arrowHead" class="leftover__arrow-head"></polygon>
+        <path v-if="shiftInteraction" :d="arrowPath" class="leftover__arrow"></path>
+        <polygon v-if="shiftInteraction" :points="arrowHead" class="leftover__arrow-head"></polygon>
     </svg>
 </template>
 
 <script>
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazeCard.js";
+import * as action from "@/model/player.js";
 
 export default {
     name: "leftover-maze-card",
@@ -25,20 +24,15 @@ export default {
         /* eslint-disable vue/no-unused-components */
         VMazeCard
     },
-    props: {
-        mazeCard: {
-            type: MazeCard,
-            required: true
-        },
-        interaction: {
-            type: Boolean,
-            required: false,
-            default: false
-        }
-    },
     computed: {
-        hasStarted: function() {
-            return this.mazeCard instanceof MazeCard;
+        rotation: function() {
+            return this.mazeCard.rotation;
+        },
+        mazeCard: function() {
+            return this.$store.getters["board/leftoverMazeCard"];
+        },
+        shiftInteraction: function() {
+            return this.$store.getters["players/userPlayer"]?.nextAction === action.SHIFT_ACTION;
         },
         arrowPath: function() {
             let radius = 40;
@@ -59,8 +53,8 @@ export default {
     },
     methods: {
         onLeftoverClick: function() {
-            if (this.interaction) {
-                this.mazeCard.rotateClockwise();
+            if (this.shiftInteraction) {
+                this.$store.dispatch("board/rotateLeftoverClockwise");
             }
         }
     }

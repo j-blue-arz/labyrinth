@@ -4,6 +4,7 @@ import Vue from "vue";
 import Player, { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
 
 beforeEach(() => {
+    mockStore = createMockStore();
     wrapper = factory();
 });
 
@@ -45,44 +46,49 @@ describe("VMessageArea", () => {
 });
 
 let wrapper = null;
+let mockStore = null;
 
-const mockCountdown = {
-    remaining: 30,
-    startSeconds: 30,
-    isRunning: jest.fn().mockReturnValue(true)
+const initialPlayer = { id: 0, nextAction: NO_ACTION };
+
+const createMockStore = function() {
+    let mockStore = {
+        state: {
+            countdown: {
+                remainingSeconds: 30,
+                startSeconds: 30
+            }
+        },
+        getters: {
+            "countdown/isRunning": true,
+            "players/userPlayer": { ...initialPlayer }
+        }
+    };
+    return mockStore;
 };
-
-const player = new Player(0);
 
 const factory = function() {
     let wrapper = mount(VMessageArea, {
-        propsData: {
-            countdown: mockCountdown,
-            userPlayer: player
+        mocks: {
+            $store: mockStore
         }
     });
     return wrapper;
 };
 
 const givenNotPlayersTurn = function() {
-    player.setTurnAction(NO_ACTION);
+    mockStore.getters["players/userPlayer"].nextAction = NO_ACTION;
 };
 
 const givenPlayerShift = function() {
-    player.setTurnAction(SHIFT_ACTION);
+    mockStore.getters["players/userPlayer"].nextAction = SHIFT_ACTION;
 };
 
 const givenPlayerMove = function() {
-    player.setTurnAction(MOVE_ACTION);
+    mockStore.getters["players/userPlayer"].nextAction = MOVE_ACTION;
 };
 
 const whenCountdownReaches = function(seconds) {
-    const mockCountdown = {
-        remaining: seconds,
-        startSeconds: 30,
-        isRunning: jest.fn().mockReturnValue(true)
-    };
-    wrapper.setProps({ countdown: mockCountdown });
+    mockStore.state.countdown.remainingSeconds = seconds;
 };
 
 const thenMessageBoardIsInvisible = function() {

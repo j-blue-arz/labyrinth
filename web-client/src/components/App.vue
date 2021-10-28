@@ -1,16 +1,16 @@
 <template>
     <div class="app">
-        <v-menu-bar class="app__menubar" :controller="controller" />
+        <v-menu-bar class="app__menubar" />
         <div class="app__main">
-            <v-game class="app__game" :controller="controller" />
+            <v-game class="app__game" />
         </div>
     </div>
 </template>
 
 <script>
 import VMenuBar from "@/components/VMenuBar.vue";
-import Controller from "@/controllers/controller.js";
 import VGame from "@/components/VGame.vue";
+import API from "@/services/game-api.js";
 
 export default {
     name: "app",
@@ -18,18 +18,37 @@ export default {
         VMenuBar,
         VGame
     },
-    data() {
-        return {
-            controller: null
-        };
-    },
     created: function() {
-        this.controller = new Controller();
-        window.addEventListener("beforeunload", () => this.controller.beforeDestroy());
-        this.controller.initialize();
+        API.errorHandlers.push(error => this.handleError(error));
+        API.stateObservers.push(apiState => this.$store.dispatch("game/update", apiState));
+        API.activatePolling();
+        window.addEventListener("beforeunload", () => this.leave());
+        this.$store.dispatch("players/enterGame");
+    },
+    methods: {
+        leave() {
+            API.stopPolling();
+            this.$store.dispatch("players/removeAllClientPlayers");
+        },
+        handleError(error) {
+            if (error.response) {
+                if (error.response.data.key === "GAME_NOT_FOUND") {
+                    console.log("Game not found, resetting.");
+                    this.$store.dispatch("game/reset");
+                    API.stopPolling();
+                } else {
+                    console.error("Response error", error.response.data);
+                }
+            } else if (error.request) {
+                API.stopPolling();
+                console.error("Request error", error.request);
+            } else {
+                console.error("Error", error.message);
+            }
+        }
     },
     beforeDestroy() {
-        this.controller.beforeDestroy();
+        this.leave();
     }
 };
 </script>

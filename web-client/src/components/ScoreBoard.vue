@@ -4,7 +4,6 @@
             v-for="player in players"
             :key="'score-row-' + player.id"
             :player="player"
-            :controller="controller"
         />
     </div>
 </template>
@@ -17,14 +16,9 @@ export default {
     components: {
         VScoreBoardRow
     },
-    props: {
-        players: {
-            type: Array,
-            required: true
-        },
-        controller: {
-            type: Object,
-            required: true
+    computed: {
+        players: function() {
+            return this.$store.getters["players/all"];
         }
     }
 };

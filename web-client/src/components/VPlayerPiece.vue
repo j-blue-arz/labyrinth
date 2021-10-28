@@ -1,5 +1,5 @@
 <template>
-    <svg ref="playerPiece" class="player-piece" :class="colorIndexClass" viewBox="0 0 30 30">
+    <svg ref="playerPiece" class="player-piece" :class="pieceIndexClass" viewBox="0 0 30 30">
         <circle
             cx="15"
             cy="15"
@@ -25,19 +25,16 @@
             dominant-baseline="central"
             text-anchor="middle"
         >
-            {{ playerId }}
+            {{ pieceIndex }}
         </text>
     </svg>
 </template>
 
 <script>
-import Player from "@/model/player.js";
-
 export default {
     name: "v-player-piece",
     props: {
         player: {
-            type: Player,
             required: true
         },
         interaction: {
@@ -47,14 +44,14 @@ export default {
         }
     },
     computed: {
-        colorIndexClass: function() {
-            return "player-piece__player-" + this.player.colorIndex;
+        pieceIndexClass: function() {
+            return "player-piece__player-" + this.player.pieceIndex;
         },
         isUser: function() {
             return this.player.isUser;
         },
-        playerId: function() {
-            return this.player.colorIndex;
+        pieceIndex: function() {
+            return this.player.pieceIndex;
         }
     }
 };

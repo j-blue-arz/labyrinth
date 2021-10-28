@@ -1,73 +1,101 @@
-import { shallowMount, mount } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazeCard.js";
-import { copyObjectStructure } from "../testutils.js";
-
-beforeEach(() => {
-    leftoverMazeCard = factory();
-});
+import * as action from "@/model/player.js";
 
 describe("InteractiveBoard", () => {
+    beforeEach(() => {
+        mockStore = createMockStore();
+    });
+
     it("rotates leftover maze card when clicked", () => {
         givenRotation(0);
-        givenInteraction(true);
+        givenShiftRequired();
+        givenLeftoverMazeCard();
 
         whenMazeCardIsClicked();
 
-        thenRotationIs(90);
+        thenMazeCardWasRotated();
     });
 
     it("does not rotate leftover maze card given no interaction required", () => {
         givenRotation(0);
-        givenInteraction(false);
+        givenNoActionRequired();
+        givenLeftoverMazeCard();
 
         whenMazeCardIsClicked();
 
-        thenRotationIs(0);
+        thenMazeCardWasNotRotated();
     });
 
     it("assigns class 'interaction' on leftover maze card when interaction is required", () => {
-        givenInteraction(true);
+        givenShiftRequired();
+        givenLeftoverMazeCard();
 
         thenMazeCardIsInteractive();
     });
 
     it("removes class 'interaction' on leftover maze card when no interaction required", () => {
-        givenInteraction(false);
+        givenNoActionRequired();
+        givenLeftoverMazeCard();
 
         thenMazeCardIsNotInteractive();
     });
 });
 
-let leftoverMazeCard = null;
+let leftoverMazeCard;
+let mockStore;
 
-const mazeCard = new MazeCard(0, -1, -1, "NS", 0);
+const mazeCard = { id: 0, location: null, outPaths: "NS", rotation: 0 };
 
-const factory = function(interaction) {
+const createMockStore = function() {
+    return {
+        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": id => [] },
+        dispatch: jest.fn(),
+        state: {
+            game: {
+                objectiveId: 1
+            }
+        }
+    };
+};
+
+const factory = function() {
     let leftoverMazeCard = mount(LeftoverMazeCard, {
-        propsData: {
-            mazeCard: mazeCard,
-            interaction: interaction
+        mocks: {
+            $store: mockStore
         }
     });
     return leftoverMazeCard;
+};
+
+const givenLeftoverMazeCard = function() {
+    leftoverMazeCard = factory();
 };
 
 const givenRotation = function(rotation) {
     mazeCard.rotation = rotation;
 };
 
-const givenInteraction = function(isInteraction) {
-    leftoverMazeCard = factory(isInteraction);
+const givenShiftRequired = function() {
+    mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.SHIFT_ACTION };
+};
+
+const givenNoActionRequired = function() {
+    mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.NO_ACTION };
 };
 
 const whenMazeCardIsClicked = function() {
     leftoverMazeCard.find(VMazeCard).trigger("click");
 };
 
-const thenRotationIs = function(rotation) {
-    expect(mazeCard.rotation).toEqual(rotation);
+const thenMazeCardWasRotated = function() {
+    expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+    expect(mockStore.dispatch).toHaveBeenCalledWith("board/rotateLeftoverClockwise");
+};
+
+const thenMazeCardWasNotRotated = function() {
+    expect(mockStore.dispatch).toHaveBeenCalledTimes(0);
 };
 
 const thenMazeCardIsInteractive = function() {

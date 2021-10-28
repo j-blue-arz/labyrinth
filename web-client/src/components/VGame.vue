@@ -1,24 +1,18 @@
 <template>
     <div class="game">
         <div class="game__board">
-            <interactive-board v-if="hasStarted" :controller="controller" ref="interactive-board" />
+            <interactive-board v-if="hasStarted" ref="interactive-board" />
         </div>
-        <timer
-            class="game__timer"
-            :controller="controller"
-            :countdown="countdown"
-            :user-player="userPlayer"
-        />
+        <timer class="game__timer" />
         <div class="game__score">
-            <score-board :players="players" :controller="controller" />
+            <score-board />
         </div>
         <div class="game__message">
-            <v-message-area :countdown="countdown" :user-player="userPlayer" />
+            <v-message-area />
         </div>
         <leftover-maze-card
             class="game__leftover"
-            :maze-card="leftoverMazeCard"
-            :interaction="isMyTurnToShift"
+            v-if="hasStarted"
             :style="{ width: leftoverSize, height: leftoverSize }"
         ></leftover-maze-card>
     </div>
@@ -30,7 +24,6 @@ import ScoreBoard from "@/components/ScoreBoard.vue";
 import Timer from "@/components/Timer.vue";
 import VMessageArea from "@/components/VMessageArea.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
-import * as action from "@/model/player.js";
 
 export default {
     name: "v-game",
@@ -41,43 +34,16 @@ export default {
         VMessageArea,
         LeftoverMazeCard
     },
-    props: {
-        controller: {
-            type: Object,
-            required: true
-        }
-    },
     computed: {
-        players: function() {
-            return this.controller.game.getPlayers();
-        },
         hasStarted: function() {
-            return this.controller && this.controller.game && this.controller.game.hasStarted();
-        },
-        game: function() {
-            return this.controller.game;
-        },
-        userPlayerId: function() {
-            return this.controller.playerManager.getUserPlayerId();
+            return this.$store.state.game.isServed;
         },
         userPlayer: function() {
-            return this.controller.game.getPlayer(this.userPlayerId);
-        },
-        countdown: function() {
-            return this.controller.turnCountdown;
-        },
-        isMyTurnToShift: function() {
-            return (
-                this.game.nextAction.playerId === this.userPlayerId &&
-                this.game.nextAction.action === action.SHIFT_ACTION
-            );
-        },
-        leftoverMazeCard: function() {
-            return this.game.leftoverMazeCard;
+            return this.$store.getters["players/userPlayer"];
         },
         leftoverSize: function() {
-            let gameSize = this.game.n;
-            return Math.round(100 / (gameSize + 2)) + "vmin";
+            const mazeSize = this.$store.state.board.mazeSize;
+            return Math.round(100 / (mazeSize + 2)) + "vmin";
         }
     }
 };

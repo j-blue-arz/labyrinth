@@ -1,5 +1,5 @@
 <template>
-    <div class="score-row" :class="[colorIndexClass, { 'score-row--is-turn': isTurn }]">
+    <div class="score-row" :class="[pieceIndexClass, { 'score-row--is-turn': isTurn }]">
         <v-player-piece
             :maxSize="25"
             :player="player"
@@ -7,7 +7,7 @@
             class="score-row__piece-symbol"
         />
         <div class="score-row__player-name">
-            <player-name-panel :controller="controller" :player="player" />
+            <player-name-panel :player="player" />
         </div>
         <p class="score-row__score-data">{{ player.score }}</p>
     </div>
@@ -16,7 +16,7 @@
 <script>
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 import PlayerNamePanel from "@/components/PlayerNamePanel.vue";
-import Player from "@/model/player.js";
+import { getLabel, NO_ACTION } from "@/model/player.js";
 
 export default {
     name: "v-score-board-row",
@@ -26,23 +26,18 @@ export default {
     },
     props: {
         player: {
-            type: Player,
-            required: true
-        },
-        controller: {
-            type: Object,
             required: true
         }
     },
     computed: {
-        colorIndexClass: function() {
-            return "score-row--player-" + this.player.colorIndex;
+        pieceIndexClass: function() {
+            return "score-row--player-" + this.player.pieceIndex;
         },
         playerName: function() {
-            return this.player.getLabel();
+            return getLabel(this.player);
         },
         isTurn: function() {
-            return this.player.isHisTurn();
+            return this.player.nextAction !== NO_ACTION;
         }
     }
 };

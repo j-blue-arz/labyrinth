@@ -6,7 +6,7 @@
             :y="pieceOrigins[index].y"
             :key="'piece-' + player.id"
             :player="player"
-            :interaction="player.isHisTurn()"
+            :interaction="playerTurns[index]"
             :width="pieceSizes[index]"
             :height="pieceSizes[index]"
         />
@@ -15,6 +15,7 @@
 
 <script>
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import * as action from "@/model/player.js";
 
 const smallPieceSizeFactor = 0.7;
 const smallPieceCircleRadiusFactor = 0.5;
@@ -39,12 +40,15 @@ export default {
         }
     },
     computed: {
+        playerTurns: function() {
+            return this.players.map(player => this.isTurn(player));
+        },
         pieceSizes: function() {
             const pieceSize =
                 this.players.length === 1 ? this.maxSize : this.maxSize * smallPieceSizeFactor;
             const turnFactor = 1.1;
             return this.players
-                .map(player => (player.isHisTurn() ? pieceSize * turnFactor : pieceSize))
+                .map(player => (this.isTurn(player) ? pieceSize * turnFactor : pieceSize))
                 .map(size => Math.floor(size));
         },
         pieceOrigins: function() {
@@ -78,6 +82,11 @@ export default {
                 );
                 return centers;
             }
+        }
+    },
+    methods: {
+        isTurn: function(player) {
+            return player.nextAction !== action.NO_ACTION;
         }
     }
 };

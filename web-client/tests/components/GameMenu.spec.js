@@ -1,138 +1,129 @@
 import { mount } from "@vue/test-utils";
+import playersConfig from "@/store/modules/players.js";
 import GameMenu from "@/components/GameMenu.vue";
 import VMenu from "@/components/VMenu.vue";
-import Controller from "@/controllers/controller.js";
-import PlayerManager from "@/model/playerManager.js";
-import Player from "@/model/player.js";
+import { getLabel, computationMethodLabel } from "@/model/player.js";
 import API from "@/services/game-api.js";
 
 beforeEach(() => {
-    const playerManager = new PlayerManager();
-    playerManager.addUserPlayerId(1);
-    mockGetPlayerManager.mockReturnValue(playerManager);
+    mockStore = createMockStore();
+    givenNoBots();
     API.fetchComputationMethods.mockImplementation(cb => cb([]));
-    mockGetBots.mockReturnValue([]);
-    mockGetPlayer.mockReturnValue(null);
-    mockGetPlayers.mockReturnValue([]);
-    // Clear all instances and calls to constructor and all methods:
-    Controller.mockClear();
-    mockGetPlayerManager.mockClear();
-    mockEnterGame.mockClear();
-    mockLeaveGame.mockClear();
     API.doAddBot.mockClear();
     API.removePlayer.mockClear();
-    mockRemoveWasmPlayer.mockClear();
     API.changeGame.mockClear();
-    mockAddWasmPlayer.mockClear();
-    mockGetBots.mockClear();
-    mockGetPlayer.mockClear();
-    mockGetPlayers.mockClear();
     API.fetchComputationMethods.mockClear();
 });
 
 describe("GameMenu", () => {
     describe("entry leave game", () => {
         it("is visible if user is participating", () => {
-            let gameMenu = factory();
-            let entry = gameMenu.find(VMenu).find({ ref: "leave" });
-            expect(entry.exists()).toBe(true);
+            givenUserIsParticipating();
+
+            whenGameMenuIsCreated();
+
+            thenEntryExists("leave");
         });
 
         it("is invisible if user is not participating", () => {
             givenUserIsNotParticipating();
-            let gameMenu = factory();
 
-            let entry = gameMenu.find(VMenu).find({ ref: "leave" });
-            expect(entry.exists()).toBe(false);
+            whenGameMenuIsCreated();
+
+            thenEntryDoesNotExist("leave");
         });
 
-        it("calls method on controller", () => {
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "leave");
-            expect(mockLeaveGame).toHaveBeenCalled();
+        it("dispatches leaveGame", () => {
+            givenUserIsParticipating();
+            givenGameMenu();
+
+            whenClickInMenu("leave");
+
+            thenDispatchWas("players/leaveGame");
         });
     });
 
     describe("entry enter game", () => {
         it("calls method on controller", () => {
             givenUserIsNotParticipating();
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "enter");
-            expect(mockEnterGame).toHaveBeenCalled();
+            givenGameMenu();
+
+            whenClickInMenu("enter");
+
+            thenDispatchWas("players/enterGame");
         });
 
         it("is not visible if user participating", () => {
-            let gameMenu = factory();
-            let entry = gameMenu.find(VMenu).find({ ref: "enter-game" });
-            expect(entry.exists()).toBe(false);
+            whenGameMenuIsCreated();
+
+            thenEntryDoesNotExist("enter-game");
         });
     });
 
     describe("Add bot submenu", () => {
         it("has entries corresponding to API computation methods", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            let menu = gameMenu.find(VMenu);
-            expect(menu.find({ ref: "add-libminimax-distance" }).exists()).toBe(true);
-            expect(menu.find({ ref: "add-libexhsearch" }).exists()).toBe(true);
-            expect(menu.find({ ref: "add-alpha-beta" }).exists()).toBe(false);
+            givenGameMenu();
+
+            whenClickInMenu("add");
+
+            thenEntryDoesNotExist("add-alpha-beta");
+            thenEntryExists("add-libexhsearch");
+            thenEntryExists("add-libminimax-distance");
         });
 
         it("calls addBot() on API with computation method", () => {
             givenComputationMethods(["exhaustive-search"]);
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            clickInMenu(gameMenu, "add-exhaustive-search");
+            givenGameMenu();
+
+            whenClickInMenu("add", "add-exhaustive-search");
+
             expect(API.doAddBot).toHaveBeenCalledWith("exhaustive-search");
         });
 
         it("has WASM entry when there is no WASM player participating", () => {
             givenWasmIsNotParticipating();
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            let menu = gameMenu.find(VMenu);
-            expect(menu.find({ ref: "add-wasm" }).exists()).toBe(true);
+            givenGameMenu();
+
+            whenClickInMenu("add");
+
+            thenEntryExists("add-wasm");
         });
 
         it("has no WASM entry when there is already a WASM player participating", () => {
-            givenWasmIsParticipating(new Player(7));
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            let menu = gameMenu.find(VMenu);
-            expect(menu.find({ ref: "add-wasm" }).exists()).toBe(false);
+            givenWasmIsParticipating();
+            givenGameMenu();
+
+            whenClickInMenu("add");
+
+            thenEntryDoesNotExist("add-wasm");
         });
 
-        it("calls addWasmPlayer for WASM menu entry", () => {
+        it("dispatches addWasmPlayer for WASM menu entry", () => {
             givenWasmIsNotParticipating();
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            clickInMenu(gameMenu, "add-wasm");
-            expect(mockAddWasmPlayer).toHaveBeenCalled();
+            givenGameMenu();
+
+            whenClickInMenu("add", "add-wasm");
+
+            thenDispatchWas("players/addWasmPlayer");
         });
 
         it("displays readable labels", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             givenWasmIsNotParticipating();
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "add");
-            let menu = gameMenu.find(VMenu);
-            let entries = menu.findAll("li");
-            let labels = entries.wrappers.map(wrapper => wrapper.text());
-            expect(labels).toEqual(
-                expect.arrayContaining([
-                    Player.computationMethodLabel("libminimax-distance"),
-                    Player.computationMethodLabel("libexhsearch"),
-                    "WASM: Exhaustive Search\u00A0(1P)"
-                ])
-            );
+            givenGameMenu();
+
+            whenClickInMenu("add");
+
+            thenReadableLabelsAreDisplayed();
         });
 
         it("is invisible if game is full", () => {
             givenGameIsFull();
-            let gameMenu = factory();
-            let entry = gameMenu.find(VMenu).find({ ref: "add" });
-            expect(entry.exists()).toBe(false);
+
+            whenGameMenuIsCreated();
+
+            thenEntryDoesNotExist("add");
         });
     });
 
@@ -141,155 +132,202 @@ describe("GameMenu", () => {
             let exhaustiveSearch = createBot(10, "libexhsearch");
             let alphaBeta = createBot(11, "libminimax");
             givenBots([exhaustiveSearch, alphaBeta]);
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "remove");
-            expectMenuContainsLabelContaining(gameMenu, "Minimax");
-            expectMenuContainsLabelContaining(gameMenu, "Exhaustive Search");
-            expectMenuDoesNotContainLabelContaining(gameMenu, "WASM: Exhaustive Search");
+            givenGameMenu();
+
+            whenClickInMenu("remove");
+
+            thenOneLabelContains("Minimax");
+            thenOneLabelContains("Exhaustive Search");
+            expectNoLabelContains("WASM: Exhaustive Search");
         });
 
         it("calls removePlayer() on API with correct player ID for backend players", () => {
             givenBots([createBot(11, "alpha-beta")]);
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "remove");
-            clickInMenu(gameMenu, "remove-11");
+            givenGameMenu();
+
+            whenClickInMenu("remove", "remove-11");
+
             expect(API.removePlayer).toHaveBeenCalledWith(11);
         });
 
-        it("calls removeWasmPlayer() on controller for WASM player", () => {
-            givenWasmIsParticipating(new Player(4));
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "remove");
-            clickInMenu(gameMenu, "remove-wasm");
-            expect(mockRemoveWasmPlayer).toHaveBeenCalled();
+        it("dispatches removeWasmPlayer for WASM player", () => {
+            givenWasmIsParticipating();
+            givenGameMenu();
+
+            whenClickInMenu("remove", "remove-wasm");
+
+            thenDispatchWas("players/removeWasmPlayer");
         });
 
         it("is invisible if no bot exists", () => {
             givenBots([]);
-            let gameMenu = factory();
-            let entry = gameMenu.find(VMenu).find({ ref: "remove" });
-            expect(entry.exists()).toBe(false);
+
+            whenGameMenuIsCreated();
+
+            thenEntryDoesNotExist("remove");
         });
 
         it("is visible if WASM player exists", () => {
-            givenWasmIsParticipating(new Player(4));
-            let gameMenu = factory();
-            let entry = gameMenu.find(VMenu).find({ ref: "remove" });
-            expect(entry.exists()).toBe(true);
+            givenWasmIsParticipating();
+
+            whenGameMenuIsCreated();
+
+            thenEntryExists("remove");
         });
     });
 
     describe("change game size", () => {
         it("calls changeGame() on API with correct size", () => {
-            let gameMenu = factory();
-            clickInMenu(gameMenu, "restart");
-            clickInMenu(gameMenu, "restart-9");
+            givenGameMenu();
+
+            whenClickInMenu("restart", "restart-9");
+
             expect(API.changeGame).toHaveBeenCalledWith(9);
         });
     });
 });
 
-let mockGetPlayerManager = jest.fn();
-let mockEnterGame = jest.fn();
-let mockLeaveGame = jest.fn();
+const { state } = playersConfig;
+
+const createMockStore = function() {
+    return {
+        dispatch: jest.fn(),
+        state: {
+            players: state()
+        },
+        getters: {}
+    };
+};
+
+let mockStore = createMockStore();
+
+let gameMenu;
+
 API.doAddBot = jest.fn();
 API.removePlayer = jest.fn();
-let mockRemoveWasmPlayer = jest.fn();
 API.changeGame = jest.fn();
-let mockAddWasmPlayer = jest.fn();
 API.fetchComputationMethods = jest.fn();
 
-jest.mock("@/controllers/controller.js", () => {
-    return jest.fn().mockImplementation(() => {
-        return {
-            playerManager: mockGetPlayerManager(),
-            enterGame: mockEnterGame,
-            leaveGame: mockLeaveGame,
-            game: mockGame,
-            removeWasmPlayer: mockRemoveWasmPlayer,
-            addWasmPlayer: mockAddWasmPlayer
-        };
-    });
-});
-
 const factory = function() {
-    let controller = new Controller(false);
     return mount(GameMenu, {
-        propsData: {
-            controller: controller
+        mocks: {
+            $store: mockStore
         }
     });
 };
 
-const mockGetBots = jest.fn();
-const mockGetPlayer = jest.fn();
-const mockGetPlayers = jest.fn();
-const mockGame = {
-    getBots: mockGetBots,
-    getPlayer: mockGetPlayer,
-    getPlayers: mockGetPlayers
+const givenGameMenu = function() {
+    gameMenu = factory();
+};
+
+const whenGameMenuIsCreated = function() {
+    gameMenu = factory();
 };
 
 const givenComputationMethods = function(computationMethods) {
     API.fetchComputationMethods.mockImplementation(cb => cb(computationMethods));
 };
 
-const givenUserIsNotParticipating = function() {
-    let playerManager = mockGetPlayerManager();
-    playerManager.removeUserPlayer();
+const givenUserIsParticipating = function() {
+    mockStore.getters["players/hasUserPlayer"] = true;
 };
 
-const givenWasmIsParticipating = function(wasmPlayer) {
-    let playerManager = mockGetPlayerManager();
-    playerManager.addWasmPlayerId(wasmPlayer.id);
-    mockGetPlayer.mockImplementation(playerId => {
-        if (playerId === wasmPlayer.id) {
-            return wasmPlayer;
-        } else {
-            return null;
-        }
-    });
-    mockGetPlayers.mockReturnValue([wasmPlayer]);
+const givenUserIsNotParticipating = function() {
+    mockStore.getters["players/hasUserPlayer"] = false;
 };
 
 const givenGameIsFull = function() {
-    mockGetPlayers.mockReturnValue([new Player(0), new Player(1), new Player(2), new Player(3)]);
+    mockStore.state.players.byId = {
+        0: { id: 0 },
+        1: { id: 1 },
+        2: { id: 2 },
+        3: { id: 3 }
+    };
+    mockStore.state.players.allIds = [0, 1, 2, 3];
+};
+
+const givenWasmIsParticipating = function() {
+    const id = 3;
+    const wasmPlayer = {
+        id: id,
+        isWasm: true,
+        name: ""
+    };
+    mockStore.getters["players/hasWasmPlayer"] = true;
+    mockStore.getters["players/wasmPlayerId"] = id;
+    mockStore.getters["players/find"] = playerId => (playerId === id ? wasmPlayer : null);
 };
 
 const givenWasmIsNotParticipating = function() {
-    let playerManager = mockGetPlayerManager();
-    playerManager.removeWasmPlayer();
+    mockStore.getters["players/hasWasmPlayer"] = false;
 };
 
 const givenBots = function(players) {
-    mockGetBots.mockReturnValue(players);
-    mockGetPlayers.mockReturnValue(players);
+    mockStore.getters["players/bots"] = players;
+};
+
+const givenNoBots = function() {
+    mockStore.getters["players/bots"] = [];
 };
 
 const createBot = function(id, computationMethod) {
-    let player = new Player(id);
-    player.isBot = true;
-    player.computationMethod = computationMethod;
-    return player;
+    return {
+        isBot: true,
+        computationMethod: computationMethod,
+        id: id,
+        pieceIndex: id
+    };
 };
 
-const expectMenuContainsLabelContaining = function(gameMenu, expectedText) {
+const thenOneLabelContains = function(expectedText) {
     let menu = gameMenu.find(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
     expect(entries.find(entry => entry.text().includes(expectedText))).not.toBeUndefined();
 };
 
-const expectMenuDoesNotContainLabelContaining = function(gameMenu, expectedText) {
+const expectNoLabelContains = function(expectedText) {
     let menu = gameMenu.find(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
     expect(entries.find(entry => entry.text().includes(expectedText))).toBeUndefined();
 };
 
-const clickInMenu = function(gameMenu, ref) {
+const whenClickInMenu = function(...refs) {
+    refs.forEach(ref => {
+        clickInMenu(ref);
+    });
+};
+
+const clickInMenu = function(ref) {
     gameMenu
         .find(VMenu)
         .find({ ref: ref })
         .trigger("click");
 };
+
+const thenDispatchWas = function(expected) {
+    expect(mockStore.dispatch).toHaveBeenCalledWith(expected);
+};
+
+const thenEntryExists = function(ref) {
+    let entry = gameMenu.find(VMenu).find({ ref: ref });
+    expect(entry.exists()).toBe(true);
+};
+
+const thenEntryDoesNotExist = function(ref) {
+    let entry = gameMenu.find(VMenu).find({ ref: ref });
+    expect(entry.exists()).toBe(false);
+};
+function thenReadableLabelsAreDisplayed() {
+    let menu = gameMenu.find(VMenu);
+    let entries = menu.findAll("li");
+    let labels = entries.wrappers.map(wrapper => wrapper.text());
+    expect(labels).toEqual(
+        expect.arrayContaining([
+            computationMethodLabel("libminimax-distance"),
+            computationMethodLabel("libexhsearch"),
+            "WASM: Exhaustive Search\u00A0(1P)"
+        ])
+    );
+}

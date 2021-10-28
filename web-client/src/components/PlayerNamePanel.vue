@@ -1,16 +1,11 @@
 <template>
-    <v-editable-field
-        v-if="isEditable"
-        v-model="player.playerName"
-        @input="onChangeName"
-        :placeholder="editablePlaceholder"
-    />
+    <v-editable-field v-if="isEditable" v-model="playerName" :placeholder="editablePlaceholder" />
     <p v-else>{{ playerLabel }}</p>
 </template>
 
 <script>
 import VEditableField from "@/components/VEditableField.vue";
-import Player from "@/model/player.js";
+import { getLabel } from "@/model/player.js";
 
 export default {
     name: "player-name-panel",
@@ -24,11 +19,6 @@ export default {
     },
     props: {
         player: {
-            type: Player,
-            required: true
-        },
-        controller: {
-            type: Object,
             required: true
         }
     },
@@ -37,12 +27,15 @@ export default {
             return this.player.isUser;
         },
         playerLabel: function() {
-            return this.player.getLabel();
-        }
-    },
-    methods: {
-        onChangeName: function() {
-            this.controller.changeUserPlayerName(this.player.playerName);
+            return getLabel(this.player);
+        },
+        playerName: {
+            get() {
+                return this.player.name;
+            },
+            set(value) {
+                this.$store.dispatch("players/changeUserPlayerName", value);
+            }
         }
     }
 };

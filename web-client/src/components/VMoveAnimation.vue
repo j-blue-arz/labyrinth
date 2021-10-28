@@ -11,23 +11,12 @@
 </template>
 
 <script>
-import Game from "@/model/game.js";
 import Graph from "@/model/Graph.js";
-import Player from "@/model/player.js";
 
 export default {
     name: "v-move-animation",
     props: {
-        game: {
-            type: Game,
-            required: true
-        },
         player: {
-            type: Player,
-            required: true
-        },
-        mazeCardId: {
-            type: Number,
             required: true
         }
     },
@@ -39,13 +28,13 @@ export default {
     },
     watch: {
         mazeCardId: function(newMazeCardId, oldMazeCardId) {
-            let newMazeCard = this.game.mazeCardById(newMazeCardId);
-            let oldMazeCard = this.game.mazeCardById(oldMazeCardId);
+            const newMazeCard = this.$store.getters["board/mazeCardById"](newMazeCardId);
+            const oldMazeCard = this.$store.getters["board/mazeCardById"](oldMazeCardId);
             if (newMazeCard && oldMazeCard) {
                 if (!this.isLeftover(newMazeCard) && !this.isLeftover(oldMazeCard)) {
                     let sourceLocation = oldMazeCard.location;
                     let targetLocation = newMazeCard.location;
-                    let graph = new Graph(this.game);
+                    let graph = new Graph(this.$store.state.board);
                     let locations = graph.path(sourceLocation, targetLocation);
                     this.path = locations.map(location => this.locationToPosition(location));
                     this.correctLastSegment();
@@ -55,8 +44,11 @@ export default {
         }
     },
     computed: {
+        mazeCardId: function() {
+            return this.player.mazeCard;
+        },
         colorIndexClass: function() {
-            return "move-animation__path--player-" + this.player.colorIndex;
+            return "move-animation__path--player-" + this.player.pieceIndex;
         }
     },
     methods: {
@@ -81,7 +73,7 @@ export default {
             return [x, y];
         },
         isLeftover: function(mazeCard) {
-            return mazeCard.id === this.game.leftoverMazeCard.id || mazeCard.isLeftoverLocation();
+            return mazeCard.id === this.$store.state.board.leftoverId || !mazeCard.location;
         }
     }
 };

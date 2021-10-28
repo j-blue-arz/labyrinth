@@ -11,11 +11,7 @@
             <span class="menubar__toggle-symbol" />
         </label>
         <div class="menubar__slider">
-            <game-menu
-                :controller="controller"
-                @item-click="resetToggle"
-                v-click-outside="resetToggle"
-            />
+            <game-menu @item-click="resetToggle" v-click-outside="resetToggle" />
             <v-footer />
         </div>
     </div>
@@ -27,12 +23,6 @@ import VFooter from "@/components/VFooter.vue";
 
 export default {
     name: "v-menu-bar",
-    props: {
-        controller: {
-            type: Object,
-            required: true
-        }
-    },
     data() {
         return {
             menuToggled: false

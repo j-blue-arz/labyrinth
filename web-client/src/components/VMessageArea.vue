@@ -9,21 +9,12 @@ import * as action from "@/model/player.js";
 
 export default {
     name: "v-message-area",
-    props: {
-        countdown: {
-            type: Object,
-            required: true
-        },
-        userPlayer: {
-            required: true
-        }
-    },
     computed: {
         text: function() {
             if (this.shouldShowMessage) {
-                if (this.userPlayer.hasToShift()) {
+                if (this.userPlayer.nextAction === action.SHIFT_ACTION) {
                     return "Drag the maze tiles to modify the maze layout.";
-                } else if (this.userPlayer.hasToMove()) {
+                } else if (this.userPlayer.nextAction === action.MOVE_ACTION) {
                     return "Select a connected maze tile to move to.";
                 }
             }
@@ -33,10 +24,14 @@ export default {
             return this.text !== "";
         },
         shouldShowMessage() {
+            const countdownState = this.$store.state.countdown;
             return (
-                this.countdown.isRunning() &&
-                this.countdown.remaining < this.countdown.startSeconds - 10
+                this.$store.getters["countdown/isRunning"] &&
+                countdownState.remainingSeconds < countdownState.startSeconds - 10
             );
+        },
+        userPlayer: function() {
+            return this.$store.getters["players/userPlayer"];
         }
     }
 };

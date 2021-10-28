@@ -1,5 +1,6 @@
 import Vue from "vue";
 import App from "@/components/App.vue";
+import store from "@/store";
 
 Vue.config.productionTip = false;
 
@@ -25,5 +26,6 @@ Vue.directive("click-outside", {
 new Vue({
     render: function(h) {
         return h(App);
-    }
+    },
+    store: store
 }).$mount("#app");

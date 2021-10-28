@@ -8,7 +8,7 @@
         viewBox="0 0 100 100"
         class="maze-card"
         :class="[
-            { 'maze-card--interactive': moveInteraction, 'maze-card--shiftable': shiftInteraction },
+            { 'maze-card--interactive': interaction, 'maze-card--shiftable': shiftInteraction },
             reachablePlayerColorIndexClass
         ]"
     >
@@ -66,12 +66,11 @@
             ></rect>
         </g>
         <player-piece-group :players="players" :mid-point="50" :max-size="piecesSize" />
-        <v-objective v-if="mazeCard.hasObject"></v-objective>
+        <v-objective v-if="hasObjective"></v-objective>
     </svg>
 </template>
 
 <script>
-import MazeCard from "@/model/mazeCard.js";
 import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
 import { TweenLite, Power3 } from "gsap";
@@ -85,7 +84,7 @@ export default {
     },
     props: {
         mazeCard: {
-            type: MazeCard,
+            type: Object,
             required: true
         },
         xPos: {
@@ -98,7 +97,7 @@ export default {
             required: false,
             default: 0
         },
-        moveInteraction: {
+        interaction: {
             type: Boolean,
             required: false,
             default: false
@@ -164,22 +163,30 @@ export default {
             return "";
         },
         players: function() {
-            return this.mazeCard.players;
+            return this.$store.getters["players/findByMazeCard"](this.mazeCard.id);
         },
         remainingSpace: function() {
             return Math.floor((this.$ui.cardSize - this.pathWidth) / 2);
         },
         hasNorth: function() {
-            return this.mazeCard.hasNorthOutPath();
+            return this.hasOutPath(this.mazeCard, "N");
         },
         hasEast: function() {
-            return this.mazeCard.hasEastOutPath();
+            return this.hasOutPath(this.mazeCard, "E");
         },
         hasSouth: function() {
-            return this.mazeCard.hasSouthOutPath();
+            return this.hasOutPath(this.mazeCard, "S");
         },
         hasWest: function() {
-            return this.mazeCard.hasWestOutPath();
+            return this.hasOutPath(this.mazeCard, "W");
+        },
+        hasObjective: function() {
+            return this.$store.state.game.objectiveId === this.mazeCard.id;
+        }
+    },
+    methods: {
+        hasOutPath(mazeCard, outPath) {
+            return mazeCard.outPaths.indexOf(outPath) != -1;
         }
     },
     created: function() {

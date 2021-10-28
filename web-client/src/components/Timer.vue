@@ -5,46 +5,32 @@
 </template>
 
 <script>
-import { setInterval, clearInterval } from "timers";
-import * as action from "@/model/player.js";
+import { NO_ACTION } from "@/model/player.js";
 
 export default {
     name: "timer",
-    props: {
-        controller: {
-            type: Object,
-            required: true
-        },
-        countdown: {
-            type: Object,
-            required: true
-        },
-        userPlayer: {
-            required: true
-        }
-    },
     data() {
         return {
             visible: false
         };
     },
     watch: {
-        userTurn: function(newValue, oldValue) {
-            if (newValue !== action.NO_ACTION) {
-                this.countdown.restartCountdown();
+        nextUserAction: function(newValue, oldValue) {
+            if (newValue !== NO_ACTION) {
+                this.$store.dispatch("countdown/restartCountdown");
                 this.visible = true;
             } else {
                 this.visible = false;
-                this.countdown.stopCountdown();
+                this.$store.dispatch("countdown/stopCountdown");
             }
         },
         gameSize: function() {
             // this is a heuristic to detect a game restart
             // For the case where a game is restarted with a different size,
             // but the user turn does not change
-            if (this.userPlayer && this.userPlayer.isHisTurn()) {
+            if (this.nextUserAction !== NO_ACTION) {
                 this.visible = true;
-                this.countdown.restartCountdown();
+                this.$store.dispatch("countdown/restartCountdown");
             }
         },
         objectiveId: function() {
@@ -52,32 +38,33 @@ export default {
             // For the case where a game is restarted with the same size,
             // but the user turn does not change
             // This heuristic might fail!
-            if (this.userPlayer && this.userPlayer.isHisTurn()) {
+            if (this.nextUserAction !== NO_ACTION) {
                 this.visible = true;
-                this.countdown.restartCountdown();
+                this.$store.dispatch("countdown/restartCountdown");
             }
         },
         remainingSeconds: function(newValue) {
-            if (newValue <= 0 && this.userPlayer.isHisTurn()) {
+            if (newValue <= 0 && this.nextUserAction !== NO_ACTION) {
                 this.removeCurrentPlayer();
             }
         }
     },
     computed: {
         gameSize: function() {
-            return this.controller.game.n;
+            return this.$store.state.board.mazeSize;
         },
         objectiveId: function() {
-            return this.controller.game.objectiveId;
+            return this.$store.state.game.objectiveId;
         },
         remainingSeconds: function() {
-            return this.countdown.remaining;
+            return this.$store.state.countdown.remainingSeconds;
         },
-        userTurn: function() {
-            if (this.userPlayer) {
-                return this.userPlayer.getTurnAction();
+        nextUserAction: function() {
+            const userPlayer = this.$store.getters["players/userPlayer"];
+            if (userPlayer) {
+                return userPlayer.nextAction;
             } else {
-                return action.NO_ACTION;
+                return NO_ACTION;
             }
         }
     },
@@ -86,8 +73,8 @@ export default {
             return ("0" + seconds).slice(-2);
         },
         removeCurrentPlayer: function() {
-            let currentPlayerId = this.controller.game.nextAction.playerId;
-            this.controller.removeManagedPlayer(currentPlayerId);
+            const currentPlayerId = this.$store.state.game.nextAction.playerId;
+            this.$store.dispatch("players/removeClientPlayer", currentPlayerId);
         }
     }
 };

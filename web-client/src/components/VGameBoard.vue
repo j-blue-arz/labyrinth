@@ -25,7 +25,7 @@
                     :key="'mazeCard-' + mazeCard.id"
                     :xPos="xPos(mazeCard)"
                     :yPos="yPos(mazeCard)"
-                    :moveInteraction="isMoveInteractive(mazeCard)"
+                    :interaction="isMoveInteractive(mazeCard)"
                     :shiftInteraction="isShiftInteractive(mazeCard)"
                     :reachable-by-player="reachableByPlayer(mazeCard)"
                     class="game-board__maze-card"
@@ -36,8 +36,6 @@
             v-for="player in players"
             :key="'player-' + player.id"
             :player="player"
-            :maze-card-id="player.mazeCard.id"
-            :game="game"
         ></v-move-animation>
     </svg>
 </template>
@@ -54,18 +52,6 @@ export default {
         VMoveAnimation
     },
     props: {
-        game: {
-            type: Object,
-            required: true
-        },
-        mazeSize: {
-            type: Number,
-            required: true
-        },
-        mazeCards: {
-            type: Array,
-            required: true
-        },
         interactiveMazeCards: {
             required: false,
             default: () => new Set()
@@ -90,6 +76,12 @@ export default {
         }
     },
     computed: {
+        mazeSize: function() {
+            return this.$store.state.board.mazeSize;
+        },
+        mazeCards: function() {
+            return this.$store.getters["board/mazeCardsRowMajorOrder"];
+        },
         boardSize: function() {
             return this.$ui.cardSize * this.mazeSize;
         },
@@ -97,7 +89,7 @@ export default {
             return Math.floor(this.$ui.cardSize / 6);
         },
         players: function() {
-            return this.game.getPlayers();
+            return this.$store.getters["players/all"];
         }
     },
     methods: {
@@ -120,6 +112,9 @@ export default {
             return null;
         },
         xPos(mazeCard) {
+            if (mazeCard.location === null) {
+                console.log(mazeCard.id + " location is null");
+            }
             let xPos = this.$ui.cardSize * mazeCard.location.column;
             if (this.drag.row === mazeCard.location.row) {
                 xPos += this.drag.offset;

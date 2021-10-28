@@ -16,37 +16,31 @@
 <script>
 import VInsertPanel from "@/components/VInsertPanel.vue";
 import { InsertPanel } from "@/model/shift.js";
-import { locationsEqual } from "@/model/game.js";
+import { locationsEqual, getShiftLocations } from "@/store/modules/board.js";
+import { SHIFT_ACTION } from "@/model/player.js";
 
 export default {
     name: "insert-panels",
     components: {
         VInsertPanel
     },
-    props: {
-        game: {
-            type: Object,
-            required: true
-        },
-        interaction: {
-            type: Boolean,
-            required: true
-        }
-    },
     computed: {
         insertPanels: function() {
             let result = [];
             let id = 0;
-            let n = this.game.n;
-            let shiftLocations = this.game.getShiftLocations();
+            const mazeSize = this.$store.state.board.mazeSize;
+            let shiftLocations = getShiftLocations(mazeSize);
             for (let location of shiftLocations) {
-                let insertPanel = new InsertPanel(id++, location, n);
-                if (locationsEqual(this.game.disabledShiftLocation, location)) {
+                let insertPanel = new InsertPanel(id++, location, mazeSize);
+                if (locationsEqual(this.$store.state.board.disabledShiftLocation, location)) {
                     insertPanel.enabled = false;
                 }
                 result.push(insertPanel);
             }
             return result;
+        },
+        interaction: function() {
+            return this.$store.getters["players/userPlayer"]?.nextAction === SHIFT_ACTION;
         }
     },
     methods: {

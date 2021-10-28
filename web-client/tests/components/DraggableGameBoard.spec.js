@@ -1,13 +1,13 @@
-import { mount } from "@vue/test-utils";
+import Vuex from "vuex";
+import { mount, createLocalVue } from "@vue/test-utils";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import Game, { loc } from "@/model/game.js";
 import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import VGameBoard from "@/components/VGameBoard.vue";
-import { buildRandomMaze } from "../testutils.js";
+import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { loc } from "@/store/modules/board.js";
 
 beforeEach(() => {
     wrapper = factory();
-    game = wrapper.props("game");
 });
 
 describe("DraggableGameBoard", () => {
@@ -143,19 +143,21 @@ describe("DraggableGameBoard", () => {
     });
 });
 
-let wrapper = null;
-let game = null;
-let mousePosition = null;
+let wrapper;
+let store;
+let mousePosition;
 
 const factory = function() {
-    let game = new Game();
-    game.n = 3;
-    buildRandomMaze(game);
+    const localVue = createLocalVue();
+    localVue.use(Vuex);
+    store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
+    givenDisabledShiftLocation(null);
     let wrapper = mount(DraggableGameBoard, {
         propsData: {
-            userAction: SHIFT_ACTION,
-            game: game
-        }
+            userAction: SHIFT_ACTION
+        },
+        store,
+        localVue
     });
     wrapper.element.getScreenCTM = function() {
         return { e: 0, f: 0, a: 1, d: 1 };
@@ -168,7 +170,7 @@ const givenShiftIsNotRequired = function() {
 };
 
 const givenDisabledShiftLocation = function(location) {
-    game.disabledShiftLocation = location;
+    store.commit("board/setDisabledShiftLocation", location);
 };
 
 const givenMouseDownAt = function(location) {

@@ -13,10 +13,10 @@ const wrapperFactory = function(player) {
 };
 
 describe("VPlayerPiece", () => {
-    it("renders different classes for different values of colorIndex", () => {
+    it("renders different classes for different values of pieceIndex", () => {
         for (let index = 0; index < 4; index++) {
             let player = new Player(index);
-            player.colorIndex = index;
+            player.pieceIndex = index;
             let playerPiece = wrapperFactory(player);
             let svgElement = playerPiece.find({ ref: "playerPiece" });
             let expectedClass = "player-piece__player-" + index;

@@ -1,12 +1,21 @@
-import Game, { loc } from "@/model/game.js";
 import Graph from "@/model/Graph";
+import boardConfig, { loc } from "@/store/modules/board.js";
+import { createLocalVue } from "@vue/test-utils";
+import Vuex from "vuex";
+import { cloneDeep } from "lodash";
 
 describe("Graph", () => {
+    beforeEach(() => {
+        const localVue = createLocalVue();
+        localVue.use(Vuex);
+        let store = new Vuex.Store(cloneDeep(boardConfig));
+        const apiState = JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER);
+        store.dispatch("update", apiState);
+        graph = new Graph(store.state);
+    });
+
     describe("reachableLocations", () => {
         it("returns the source location for a component of size 1", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(0, 0));
 
             expect(reachable.length).toBe(1);
@@ -14,9 +23,6 @@ describe("Graph", () => {
         });
 
         it("finds all locations for a component of size 6 with cycle", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(5, 3));
 
             expect(reachable.length).toBe(6);
@@ -33,9 +39,6 @@ describe("Graph", () => {
         });
 
         it("finds all locations for a component with outside connections to the north", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(0, 2));
 
             expect(reachable.length).toBe(5);
@@ -45,9 +48,6 @@ describe("Graph", () => {
         });
 
         it("finds all locations for a component with outside connections to the west and south", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
             let reachable = graph.reachableLocations(loc(6, 2));
 
             expect(reachable.length).toBe(13);
@@ -73,22 +73,16 @@ describe("Graph", () => {
 
     describe("isReachable", () => {
         it("returns true for locations in same component", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
-
             expect(graph.isReachable(loc(0, 4), loc(0, 6))).toEqual(true);
         });
 
         it("returns false for locations in different components", () => {
-            let game = new Game();
-            game.createFromApi(JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER));
-            let graph = new Graph(game);
-
             expect(graph.isReachable(loc(6, 0), loc(0, 6))).toEqual(false);
         });
     });
 });
+
+let graph;
 
 /* GENERATED_WITH_LINE_LEFTOVER =
 ###|#.#|###|#.#|###|###|###|
@@ -522,11 +516,6 @@ let GAME_STATE_GENERATED_WITH_LINE_LEFTOVER = `{
         "rotation": 270
         }]
     },
-    "nextAction": {
-      "action": "MOVE",
-      "playerId": 1
-    },
-    "objectiveMazeCardId": 34,
     "players": [{
       "id": 1,
       "isBot": false,

@@ -4,17 +4,11 @@
         <draggable-game-board
             @player-move="onPlayerMove"
             @player-shift="onPlayerShift"
-            :game="game"
             :current-player-color="currentPlayerColor"
             :reachable-cards="reachableMazeCards"
             :user-action="userAction"
         ></draggable-game-board>
-        <insert-panels
-            v-if="!isTouchDevice"
-            @player-shift="onPlayerShift"
-            :interaction="isMyTurnToShift"
-            :game="game"
-        ></insert-panels>
+        <insert-panels v-if="!isTouchDevice" @player-shift="onPlayerShift"></insert-panels>
     </svg>
 </template>
 
@@ -35,12 +29,6 @@ export default {
         VMazeCard,
         VSvgDefs
     },
-    props: {
-        controller: {
-            type: Object,
-            required: true
-        }
-    },
     data() {
         return {
             leftoverX: 0,
@@ -49,41 +37,21 @@ export default {
         };
     },
     computed: {
-        game: function() {
-            return this.controller.game;
-        },
-        mazeSize: function() {
-            return this.game.n;
-        },
         userPlayerId: function() {
-            return this.controller.playerManager.getUserPlayerId();
+            return this.$store.getters["players/userPlayerId"];
         },
         reachableMazeCards: function() {
-            let player = this.game.getPlayer(this.game.nextAction.playerId);
-            if (player) {
-                return this.computeReachableMazeCards(player);
+            const playerId = this.$store.getters["game/currentPlayer"]?.id;
+            if (playerId) {
+                return this.computeReachableMazeCards(playerId);
             }
             return new Set();
         },
         currentPlayerColor: function() {
-            let player = this.game.getPlayer(this.game.nextAction.playerId);
-            if (player) {
-                return player.colorIndex;
-            }
-            return null;
-        },
-        isMyTurnToShift: function() {
-            return (
-                this.game.nextAction.playerId === this.userPlayerId &&
-                this.game.nextAction.action === action.SHIFT_ACTION
-            );
+            return this.$store.getters["game/currentPlayer"]?.pieceIndex;
         },
         userAction: function() {
-            let player = this.game.getPlayer(this.userPlayerId);
-            if (player) {
-                return player.getTurnAction();
-            }
-            return action.NO_ACTION;
+            return this.$store.getters["players/userPlayer"]?.nextAction ?? action.NO_ACTION;
         },
         isTouchDevice: function() {
             // https://stackoverflow.com/a/4819886/359287
@@ -95,23 +63,21 @@ export default {
         },
         viewBox: function() {
             const offset = this.isTouchDevice ? -16 : -100;
-            const interactionSize = this.$ui.cardSize * this.mazeSize + 2 * -offset;
+            const interactionSize =
+                this.$ui.cardSize * this.$store.state.board.mazeSize + 2 * -offset;
             return `${offset} ${offset} ${interactionSize} ${interactionSize}`;
         }
     },
     methods: {
-        isMyTurnToMove: function() {
-            return (
-                this.game.nextAction.playerId === this.userPlayerId &&
-                this.game.nextAction.action === action.MOVE_ACTION
-            );
-        },
-        computeReachableMazeCards: function(player) {
-            if (!player.mazeCard.isLeftoverLocation()) {
-                let pieceLocation = player.mazeCard.location;
-                let graph = new Graph(this.game);
+        computeReachableMazeCards: function(playerId) {
+            const playerCard = this.$store.getters["players/mazeCard"](playerId);
+            if (playerCard?.location) {
+                let pieceLocation = playerCard.location;
+                let graph = new Graph(this.$store.state.board);
                 let locations = graph.reachableLocations(pieceLocation);
-                return new Set(locations.map(location => this.game.getMazeCard(location)));
+                return new Set(
+                    locations.map(location => this.$store.getters["board/mazeCard"](location))
+                );
             } else {
                 return new Set();
             }
@@ -120,21 +86,26 @@ export default {
             let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
-                leftoverRotation: this.game.leftoverMazeCard.rotation
+                leftoverRotation: this.$store.getters["board/leftoverMazeCard"].rotation
             };
-            this.controller.performShift(shiftAction);
+            this.$store.dispatch("game/shift", shiftAction);
         },
         onPlayerMove: function(mazeCard) {
-            if (
-                this.isMyTurnToMove() &&
-                this.game.isMoveValid(this.userPlayerId, mazeCard.location)
-            ) {
+            if (this.isMoveValid(mazeCard.location)) {
                 let moveAction = {
                     playerId: this.userPlayerId,
                     targetLocation: mazeCard.location
                 };
-                this.controller.performMove(moveAction);
+                this.$store.dispatch("game/move", moveAction);
             }
+        },
+        isMoveValid: function(targetLocation) {
+            const sourceLocation = this.$store.getters["players/mazeCard"](this.userPlayerId)
+                .location;
+            return (
+                this.userAction === action.MOVE_ACTION &&
+                new Graph(this.$store.state.board).isReachable(sourceLocation, targetLocation)
+            );
         }
     }
 };

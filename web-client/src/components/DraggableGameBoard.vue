@@ -4,10 +4,7 @@
         @pointermove.native="pointerMove($event)"
         @pointerup.native="endDrag()"
         @pointercancel.native="pointercancel($event)"
-        :maze-size="mazeSize"
-        :maze-cards="mazeCards"
         :interactive-maze-cards="interactiveMazeCards"
-        :game="game"
         :current-player-color="currentPlayerColor"
         :reachable-cards="reachableCards"
         :required-action="userAction"
@@ -18,7 +15,7 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
-import { locationsEqual, loc } from "@/model/game.js";
+import { locationsEqual, getShiftLocations, loc } from "@/store/modules/board.js";
 import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import { Vector, bound } from "@/model/2d.js";
 import { ShiftLocation } from "@/model/shift.js";
@@ -30,10 +27,6 @@ export default {
         VGameBoard
     },
     props: {
-        game: {
-            type: Object,
-            required: true
-        },
         userAction: {
             required: false,
             default: NO_ACTION
@@ -58,24 +51,17 @@ export default {
     },
     computed: {
         mazeSize: function() {
-            return this.game.n;
-        },
-        mazeCards: function() {
-            return this.game.mazeCardsAsList();
+            return this.$store.state.board.mazeSize;
         },
         shiftLocations: function() {
-            let result = [];
-            let locations = this.game.getShiftLocations();
-            for (let location of locations) {
-                result.push(new ShiftLocation(location, this.game.n));
-            }
-            return result;
+            const n = this.mazeSize;
+            return getShiftLocations(n).map(location => new ShiftLocation(location, n));
         },
         dragInteractiveLocations: function() {
             let result = new Set();
             for (let shiftLocation of this.shiftLocations) {
                 shiftLocation
-                    .affectedLocations(this.game.n)
+                    .affectedLocations(this.mazeSize)
                     .forEach(location => result.add(location));
             }
             return result;
@@ -86,7 +72,7 @@ export default {
             } else if (this.userAction === SHIFT_ACTION) {
                 let result = new Set();
                 for (let location of this.dragInteractiveLocations) {
-                    result.add(this.game.getMazeCard(location));
+                    result.add(this.$store.getters["board/mazeCard"](location));
                 }
                 return result;
             } else {
@@ -96,8 +82,9 @@ export default {
         possibleDragDirections: function() {
             let result = [];
             if (this.dragLocation) {
+                const disabledShiftLocation = this.$store.state.board.disabledShiftLocation;
                 for (let shiftLocation of this.shiftLocations) {
-                    if (!locationsEqual(this.game.disabledShiftLocation, shiftLocation)) {
+                    if (!locationsEqual(disabledShiftLocation, shiftLocation)) {
                         if (shiftLocation.affects(this.dragLocation)) {
                             result.push(shiftLocation.direction);
                         }
@@ -112,7 +99,7 @@ export default {
             this.resetDrag();
             if (this.userAction === SHIFT_ACTION) {
                 let location = this.getLocation(svgPosition);
-                let mazeCard = this.getMazeCard(location);
+                let mazeCard = this.$store.getters["board/mazeCard"](location);
                 if (mazeCard) {
                     if (this.isDraggable(location)) {
                         this.dragLocation = location;
@@ -182,13 +169,13 @@ export default {
                 if (this.dragOffset > 0) {
                     shiftLocation = loc(this.dragRow, 0);
                 } else {
-                    shiftLocation = loc(this.dragRow, this.game.n - 1);
+                    shiftLocation = loc(this.dragRow, this.mazeSize - 1);
                 }
             } else if (this.dragColumn) {
                 if (this.dragOffset > 0) {
                     shiftLocation = loc(0, this.dragColumn);
                 } else {
-                    shiftLocation = loc(this.game.n - 1, this.dragColumn);
+                    shiftLocation = loc(this.mazeSize - 1, this.dragColumn);
                 }
             }
             if (shiftLocation) {
@@ -208,12 +195,6 @@ export default {
             let column = Math.floor(locationVector.x);
             let row = Math.floor(locationVector.y);
             return loc(row, column);
-        },
-        getMazeCard: function(location) {
-            let mazeCard = this.mazeCards.find(mazeCard =>
-                locationsEqual(mazeCard.location, location)
-            );
-            return mazeCard;
         },
         onMazeCardClicked: function(mazeCard) {
             this.$emit("player-move", mazeCard);

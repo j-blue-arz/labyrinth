@@ -1,4 +1,4 @@
-import { loc } from "@/model/game.js";
+import { loc } from "@/store/modules/board.js";
 
 function shiftLocationDirection(shiftLocation, limit) {
     if (shiftLocation.row === 0) {

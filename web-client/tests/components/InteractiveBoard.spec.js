@@ -1,50 +1,11 @@
-import { shallowMount, mount } from "@vue/test-utils";
+import Vuex from "vuex";
+import { createStore } from "../testfixtures.js";
+import { mount, createLocalVue } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
-import InsertPanels from "@/components/InsertPanels.vue";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import { copyObjectStructure } from "../testutils.js";
-import Game, { loc } from "@/model/game.js";
-import Controller from "@/controllers/controller.js";
-import PlayerManager from "@/model/playerManager.js";
-
-const mockPlayerManager = new PlayerManager();
-
-let mockPerformShift = jest.fn();
-let mockPerformMove = jest.fn();
-jest.mock("@/controllers/controller.js", () => {
-    return jest.fn().mockImplementation(() => {
-        return {
-            playerManager: mockPlayerManager,
-            performShift: mockPerformShift,
-            performMove: mockPerformMove
-        };
-    });
-});
-
-const createMockController = function(game) {
-    let controller = new Controller(false);
-    controller.game = game;
-    controller.playerManager.addUserPlayerId(5);
-    return controller;
-};
-
-const shallowFactory = function(game) {
-    let controller = createMockController(game);
-    return shallowMount(InteractiveBoard, {
-        propsData: {
-            controller: controller
-        }
-    });
-};
-
-const factory = function(game) {
-    let controller = createMockController(game);
-    return mount(InteractiveBoard, {
-        propsData: {
-            controller: controller
-        }
-    });
-};
+import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
+import { loc } from "@/store/modules/board.js";
 
 function fromStateWithShiftAction() {
     let stateCopy = copyObjectStructure(API_STATE);
@@ -62,83 +23,110 @@ function fromStateWithMoveAction() {
     return game;
 }
 
-beforeEach(() => {
-    // Clear all instances and calls to constructor and all methods:
-    Controller.mockClear();
-    mockPerformShift.mockClear();
-    mockPerformMove.mockClear();
-});
-
 describe("InteractiveBoard", () => {
-    it("sets interaction class on reachable maze cards", () => {
-        let game = fromStateWithMoveAction();
-        let board = factory(game);
-        let reachableCardLocations = [loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)];
-        let reachableCardIds = reachableCardLocations.map(
-            location => game.getMazeCard(location).id
-        );
+    beforeEach(() => {
+        givenInteractiveBoard();
+        givenUserPlayer();
+        store.dispatch = jest.fn();
+    });
 
-        let interactiveCardIds = fetchInteractiveCardIds(board);
-        expect(interactiveCardIds.length).toBe(reachableCardIds.length);
-        expect(interactiveCardIds).toEqual(expect.arrayContaining(reachableCardIds));
+    it("sets interaction class on reachable maze cards", () => {
+        whenMoveRequired();
+
+        thenCardsAreInteractive([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)]);
     });
 
     it("does not set interaction class if shift is required", () => {
-        let board = factory(fromStateWithShiftAction());
-        let interactiveCardIds = fetchInteractiveCardIds(board);
-        expect(interactiveCardIds.length).toBe(0);
+        whenShiftRequired();
+
+        thenCardsAreInteractive([]);
     });
 
     it("calls performMove() on controller when maze card is clicked", () => {
-        let game = fromStateWithMoveAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][2];
-        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
-        expect(mockPerformMove).toHaveBeenCalled();
+        givenMoveRequired();
+
+        whenMazeCardIsClickedAtLocation(loc(0, 2));
+
+        thenMoveIsDispatched(loc(0, 2));
     });
 
     it("does not call performMove() if shift is required", () => {
-        let game = fromStateWithShiftAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][2];
-        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
-        expect(mockPerformMove).not.toHaveBeenCalled();
+        givenShiftRequired();
+
+        whenMazeCardIsClickedAtLocation(loc(0, 2));
+
+        thenMoveIsNotDispatched();
     });
 
     it("does not call performMove() if clicked maze card is not reachable", () => {
-        let game = fromStateWithShiftAction();
-        let board = shallowFactory(game);
-        let clickedMazeCard = game.mazeCards[0][0];
-        board.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
-        expect(mockPerformMove).not.toHaveBeenCalled();
-    });
+        givenMoveRequired();
 
-    it("sets interaction on insert panels if shift is required", () => {
-        let board = shallowFactory(fromStateWithShiftAction());
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().interaction).toBeTruthy();
-    });
+        whenMazeCardIsClickedAtLocation(loc(0, 0));
 
-    it("does not set interaction on insert panels if move is required", () => {
-        let board = shallowFactory(fromStateWithMoveAction());
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().interaction).toBeFalsy();
-    });
-
-    it("forwards game to insert panels", () => {
-        let game = fromStateWithShiftAction();
-        game.disabledShiftLocation = {
-            row: 0,
-            column: 1
-        };
-        let board = shallowFactory(game);
-        let insertPanels = board.find(InsertPanels);
-        expect(insertPanels.props().game).toEqual(game);
+        thenMoveIsNotDispatched();
     });
 });
 
-function fetchInteractiveCardIds(board) {
-    let mazeCards = board.findAll(".maze-card");
+let interactiveBoard;
+let store;
+
+const userPlayerId = 5;
+
+function givenUserPlayer() {
+    store.commit("players/addPlayer", { id: userPlayerId, isUser: true });
+    store.dispatch("game/update", API_STATE);
+}
+
+function givenInteractiveBoard() {
+    const localVue = createLocalVue();
+    localVue.use(Vuex);
+    store = createStore();
+    interactiveBoard = mount(InteractiveBoard, {
+        store,
+        localVue
+    });
+}
+
+function givenShiftRequired() {
+    whenShiftRequired();
+}
+
+const whenShiftRequired = function() {
+    store.commit("game/update", {
+        objectiveMazeCardId: 0,
+        nextAction: { playerId: userPlayerId, action: SHIFT_ACTION }
+    });
+};
+
+function givenMoveRequired() {
+    whenMoveRequired();
+}
+
+const whenMoveRequired = function() {
+    store.commit("game/update", {
+        objectiveMazeCardId: 0,
+        nextAction: { playerId: userPlayerId, action: MOVE_ACTION }
+    });
+};
+
+function whenMazeCardIsClickedAtLocation(location) {
+    const clickedMazeCard = store.getters["board/mazeCard"](location);
+    interactiveBoard.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
+}
+
+function thenMoveIsDispatched(toLocation) {
+    expect(store.dispatch).toHaveBeenCalledWith("game/move", {
+        playerId: userPlayerId,
+        targetLocation: toLocation
+    });
+}
+
+function thenMoveIsNotDispatched() {
+    expect(store.dispatch).not.toHaveBeenCalled();
+}
+
+function fetchInteractiveCardIds() {
+    let mazeCards = interactiveBoard.findAll(".maze-card");
     let interactiveCardIds = [];
     for (var i = 0; i < mazeCards.length; i++) {
         let card = mazeCards.at(i);
@@ -147,6 +135,16 @@ function fetchInteractiveCardIds(board) {
         }
     }
     return interactiveCardIds;
+}
+
+function thenCardsAreInteractive(reachableCardLocations) {
+    let reachableCardIds = reachableCardLocations.map(
+        location => store.getters["board/mazeCard"](location).id
+    );
+
+    let interactiveCardIds = fetchInteractiveCardIds();
+    expect(interactiveCardIds.length).toBe(reachableCardIds.length);
+    expect(interactiveCardIds).toEqual(expect.arrayContaining(reachableCardIds));
 }
 
 /* GENERATED_WITH_LINE_LEFTOVER =
@@ -179,7 +177,7 @@ function fetchInteractiveCardIds(board) {
 ###|#.#|###|###|###|#.#|###|
 ---------------------------* */
 
-var API_STATE = {
+const API_STATE = {
     maze: {
         mazeSize: 7,
         mazeCards: [

@@ -1,74 +1,115 @@
 import { mount } from "@vue/test-utils";
 import VMazeCard from "@/components/VMazeCard.vue";
-import MazeCard from "@/model/mazeCard.js";
 import Player from "@/model/player.js";
 
-const wrapperFactory = (
-    props = {
-        mazeCard: new MazeCard(0, 0, 0, "NSEW", 0)
-    }
-) => {
-    return mount(VMazeCard, {
-        propsData: { ...props }
-    });
-};
+beforeEach(() => {
+    mockStore = createMockStore();
+    mazeCard = { ...initialMazeCard };
+    vMazeCard = undefined;
+    givenNoObjective();
+});
 
 describe("VMazeCard", () => {
     it("contains an svg-element", () => {
-        const wrapper = wrapperFactory();
-        expect(wrapper.contains("svg")).toBe(true);
+        givenVMazeCard();
+
+        expect(vMazeCard.contains("svg")).toBe(true);
     });
 
     it("has width of 100 if cardSize is 100", () => {
-        const wrapper = wrapperFactory();
-        expect(wrapper.element.getAttribute("width")).toBe("100");
+        givenVMazeCard();
+
+        expect(vMazeCard.element.getAttribute("width")).toBe("100");
     });
 
     it("includes north outPath if MazeCard has a north outPath", () => {
-        const wrapper = wrapperFactory({
-            mazeCard: new MazeCard(0, 0, 0, "NW", 0)
-        });
-        expect(wrapper.find({ ref: "north" }).exists()).toBeTruthy();
+        givenCardWithOutPaths("NW");
+        givenVMazeCard();
+
+        expect(vMazeCard.find({ ref: "north" }).exists()).toBeTruthy();
     });
 
     it("does not include north outPath if MazeCard object does not have a north outPath", () => {
-        const wrapper = wrapperFactory({
-            mazeCard: new MazeCard(0, 0, 0, "EW", 0)
-        });
-        expect(wrapper.find({ ref: "north" }).exists()).toBeFalsy();
+        givenCardWithOutPaths("EW");
+        givenVMazeCard();
+
+        expect(vMazeCard.find({ ref: "north" }).exists()).toBeFalsy();
     });
 
     it("does not render players if the MazeCard object does not contain pieces", () => {
-        const wrapper = wrapperFactory({
-            mazeCard: new MazeCard(0, 0, 0, "EW", 0)
-        });
-        expect(wrapper.findAll("player-piece").length).toBe(0);
+        givenVMazeCard();
+
+        expect(vMazeCard.findAll("player-piece").length).toBe(0);
     });
 
     it("renders a single player", () => {
-        var mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.addPlayer(Player.withId(0));
-        const wrapper = wrapperFactory({
-            mazeCard: mazeCard
-        });
-        expect(wrapper.findAll(".player-piece").length).toBe(1);
+        givenPlayers([{ id: 0 }]);
+        givenVMazeCard();
+
+        expect(vMazeCard.findAll(".player-piece").length).toBe(1);
     });
 
     it("renders an objective if MazeCard has one", () => {
-        let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.hasObject = true;
-        const wrapper = wrapperFactory({
-            mazeCard: mazeCard
-        });
-        expect(wrapper.findAll(".objective").length).toBe(1);
+        givenObjective();
+        givenVMazeCard();
+
+        expect(vMazeCard.findAll(".objective").length).toBe(1);
     });
 
     it("does not render an objective if MazeCard has none", () => {
-        let mazeCard = new MazeCard(0, 0, 0, "EW", 0);
-        mazeCard.hasObject = false;
-        const wrapper = wrapperFactory({
-            mazeCard: mazeCard
-        });
-        expect(wrapper.findAll(".objective").length).toBe(0);
+        givenNoObjective();
+        givenVMazeCard();
+
+        expect(vMazeCard.findAll(".objective").length).toBe(0);
     });
 });
+
+const mazeCardId = 1;
+const initialMazeCard = { id: mazeCardId, outPaths: "NESW" };
+let mazeCard = { ...initialMazeCard };
+let vMazeCard;
+let mockStore = createMockStore();
+
+function createMockStore() {
+    return {
+        state: {
+            game: {
+                objectiveId: -1
+            }
+        },
+        getters: {
+            "players/findByMazeCard": id => []
+        }
+    };
+}
+
+function givenCardWithOutPaths(outPaths) {
+    mazeCard = { ...mazeCard, outPaths: outPaths };
+}
+
+function givenVMazeCard() {
+    vMazeCard = mount(VMazeCard, {
+        propsData: { mazeCard: mazeCard },
+        mocks: {
+            $store: mockStore
+        }
+    });
+}
+
+function givenNoObjective() {
+    mockStore.state.game.objectiveId = -1;
+}
+
+function givenObjective() {
+    mockStore.state.game.objectiveId = mazeCardId;
+}
+
+function givenPlayers(players) {
+    mockStore.getters["players/findByMazeCard"] = id => {
+        if (id === mazeCardId) {
+            return players;
+        } else {
+            return [];
+        }
+    };
+}

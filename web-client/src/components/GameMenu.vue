@@ -5,7 +5,7 @@
 <script>
 import VMenu from "@/components/VMenu.vue";
 import MenuItem from "@/model/menuItem.js";
-import Player from "@/model/player.js";
+import { getLabel, computationMethodLabel } from "@/model/player.js";
 import API from "@/services/game-api.js";
 
 const REMOVE_PREFIX = "remove-";
@@ -14,12 +14,6 @@ const RESTART_PREFIX = "restart-";
 
 export default {
     name: "game-menu",
-    props: {
-        controller: {
-            type: Object,
-            required: true
-        }
-    },
     data() {
         return {
             computationMethods: []
@@ -31,42 +25,17 @@ export default {
     computed: {
         menuItems: function() {
             let menu = [];
-            if (this.playerManager.hasUserPlayer()) {
+            if (this.$store.getters["players/hasUserPlayer"]) {
                 menu.push(new MenuItem("leave", "Leave game"));
             } else {
                 menu.push(new MenuItem("enter", "Enter game"));
             }
-            if (this.players.length < 4) {
-                let submenu = [];
-                if (this.computationMethods) {
-                    this.computationMethods.forEach(method => {
-                        let key = ADD_PREFIX + method;
-                        let text = Player.computationMethodLabel(method);
-                        submenu.push(new MenuItem(key, text));
-                    });
-                }
-                if (this.playerManager.canAddWasmPlayerId()) {
-                    submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search\u00A0(1P)"));
-                }
+            if (this.gameIsNotFull) {
+                let submenu = this.createAddBotSubmenu();
                 menu.push(new MenuItem("add", "Add bot..", submenu));
             }
-            if (this.bots.length > 0 || this.playerManager.hasWasmPlayer()) {
-                let submenu = [];
-                for (let player of this.bots) {
-                    let key = REMOVE_PREFIX + player.id;
-                    let label = player.getLabel();
-                    let text = "" + player.colorIndex + " - " + label;
-                    submenu.push(new MenuItem(key, text));
-                }
-                if (this.playerManager.hasWasmPlayer()) {
-                    let playerId = this.playerManager.getWasmPlayerId();
-                    let player = this.controller.game.getPlayer(playerId);
-                    if (player) {
-                        let label = player.getLabel();
-                        let text = "" + player.colorIndex + " - " + label;
-                        submenu.push(new MenuItem("remove-wasm", text));
-                    }
-                }
+            if (this.bots.length > 0 || this.$store.getters["players/hasWasmPlayer"]) {
+                let submenu = this.removeBotSubmenu();
                 menu.push(new MenuItem("remove", "Remove bot..", submenu));
             }
             menu.push(
@@ -79,25 +48,22 @@ export default {
             return menu;
         },
         bots: function() {
-            return this.controller.game.getBots();
+            return this.$store.getters["players/bots"];
         },
-        players: function() {
-            return this.controller.game.getPlayers();
-        },
-        playerManager: function() {
-            return this.controller.playerManager;
+        gameIsNotFull: function() {
+            return this.$store.state.players.allIds.length < 4;
         }
     },
     methods: {
         onItemClick: function($event) {
             if ($event === "leave") {
-                this.controller.leaveGame();
+                this.$store.dispatch("players/leaveGame");
             } else if ($event === "enter") {
-                this.controller.enterGame();
+                this.$store.dispatch("players/enterGame");
             } else if ($event === "add-wasm") {
-                this.controller.addWasmPlayer();
+                this.$store.dispatch("players/addWasmPlayer");
             } else if ($event === "remove-wasm") {
-                this.controller.removeWasmPlayer();
+                this.$store.dispatch("players/removeWasmPlayer");
             } else if ($event.startsWith(ADD_PREFIX)) {
                 let computeMethod = $event.substr(ADD_PREFIX.length);
                 API.doAddBot(computeMethod);
@@ -109,6 +75,39 @@ export default {
                 API.changeGame(size);
             }
             this.$emit("item-click");
+        },
+        createAddBotSubmenu: function() {
+            let submenu = [];
+            if (this.computationMethods) {
+                this.computationMethods.forEach(method => {
+                    let key = ADD_PREFIX + method;
+                    let text = computationMethodLabel(method);
+                    submenu.push(new MenuItem(key, text));
+                });
+            }
+            if (!this.$store.getters["players/hasWasmPlayer"]) {
+                submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search\u00A0(1P)"));
+            }
+            return submenu;
+        },
+        removeBotSubmenu: function() {
+            let submenu = [];
+            for (let player of this.bots) {
+                let key = REMOVE_PREFIX + player.id;
+                let label = getLabel(player);
+                let text = "" + player.pieceIndex + " - " + label;
+                submenu.push(new MenuItem(key, text));
+            }
+            if (this.$store.getters["players/hasWasmPlayer"]) {
+                let playerId = this.$store.getters["players/wasmPlayerId"];
+                let player = this.$store.getters["players/find"](playerId);
+                if (player) {
+                    let label = getLabel(player);
+                    let text = "" + player.pieceIndex + " - " + label;
+                    submenu.push(new MenuItem("remove-wasm", text));
+                }
+            }
+            return submenu;
         }
     },
     created: function() {
