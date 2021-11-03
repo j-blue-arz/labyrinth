@@ -73,7 +73,6 @@ const actions = {
 
 export const mutations = {
     emptyBoard(state) {
-        Vue.set(state, "cardsById", {});
         state.boardLayout.splice(0, state.boardLayout.length);
     },
     fillBoard(state, apiState) {
@@ -82,10 +81,12 @@ export const mutations = {
         if (!apiMazeCards) {
             return;
         }
+
         if (state.leftoverId !== apiMazeCards[0].id) {
             state.leftoverId = apiMazeCards[0].id;
             Vue.set(state.cardsById, state.leftoverId, createCardFromApi(apiMazeCards[0]));
         }
+
         const n = apiState.maze.mazeSize;
         let index = 1;
         for (let row = 0; row < n; row++) {
