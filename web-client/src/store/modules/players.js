@@ -45,6 +45,9 @@ const getters = {
     wasmPlayerId: state => {
         return state.allIds.find(id => state.byId[id].isWasm);
     },
+    wasmPlayer: (_, getters) => {
+        return getters.find(getters.wasmPlayerId);
+    },
     bots: (_, getters) => {
         return getters.all.filter(player => player.isBot);
     }

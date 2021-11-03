@@ -7,6 +7,8 @@ export function getLabel(player) {
         return computationMethodLabel(player.computationMethod);
     } else if (player.name) {
         return player.name;
+    } else if (player.isWasm) {
+        return "WASM: Exhaustive Search";
     }
     return "";
 }

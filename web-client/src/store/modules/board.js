@@ -245,14 +245,16 @@ function rowLocations(row, n) {
 
 function getOppositeLocation(borderLocation, n) {
     let oppositeLocation = null;
-    if (borderLocation.row === 0) {
-        oppositeLocation = { row: n - 1, column: borderLocation.column };
-    } else if (borderLocation.row === n - 1) {
-        oppositeLocation = { row: 0, column: borderLocation.column };
-    } else if (borderLocation.column === n - 1) {
-        oppositeLocation = { row: borderLocation.row, column: 0 };
-    } else if (borderLocation.column === 0) {
-        oppositeLocation = { row: borderLocation.row, column: n - 1 };
+    if (borderLocation) {
+        if (borderLocation.row === 0) {
+            oppositeLocation = { row: n - 1, column: borderLocation.column };
+        } else if (borderLocation.row === n - 1) {
+            oppositeLocation = { row: 0, column: borderLocation.column };
+        } else if (borderLocation.column === n - 1) {
+            oppositeLocation = { row: borderLocation.row, column: 0 };
+        } else if (borderLocation.column === 0) {
+            oppositeLocation = { row: borderLocation.row, column: n - 1 };
+        }
     }
     return oppositeLocation;
 }

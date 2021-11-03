@@ -11,6 +11,7 @@
 import VMenuBar from "@/components/VMenuBar.vue";
 import VGame from "@/components/VGame.vue";
 import API from "@/services/game-api.js";
+import WasmPlayer from "@/model/wasmPlayer.js";
 
 export default {
     name: "app",
@@ -18,10 +19,16 @@ export default {
         VMenuBar,
         VGame
     },
+    data() {
+        return {
+            wasmPlayer: null
+        };
+    },
     created: function() {
         API.errorHandlers.push(error => this.handleError(error));
         API.stateObservers.push(apiState => this.$store.dispatch("game/update", apiState));
         API.activatePolling();
+        this.wasmPlayer = new WasmPlayer(this.$store);
         window.addEventListener("beforeunload", () => this.leave());
         this.$store.dispatch("players/enterGame");
     },

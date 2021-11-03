@@ -36,38 +36,25 @@ export default class WasmGateway {
         }
     }
 
-    computeActions(game, playerId) {
-        let computedActions = null;
-        let player = game.getPlayer(playerId);
-        let objectiveId = -1;
+    computeActions(instance) {
         let vectorNodes = new this.libexhsearch.vectorOfNode();
-        let mazeCardList = game.mazeCardsAsList().concat([game.leftoverMazeCard]);
-        for (let mazeCard of mazeCardList) {
+        for (const mazeCard of instance.mazeCardList) {
             vectorNodes.push_back(this._createNode(mazeCard));
-            if (mazeCard.hasObject) {
-                objectiveId = mazeCard.id;
-            }
         }
 
         let mazeGraph = new this.libexhsearch.MazeGraph(vectorNodes);
-        let shiftLocations = game.getShiftLocations();
-        for (let location of shiftLocations) {
+        for (const location of instance.shiftLocations) {
             mazeGraph.addShiftLocation(location);
         }
 
-        let previousShiftLocation = this._loc(-1, -1);
-        if (game.disabledShiftLocation) {
-            previousShiftLocation = game.getOppositeLocation(game.disabledShiftLocation);
-        }
-
-        let action = this.libexhsearch.findBestAction(
+        const action = this.libexhsearch.findBestAction(
             mazeGraph,
-            player.mazeCard.location,
-            objectiveId,
-            previousShiftLocation
+            instance.playerLocation,
+            instance.objectiveId,
+            instance.previousShiftLocation ?? this._loc(-1, -1)
         );
 
-        computedActions = {
+        const computedActions = {
             shiftAction: {
                 location: this._loc(action.shift.location.row, action.shift.location.column),
                 leftoverRotation: action.shift.rotation
@@ -87,16 +74,16 @@ export default class WasmGateway {
     _createNode(mazeCard) {
         let id = mazeCard.id;
         let outPathBitmask = 0;
-        if (mazeCard.hasNorthOutPath()) {
+        if (this._hasOutPath(mazeCard, "N")) {
             outPathBitmask += 1;
         }
-        if (mazeCard.hasEastOutPath()) {
+        if (this._hasOutPath(mazeCard, "E")) {
             outPathBitmask += 2;
         }
-        if (mazeCard.hasSouthOutPath()) {
+        if (this._hasOutPath(mazeCard, "S")) {
             outPathBitmask += 4;
         }
-        if (mazeCard.hasWestOutPath()) {
+        if (this._hasOutPath(mazeCard, "W")) {
             outPathBitmask += 8;
         }
         let rotation = mazeCard.rotation;
@@ -124,5 +111,9 @@ export default class WasmGateway {
             document.body.appendChild(script);
             this.scriptElement = script;
         });
+    }
+
+    _hasOutPath(mazeCard, outPath) {
+        return mazeCard.outPaths.indexOf(outPath) != -1;
     }
 }
