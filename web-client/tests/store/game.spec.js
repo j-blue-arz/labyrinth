@@ -287,7 +287,6 @@ const thenPlayersAreEmpty = function() {
 
 const thenBoardIsEmpty = function() {
     expect(store.state.board.boardLayout).toEqual([]);
-    expect(store.state.board.cardsById).toEqual({});
     expect(store.state.board.mazeSize).toEqual(0);
 };
 

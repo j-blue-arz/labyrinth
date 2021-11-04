@@ -7,7 +7,8 @@ const factory = function() {
     return shallowMount(App, {
         mocks: {
             $store: {
-                dispatch: dispatch
+                dispatch: dispatch,
+                watch: jest.fn()
             }
         }
     });
