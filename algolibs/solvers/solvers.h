@@ -20,7 +20,7 @@ struct SolverInstance {
 
 struct ShiftAction {
     Location location{0, 0};
-    RotationDegreeType rotation{0};
+    RotationDegreeType rotation{RotationDegreeType::_0};
 };
 
 struct PlayerAction {

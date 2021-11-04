@@ -9,6 +9,8 @@
 
 namespace labyrinth {
 
+namespace wasm {
+
 Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, short rotation) {
     Node* node = new Node();
     node->node_id = node_id;
@@ -17,9 +19,19 @@ Node* createNode(NodeId node_id, OutPathsIntegerType out_paths_bitmask, short ro
     return node;
 }
 
-solvers::PlayerAction errorAction() {
+struct ShiftAction {
+    Location location{0, 0};
+    short rotation{0};
+};
+
+struct PlayerAction {
+    ShiftAction shift;
+    Location move_location;
+};
+
+PlayerAction errorAction() {
     Location errorLocation{-1, -1};
-    return solvers::PlayerAction{solvers::ShiftAction{errorLocation, RotationDegreeType::_0}, errorLocation};
+    return PlayerAction{ShiftAction{errorLocation, 0}, errorLocation};
 }
 
 struct LocationValueObject {
@@ -27,7 +39,7 @@ struct LocationValueObject {
     Location::IndexType column;
 };
 
-solvers::PlayerAction findBestAction(const MazeGraph& graph,
+PlayerAction findBestAction(const MazeGraph& graph,
                                      LocationValueObject player_location,
                                      NodeId objective_id,
                                      LocationValueObject previous_shift_location) {
@@ -41,7 +53,9 @@ solvers::PlayerAction findBestAction(const MazeGraph& graph,
     if (best_actions.empty()) {
         return errorAction();
     } else {
-        return best_actions[0];
+        auto best_action = best_actions[0];
+        auto rotation = static_cast<RotationDegreeIntegerType>(best_action.shift.rotation) * 90;
+        return PlayerAction{ShiftAction{best_action.shift.location, static_cast<short>(rotation)}, best_action.move_location};
     }
 }
 
@@ -56,13 +70,13 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
         .property("row", &Location::getRow)
         .property("column", &Location::getColumn);
 
-    emscripten::value_object<solvers::ShiftAction>("ShiftAction")
-        .field("location", &solvers::ShiftAction::location)
-        .field("rotation", &solvers::ShiftAction::rotation);
+    emscripten::value_object<ShiftAction>("ShiftAction")
+        .field("location", &ShiftAction::location)
+        .field("rotation", &ShiftAction::rotation);
 
-    emscripten::value_object<solvers::PlayerAction>("PlayerAction")
-        .field("shift", &solvers::PlayerAction::shift)
-        .field("move_location", &solvers::PlayerAction::move_location);
+    emscripten::value_object<PlayerAction>("PlayerAction")
+        .field("shift", &PlayerAction::shift)
+        .field("move_location", &PlayerAction::move_location);
 
     emscripten::value_object<LocationValueObject>("LocationValueObject")
         .field("row", &LocationValueObject::row)
@@ -79,5 +93,7 @@ EMSCRIPTEN_BINDINGS(libexhsearch) {
 
     emscripten::function("findBestAction", &findBestAction);
 }
+
+} // namespace wasm
 
 } // namespace labyrinth

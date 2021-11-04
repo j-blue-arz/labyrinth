@@ -20,7 +20,7 @@ enum class OutPaths : OutPathsIntegerType { North = 1, East = 2, South = 4, West
 struct Node {
     NodeId node_id{0};
     OutPaths out_paths{static_cast<OutPaths>(0)};
-    RotationDegreeType rotation{0};
+    RotationDegreeType rotation{RotationDegreeType::_0};
 };
 
 bool hasOutPath(const Node& node, OutPaths out_path);
