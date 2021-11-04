@@ -112,9 +112,6 @@ export default {
             return null;
         },
         xPos(mazeCard) {
-            if (mazeCard.location === null) {
-                console.log(mazeCard.id + " location is null");
-            }
             let xPos = this.$ui.cardSize * mazeCard.location.column;
             if (this.drag.row === mazeCard.location.row) {
                 xPos += this.drag.offset;

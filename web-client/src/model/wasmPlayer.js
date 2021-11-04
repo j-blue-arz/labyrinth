@@ -13,7 +13,6 @@ export default class WasmPlayer {
                 return this.store.getters["players/wasmPlayer"]?.nextAction ?? NO_ACTION;
             },
             newAction => {
-                console.log(newAction);
                 if (newAction === SHIFT_ACTION) {
                     this.onHasToShift();
                 } else if (newAction === MOVE_ACTION) {
