@@ -313,9 +313,7 @@ describe("players Vuex module", () => {
                 expect(API.changePlayerName).toHaveBeenCalledWith(7, "gina");
             });
         });
-    });
 
-    describe("mutations", () => {
         describe("update", () => {
             beforeEach(() => {
                 apiPlayers = [];
@@ -349,7 +347,7 @@ describe("players Vuex module", () => {
 
                 whenSetPlayersFromApi();
 
-                const botPlayer = playerWithId(42);
+                const botPlayer = findPlayer(42);
                 expect(botPlayer.id).toBe(42);
                 expect(botPlayer.mazeCard).toBe(16);
                 expect(botPlayer.pieceIndex).toBe(0);
@@ -363,7 +361,7 @@ describe("players Vuex module", () => {
 
                 whenSetPlayersFromApi();
 
-                const player = playerWithId(17);
+                const player = findPlayer(17);
                 expect(player.id).toBe(17);
                 expect(player.mazeCard).toBe(15);
                 expect(player.pieceIndex).toBe(1);
@@ -382,7 +380,7 @@ describe("players Vuex module", () => {
 
                 whenSetPlayersFromApi();
 
-                expect(playerWithId(2).isUser).toBe(true);
+                expect(findPlayer(2).isUser).toBe(true);
             });
 
             it("keeps value of isUser for existing non-user player", () => {
@@ -395,7 +393,7 @@ describe("players Vuex module", () => {
 
                 whenSetPlayersFromApi();
 
-                expect(playerWithId(2).isUser).toBeFalsy();
+                expect(findPlayer(2).isUser).toBeFalsy();
             });
 
             it("sets isUser to false for new players", () => {
@@ -403,7 +401,7 @@ describe("players Vuex module", () => {
 
                 whenSetPlayersFromApi();
 
-                expect(playerWithId(17).isUser).toBeFalsy();
+                expect(findPlayer(17).isUser).toBeFalsy();
             });
 
             it("removes player if not present in api", () => {
@@ -417,32 +415,30 @@ describe("players Vuex module", () => {
     });
 });
 
-const { state, mutations } = playersConfig;
-const { update } = mutations;
+const { state } = playersConfig;
 
 API.doAddPlayer = jest.fn();
 API.removePlayer = jest.fn();
 API.changePlayerName = jest.fn();
 
 let store;
-let players;
 let apiPlayers = [];
 
 const givenNoPlayersInState = function() {
-    players = state();
+    let players = state();
     store.replaceState({
         game: store.state.game,
-        players: cloneDeep(players),
+        players: players,
         board: store.state.board
     });
 };
 
 const givenPlayerInState = function(player) {
     const playerId = player.id;
-    players = { byId: { [playerId]: player }, allIds: [playerId] };
+    let players = { byId: { [playerId]: player }, allIds: [playerId] };
     store.replaceState({
         game: store.state.game,
-        players: cloneDeep(players),
+        players: players,
         board: store.state.board
     });
 };
@@ -452,15 +448,16 @@ const givenPlayersInState = function(players) {
         result[player.id] = player;
         return result;
     }, {});
-    players = { byId: byId, allIds: players.map(player => player.id) };
+    let storePlayers = { byId: byId, allIds: players.map(player => player.id) };
     store.replaceState({
         game: store.state.game,
-        players: cloneDeep(players),
+        players: storePlayers,
         board: store.state.board
     });
 };
 
 const givenNextAction = function(nextAction) {
+    const players = store.state.players;
     store.commit("game/update", {
         players: players.allIds.map(id => players.byId[id]),
         objectiveMazeCardId: 0,
@@ -477,7 +474,7 @@ const givenApiAddPlayerReturns = function(apiPlayer) {
 };
 
 const whenSetPlayersFromApi = function() {
-    update(players, apiPlayers);
+    store.dispatch("players/update", apiPlayers);
 };
 
 const whenEnterGame = function() {
@@ -509,17 +506,15 @@ const whenChangeUserPlayerName = function(newName) {
 };
 
 const thenPlayerExists = function(id) {
+    const players = store.state.players;
     expect(players.byId).toHaveProperty("" + id);
     expect(players.allIds).toContain(id);
 };
 
 const thenPlayerDoesNotExist = function(id) {
+    const players = store.state.players;
     expect(players.byId).not.toHaveProperty("" + id);
     expect(players.allIds).not.toContain(id);
-};
-
-const playerWithId = function(id) {
-    return players.byId[id];
 };
 
 const findPlayer = function(id) {

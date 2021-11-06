@@ -54,8 +54,17 @@ const getters = {
 };
 
 const actions = {
-    update({ commit }, apiPlayers) {
-        commit("update", apiPlayers);
+    update({ commit, state }, apiPlayers) {
+        const apiIds = apiPlayers.map(apiPlayer => apiPlayer.id);
+        const removedPlayerIds = state.allIds.filter(id => !apiIds.includes(id));
+        removedPlayerIds.forEach(playerId => commit("removePlayer", playerId));
+        apiPlayers.forEach(apiPlayer => {
+            if (state.allIds.includes(apiPlayer.id)) {
+                commit("updatePlayer", apiPlayer);
+            } else {
+                commit("addPlayer", apiPlayer);
+            }
+        });
     },
     changePlayersCard({ commit }, cardChange) {
         commit("setPlayerCard", cardChange);
@@ -111,22 +120,6 @@ const actions = {
 };
 
 export const mutations = {
-    update(state, apiPlayers) {
-        const apiIds = apiPlayers.map(apiPlayer => apiPlayer.id);
-        const removedPlayerIds = state.allIds.filter(id => !apiIds.includes(id));
-        removedPlayerIds.forEach(id => Vue.delete(state.byId, id));
-        apiPlayers.forEach(apiPlayer => {
-            let player;
-            if (state.allIds.includes(apiPlayer.id)) {
-                player = state.byId[apiPlayer.id];
-            } else {
-                player = newPlayer(apiPlayer.id);
-            }
-            player = fillFromApi(player, apiPlayer);
-            Vue.set(state.byId, player.id, player);
-        });
-        state.allIds = apiIds;
-    },
     setPlayerCard(state, cardChange) {
         state.byId[cardChange.playerId].mazeCard = cardChange.mazeCardId;
     },
@@ -140,6 +133,11 @@ export const mutations = {
         Vue.delete(state.byId, id);
         const index = state.allIds.indexOf(id);
         state.allIds.splice(index, 1);
+    },
+    updatePlayer(state, apiPlayer) {
+        let player = state.byId[apiPlayer.id];
+        player = fillFromApi(player, apiPlayer);
+        Vue.set(state.byId, player.id, player);
     },
     changeName(state, nameChange) {
         state.byId[nameChange.id].name = nameChange.name;
