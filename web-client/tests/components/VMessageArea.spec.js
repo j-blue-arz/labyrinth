@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import VMessageArea from "@/components/VMessageArea.vue";
 import Vue from "vue";
-import Player, { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
 
 beforeEach(() => {
     mockStore = createMockStore();

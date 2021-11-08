@@ -1,6 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
-import Player from "@/model/player.js";
 
 const wrapperFactory = function(player) {
     return shallowMount(VPlayerPiece, {

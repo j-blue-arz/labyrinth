@@ -312,4 +312,3 @@ function loc(row, column) {
 
 API.doMove = jest.fn();
 API.doShift = jest.fn();
-
