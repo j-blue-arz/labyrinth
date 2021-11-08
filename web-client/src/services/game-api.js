@@ -21,7 +21,7 @@ export default {
         this._suspendPolling();
     },
 
-    _resumePolling() {
+    resumePolling() {
         if (this._isPolling) {
             this._suspendPolling();
             if (pollingTimer === 0) {
@@ -39,13 +39,7 @@ export default {
     },
 
     _poll() {
-        this._fetchState()
-            .then(response =>
-                this.stateObservers.forEach(fn => {
-                    fn(response.data);
-                })
-            )
-            .catch(error => this._handleError(error));
+        this.fetchState();
         pollingTimer = setTimeout(() => this._poll(), POLL_INTERVAL_MS);
     },
 
@@ -65,7 +59,7 @@ export default {
                 location: toLocation
             })
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     doShift(playerId, shiftLocation, leftoverRotation, callback) {
@@ -78,7 +72,7 @@ export default {
             })
             .then(apiResponse => callback(apiResponse.data))
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     doAddPlayer(callback) {
@@ -88,7 +82,7 @@ export default {
             .post(addPlayerPath)
             .then(apiResponse => callback(apiResponse.data))
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     doAddBot(computeMethod) {
@@ -100,7 +94,7 @@ export default {
                 computationMethod: computeMethod
             })
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     removePlayer(playerId) {
@@ -109,7 +103,7 @@ export default {
         axios
             .delete(deletePlayerPath)
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     changePlayerName(playerId, name) {
@@ -120,7 +114,7 @@ export default {
                 name: name
             })
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
     changeGame(size) {
@@ -131,14 +125,21 @@ export default {
                 mazeSize: size
             })
             .catch(error => this._handleError(error))
-            .then(() => this._resumePolling());
+            .then(() => this.resumePolling());
     },
 
-    _fetchState() {
+    fetchState() {
         var getStatePath = API_PATH + "/games/0/state";
-        return axios.get(getStatePath, {
-            cancelToken: this._fetchSource.token
-        });
+        axios
+            .get(getStatePath, {
+                cancelToken: this._fetchSource.token
+            })
+            .then(response =>
+                this.stateObservers.forEach(fn => {
+                    fn(response.data);
+                })
+            )
+            .catch(error => this._handleError(error));
     },
 
     fetchComputationMethods(callback) {

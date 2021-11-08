@@ -12,6 +12,7 @@ import VMenuBar from "@/components/VMenuBar.vue";
 import VGame from "@/components/VGame.vue";
 import API from "@/services/game-api.js";
 import WasmPlayer from "@/model/wasmPlayer.js";
+import Storage, { USER_PLAYER, WASM_PLAYER } from "@/services/storage.js";
 
 export default {
     name: "app",
@@ -30,6 +31,22 @@ export default {
         API.activatePolling();
         this.wasmPlayer = new WasmPlayer(this.$store);
         window.addEventListener("beforeunload", () => this.leave());
+
+        if (process.env.NODE_ENV === "production") {
+            Storage.useStorage();
+        }
+        if (Storage.hasAny()) {
+            if (Storage.has(USER_PLAYER)) {
+                const playerId = Storage.get(USER_PLAYER);
+                this.$store.commit("players/addPlayer", { id: playerId, isUser: true });
+            }
+            if (Storage.has(WASM_PLAYER)) {
+                const playerId = Storage.get(WASM_PLAYER);
+                this.$store.commit("players/addPlayer", { id: playerId, isWasm: true });
+            }
+            API.resumePolling();
+        }
+
         this.$store.dispatch("players/enterGame");
     },
     methods: {
