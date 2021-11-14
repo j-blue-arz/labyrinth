@@ -494,7 +494,7 @@ class PlayerAction:
     def __init__(self, player, action, turn_callback=None):
         """
         :param player: a Player instance
-        :param action: PlayerAction.MOVE_ACTION or PlayerAction.SHIFT_ACTION
+        :param action: one of PlayerAction.MOVE_ACTION, SHIFT_ACTION, PREPARE_SHIFT, or PREPARE_MOVE
         :param turn_callback: a method which is called if it is the player's turn.
                 the method will be called with the required action.
         """
@@ -519,6 +519,10 @@ class PlayerAction:
 
     def is_prepare(self):
         return self.action in [self.PREPARE_SHIFT, self.PREPARE_MOVE]
+
+    def copy_with_prepare(self):
+        action = self.action if self.is_prepare() else f"PREPARE_{self.action}"
+        return PlayerAction(self._player, action)
 
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
@@ -643,10 +647,14 @@ class Turns:
         else:
             self._notify_turn_changed_listeners()
 
-    def _delay_next_state(self, current_player_action):
+    def restart_player_action(self):
+        player_prepare_action = self.next_player_action().copy_with_prepare()
+        self.set_next(player_action=player_prepare_action)
+
+    def _delay_next_state(self, next_player_action):
         time.sleep(self._prepare_delay.total_seconds())
         # check that state was not changed, e.g. due to removed player
-        if current_player_action == self.next_player_action():
+        if next_player_action == self.next_player_action():
             self.set_next()
 
     def next_player_action(self):
@@ -733,6 +741,8 @@ class Game:
         self._players.sort(key=lambda player: player.piece.piece_index)
         if len(self.players) == 1:
             self._turns.start()
+        if len(self.players) == 2:
+            self._turns.restart_player_action()
 
     def get_player(self, player_id):
         """ Finds a player by ID
@@ -758,7 +768,7 @@ class Game:
         self.turns.remove_player(player)
         self.players.remove(player)
 
-    def restart(self, new_board):
+    def restart(self, new_board=None):
         """ Replaces the current board with a new one and resets the game.
         For all players, new pieces are created on the board """
         new_board.pieces.clear()

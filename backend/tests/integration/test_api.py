@@ -463,17 +463,46 @@ def test_get_computation_methods_contains_library(library_path, client):
     assert expected_name in computation_methods
 
 
-def test_remove_overdue_players__with_one_overdue_player__should_remove_player(client, cli_runner):
+def test_remove_overdue_players__with_two_overdue_player__should_remove_player(client, cli_runner):
     """ Tests the cli to remove overdue players.
 
     Sets the overdue time to 1s and waits 2s before executing cli."""
-    player_id = _assert_ok_retrieve_id(_post_player(client))
+    player_id_1 = _assert_ok_retrieve_id(_post_player(client))
+    player_id_2 = _assert_ok_retrieve_id(_post_player(client))
     _wait_for(client, "SHIFT")
-    _post_shift(client, player_id, 0, 1, 270)
+    _post_shift(client, player_id_1, 0, 1, 270)
+    time.sleep(2)
+
+    _cli_remove_overdue_players(cli_runner, 1)
+
+    state = _get_state(client).get_json()
+    assert len(state["players"]) == 1
+    assert state["players"][0]["id"] == player_id_2
+
+
+def test_remove_overdue_players__with_one_overdue_player__should_not_remove_player(client, cli_runner):
+    """ Tests the cli to remove overdue players.
+
+    A single player is not removed. When a second player joins, the countdown starts for the first player.
+    Sets the overdue time to 1s and waits 2s before executing cli."""
+    player_id_1 = _assert_ok_retrieve_id(_post_player(client))
+    _wait_for(client, "SHIFT")
+    _post_shift(client, player_id_1, 0, 1, 270)
     time.sleep(2)
     _cli_remove_overdue_players(cli_runner, 1)
     state = _get_state(client).get_json()
-    assert len(state["players"]) == 0
+    assert len(state["players"]) == 1
+
+    player_id_2 = _assert_ok_retrieve_id(_post_player(client))
+    _cli_remove_overdue_players(cli_runner, 1)
+    state = _get_state(client).get_json()
+    assert len(state["players"]) == 2
+
+    time.sleep(2)
+    _cli_remove_overdue_players(cli_runner, 1)
+    state = _get_state(client).get_json()
+    assert len(state["players"]) == 1
+    assert state["players"][0]["id"] == player_id_2
 
 
 def test_remove_unobserved_games__with_one_unobserved_game__should_remove_game(client, cli_runner):
@@ -593,9 +622,7 @@ def _put_player_name(client, player_id, name, game_id=0):
 
 
 def _put_game(client, game_id=0, size=7):
-    game_data = None
-    if size:
-        game_data = json.dumps({"mazeSize": size})
+    game_data = json.dumps({"mazeSize": size}) if size else None
     return client.put("/api/games/{}".format(game_id), data=game_data, mimetype="application/json")
 
 

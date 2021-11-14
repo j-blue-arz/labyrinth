@@ -10,16 +10,16 @@ from tests.unit import matchers
 logger = Mock()
 
 
-def setup_test():
+def setup_test(players=None):
     game = factories.create_game(game_id=5)
-    player = Player(3)
-    game.add_player(player)
+    for player in players:
+        game.add_player(player)
     logger.reset_mock()
-    return game, player
+    return game
 
 
 def test_remove_overdue_players__with_one_blocking_player__removes_current_player():
-    game, player = setup_test()
+    game = setup_test(players=[Player(3), Player(4)])
     game.remove_player = Mock()
     game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
@@ -30,12 +30,24 @@ def test_remove_overdue_players__with_one_blocking_player__removes_current_playe
     logger.remove_player.assert_called_once()
 
 
+def test_remove_overdue_players__with_only_one_blocking_player__does_not_remove_current_player():
+    game = setup_test(players=[Player(3)])
+    game.remove_player = Mock()
+    game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
+
+    interactor = interactors.OverduePlayerInteractor(game_repository, logger)
+    interactor.remove_overdue_players()
+
+    game.remove_player.assert_not_called()
+    logger.remove_player.assert_not_called()
+
+
 def test_remove_overdue_players__with_player_just_removed__does_not_raise_exception():
     """ When the last remaining player was removed or has left the game,
     the update timestamp will stay at its last value. Then, the interactor must not try to remove a player.
     """
-    game, player = setup_test()
-    game.remove_player(player.identifier)
+    game = setup_test(players=[Player(3)])
+    game.remove_player(3)
     game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
 
     interactor = interactors.OverduePlayerInteractor(game_repository, logger)
@@ -43,7 +55,7 @@ def test_remove_overdue_players__with_player_just_removed__does_not_raise_except
 
 
 def test_interactor__when_game_notifies_turn_listeners__updates_player_action_timestamp():
-    game, _ = setup_test()
+    game = setup_test(players=[Player(3), Player(4)])
     data_access = DatabaseGateway(settings={"DATABASE": "foo"})
     game_repository = interactors.GameRepository(data_access)
     game_repository.update_action_timestamp = Mock()

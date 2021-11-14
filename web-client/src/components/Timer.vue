@@ -15,8 +15,8 @@ export default {
         };
     },
     watch: {
-        nextUserAction: function(newValue, oldValue) {
-            if (newValue !== NO_ACTION) {
+        nextUserAction: function(newValue) {
+            if (this.timerShouldRun()) {
                 this.$store.dispatch("countdown/restartCountdown");
                 this.visible = true;
             } else {
@@ -24,11 +24,17 @@ export default {
                 this.$store.dispatch("countdown/stopCountdown");
             }
         },
+        numPlayers: function(_, oldValue) {
+            if (oldValue === 1 && this.timerShouldRun()) {
+                this.$store.dispatch("countdown/restartCountdown");
+                this.visible = true;
+            }
+        },
         gameSize: function() {
             // this is a heuristic to detect a game restart
             // For the case where a game is restarted with a different size,
             // but the user turn does not change
-            if (this.nextUserAction !== NO_ACTION) {
+            if (this.timerShouldRun()) {
                 this.visible = true;
                 this.$store.dispatch("countdown/restartCountdown");
             }
@@ -38,13 +44,13 @@ export default {
             // For the case where a game is restarted with the same size,
             // but the user turn does not change
             // This heuristic might fail!
-            if (this.nextUserAction !== NO_ACTION) {
+            if (this.timerShouldRun()) {
                 this.visible = true;
                 this.$store.dispatch("countdown/restartCountdown");
             }
         },
         remainingSeconds: function(newValue) {
-            if (newValue <= 0 && this.nextUserAction !== NO_ACTION) {
+            if (newValue <= 0 && this.timerShouldRun()) {
                 this.removeCurrentPlayer();
             }
         }
@@ -66,6 +72,9 @@ export default {
             } else {
                 return NO_ACTION;
             }
+        },
+        numPlayers: function() {
+            return this.$store.state.players.allIds.length;
         }
     },
     methods: {
@@ -75,6 +84,9 @@ export default {
         removeCurrentPlayer: function() {
             const currentPlayerId = this.$store.state.game.nextAction.playerId;
             this.$store.dispatch("players/removeClientPlayer", currentPlayerId);
+        },
+        timerShouldRun: function() {
+            return this.nextUserAction !== NO_ACTION && this.numPlayers >= 2;
         }
     }
 };
