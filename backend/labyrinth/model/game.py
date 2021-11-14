@@ -768,7 +768,7 @@ class Game:
         self.turns.remove_player(player)
         self.players.remove(player)
 
-    def restart(self, new_board=None):
+    def restart(self, new_board):
         """ Replaces the current board with a new one and resets the game.
         For all players, new pieces are created on the board """
         new_board.pieces.clear()
