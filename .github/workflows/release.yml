@@ -9,28 +9,9 @@ on:
 jobs:
     web-client:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./web-client
         steps:
           - name: Check out repository
             uses: actions/checkout@v2
-          - name: Set up node
-            uses: actions/setup-node@v1
-            with:
-                node-version: "12.x"
-          - name: Install dependencies
-            run: |
-              npm ci
-          - name: Lint
-            run: |
-              npm run lint
-          - name: Run tests
-            run: |
-              npm run test:unit
-          - name: Build web-client
-            run: |
-              npm run build
           - name: Log in to Docker Hub
             uses: docker/login-action@v1
             with:
@@ -54,71 +35,11 @@ jobs:
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
 
-    algolibs:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./algolibs
-        steps:
-          - name: Check out repository
-            uses: actions/checkout@v2
-          - name: Setup cmake
-            uses: lukka/get-cmake@latest
-          - name: Run cmake and build shared library
-            run: |
-              export CC=gcc-9
-              export CXX=g++-9
-              mkdir builds
-              cmake -S. -Bbuilds/shared -DCMAKE_BUILD_TYPE=RELEASE
-              cmake --build builds/shared
-              mkdir -p ../backend/instance/lib/
-              cp builds/shared/solvers/*.so ../backend/instance/lib/
-          - name: Run tests
-            run: |
-              mkdir ../test-results
-              cd builds/shared/test/
-              ctest -V
-              mv all_tests.xml ../../../../test-results/algolibs-results.xml
-              cd ../../../
-          - name: Archive shared library
-            uses: actions/upload-artifact@v1
-            with:
-                name: sharedLib
-                path: backend/instance/lib/
-  
     backend:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: ./backend
-        needs: [web-client, algolibs]
         steps:
           - name: Check out repository
             uses: actions/checkout@v2
-          - name: Set up Python 3.8
-            uses: actions/setup-python@v2
-            with:
-                python-version: 3.8
-          - name: Install dependencies
-            run: |
-              python -m venv venv
-              . venv/bin/activate
-              pip install --upgrade pip
-              pip install -r dev-requirements.txt
-          - name: Lint
-            run: |
-              . venv/bin/activate
-              flake8 . --count --max-line-length=120 --max-complexity=10 --show-source --statistics --exclude __pycache__,venv
-          - name: Restore shared library artifact
-            uses: actions/download-artifact@v1
-            with:
-                name: sharedLib
-                path: backend/instance/lib/
-          - name: Run tests
-            run: |
-              . venv/bin/activate
-              pytest . --junitxml=../test-results/backend-results.xml --cov=backend --cov-report=xml:../test-results/backend-coverage.xml
-            
           - name: Log in to Docker Hub
             uses: docker/login-action@v1
             with:
@@ -136,8 +57,8 @@ jobs:
           - name: Build and push Docker image
             uses: docker/build-push-action@v2
             with:
-                context: ./backend
-                file: ./backend/Dockerfile
+                context: ./
+                file: ./backend/docker/backend.Dockerfile
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
                 labels: ${{ steps.meta.outputs.labels }}
