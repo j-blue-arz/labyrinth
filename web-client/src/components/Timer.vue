@@ -24,10 +24,13 @@ export default {
                 this.$store.dispatch("countdown/stopCountdown");
             }
         },
-        numPlayers: function(_, oldValue) {
+        numPlayers: function(newValue, oldValue) {
             if (oldValue === 1 && this.timerShouldRun()) {
                 this.$store.dispatch("countdown/restartCountdown");
                 this.visible = true;
+            } else if (newValue === 1) {
+                this.visible = false;
+                this.$store.dispatch("countdown/stopCountdown");
             }
         },
         gameSize: function() {
