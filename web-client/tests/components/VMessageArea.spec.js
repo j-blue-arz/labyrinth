@@ -12,33 +12,27 @@ describe("VMessageArea", () => {
     it("is invisible if not player's turn", async () => {
         givenNotPlayersTurn();
 
-        whenCountdownReaches(19);
-        await Vue.nextTick();
+        thenMessageBoardIsInvisible();
+    });
+
+    it("is invisible if score is greater than 0", () => {
+        givenPlayerShift();
+        givenPlayerScore(1);
 
         thenMessageBoardIsInvisible();
     });
 
-    it("is invisible if countdown is greater than 20", () => {
+    it("shows message if score is 0 and shift is required", () => {
         givenPlayerShift();
-
-        whenCountdownReaches(21);
-
-        thenMessageBoardIsInvisible();
-    });
-
-    it("is shows message countdown is less than 20 and shift is required", () => {
-        givenPlayerShift();
-
-        whenCountdownReaches(19);
+        givenPlayerScore(0);
 
         thenMessageBoardIsVisible();
         thenMessageBoardShowsMessageContaining("layout");
     });
 
-    it("is shows message countdown is less than 20 and move is required", () => {
+    it("shows message if score is 0 and move is required", () => {
         givenPlayerMove();
-
-        whenCountdownReaches(19);
+        givenPlayerScore(0);
 
         thenMessageBoardIsVisible();
         thenMessageBoardShowsMessageContaining("move");
@@ -48,7 +42,7 @@ describe("VMessageArea", () => {
 let wrapper = null;
 let mockStore = null;
 
-const initialPlayer = { id: 0, nextAction: NO_ACTION };
+const initialPlayer = { id: 0, nextAction: NO_ACTION, score: 0 };
 
 const createMockStore = function() {
     let mockStore = {
@@ -87,8 +81,8 @@ const givenPlayerMove = function() {
     mockStore.getters["players/userPlayer"].nextAction = MOVE_ACTION;
 };
 
-const whenCountdownReaches = function(seconds) {
-    mockStore.state.countdown.remainingSeconds = seconds;
+const givenPlayerScore = function(score) {
+    mockStore.getters["players/userPlayer"].score = score;
 };
 
 const thenMessageBoardIsInvisible = function() {

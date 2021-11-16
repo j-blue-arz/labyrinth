@@ -24,11 +24,7 @@ export default {
             return this.text !== "";
         },
         shouldShowMessage() {
-            const countdownState = this.$store.state.countdown;
-            return (
-                this.$store.getters["countdown/isRunning"] &&
-                countdownState.remainingSeconds < countdownState.startSeconds - 10
-            );
+            return this.userPlayer.score === 0;
         },
         userPlayer: function() {
             return this.$store.getters["players/userPlayer"];
