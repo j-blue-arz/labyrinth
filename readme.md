@@ -1,8 +1,7 @@
 # Labyrinth
+[![Gitter](https://badges.gitter.im/maze-solver/community.svg)](https://gitter.im/maze-solver/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Play it at [maze-solver.com](https://maze-solver.com).
-
-Labyrinth is a family board game. This project aims to recreate the game as a online multiplayer game, develop understanding of the game's complexity and implement practical search algorithms. There is one major difference to the [original game](https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf): all players have the same objective.
+Labyrinth is a family board game. This project aims to recreate the game as a online multiplayer game, develop understanding of the game's complexity and implement practical search algorithms. There is one major difference to the [original game](https://www.ravensburger.com/spielanleitungen/ecm/Spielanleitungen/Labyrinth_26448_GB.pdf): all players have the same objective. Play it at [maze-solver.com](https://maze-solver.com).
 
 The application includes a number of bots employing different solvers. They are either called by the backend as shared libraries or compiled to WebAssembly to be used by the web-client.
 
