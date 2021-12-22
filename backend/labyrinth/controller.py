@@ -120,6 +120,15 @@ def perform_move(game_id, player_id, move_dto):
     DatabaseGateway.get_instance().commit()
 
 
+def generate_board(size=7):
+    """ Generates a random board with the requested size.
+
+    Default size is 7, will return a board and a leftover.
+    The board will respect a distribution of the cards close to the original game. """
+    size = size or 7
+    return mapper.board_to_dto(factory.create_board(maze_size=size))
+
+
 def get_computation_methods():
     """ Retrieves the available computation methods.
 

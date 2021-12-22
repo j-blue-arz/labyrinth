@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from labyrinth.model.game import Game, Board, Piece, MazeCard, Turns, Maze, Player, PlayerAction
 import labyrinth.model.bots as bots
-from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
+from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, LOCATION, MAZE_CARDS, SHIFT_URL,
                                         PREVIOUS_SHIFT_LOCATION, MAZE_CARD_ID, ACTION, MOVE_URL, OUT_PATHS, ROTATION,
                                         PLAYER_ID, MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD,
@@ -24,7 +24,7 @@ def game_to_dto(game: Game):
     return {
         ID: game.identifier,
         PLAYERS: [_player_to_dto(player) for player in game.players],
-        MAZE: _board_to_dto(game.board),
+        MAZE: board_to_dto(game.board),
         NEXT_ACTION: _turns_to_next_action_dto(game.turns),
         TURN_PREPARE_DELAY: _timedelta_to_dto_(game.turns.prepare_delay),
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),

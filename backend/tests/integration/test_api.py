@@ -454,13 +454,22 @@ def test_no_pushback_rule(client):
 
 
 def test_get_computation_methods_contains_library(library_path, client):
-    """ Tests GET for /api/computationMethods
+    """ Tests GET for /api/computation-methods
 
     The returned methods should contain the library.
     """
     expected_name, ext = os.path.splitext(os.path.basename(library_path))
     computation_methods = _get_computation_methods(client).get_json()
     assert expected_name in computation_methods
+
+
+def test_generate_board__should_return_board_with_requested_size(client):
+    """ Tests GET for /api/random-board """
+    board = _get_generate_board(client, 11).get_json()
+    assert "mazeSize" in board
+    assert board["mazeSize"] == 11
+    assert "mazeCards" in board
+    assert len(board["mazeCards"]) == 122
 
 
 def test_remove_overdue_players__with_two_overdue_player__should_remove_player(client, cli_runner):
@@ -623,15 +632,20 @@ def _put_player_name(client, player_id, name, game_id=0):
 
 def _put_game(client, game_id=0, size=7):
     game_data = json.dumps({"mazeSize": size}) if size else None
-    return client.put("/api/games/{}".format(game_id), data=game_data, mimetype="application/json")
+    return client.put(f"/api/games/{game_id}", data=game_data, mimetype="application/json")
 
 
 def _get_state(client, game_id=0):
-    return client.get("/api/games/{}/state".format(game_id))
+    return client.get(f"/api/games/{game_id}/state")
 
 
 def _get_computation_methods(client):
     return client.get("/api/computation-methods")
+
+
+def _get_generate_board(client, size=None):
+    param = "?size="+str(size) if size else ""
+    return client.get("/api/random-board"+param)
 
 
 def _player_data(is_bot=False, computation_method=None, name=None):
