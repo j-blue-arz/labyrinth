@@ -6,6 +6,7 @@ import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import { copyObjectStructure } from "../testutils.js";
 import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
 import { loc } from "@/store/modules/board.js";
+import Vue from "vue";
 
 function fromStateWithShiftAction() {
     let stateCopy = copyObjectStructure(API_STATE);
@@ -30,9 +31,9 @@ describe("InteractiveBoard", () => {
         store.dispatch = jest.fn();
     });
 
-    it("sets interaction class on reachable maze cards", () => {
+    it("sets interaction class on reachable maze cards", async () => {
         whenMoveRequired();
-
+        await Vue.nextTick();
         thenCardsAreInteractive([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)]);
     });
 
