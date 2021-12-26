@@ -9,6 +9,9 @@ export const state = () => ({
 });
 
 export const getters = {
+    notEmpty: state => {
+        return state.leftoverId !== null && state.mazeSize > 0;
+    },
     mazeCardById: state => id => {
         return state.cardsById[id];
     },

@@ -58,15 +58,6 @@ describe("game Vuex module", () => {
 
                 expect(game.nextAction).toBe(apiState.nextAction);
             });
-
-            it("marks game as served by backend", () => {
-                givenInitialGameState();
-                givenApiStateWithSize3();
-
-                whenCreateFromApi();
-
-                expect(game.isServed).toBe(true);
-            });
         });
     });
 

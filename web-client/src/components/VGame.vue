@@ -1,7 +1,7 @@
 <template>
     <div class="game">
         <div class="game__board">
-            <interactive-board v-if="hasStarted" ref="interactive-board" />
+            <interactive-board v-if="hasBoard" ref="interactive-board" />
         </div>
         <timer class="game__timer" />
         <div class="game__score">
@@ -12,7 +12,7 @@
         </div>
         <leftover-maze-card
             class="game__leftover"
-            v-if="hasStarted"
+            v-if="hasBoard"
             :style="{ width: leftoverSize, height: leftoverSize }"
         ></leftover-maze-card>
     </div>
@@ -35,8 +35,8 @@ export default {
         LeftoverMazeCard
     },
     computed: {
-        hasStarted: function() {
-            return this.$store.state.game.isServed;
+        hasBoard: function() {
+            return this.$store.getters["board/notEmpty"];
         },
         userPlayer: function() {
             return this.$store.getters["players/userPlayer"];

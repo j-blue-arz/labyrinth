@@ -2,7 +2,6 @@ import API from "@/services/game-api.js";
 
 export const state = () => ({
     nextAction: null,
-    isServed: false,
     objectiveId: -1
 });
 
@@ -79,7 +78,6 @@ export const mutations = {
     update(state, apiState) {
         state.objectiveId = apiState.objectiveMazeCardId;
         state.nextAction = apiState.nextAction;
-        state.isServed = true;
     },
     reset(state) {
         Object.assign(state, stateInitializer());
