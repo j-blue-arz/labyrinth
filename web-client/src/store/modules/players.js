@@ -1,7 +1,6 @@
 import Vue from "vue";
 import API from "@/services/game-api.js";
 import * as action from "@/model/player.js";
-import Storage, { USER_PLAYER, WASM_PLAYER } from "@/services/storage.js";
 
 export const state = () => ({
     byId: {},
@@ -60,7 +59,6 @@ const actions = {
         const removedPlayerIds = state.allIds.filter(id => !apiIds.includes(id));
         removedPlayerIds.forEach(playerId => {
             commit("removePlayer", playerId);
-            Storage.deleteId(playerId);
         });
         apiPlayers.forEach(apiPlayer => {
             if (state.allIds.includes(apiPlayer.id)) {
@@ -77,7 +75,6 @@ const actions = {
         if (!getters.hasUserPlayer) {
             API.doAddPlayer(apiPlayer => {
                 apiPlayer.isUser = true;
-                Storage.set(USER_PLAYER, apiPlayer.id);
                 commit("addPlayer", apiPlayer);
             });
         }
@@ -93,7 +90,6 @@ const actions = {
         if (!getters.hasWasmPlayer) {
             API.doAddPlayer(apiPlayer => {
                 apiPlayer.isWasm = true;
-                Storage.set(WASM_PLAYER, apiPlayer.id);
                 commit("addPlayer", apiPlayer);
             });
         }
