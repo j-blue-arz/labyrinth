@@ -143,7 +143,7 @@ describe("game Vuex module", () => {
 
                 whenDispatchMove(loc(0, 2), 42);
 
-                expect(player(42).mazeCard).toEqual(2);
+                expect(player(42).mazeCardId).toEqual(2);
             });
 
             it("calls API", () => {
@@ -183,8 +183,8 @@ describe("game Vuex module", () => {
 
                 whenDispatchShift(17, loc(1, 0), 90);
 
-                expect(player(42).mazeCard).toEqual(9);
-                expect(player(17).mazeCard).toEqual(9);
+                expect(player(42).mazeCardId).toEqual(9);
+                expect(player(17).mazeCardId).toEqual(9);
             });
 
             it("calls API", () => {

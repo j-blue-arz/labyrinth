@@ -24,11 +24,11 @@ const getters = {
         return state.allIds.map(id => getters.find(id));
     },
     findByMazeCard: (_, getters) => cardId => {
-        return getters.all.filter(player => player.mazeCard === cardId);
+        return getters.all.filter(player => player.mazeCardId === cardId);
     },
     mazeCard: (state, _, __, rootGetters) => id => {
         const player = state.byId[id];
-        return rootGetters["board/mazeCardById"](player.mazeCard);
+        return rootGetters["board/mazeCardById"](player.mazeCardId);
     },
     hasUserPlayer: state => {
         return state.allIds.some(id => state.byId[id].isUser);
@@ -123,7 +123,7 @@ const actions = {
 
 export const mutations = {
     setPlayerCard(state, cardChange) {
-        state.byId[cardChange.playerId].mazeCard = cardChange.mazeCardId;
+        state.byId[cardChange.playerId].mazeCardId = cardChange.mazeCardId;
     },
     addPlayer(state, apiPlayer) {
         let player = newPlayer(apiPlayer.id);
@@ -157,8 +157,6 @@ export default {
 
 function fillFromApi(playerToFill, apiPlayer) {
     let player = { ...playerToFill, ...apiPlayer };
-    player = Object.assign({}, player, { mazeCard: player["mazeCardId"] });
-    Vue.delete(player, "mazeCardId");
     return player;
 }
 
