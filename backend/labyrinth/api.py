@@ -104,12 +104,6 @@ def post_move(game_id):
     return ""
 
 
-@API.route("/random-board", methods=["GET"])
-def generate_board():
-    requested_size = request.args.get("size", type=int)
-    return controller.generate_board(size=requested_size)
-
-
 @API.route("/computation-methods", methods=["GET"])
 def get_computation_methods():
     """ Returns an array of available computation methods."""

@@ -67,7 +67,7 @@ def _maze_cards_to_dto(board):
     return dto
 
 
-def board_to_dto(board):
+def _board_to_dto(board):
     """ Maps the maze layout and the leftover card to a DTO.
 
     :param board: an instance of model.Board

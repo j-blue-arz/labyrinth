@@ -6,7 +6,7 @@ which in turn are automatically translatable to structured text (JSON or XML)
 """
 from labyrinth.model.game import Game, Turns, Player
 import labyrinth.model.bots
-from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, board_to_dto
+from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
 from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTION, ENABLED_SHIFT_LOCATIONS, LOCATION,
                                         MAZE_CARD_ID, LEFTOVER_ROTATION, KEY, MESSAGE, ACTION, PLAYER_ID,
                                         MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD, PLAYER_NAME)
@@ -24,7 +24,7 @@ def game_state_to_dto(game: Game):
         ID: game.identifier,
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
         PLAYERS: [player_to_dto(player) for player in game.players],
-        MAZE: board_to_dto(game.board),
+        MAZE: _board_to_dto(game.board),
         NEXT_ACTION: _turns_to_next_player_action_dto(game.turns),
         ENABLED_SHIFT_LOCATIONS: _enabled_shift_locations_to_dto(game)
     }
