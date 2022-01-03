@@ -463,15 +463,6 @@ def test_get_computation_methods_contains_library(library_path, client):
     assert expected_name in computation_methods
 
 
-def test_generate_board__should_return_board_with_requested_size(client):
-    """ Tests GET for /api/random-board """
-    board = _get_generate_board(client, 11).get_json()
-    assert "mazeSize" in board
-    assert board["mazeSize"] == 11
-    assert "mazeCards" in board
-    assert len(board["mazeCards"]) == 122
-
-
 def test_remove_overdue_players__with_two_overdue_player__should_remove_player(client, cli_runner):
     """ Tests the cli to remove overdue players.
 
