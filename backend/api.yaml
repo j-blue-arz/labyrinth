@@ -205,14 +205,19 @@ components:
                     All locations in this array `enabledShiftLocations` field can be used for the `location` field in the request body of `POST /games/{game_id}/shift`"
                     items:
                         $ref: "#/components/schemas/boardLocation"
-                mazeCards:
-                    type: "array"
-                    description: "The current layout of the maze, described as an array of maze cards. 
-                    The leftover maze card is the first in this array and has location null. The other maze cards are consecutive in row-first order."
-                    items:
-                        $ref: "#/components/schemas/mazeCard"
-                    minItems: 50
-                    maxItems: 50
+                maze:
+                    type: "object"
+                    description: "The current layout of the maze. Mazes are always quadratic, with an odd number of rows and columns."
+                    properties:
+                        mazeSize:
+                            type: "integer"
+                            description: "The odd number of rows and columns."
+                        mazeCards:
+                            type: "array"
+                            description: "The current layout of the maze, described as an array of maze cards. 
+                            The leftover maze card is the first in this array and has location null. The other maze cards are consecutive in row-first order."
+                            items:
+                                $ref: "#/components/schemas/mazeCard"
                 nextAction:
                     type: "object"
                     description: "The player whose turn it is, and the action he has to take. `null` if there are no players in the game."
@@ -620,6 +625,7 @@ components:
                     description: "A player's identifier, unique in the application. This identifier is used as path parameter `player_id` or the query parameter `p_id`."
                 isBot:
                     type: "boolean"
+                    default: false
                 computationMethod:
                     type: "string"
                     description: "Only present if `isBot` is true. This will be one of the available computation methods, 
