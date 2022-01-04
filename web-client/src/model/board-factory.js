@@ -3,7 +3,7 @@ const TJUNCT = "NES";
 const CROSS = "NESW";
 const STRAIGHT = "NS";
 
-export function generateBoard(size) {
+export default function generateBoard(size) {
     let mazeCards = [];
     for (let row = 0; row < size; row++) {
         mazeCards.push([]);
@@ -18,7 +18,7 @@ export function generateBoard(size) {
     mazeCards[a][a] = generateFixedMazeCard(CORNER, 270);
     mazeCards[a][0] = generateFixedMazeCard(CORNER, 0);
 
-    if (size % 4 == 3) {
+    if (size % 4 == 1) {
         const middle = Math.floor(size / 2);
         mazeCards[middle][middle] = generateFixedMazeCard(CROSS, 0);
     }

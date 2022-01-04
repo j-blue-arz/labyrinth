@@ -1,5 +1,4 @@
-import { generateBoard } from "@/model/board-factory.js";
-import { inRange } from "lodash";
+import generateBoard from "@/model/board-factory.js";
 
 describe("generateBoard(7)", () => {
     beforeEach(() => {
@@ -110,16 +109,20 @@ describe("generateBoard(7)", () => {
         expect(mazeCardAt(4, 2).outPaths).toEqual("NES");
         expect([0, 270]).toContain(mazeCardAt(4, 2).rotation);
     });
+
+    it("does not place a cross anywhere", () => {
+        board.mazeCards.forEach(mazeCard => expect(mazeCard.outPaths).not.toEqual("NESW"));
+    });
 });
 
-describe("generateBoard(11)", () => {
+describe("generateBoard(9)", () => {
     beforeEach(() => {
-        board = generateBoard(11);
-        size = 11;
+        board = generateBoard(9);
+        size = 9;
     });
 
     it("places cross in the middle of the board", () => {
-        expect(mazeCardAt(5, 5).outPaths).toEqual("NESW");
+        expect(mazeCardAt(4, 4).outPaths).toEqual("NESW");
     });
 });
 
