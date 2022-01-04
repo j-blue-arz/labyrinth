@@ -42,7 +42,7 @@ export default {
         },
         reachableMazeCards: function() {
             const playerId = this.$store.getters["game/currentPlayer"]?.id;
-            if (playerId) {
+            if (playerId !== undefined) {
                 return this.computeReachableMazeCards(playerId);
             }
             return new Set();
