@@ -31,6 +31,6 @@ export default {
     flex-flow: column wrap;
     align-items: center;
     align-content: center;
-    justify-content: start;
+    justify-content: flex-start;
 }
 </style>
