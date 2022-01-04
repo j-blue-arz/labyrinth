@@ -61,17 +61,11 @@ const givenNoDisabledShiftLocation = function() {
 };
 
 const givenShiftRequired = function() {
-    store.commit("game/update", {
-        objectiveMazeCardId: 0,
-        nextAction: { playerId: playerId, action: SHIFT_ACTION }
-    });
+    store.commit("game/updateNextAction", { playerId: playerId, action: SHIFT_ACTION });
 };
 
 const givenMoveRequired = function() {
-    store.commit("game/update", {
-        objectiveMazeCardId: 0,
-        nextAction: { playerId: playerId, action: MOVE_ACTION }
-    });
+    store.commit("game/updateNextAction", { playerId: playerId, action: MOVE_ACTION });
 };
 
 function thenDisabledPanelIsTopOfFirstColumn() {

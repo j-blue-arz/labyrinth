@@ -351,6 +351,7 @@ describe("players Vuex module", () => {
                 expect(botPlayer.id).toBe(42);
                 expect(botPlayer.mazeCardId).toBe(16);
                 expect(botPlayer.pieceIndex).toBe(0);
+                expect(botPlayer.score).toBe(0);
                 expect(botPlayer.isBot).toBe(true);
                 expect(botPlayer.computationMethod).toBe("random");
                 expect(botPlayer.name).toBe("");
@@ -458,11 +459,7 @@ const givenPlayersInState = function(players) {
 
 const givenNextAction = function(nextAction) {
     const players = store.state.players;
-    store.commit("game/update", {
-        players: players.allIds.map(id => players.byId[id]),
-        objectiveMazeCardId: 0,
-        nextAction: nextAction
-    });
+    store.commit("game/updateNextAction", nextAction);
 };
 
 const givenApiPlayer = function(apiPlayer) {

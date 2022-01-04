@@ -1,8 +1,15 @@
 import API from "@/services/game-api.js";
+import generateBoard from "@/model/board-factory.js";
+import { getShiftLocations } from "@/store/modules/board.js";
+import * as action from "@/model/player.js";
+
+const OFFLINE = "offline";
+const ONLINE = "online";
 
 export const state = () => ({
     nextAction: null,
-    objectiveId: -1
+    objectiveId: -1,
+    mode: OFFLINE
 });
 
 const stateInitializer = state;
@@ -14,31 +21,74 @@ const getters = {
         } else {
             return null;
         }
+    },
+    isOffline: state => {
+        return state.mode === OFFLINE;
+    },
+    isOnline: state => {
+        return state.mode === ONLINE;
     }
 };
 
 const actions = {
-    update({ commit, dispatch }, apiState) {
-        commit("update", apiState);
-        dispatch("players/update", apiState.players, { root: true });
-        const boardState = {
-            maze: apiState.maze,
-            enabledShiftLocations: apiState.enabledShiftLocations,
-            players: apiState.players
-        };
-        dispatch("board/update", boardState, { root: true });
+    enterOnlineGame({ dispatch }) {
+        API.errorHandlers.push(error => handleError(error));
+        API.stateObservers.push(apiState => dispatch("game/update", apiState, { root: true }));
+        API.activatePolling();
+        dispatch("players/enterGame", null, { root: true });
     },
-    reset({ commit, dispatch }) {
+    leaveOnlineGame({ commit, dispatch, getters }) {
+        if (getters.isOnline) {
+            API.stopPolling();
+            dispatch("players/removeAllClientPlayers", null, { root: true });
+        }
+        commit("offline");
+    },
+    playOnline({ commit }) {
+        commit("online");
+    },
+    playOffline({ commit, dispatch }) {
+        dispatch("leaveOnlineGame");
         commit("reset");
         dispatch("players/update", [], { root: true });
+
+        let board = generateBoard(7);
+        const playerMazeCard = board.mazeCards[1];
+        const playerId = 0;
+
+        let player = {
+            id: playerId,
+            mazeCardId: playerMazeCard.id,
+            pieceIndex: 0,
+            isUser: true
+        };
+
+        let objectiveMazeCardId;
+        do {
+            objectiveMazeCardId = randomChoice(board.mazeCards).id;
+        } while (player.mazeCardId === objectiveMazeCardId);
+
+        const generatedState = {
+            maze: board,
+            enabledShiftLocations: getShiftLocations(7),
+            players: [player],
+            objectiveMazeCardId: objectiveMazeCardId,
+            nextAction: { playerId: playerId, action: action.SHIFT_ACTION }
+        };
+        dispatch("update", generatedState);
+    },
+    update({ commit, dispatch }, newState) {
+        commit("updateObjective", newState.objectiveMazeCardId);
+        commit("updateNextAction", newState.nextAction);
+        dispatch("players/update", newState.players, { root: true });
         const boardState = {
-            maze: { mazeSize: 0 },
-            enabledShiftLocations: [],
-            players: []
+            maze: newState.maze,
+            enabledShiftLocations: newState.enabledShiftLocations,
+            players: newState.players
         };
         dispatch("board/update", boardState, { root: true });
     },
-    move({ dispatch, rootGetters }, moveAction) {
+    move({ dispatch, rootGetters, getters, commit, state }, moveAction) {
         // already validated
         const targetCard = rootGetters["board/mazeCard"](moveAction.targetLocation);
         const sourceCard = rootGetters["players/mazeCard"](moveAction.playerId);
@@ -51,15 +101,24 @@ const actions = {
 
         const cardChange = { playerId: moveAction.playerId, mazeCardId: targetCard.id };
         dispatch("players/changePlayersCard", cardChange, { root: true });
-        API.doMove(moveAction.playerId, moveAction.targetLocation);
+        if (getters.isOnline) {
+            API.doMove(moveAction.playerId, moveAction.targetLocation);
+        } else {
+            commit("updateNextAction", {
+                playerId: state.nextAction.playerId,
+                action: action.SHIFT_ACTION
+            });
+        }
     },
-    shift({ dispatch, rootGetters }, shiftAction) {
-        API.doShift(
-            shiftAction.playerId,
-            shiftAction.location,
-            shiftAction.leftoverRotation,
-            () => {}
-        );
+    shift({ dispatch, rootGetters, getters, commit, state }, shiftAction) {
+        if (getters.isOnline) {
+            API.doShift(
+                shiftAction.playerId,
+                shiftAction.location,
+                shiftAction.leftoverRotation,
+                () => {}
+            );
+        }
 
         const shiftLocation = shiftAction.location;
         const oppositeLocation = rootGetters["board/oppositeLocation"](shiftLocation);
@@ -71,16 +130,31 @@ const actions = {
             const cardChange = { playerId: playerId, mazeCardId: leftoverCard.id };
             dispatch("players/changePlayersCard", cardChange, { root: true });
         }
+
+        if (getters.isOffline) {
+            commit("updateNextAction", {
+                playerId: state.nextAction.playerId,
+                action: action.MOVE_ACTION
+            });
+        }
     }
 };
 
 export const mutations = {
-    update(state, apiState) {
-        state.objectiveId = apiState.objectiveMazeCardId;
-        state.nextAction = apiState.nextAction;
+    updateObjective(state, newObjectiveId) {
+        state.objectiveId = newObjectiveId;
+    },
+    updateNextAction(state, newAction) {
+        state.nextAction = newAction;
     },
     reset(state) {
         Object.assign(state, stateInitializer());
+    },
+    offline(state) {
+        state.mode = OFFLINE;
+    },
+    online(state) {
+        state.mode = ONLINE;
     }
 };
 
@@ -91,3 +165,23 @@ export default {
     actions,
     mutations
 };
+
+function handleError(error) {
+    if (error.response) {
+        if (error.response.data.key === "GAME_NOT_FOUND") {
+            console.log("Game not found, resetting.");
+            this.$store.dispatch("game/playOffline");
+        } else {
+            console.error("Response error", error.response.data);
+        }
+    } else if (error.request) {
+        API.stopPolling();
+        console.error("Request error", error.request);
+    } else {
+        console.error("Error", error.message);
+    }
+}
+
+function randomChoice(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}

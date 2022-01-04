@@ -93,10 +93,7 @@ function givenShiftRequired() {
 }
 
 const whenShiftRequired = function() {
-    store.commit("game/update", {
-        objectiveMazeCardId: 0,
-        nextAction: { playerId: userPlayerId, action: SHIFT_ACTION }
-    });
+    store.commit("game/updateNextAction", { playerId: userPlayerId, action: SHIFT_ACTION });
 };
 
 function givenMoveRequired() {
@@ -104,10 +101,7 @@ function givenMoveRequired() {
 }
 
 const whenMoveRequired = function() {
-    store.commit("game/update", {
-        objectiveMazeCardId: 0,
-        nextAction: { playerId: userPlayerId, action: MOVE_ACTION }
-    });
+    store.commit("game/updateNextAction", { playerId: userPlayerId, action: MOVE_ACTION });
 };
 
 function whenMazeCardIsClickedAtLocation(location) {

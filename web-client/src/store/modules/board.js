@@ -33,13 +33,13 @@ export const getters = {
 };
 
 const actions = {
-    update({ commit }, apiState) {
-        commit("updateBoardFromApi", apiState);
-        const n = apiState.maze.mazeSize;
-        const enabledShiftLocations = apiState.enabledShiftLocations;
+    update({ commit }, updateState) {
+        commit("updateBoard", updateState.maze);
+        const n = updateState.maze.mazeSize;
+        const enabledShiftLocations = updateState.enabledShiftLocations;
         const disabledShiftLocation = findDisabledShiftLocation(n, enabledShiftLocations);
         commit("setDisabledShiftLocation", disabledShiftLocation);
-        commit("setPlayersOnCardsFromApi", apiState.players);
+        commit("setPlayersOnCards", updateState.players);
     },
     movePlayer({ commit, getters }, move) {
         const sourceCard = getters.mazeCardById(move.sourceCardId);
@@ -74,7 +74,7 @@ const actions = {
 };
 
 export const mutations = {
-    updateBoardFromApi(state, apiState) {
+    updateBoard(state, maze) {
         const newState = {
             mazeSize: 0,
             leftoverId: state.leftoverId,
@@ -82,17 +82,17 @@ export const mutations = {
             boardLayout: []
         };
 
-        const n = apiState.maze.mazeSize;
+        const n = maze.mazeSize;
         newState.mazeSize = n;
 
-        const apiMazeCards = apiState.maze.mazeCards;
-        if (apiMazeCards) {
-            if (newState.leftoverId !== apiMazeCards[0].id) {
-                newState.leftoverId = apiMazeCards[0].id;
+        const mazeCardArray = maze.mazeCards;
+        if (mazeCardArray) {
+            if (newState.leftoverId !== mazeCardArray[0].id) {
+                newState.leftoverId = mazeCardArray[0].id;
                 Vue.set(
                     newState.cardsById,
                     newState.leftoverId,
-                    createCardFromApi(apiMazeCards[0])
+                    createCardWithPlayers(mazeCardArray[0])
                 );
             }
 
@@ -102,10 +102,10 @@ export const mutations = {
                 for (let col = 0; col < n; col++) {
                     Vue.set(
                         newState.cardsById,
-                        apiMazeCards[index].id,
-                        createCardFromApi(apiMazeCards[index])
+                        mazeCardArray[index].id,
+                        createCardWithPlayers(mazeCardArray[index])
                     );
-                    newState.boardLayout[row].push(apiMazeCards[index].id);
+                    newState.boardLayout[row].push(mazeCardArray[index].id);
                     index++;
                 }
             }
@@ -116,8 +116,8 @@ export const mutations = {
     setDisabledShiftLocation(state, shiftLocation) {
         state.disabledShiftLocation = shiftLocation;
     },
-    setPlayersOnCardsFromApi(state, apiPlayers) {
-        for (const player of apiPlayers) {
+    setPlayersOnCards(state, players) {
+        for (const player of players) {
             state.cardsById[player.mazeCardId].playerIds.push(player.id);
         }
     },
@@ -194,8 +194,8 @@ export function isInside(location, mazeSize) {
     );
 }
 
-function createCardFromApi(apiCard) {
-    return { ...apiCard, playerIds: [] };
+function createCardWithPlayers(mazeCard) {
+    return { ...mazeCard, playerIds: [] };
 }
 
 function generateShiftLocations(location, n) {

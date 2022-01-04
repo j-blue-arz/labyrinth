@@ -45,7 +45,7 @@ export default {
     },
     computed: {
         mazeCardId: function() {
-            return this.player.mazeCard;
+            return this.player.mazeCardId;
         },
         colorIndexClass: function() {
             return "move-animation__path--player-" + this.player.pieceIndex;

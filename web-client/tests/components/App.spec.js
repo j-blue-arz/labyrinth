@@ -15,8 +15,8 @@ const factory = function() {
 };
 
 describe("App", () => {
-    it("enters game on startup", () => {
+    it("starts offline game on startup", () => {
         factory();
-        expect(dispatch).toHaveBeenCalledWith("players/enterGame");
+        expect(dispatch).toHaveBeenCalledWith("game/playOffline");
     });
 });

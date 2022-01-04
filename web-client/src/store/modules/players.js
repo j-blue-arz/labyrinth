@@ -125,9 +125,9 @@ export const mutations = {
     setPlayerCard(state, cardChange) {
         state.byId[cardChange.playerId].mazeCardId = cardChange.mazeCardId;
     },
-    addPlayer(state, apiPlayer) {
-        let player = newPlayer(apiPlayer.id);
-        player = fillFromApi(player, apiPlayer);
+    addPlayer(state, playerToAdd) {
+        let defaultPlayer = newPlayer(playerToAdd.id);
+        let player = fillPlayer(defaultPlayer, playerToAdd);
         Vue.set(state.byId, player.id, player);
         state.allIds.push(player.id);
     },
@@ -137,10 +137,10 @@ export const mutations = {
         const index = state.allIds.indexOf(id);
         state.allIds.splice(index, 1);
     },
-    updatePlayer(state, apiPlayer) {
-        let player = state.byId[apiPlayer.id];
-        player = fillFromApi(player, apiPlayer);
-        Vue.set(state.byId, player.id, player);
+    updatePlayer(state, player) {
+        let existingPlayer = state.byId[player.id];
+        let updatedPlayer = fillPlayer(existingPlayer, player);
+        Vue.set(state.byId, updatedPlayer.id, updatedPlayer);
     },
     changeName(state, nameChange) {
         state.byId[nameChange.id].name = nameChange.name;
@@ -155,11 +155,11 @@ export default {
     mutations
 };
 
-function fillFromApi(playerToFill, apiPlayer) {
+function fillPlayer(playerToFill, apiPlayer) {
     let player = { ...playerToFill, ...apiPlayer };
     return player;
 }
 
 function newPlayer(id) {
-    return { id: id, name: "" };
+    return { id: id, name: "", score: 0 };
 }

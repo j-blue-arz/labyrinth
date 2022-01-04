@@ -10,7 +10,6 @@
 <script>
 import VMenuBar from "@/components/VMenuBar.vue";
 import VGame from "@/components/VGame.vue";
-import API from "@/services/game-api.js";
 import WasmPlayer from "@/model/wasmPlayer.js";
 
 export default {
@@ -25,34 +24,14 @@ export default {
         };
     },
     created: function() {
-        API.errorHandlers.push(error => this.handleError(error));
-        API.stateObservers.push(apiState => this.$store.dispatch("game/update", apiState));
-        API.activatePolling();
         this.wasmPlayer = new WasmPlayer(this.$store);
         window.addEventListener("beforeunload", () => this.leave());
 
-        this.$store.dispatch("players/enterGame");
+        this.$store.dispatch("game/playOffline");
     },
     methods: {
         leave() {
-            API.stopPolling();
-            this.$store.dispatch("players/removeAllClientPlayers");
-        },
-        handleError(error) {
-            if (error.response) {
-                if (error.response.data.key === "GAME_NOT_FOUND") {
-                    console.log("Game not found, resetting.");
-                    this.$store.dispatch("game/reset");
-                    API.stopPolling();
-                } else {
-                    console.error("Response error", error.response.data);
-                }
-            } else if (error.request) {
-                API.stopPolling();
-                console.error("Request error", error.request);
-            } else {
-                console.error("Error", error.message);
-            }
+            this.$store.dispatch("game/leaveOnlineGame");
         }
     },
     beforeDestroy() {
