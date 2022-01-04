@@ -52,28 +52,16 @@ const actions = {
         commit("reset");
         dispatch("players/update", [], { root: true });
 
-        let board = generateBoard(7);
-        const playerMazeCard = board.mazeCards[1];
-        const playerId = 0;
-
-        let player = {
-            id: playerId,
-            mazeCardId: playerMazeCard.id,
-            pieceIndex: 0,
-            isUser: true
-        };
-
-        let objectiveMazeCardId;
-        do {
-            objectiveMazeCardId = randomChoice(board.mazeCards).id;
-        } while (player.mazeCardId === objectiveMazeCardId);
+        const board = generateBoard(7);
+        const player = createPlayer(board.mazeCards[1]);
+        const objectiveMazeCardId = chooseRandomObjective(board.mazeCards, player);
 
         const generatedState = {
             maze: board,
             enabledShiftLocations: getShiftLocations(7),
             players: [player],
             objectiveMazeCardId: objectiveMazeCardId,
-            nextAction: { playerId: playerId, action: action.SHIFT_ACTION }
+            nextAction: { playerId: player.id, action: action.SHIFT_ACTION }
         };
         dispatch("update", generatedState);
     },
@@ -180,6 +168,26 @@ function handleError(error) {
     } else {
         console.error("Error", error.message);
     }
+}
+
+function createPlayer(playerMazeCard) {
+    const playerId = 0;
+
+    let player = {
+        id: playerId,
+        mazeCardId: playerMazeCard.id,
+        pieceIndex: 0,
+        isUser: true
+    };
+    return player;
+}
+
+function chooseRandomObjective(mazeCards, player) {
+    let objectiveMazeCardId;
+    do {
+        objectiveMazeCardId = randomChoice(mazeCards).id;
+    } while (player.mazeCardId === objectiveMazeCardId);
+    return objectiveMazeCardId;
 }
 
 function randomChoice(array) {

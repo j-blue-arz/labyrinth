@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import { InsertPanel, ShiftLocation } from "@/model/shift.js";
+import { InsertPanel } from "@/model/shift.js";
 
 export default {
     name: "v-insert-panel",

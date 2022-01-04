@@ -4,34 +4,56 @@ const CROSS = "NESW";
 const STRAIGHT = "NS";
 
 export default function generateBoard(size) {
-    let mazeCards = [];
+    let mazeCards = createEmptyBoard(size);
+
+    placeCorners(mazeCards);
+    const middleIsFixed = size % 4 == 1;
+    if (middleIsFixed) {
+        placeMiddleCross(mazeCards);
+    }
+    placeFixedTCrosses(mazeCards);
+
+    const free = countFreeCards(mazeCards);
+    let freeCards = generateFreeCards(free);
+    placeFreeCards(mazeCards, freeCards);
+
+    setCardLocations(mazeCards);
+
+    const leftover = freeCards.pop();
+    mazeCards = [].concat.apply([leftover], mazeCards);
+    setCardIds(mazeCards);
+
+    return { mazeSize: size, mazeCards: mazeCards };
+}
+
+function setCardIds(mazeCards) {
+    for (let id = 0; id < mazeCards.length; id++) {
+        mazeCards[id].id = id;
+    }
+}
+
+function setCardLocations(mazeCards) {
+    const size = mazeCards.length;
     for (let row = 0; row < size; row++) {
-        mazeCards.push([]);
         for (let column = 0; column < size; column++) {
-            mazeCards[row].push(null);
+            mazeCards[row][column].location = { row: row, column: column };
         }
     }
+}
 
-    const a = size - 1;
-    mazeCards[0][0] = generateFixedMazeCard(CORNER, 90);
-    mazeCards[0][a] = generateFixedMazeCard(CORNER, 180);
-    mazeCards[a][a] = generateFixedMazeCard(CORNER, 270);
-    mazeCards[a][0] = generateFixedMazeCard(CORNER, 0);
-
-    if (size % 4 == 1) {
-        const middle = Math.floor(size / 2);
-        mazeCards[middle][middle] = generateFixedMazeCard(CROSS, 0);
-    }
-
-    for (let row = 0; row < size; row += 2) {
-        for (let column = 0; column < size; column += 2) {
+function placeFreeCards(mazeCards, freeCards) {
+    const size = mazeCards.length;
+    for (let row = 0; row < size; row++) {
+        for (let column = 0; column < size; column++) {
             if (!mazeCards[row][column]) {
-                const rotation = rotationOfFixedTJunct(row, column, size);
-                mazeCards[row][column] = generateFixedMazeCard(TJUNCT, rotation);
+                mazeCards[row][column] = freeCards.pop();
             }
         }
     }
+}
 
+function countFreeCards(mazeCards) {
+    const size = mazeCards.length;
     let free = 1;
     for (let row = 0; row < size; row++) {
         for (let column = 0; column < size; column++) {
@@ -40,29 +62,44 @@ export default function generateBoard(size) {
             }
         }
     }
+    return free;
+}
 
-    let freeCards = generateFreeCards(free);
-    let leftover = freeCards.pop();
-    for (let row = 0; row < size; row++) {
-        for (let column = 0; column < size; column++) {
+function placeFixedTCrosses(mazeCards) {
+    const size = mazeCards.length;
+    for (let row = 0; row < size; row += 2) {
+        for (let column = 0; column < size; column += 2) {
             if (!mazeCards[row][column]) {
-                mazeCards[row][column] = freeCards.pop();
+                const rotation = rotationOfFixedTJunct(row, column, size);
+                mazeCards[row][column] = generateFixedMazeCard(TJUNCT, rotation);
             }
         }
     }
+}
 
+function placeMiddleCross(mazeCards) {
+    const size = mazeCards.length;
+    const middle = Math.floor(size / 2);
+    mazeCards[middle][middle] = generateFixedMazeCard(CROSS, 0);
+}
+
+function placeCorners(mazeCards) {
+    const a = mazeCards.length - 1;
+    mazeCards[0][0] = generateFixedMazeCard(CORNER, 90);
+    mazeCards[0][a] = generateFixedMazeCard(CORNER, 180);
+    mazeCards[a][a] = generateFixedMazeCard(CORNER, 270);
+    mazeCards[a][0] = generateFixedMazeCard(CORNER, 0);
+}
+
+function createEmptyBoard(size) {
+    let mazeCards = [];
     for (let row = 0; row < size; row++) {
+        mazeCards.push([]);
         for (let column = 0; column < size; column++) {
-            mazeCards[row][column].location = { row: row, column: column };
+            mazeCards[row].push(null);
         }
     }
-
-    mazeCards = [].concat.apply([leftover], mazeCards);
-    for (let id = 0; id < mazeCards.length; id++) {
-        mazeCards[id].id = id;
-    }
-
-    return { mazeSize: size, mazeCards: mazeCards };
+    return mazeCards;
 }
 
 function rotationOfFixedTJunct(row, column, size) {
