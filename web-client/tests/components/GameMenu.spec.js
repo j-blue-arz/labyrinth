@@ -61,7 +61,7 @@ describe("GameMenu", () => {
     });
 
     describe("Add bot submenu", () => {
-        it("has entries corresponding to API computation methods", () => {
+        it("has entries corresponding to store computation methods", () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             givenGameMenu();
 
@@ -81,15 +81,6 @@ describe("GameMenu", () => {
             expect(API.doAddBot).toHaveBeenCalledWith("exhaustive-search");
         });
 
-        it("has WASM entry when there is no WASM player participating", () => {
-            givenWasmIsNotParticipating();
-            givenGameMenu();
-
-            whenClickInMenu("add");
-
-            thenEntryExists("add-wasm");
-        });
-
         it("has no WASM entry when there is already a WASM player participating", () => {
             givenWasmIsParticipating();
             givenGameMenu();
@@ -99,17 +90,8 @@ describe("GameMenu", () => {
             thenEntryDoesNotExist("add-wasm");
         });
 
-        it("dispatches addWasmPlayer for WASM menu entry", () => {
-            givenWasmIsNotParticipating();
-            givenGameMenu();
-
-            whenClickInMenu("add", "add-wasm");
-
-            thenDispatchWas("players/addWasmPlayer");
-        });
-
         it("displays readable labels", () => {
-            givenComputationMethods(["libminimax-distance", "libexhsearch"]);
+            givenComputationMethods(["libminimax-distance", "libexhsearch", "wasm"]);
             givenWasmIsNotParticipating();
             givenGameMenu();
 

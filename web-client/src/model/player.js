@@ -27,6 +27,8 @@ export function computationMethodLabel(computationMethod) {
         } else {
             return "Minimax (2P) - heuristic: " + suffix;
         }
+    } else if (computationMethod === "wasm") {
+        return "WASM: Exhaustive Search\u00A0(1P)";
     } else {
         return computationMethod;
     }

@@ -25,7 +25,7 @@ export default {
             } else {
                 menu.push(new MenuItem("enter", "Enter game"));
             }
-            if (this.gameIsNotFull && this.playingOnline) {
+            if (this.gameIsNotFull) {
                 let submenu = this.createAddBotSubmenu();
                 menu.push(new MenuItem("add", "Add bot..", submenu));
             }
@@ -47,9 +47,6 @@ export default {
         },
         gameIsNotFull: function() {
             return this.$store.state.players.allIds.length < 4;
-        },
-        playingOnline: function() {
-            return this.$store.getters["game/isOnline"];
         }
     },
     methods: {
@@ -87,9 +84,6 @@ export default {
                     let text = computationMethodLabel(method);
                     submenu.push(new MenuItem(key, text));
                 });
-            }
-            if (!this.$store.getters["players/hasWasmPlayer"]) {
-                submenu.push(new MenuItem("add-wasm", "WASM: Exhaustive Search\u00A0(1P)"));
             }
             return submenu;
         },
