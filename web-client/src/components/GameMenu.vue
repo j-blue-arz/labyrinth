@@ -14,11 +14,6 @@ const RESTART_PREFIX = "restart-";
 
 export default {
     name: "game-menu",
-    data() {
-        return {
-            computationMethods: []
-        };
-    },
     components: {
         VMenu
     },
@@ -30,7 +25,7 @@ export default {
             } else {
                 menu.push(new MenuItem("enter", "Enter game"));
             }
-            if (this.gameIsNotFull) {
+            if (this.gameIsNotFull && this.playingOnline) {
                 let submenu = this.createAddBotSubmenu();
                 menu.push(new MenuItem("add", "Add bot..", submenu));
             }
@@ -52,6 +47,9 @@ export default {
         },
         gameIsNotFull: function() {
             return this.$store.state.players.allIds.length < 4;
+        },
+        playingOnline: function() {
+            return this.$store.getters["game/isOnline"];
         }
     },
     methods: {
@@ -72,14 +70,19 @@ export default {
                 API.removePlayer(playerId);
             } else if ($event.startsWith(RESTART_PREFIX)) {
                 let size = Number.parseInt($event.substr(RESTART_PREFIX.length));
-                API.changeGame(size);
+                if (this.$store.getters["game/isOnline"]) {
+                    API.changeGame(size);
+                } else {
+                    this.$store.dispatch("game/playOffline", size);
+                }
             }
             this.$emit("item-click");
         },
         createAddBotSubmenu: function() {
             let submenu = [];
-            if (this.computationMethods) {
-                this.computationMethods.forEach(method => {
+            const computationMethods = this.$store.getters["game/computationMethods"];
+            if (computationMethods) {
+                computationMethods.forEach(method => {
                     let key = ADD_PREFIX + method;
                     let text = computationMethodLabel(method);
                     submenu.push(new MenuItem(key, text));
@@ -109,11 +112,6 @@ export default {
             }
             return submenu;
         }
-    },
-    created: function() {
-        API.fetchComputationMethods(responseList => {
-            this.computationMethods = responseList;
-        });
     }
 };
 </script>

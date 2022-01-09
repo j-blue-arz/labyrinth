@@ -89,7 +89,7 @@ export default {
             this.$store.dispatch("players/removeClientPlayer", currentPlayerId);
         },
         timerShouldRun: function() {
-            return this.nextUserAction !== NO_ACTION && this.numPlayers >= 2;
+            return this.nextUserAction !== NO_ACTION && this.$store.getters["game/isOnline"];
         }
     }
 };

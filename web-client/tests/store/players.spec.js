@@ -21,6 +21,7 @@ describe("players Vuex module", () => {
         API.doAddPlayer.mockClear();
         API.removePlayer.mockClear();
         API.changePlayerName.mockClear();
+        givenPlayingOnline();
     });
 
     describe("getters", () => {
@@ -424,6 +425,10 @@ API.changePlayerName = jest.fn();
 
 let store;
 let apiPlayers = [];
+
+const givenPlayingOnline = function() {
+    store.dispatch("game/playOnline");
+};
 
 const givenNoPlayersInState = function() {
     let players = state();

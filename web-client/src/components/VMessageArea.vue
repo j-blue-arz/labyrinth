@@ -24,7 +24,7 @@ export default {
             return this.text !== "";
         },
         shouldShowMessage() {
-            return this.userPlayer.score === 0;
+            return this.userPlayer?.score === 0;
         },
         userPlayer: function() {
             return this.$store.getters["players/userPlayer"];

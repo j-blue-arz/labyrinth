@@ -9,7 +9,8 @@ const ONLINE = "online";
 export const state = () => ({
     nextAction: null,
     objectiveId: -1,
-    mode: OFFLINE
+    mode: OFFLINE,
+    computationMethods: []
 });
 
 const stateInitializer = state;
@@ -27,43 +28,55 @@ const getters = {
     },
     isOnline: state => {
         return state.mode === ONLINE;
+    },
+    computationMethods: state => {
+        if (state.mode === ONLINE) {
+            return state.computationMethods;
+        } else {
+            return [];
+        }
     }
 };
 
 const actions = {
-    enterOnlineGame({ dispatch }) {
+    enterOnlineGame({ dispatch, state }) {
         API.errorHandlers.push(error => handleError(error));
         API.stateObservers.push(apiState => dispatch("game/update", apiState, { root: true }));
         API.activatePolling();
         dispatch("players/enterGame", null, { root: true });
+        if (state.computationMethods.length === 0) {
+            API.fetchComputationMethods(responseList => {
+                commit("setComputationMethods", responseList);
+            });
+        }
     },
     leaveOnlineGame({ commit, dispatch, getters }) {
         if (getters.isOnline) {
             API.stopPolling();
             dispatch("players/removeAllClientPlayers", null, { root: true });
+            commit("offline");
         }
-        commit("offline");
     },
     playOnline({ commit }) {
         commit("online");
     },
-    playOffline({ commit, dispatch }) {
+    playOffline({ commit, dispatch, rootGetters }, size = 7) {
         dispatch("leaveOnlineGame");
         commit("reset");
         dispatch("players/update", [], { root: true });
 
-        const board = generateBoard(7);
-        const player = createPlayer(board.mazeCards[1]);
-        const objectiveMazeCardId = chooseRandomObjective(board.mazeCards, player);
-
-        const generatedState = {
+        const board = generateBoard(size);
+        const boardState = {
             maze: board,
-            enabledShiftLocations: getShiftLocations(7),
-            players: [player],
-            objectiveMazeCardId: objectiveMazeCardId,
-            nextAction: { playerId: player.id, action: action.SHIFT_ACTION }
+            enabledShiftLocations: getShiftLocations(size),
+            players: []
         };
-        dispatch("update", generatedState);
+        dispatch("board/update", boardState, { root: true });
+        dispatch("players/enterGame", null, { root: true });
+        dispatch("board/updatePlayers", rootGetters["players/all"], { root: true });
+
+        const objectiveMazeCardId = chooseRandomObjective(rootGetters);
+        commit("updateObjective", objectiveMazeCardId);
     },
     update({ commit, dispatch }, newState) {
         commit("updateObjective", newState.objectiveMazeCardId);
@@ -92,8 +105,17 @@ const actions = {
         if (getters.isOnline) {
             API.doMove(moveAction.playerId, moveAction.targetLocation);
         } else {
+            if (targetCard.id === state.objectiveId) {
+                dispatch("players/objectiveReached", moveAction.playerId, { root: true });
+                const objectiveMazeCardId = chooseRandomObjective(rootGetters);
+                commit("updateObjective", objectiveMazeCardId);
+            }
+            const allPlayers = rootGetters["players/all"];
+            const currentPlayer = state.nextAction.playerId;
+            const currentIndex = allPlayers.findIndex(player => player.id === currentPlayer.id);
+            const nextPlayerId = allPlayers[(currentIndex + 1) % allPlayers.length].id;
             commit("updateNextAction", {
-                playerId: state.nextAction.playerId,
+                playerId: nextPlayerId,
                 action: action.SHIFT_ACTION
             });
         }
@@ -125,6 +147,34 @@ const actions = {
                 action: action.MOVE_ACTION
             });
         }
+    },
+    playerWasRemoved({ state, commit, rootGetters, getters }, playerId) {
+        if (getters.isOffline) {
+            if (state.nextAction.playerId === playerId) {
+                const allPlayers = rootGetters["players/all"];
+                if (allPlayers.length > 0) {
+                    /* In offline mode, there are at maximum two players (user and wasm). Hence,
+                       it is ok to pick player with index 0 here */
+                    commit("updateNextAction", {
+                        playerId: allPlayers[0].id,
+                        action: action.SHIFT_ACTION
+                    });
+                } else {
+                    commit("updateNextAction", null);
+                }
+            }
+        }
+    },
+    playerWasAdded({ commit, rootGetters, getters }, playerId) {
+        if (getters.isOffline) {
+            const allPlayers = rootGetters["players/all"];
+            if (allPlayers.length == 1) {
+                commit("updateNextAction", {
+                    playerId: allPlayers[0].id,
+                    action: action.SHIFT_ACTION
+                });
+            }
+        }
     }
 };
 
@@ -143,6 +193,9 @@ export const mutations = {
     },
     online(state) {
         state.mode = ONLINE;
+    },
+    setComputationMethods(state, computationMethods) {
+        state.computationMethods = computationMethods;
     }
 };
 
@@ -170,23 +223,13 @@ function handleError(error) {
     }
 }
 
-function createPlayer(playerMazeCard) {
-    const playerId = 0;
-
-    let player = {
-        id: playerId,
-        mazeCardId: playerMazeCard.id,
-        pieceIndex: 0,
-        isUser: true
-    };
-    return player;
-}
-
-function chooseRandomObjective(mazeCards, player) {
+function chooseRandomObjective(rootGetters) {
+    const mazeCardIds = rootGetters["board/allIds"];
+    const playerCardIds = rootGetters["players/all"].map(player => player.mazeCardId);
     let objectiveMazeCardId;
     do {
-        objectiveMazeCardId = randomChoice(mazeCards).id;
-    } while (player.mazeCardId === objectiveMazeCardId);
+        objectiveMazeCardId = randomChoice(mazeCardIds);
+    } while (playerCardIds.includes(objectiveMazeCardId));
     return objectiveMazeCardId;
 }
 

@@ -57,7 +57,7 @@ export const GET_GAME_STATE_RESULT_FOR_N_3 = {
                 rotation: 90
             },
             {
-                outPaths: "NE",
+                outPaths: "NES",
                 id: 3,
                 location: {
                     column: 0,

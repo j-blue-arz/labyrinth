@@ -6,6 +6,7 @@ import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
+import generateBoard from "@/model/board-factory.js";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("game Vuex module", () => {
@@ -149,49 +150,66 @@ describe("game Vuex module", () => {
         });
 
         describe("move", () => {
-            it("updates players on maze cards", () => {
-                givenStoreFromApi();
+            describe("when playing online", () => {
+                beforeEach(() => {
+                    givenStoreFromApi();
+                });
 
-                whenDispatchMove(loc(0, 2), 42);
+                it("updates players on maze cards", () => {
+                    whenDispatchMove(loc(0, 2), 42);
 
-                expect(playersOnCard(loc(1, 2))).not.toContain(42);
-                expect(playersOnCard(loc(0, 2))).toContain(42);
+                    expect(playersOnCard(loc(1, 2))).not.toContain(42);
+                    expect(playersOnCard(loc(0, 2))).toContain(42);
+                });
+
+                it("updates card of players", () => {
+                    whenDispatchMove(loc(0, 2), 42);
+
+                    expect(player(42).mazeCardId).toEqual(2);
+                });
+
+                it("calls API", () => {
+                    whenDispatchMove(loc(0, 2), 42);
+
+                    expect(API.doMove).toHaveBeenCalledTimes(1);
+                    expect(API.doMove).toHaveBeenCalledWith(42, loc(0, 2));
+                });
             });
 
-            it("updates card of players", () => {
-                givenStoreFromApi();
+            describe("when playing offline", () => {
+                beforeEach(() => {
+                    givenPlayingOffline();
+                    givenNextActionIs(0, MOVE_ACTION);
+                });
 
-                whenDispatchMove(loc(0, 2), 42);
+                it("does not call API", () => {
+                    whenDispatchMove(loc(2, 0), 0);
 
-                expect(player(42).mazeCardId).toEqual(2);
-            });
+                    expect(API.doMove).not.toHaveBeenCalled();
+                });
 
-            it("calls API", () => {
-                givenStoreFromApi();
+                it("changes player's action to 'shift'", () => {
+                    whenDispatchMove(loc(2, 0), 0);
 
-                whenDispatchMove(loc(0, 2), 42);
+                    thenNextActionIs(SHIFT_ACTION);
+                    thenNextPlayerIs(0);
+                });
 
-                expect(API.doMove).toHaveBeenCalledTimes(1);
-                expect(API.doMove).toHaveBeenCalledWith(42, loc(0, 2));
-            });
+                it("increases player's score when objective is reached", () => {
+                    givenObjectiveOnMazeCard(loc(1, 0));
 
-            it("does not call API when playing offline", () => {
-                givenPlayingOffline();
-                givenNextActionIs(0, MOVE_ACTION);
+                    whenDispatchMove(loc(1, 0), 0);
 
-                whenDispatchMove(loc(0, 0), 0);
+                    thenScoreIs(player(0), 1);
+                });
 
-                expect(API.doMove).not.toHaveBeenCalled();
-            });
+                it("generates new objective when objective is reached", () => {
+                    givenObjectiveOnMazeCard(loc(1, 0));
 
-            it("changes player's action to 'shift' when playing offline", () => {
-                givenPlayingOffline();
-                givenNextActionIs(0, MOVE_ACTION);
+                    whenDispatchMove(loc(1, 0), 0);
 
-                whenDispatchMove(loc(0, 0), 0);
-
-                thenNextActionIs(SHIFT_ACTION);
-                thenNextPlayerIs(0);
+                    thenObjectiveIsNotAt(loc(1, 0));
+                });
             });
         });
 
@@ -294,11 +312,27 @@ const givenPlayingOnline = function() {
 };
 
 const givenPlayingOffline = function() {
+    function mockState() {
+        let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
+        return state.maze;
+    }
+
+    jest.mock("@/model/board-factory.js", () => ({
+        default: size => {
+            return mockState();
+        }
+    }));
+
     store.dispatch("game/playOffline");
 };
 
 const givenNextActionIs = function(playerId, nextAction) {
     store.commit("game/updateNextAction", { playerId: playerId, action: nextAction });
+};
+
+const givenObjectiveOnMazeCard = function(location) {
+    const objectiveId = store.getters["board/mazeCard"](location).id;
+    store.commit("game/updateObjective", objectiveId);
 };
 
 const whenUpdateObjective = function() {
@@ -347,6 +381,10 @@ const thenCardLocationsAreConsistent = function() {
     expect(leftoverMazeCard().location).toBeNull();
 };
 
+const thenScoreIs = function(player, expectedScore) {
+    expect(player.score).toEqual(expectedScore);
+};
+
 const thenBoardIsGeneratedWithSize = function(size) {
     const n = store.state.board.mazeSize;
     expect(n).toEqual(size);
@@ -357,6 +395,12 @@ const thenObjectiveIsAMazeCardOnTheBoard = function() {
     expect(objectiveId).toBeGreaterThanOrEqual(0);
     const objectiveCard = store.getters["board/mazeCardById"](store.state.game.objectiveId);
     expect(objectiveCard).toBeDefined();
+};
+
+const thenObjectiveIsNotAt = function(location) {
+    const prohibited = store.getters["board/mazeCard"](location).id;
+    const actual = store.state.game.objectiveId;
+    expect(actual).not.toEqual(prohibited);
 };
 
 const thenPlayerIsRemovedByApi = function(playerId) {

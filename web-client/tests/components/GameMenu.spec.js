@@ -177,12 +177,22 @@ describe("GameMenu", () => {
     });
 
     describe("change game size", () => {
-        it("calls changeGame() on API with correct size", () => {
+        it("calls changeGame() on API with correct size in online mode", () => {
+            givenPlayingOnline();
             givenGameMenu();
 
             whenClickInMenu("restart", "restart-9");
 
             expect(API.changeGame).toHaveBeenCalledWith(9);
+        });
+
+        it("dispatches change of size on store with correct size in offline mode", () => {
+            givenPlayingOffline();
+            givenGameMenu();
+
+            whenClickInMenu("restart", "restart-9");
+
+            thenDispatchWas("game/playOffline", 9);
         });
     });
 });
@@ -224,8 +234,18 @@ const whenGameMenuIsCreated = function() {
     gameMenu = factory();
 };
 
+const givenPlayingOnline = function() {
+    mockStore.getters["game/isOnline"] = true;
+    mockStore.getters["game/isOffline"] = false;
+};
+
+const givenPlayingOffline = function() {
+    mockStore.getters["game/isOnline"] = false;
+    mockStore.getters["game/isOffline"] = true;
+};
+
 const givenComputationMethods = function(computationMethods) {
-    API.fetchComputationMethods.mockImplementation(cb => cb(computationMethods));
+    mockStore.getters["game/computationMethods"] = computationMethods;
 };
 
 const givenUserIsParticipating = function() {
@@ -306,8 +326,12 @@ const clickInMenu = function(ref) {
         .trigger("click");
 };
 
-const thenDispatchWas = function(expected) {
-    expect(mockStore.dispatch).toHaveBeenCalledWith(expected);
+const thenDispatchWas = function(expected, arg) {
+    if (arg) {
+        expect(mockStore.dispatch).toHaveBeenCalledWith(expected, arg);
+    } else {
+        expect(mockStore.dispatch).toHaveBeenCalledWith(expected);
+    }
 };
 
 const thenEntryExists = function(ref) {

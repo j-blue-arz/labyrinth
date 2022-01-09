@@ -29,17 +29,23 @@ export const getters = {
     },
     mazeCardsRowMajorOrder: (state, getters) => {
         return [].concat.apply([], state.boardLayout).map(getters.mazeCardById);
+    },
+    allIds: state => {
+        return [].concat.apply([state.leftoverId], state.boardLayout);
     }
 };
 
 const actions = {
-    update({ commit }, updateState) {
+    update({ commit, dispatch }, updateState) {
         commit("updateBoard", updateState.maze);
         const n = updateState.maze.mazeSize;
         const enabledShiftLocations = updateState.enabledShiftLocations;
         const disabledShiftLocation = findDisabledShiftLocation(n, enabledShiftLocations);
         commit("setDisabledShiftLocation", disabledShiftLocation);
-        commit("setPlayersOnCards", updateState.players);
+        dispatch("updatePlayers", updateState.players);
+    },
+    updatePlayers({ commit }, players) {
+        commit("setPlayersOnCards", players);
     },
     movePlayer({ commit, getters }, move) {
         const sourceCard = getters.mazeCardById(move.sourceCardId);

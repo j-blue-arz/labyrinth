@@ -71,53 +71,77 @@ const actions = {
     changePlayersCard({ commit }, cardChange) {
         commit("setPlayerCard", cardChange);
     },
-    enterGame({ commit, getters }) {
+    enterGame({ commit, getters, rootGetters, dispatch }) {
         if (!getters.hasUserPlayer) {
-            API.doAddPlayer(apiPlayer => {
-                apiPlayer.isUser = true;
-                commit("addPlayer", apiPlayer);
-            });
+            if (rootGetters["game/isOnline"]) {
+                API.doAddPlayer(apiPlayer => {
+                    apiPlayer.isUser = true;
+                    commit("addPlayer", apiPlayer);
+                });
+            } else {
+                const playerMazeCard = rootGetters["board/mazeCard"]({ row: 0, column: 0 });
+                const player = createPlayer(0);
+                player.isUser = true;
+                player.mazeCardId = playerMazeCard.id;
+                commit("addPlayer", player);
+                dispatch("game/playerWasAdded", player.id, { root: true });
+            }
         }
     },
-    leaveGame({ commit, getters }) {
+    leaveGame({ getters, dispatch }) {
         if (getters.hasUserPlayer) {
-            const playerId = getters.userPlayerId;
-            API.removePlayer(playerId);
-            commit("removePlayer", playerId);
+            dispatch("removeClientPlayer", getters.userPlayerId);
         }
     },
-    addWasmPlayer({ commit, getters }) {
+    addWasmPlayer({ commit, getters, rootGetters, rootState, dispatch }) {
         if (!getters.hasWasmPlayer) {
-            API.doAddPlayer(apiPlayer => {
-                apiPlayer.isWasm = true;
-                commit("addPlayer", apiPlayer);
-            });
+            if (rootGetters["game/isOnline"]) {
+                API.doAddPlayer(apiPlayer => {
+                    apiPlayer.isWasm = true;
+                    commit("addPlayer", apiPlayer);
+                });
+            } else {
+                const playerMazeCard = rootGetters["board/mazeCard"]({
+                    row: 0,
+                    column: rootState.board.mazeSize - 1
+                });
+                const player = createPlayer(1);
+                player.isWasm = true;
+                player.mazeCardId = playerMazeCard.id;
+                commit("addPlayer", player);
+                dispatch("game/playerWasAdded", player.id, { root: true });
+            }
         }
     },
-    removeWasmPlayer({ commit, getters }) {
+    removeWasmPlayer({ getters, dispatch }) {
         if (getters.hasWasmPlayer) {
-            const playerId = getters.wasmPlayerId;
-            API.removePlayer(playerId);
-            commit("removePlayer", playerId);
+            dispatch("removeClientPlayer", getters.wasmPlayerId);
         }
     },
     removeAllClientPlayers({ dispatch }) {
         dispatch("removeWasmPlayer");
         dispatch("leaveGame");
     },
-    removeClientPlayer({ getters, dispatch }, playerId) {
-        if (getters.userPlayerId === playerId) {
-            dispatch("leaveGame");
-        } else if (getters.wasmPlayerId === playerId) {
-            dispatch("removeWasmPlayer");
+    removeClientPlayer({ getters, dispatch, commit, rootGetters }, playerId) {
+        if (getters.userPlayerId === playerId || getters.wasmPlayerId === playerId) {
+            if (rootGetters["game/isOnline"]) {
+                API.removePlayer(playerId);
+            }
+            commit("removePlayer", playerId);
+            dispatch("game/playerWasRemoved", playerId, { root: true });
         }
     },
-    changeUserPlayerName({ getters, commit }, newName) {
+    changeUserPlayerName({ getters, commit, rootGetters }, newName) {
         if (getters.hasUserPlayer) {
             const playerId = getters.userPlayerId;
-            API.changePlayerName(playerId, newName);
+            if (rootGetters["game/isOnline"]) {
+                API.changePlayerName(playerId, newName);
+            }
             commit("changeName", { id: playerId, name: newName });
         }
+    },
+    objectiveReached({ commit }, playerId) {
+        commit("increaseScore", playerId);
     }
 };
 
@@ -144,6 +168,9 @@ export const mutations = {
     },
     changeName(state, nameChange) {
         state.byId[nameChange.id].name = nameChange.name;
+    },
+    increaseScore(state, playerId) {
+        state.byId[playerId].score += 1;
     }
 };
 
@@ -162,4 +189,12 @@ function fillPlayer(playerToFill, apiPlayer) {
 
 function newPlayer(id) {
     return { id: id, name: "", score: 0 };
+}
+
+function createPlayer(playerId) {
+    let player = {
+        id: playerId,
+        pieceIndex: playerId
+    };
+    return player;
 }
