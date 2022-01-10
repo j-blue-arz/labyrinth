@@ -82,7 +82,7 @@ describe("GameMenu", () => {
         });
 
         it("has no WASM entry when there is already a WASM player participating", () => {
-            givenWasmIsParticipating();
+            givenComputationMethods(["exhaustive-search"]);
             givenGameMenu();
 
             whenClickInMenu("add");

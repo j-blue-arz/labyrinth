@@ -27,10 +27,12 @@ export default {
             }
             if (this.gameIsNotFull) {
                 let submenu = this.createAddBotSubmenu();
-                menu.push(new MenuItem("add", "Add bot..", submenu));
+                if (submenu.length > 0) {
+                    menu.push(new MenuItem("add", "Add bot..", submenu));
+                }
             }
-            if (this.bots.length > 0 || this.$store.getters["players/hasWasmPlayer"]) {
-                let submenu = this.removeBotSubmenu();
+            let submenu = this.removeBotSubmenu();
+            if (submenu.length > 0) {
                 menu.push(new MenuItem("remove", "Remove bot..", submenu));
             }
             menu.push(
