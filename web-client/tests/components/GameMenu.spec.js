@@ -177,6 +177,44 @@ describe("GameMenu", () => {
             thenDispatchWas("game/playOffline", 9);
         });
     });
+
+    describe("server connection", () => {
+        it("displays 'connect' in offline mode", () => {
+            givenPlayingOffline();
+
+            whenGameMenuIsCreated();
+
+            thenEntryExists("connect");
+            thenEntryDoesNotExist("disconnect");
+        });
+
+        it("dispatches 'playOnline' when 'connect' was clicked", () => {
+            givenPlayingOffline();
+            givenGameMenu();
+
+            whenClickInMenu("connect");
+
+            thenDispatchWas("game/playOnline");
+        });
+
+        it("displays 'disconnect' in online mode", () => {
+            givenPlayingOnline();
+
+            whenGameMenuIsCreated();
+
+            thenEntryExists("disconnect");
+            thenEntryDoesNotExist("connect");
+        });
+
+        it("dispatches 'playOffline' when 'disconnect' was clicked", () => {
+            givenPlayingOnline();
+            givenGameMenu();
+
+            whenClickInMenu("disconnect");
+
+            thenDispatchWas("game/playOffline");
+        });
+    });
 });
 
 const { state } = playersConfig;

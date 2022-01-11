@@ -7,8 +7,8 @@ let pollingTimer = 0;
 
 export default {
     _fetchSource: axios.CancelToken.source(),
-    stateObservers: [],
-    errorHandlers: [],
+    stateObserver: state => {},
+    errorHandler: error => {},
     _isPolling: false,
 
     // this will not start polling until the next request has finished.
@@ -45,10 +45,13 @@ export default {
 
     _handleError(error) {
         if (!this._errorWasThrownByCancel(error)) {
-            this.errorHandlers.forEach(fn => {
-                fn(error);
-            });
+            this.errorHandler(error);
         }
+    },
+
+    resetHandlers() {
+        this.stateObserver = state => {};
+        this.errorHandler = error => {};
     },
 
     doMove(playerId, toLocation) {
@@ -134,11 +137,7 @@ export default {
             .get(getStatePath, {
                 cancelToken: this._fetchSource.token
             })
-            .then(response =>
-                this.stateObservers.forEach(fn => {
-                    fn(response.data);
-                })
-            )
+            .then(response => this.stateObserver(response.data))
             .catch(error => this._handleError(error));
     },
 

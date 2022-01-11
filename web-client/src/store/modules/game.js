@@ -39,26 +39,26 @@ const getters = {
 };
 
 const actions = {
-    enterOnlineGame({ dispatch, state }) {
-        API.errorHandlers.push(error => handleError(error));
-        API.stateObservers.push(apiState => dispatch("game/update", apiState, { root: true }));
-        API.activatePolling();
-        dispatch("players/enterGame", null, { root: true });
-        if (state.computationMethods.length === 0) {
-            API.fetchComputationMethods(responseList => {
-                commit("setComputationMethods", responseList);
-            });
-        }
-    },
     leaveOnlineGame({ commit, dispatch, getters }) {
         if (getters.isOnline) {
+            API.resetHandlers();
             API.stopPolling();
             dispatch("players/removeAllClientPlayers", null, { root: true });
             commit("offline");
         }
     },
-    playOnline({ commit }) {
+    playOnline({ commit, dispatch, state }) {
+        API.errorHandler = error => handleError(error);
+        API.stateObserver = apiState => dispatch("game/update", apiState, { root: true });
+        API.activatePolling();
         commit("online");
+        dispatch("players/update", [], { root: true });
+        if (state.computationMethods.length === 0) {
+            API.fetchComputationMethods(responseList => {
+                commit("setComputationMethods", responseList);
+            });
+        }
+        dispatch("players/enterGame", null, { root: true });
     },
     playOffline({ commit, dispatch, rootGetters }, size = 7) {
         dispatch("leaveOnlineGame");

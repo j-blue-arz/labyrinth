@@ -42,6 +42,11 @@ export default {
                     new MenuItem(RESTART_PREFIX + "13", "huge size (13)")
                 ])
             );
+            if (this.$store.getters["game/isOffline"]) {
+                menu.push(new MenuItem("connect", "Connect to server"));
+            } else {
+                menu.push(new MenuItem("disconnect", "Disconnect"));
+            }
             return menu;
         },
         bots: function() {
@@ -57,6 +62,10 @@ export default {
                 this.$store.dispatch("players/leaveGame");
             } else if ($event === "enter") {
                 this.$store.dispatch("players/enterGame");
+            } else if ($event === "connect") {
+                this.$store.dispatch("game/playOnline");
+            } else if ($event === "disconnect") {
+                this.$store.dispatch("game/playOffline");
             } else if ($event === "add-wasm") {
                 this.$store.dispatch("players/addWasmPlayer");
             } else if ($event === "remove-wasm") {

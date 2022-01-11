@@ -427,7 +427,7 @@ let store;
 let apiPlayers = [];
 
 const givenPlayingOnline = function() {
-    store.dispatch("game/playOnline");
+    store.commit("game/online");
 };
 
 const givenNoPlayersInState = function() {
