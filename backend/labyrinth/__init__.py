@@ -4,7 +4,7 @@ and defines a set of API methods to play the game """
 from collections import namedtuple
 
 Version = namedtuple("Version", ["milestone", "major", "minor"])
-version_info = Version(0, 3, 1)
+version_info = Version(0, 3, 2)
 __version__ = '.'.join(map(str, version_info))
 
 
