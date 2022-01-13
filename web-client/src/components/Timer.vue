@@ -9,27 +9,11 @@ import { NO_ACTION } from "@/model/player.js";
 
 export default {
     name: "timer",
-    data() {
-        return {
-            visible: false
-        };
-    },
     watch: {
         nextUserAction: function(newValue) {
             if (this.timerShouldRun()) {
                 this.$store.dispatch("countdown/restartCountdown");
-                this.visible = true;
             } else {
-                this.visible = false;
-                this.$store.dispatch("countdown/stopCountdown");
-            }
-        },
-        numPlayers: function(newValue, oldValue) {
-            if (oldValue === 1 && this.timerShouldRun()) {
-                this.$store.dispatch("countdown/restartCountdown");
-                this.visible = true;
-            } else if (newValue === 1) {
-                this.visible = false;
                 this.$store.dispatch("countdown/stopCountdown");
             }
         },
@@ -38,7 +22,6 @@ export default {
             // For the case where a game is restarted with a different size,
             // but the user turn does not change
             if (this.timerShouldRun()) {
-                this.visible = true;
                 this.$store.dispatch("countdown/restartCountdown");
             }
         },
@@ -48,7 +31,6 @@ export default {
             // but the user turn does not change
             // This heuristic might fail!
             if (this.timerShouldRun()) {
-                this.visible = true;
                 this.$store.dispatch("countdown/restartCountdown");
             }
         },
@@ -75,6 +57,9 @@ export default {
             } else {
                 return NO_ACTION;
             }
+        },
+        visible: function() {
+            return this.timerShouldRun();
         },
         numPlayers: function() {
             return this.$store.state.players.allIds.length;
