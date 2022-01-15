@@ -49,7 +49,7 @@ const actions = {
     },
     playOnline({ commit, dispatch, state }) {
         API.errorHandler = error => handleError(error);
-        API.stateObserver = apiState => dispatch("game/update", apiState, { root: true });
+        API.stateObserver = apiState => dispatch("game/updateFromApi", apiState, { root: true });
         API.activatePolling();
         commit("online");
         dispatch("players/update", [], { root: true });
@@ -78,7 +78,7 @@ const actions = {
         const objectiveMazeCardId = chooseRandomObjective(rootGetters);
         commit("updateObjective", objectiveMazeCardId);
     },
-    update({ commit, dispatch }, newState) {
+    updateFromApi({ commit, dispatch }, newState) {
         commit("updateObjective", newState.objectiveMazeCardId);
         commit("updateNextAction", newState.nextAction);
         dispatch("players/update", newState.players, { root: true });

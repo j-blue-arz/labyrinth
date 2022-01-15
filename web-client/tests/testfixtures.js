@@ -14,7 +14,7 @@ export const createStore = function(apiState) {
         }
     });
     if (apiState) {
-        store.dispatch("game/update", cloneDeep(apiState));
+        store.dispatch("game/updateFromApi", cloneDeep(apiState));
     }
     return store;
 };

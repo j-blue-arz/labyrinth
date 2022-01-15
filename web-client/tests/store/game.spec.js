@@ -368,7 +368,7 @@ const whenPlayOffline = function() {
 };
 
 const updateGame = function() {
-    store.dispatch("game/update", apiState);
+    store.dispatch("game/updateFromApi", apiState);
 };
 
 const thenCardLocationsAreConsistent = function() {

@@ -75,7 +75,7 @@ const userPlayerId = 5;
 
 function givenUserPlayer() {
     store.commit("players/addPlayer", { id: userPlayerId, isUser: true });
-    store.dispatch("game/update", API_STATE);
+    store.dispatch("game/updateFromApi", API_STATE);
 }
 
 function givenInteractiveBoard() {
