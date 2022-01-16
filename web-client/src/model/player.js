@@ -1,6 +1,9 @@
 export const MOVE_ACTION = "MOVE";
 export const SHIFT_ACTION = "SHIFT";
 export const NO_ACTION = "NONE";
+export const PREPARE_PREFIX = "PREPARE_";
+export const PREPARE_MOVE = PREPARE_PREFIX + MOVE_ACTION;
+export const PREPARE_SHIFT = PREPARE_PREFIX + SHIFT_ACTION;
 
 export function getLabel(player) {
     if (player.isBot) {

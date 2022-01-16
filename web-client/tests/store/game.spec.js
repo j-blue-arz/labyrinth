@@ -1,7 +1,7 @@
 import gameConfig from "@/store/modules/game.js";
 import boardConfig from "@/store/modules/board.js";
 import playersConfig from "@/store/modules/players.js";
-import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
+import { SHIFT_ACTION, MOVE_ACTION, PREPARE_MOVE, PREPARE_SHIFT } from "@/model/player.js";
 import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
@@ -145,7 +145,7 @@ describe("game Vuex module", () => {
 
                 whenPlayOffline();
 
-                thenNextActionIs(SHIFT_ACTION);
+                thenNextActionIs(PREPARE_SHIFT);
             });
         });
 
@@ -191,7 +191,7 @@ describe("game Vuex module", () => {
                 it("changes player's action to 'shift'", () => {
                     whenDispatchMove(loc(2, 0), 0);
 
-                    thenNextActionIs(SHIFT_ACTION);
+                    thenNextActionIs(PREPARE_SHIFT);
                     thenNextPlayerIs(0);
                 });
 
@@ -266,7 +266,7 @@ describe("game Vuex module", () => {
 
                 whenDispatchShift(0, loc(1, 0), 90);
 
-                thenNextActionIs(MOVE_ACTION);
+                thenNextActionIs(PREPARE_MOVE);
                 thenNextPlayerIs(0);
             });
         });

@@ -84,7 +84,7 @@ const actions = {
                 player.isUser = true;
                 player.mazeCardId = playerMazeCard.id;
                 commit("addPlayer", player);
-                dispatch("game/playerWasAdded", player.id, { root: true });
+                dispatch("game/playerWasAdded", null, { root: true });
             }
         }
     },
@@ -109,7 +109,7 @@ const actions = {
                 player.isWasm = true;
                 player.mazeCardId = playerMazeCard.id;
                 commit("addPlayer", player);
-                dispatch("game/playerWasAdded", player.id, { root: true });
+                dispatch("game/playerWasAdded", null, { root: true });
             }
         }
     },

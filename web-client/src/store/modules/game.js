@@ -10,7 +10,8 @@ export const state = () => ({
     nextAction: null,
     objectiveId: -1,
     mode: OFFLINE,
-    computationMethods: []
+    computationMethods: [],
+    turnProgressionTimeout: 0
 });
 
 const stateInitializer = state;
@@ -29,11 +30,15 @@ const getters = {
     isOnline: state => {
         return state.mode === ONLINE;
     },
-    computationMethods: state => {
+    computationMethods: (state, _, __, rootGetters) => {
         if (state.mode === ONLINE) {
             return state.computationMethods;
         } else {
-            return [];
+            if (rootGetters["players/hasWasmPlayer"]) {
+                return [];
+            } else {
+                return ["wasm"];
+            }
         }
     }
 };
@@ -111,16 +116,16 @@ const actions = {
                 commit("updateObjective", objectiveMazeCardId);
             }
             const allPlayers = rootGetters["players/all"];
-            const currentPlayer = state.nextAction.playerId;
-            const currentIndex = allPlayers.findIndex(player => player.id === currentPlayer.id);
+            const currentPlayerId = state.nextAction.playerId;
+            const currentIndex = allPlayers.findIndex(player => player.id === currentPlayerId);
             const nextPlayerId = allPlayers[(currentIndex + 1) % allPlayers.length].id;
-            commit("updateNextAction", {
+            dispatch("continueTurnProgression", {
                 playerId: nextPlayerId,
                 action: action.SHIFT_ACTION
             });
         }
     },
-    shift({ dispatch, rootGetters, getters, commit, state }, shiftAction) {
+    shift({ dispatch, rootGetters, getters, state }, shiftAction) {
         if (getters.isOnline) {
             API.doShift(
                 shiftAction.playerId,
@@ -142,39 +147,59 @@ const actions = {
         }
 
         if (getters.isOffline) {
-            commit("updateNextAction", {
+            dispatch("continueTurnProgression", {
                 playerId: state.nextAction.playerId,
                 action: action.MOVE_ACTION
             });
         }
     },
-    playerWasRemoved({ state, commit, rootGetters, getters }, playerId) {
+    playerWasRemoved({ state, rootGetters, getters, dispatch }, playerId) {
         if (getters.isOffline) {
             if (state.nextAction.playerId === playerId) {
                 const allPlayers = rootGetters["players/all"];
                 if (allPlayers.length > 0) {
                     /* In offline mode, there are at maximum two players (user and wasm). Hence,
                        it is ok to pick player with index 0 here */
-                    commit("updateNextAction", {
+                    dispatch("continueTurnProgression", {
                         playerId: allPlayers[0].id,
                         action: action.SHIFT_ACTION
                     });
                 } else {
-                    commit("updateNextAction", null);
+                    dispatch("abortTurnProgression");
                 }
             }
         }
     },
-    playerWasAdded({ commit, rootGetters, getters }, playerId) {
+    playerWasAdded({ rootGetters, getters, dispatch }) {
         if (getters.isOffline) {
             const allPlayers = rootGetters["players/all"];
             if (allPlayers.length == 1) {
-                commit("updateNextAction", {
+                dispatch("continueTurnProgression", {
                     playerId: allPlayers[0].id,
                     action: action.SHIFT_ACTION
                 });
             }
         }
+    },
+    continueTurnProgression({ state, commit }, nextPlayerAction) {
+        if (state.turnProgressionTimeout > 0) {
+            clearTimeout(state.turnProgressionTimeout);
+            commit("turnProgressionTimeout", 0);
+        }
+        const prepareAction = {
+            playerId: nextPlayerAction.playerId,
+            action: action.PREPARE_PREFIX + nextPlayerAction.action
+        };
+        commit("updateNextAction", prepareAction);
+        const timeout = setTimeout(() => commit("updateNextAction", nextPlayerAction), 800);
+        commit("turnProgressionTimeout", timeout);
+    },
+    abortTurnProgression({ commit, state }) {
+        if (state.turnProgressionTimeout > 0) {
+            clearTimeout(state.turnProgressionTimeout);
+            commit("turnProgressionTimeout", 0);
+        }
+        commit("updateNextAction", null);
     }
 };
 
@@ -196,6 +221,9 @@ export const mutations = {
     },
     setComputationMethods(state, computationMethods) {
         state.computationMethods = computationMethods;
+    },
+    turnProgressionTimeout(identifier) {
+        state.turnProgressionTimeout = identifier;
     }
 };
 
