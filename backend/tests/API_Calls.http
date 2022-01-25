@@ -2,8 +2,7 @@ POST http://localhost:5000/api/games/0/players
 content-type: application/json
 
 {
-    "isBot": true,
-    "computationMethod": "dynamic-libexhsearch"
+    "isBot": false
 }
 
 ###

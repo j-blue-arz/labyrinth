@@ -96,18 +96,20 @@ class ObserveGameInteractor:
 
     It updates a timestamp on the game if the current one is too old.
     """
-    def __init__(self, game_repository, update_period=timedelta(minutes=15)):
+    def __init__(self, game_repository, update_period=timedelta(minutes=15), action_timeout=timedelta(seconds=30)):
         self._game_repository = game_repository
         self._update_period = update_period
+        self._action_timeout = action_timeout
 
     def retrieve_game(self, game_id):
-        game, last_observed_timestamp = self._game_repository.find_by_id(game_id, with_last_observed=True)
-        if self._update_required(last_observed_timestamp):
+        game, observed_timestamp, action_timestamp = self._game_repository.find_by_id(game_id, with_timestamps=True)
+        if self._update_required(observed_timestamp):
             self._game_repository.update_observed_timestamp(game, datetime.now())
-        return game
+        remaining = max((action_timestamp + self._action_timeout) - datetime.now(), timedelta(seconds=0))
+        return game, remaining
 
-    def _update_required(self, last_observed_timestamp):
-        return not last_observed_timestamp or last_observed_timestamp + self._update_period < datetime.now()
+    def _update_required(self, observed_timestamp):
+        return not observed_timestamp or observed_timestamp + self._update_period < datetime.now()
 
 
 class UnobservedGamesInteractor:
@@ -140,8 +142,8 @@ class GameRepository:
     def __init__(self, data_access):
         self._data_access = data_access
 
-    def find_by_id(self, game_id, with_last_observed=False):
-        game = self._data_access.load_game(game_id, with_last_observed=with_last_observed)
+    def find_by_id(self, game_id, with_timestamps=False):
+        game = self._data_access.load_game(game_id, with_timestamps=with_timestamps)
         if game is None:
             raise exceptions.GameNotFoundException
         return game

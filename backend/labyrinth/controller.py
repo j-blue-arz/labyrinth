@@ -2,6 +2,8 @@
 
 handles database access, calls functions on entities or use cases, performs exception mapping
 Should not contain business logic"""
+from datetime import timedelta
+
 from flask import url_for, current_app
 
 import labyrinth.model.factories as factory
@@ -93,9 +95,10 @@ def get_game_state(game_id):
     """ Returns the game state """
     _ = interactors.OverduePlayerInteractor(game_repository(), logging.get_logger())
     _ = interactors.UpdateOnTurnChangeInteractor(game_repository())
-    interactor = interactors.ObserveGameInteractor(game_repository())
-    game = _try(lambda: interactor.retrieve_game(game_id))
-    game_state = mapper.game_state_to_dto(game)
+    action_timeout = timedelta(seconds=int(current_app.config["OVERDUE_PLAYER_TIMEDELTA_S"]))
+    interactor = interactors.ObserveGameInteractor(game_repository(), action_timeout=action_timeout)
+    game, remaining_timedelta = _try(lambda: interactor.retrieve_game(game_id))
+    game_state = mapper.game_state_to_dto(game, remaining_timedelta)
     DatabaseGateway.get_instance().commit()
     return game_state
 

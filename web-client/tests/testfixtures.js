@@ -132,6 +132,7 @@ export const GET_GAME_STATE_RESULT_FOR_N_3 = {
     ],
     nextAction: {
         action: "SHIFT",
-        playerId: 17
+        playerId: 17,
+        remainingSeconds: 13
     }
 };

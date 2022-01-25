@@ -18,6 +18,7 @@ def app():
     app = create_app({
         'TESTING': True,
         'DATABASE': db_path,
+        "OVERDUE_PLAYER_TIMEDELTA_S": 30
     })
     yield app
     os.close(file_descriptor)

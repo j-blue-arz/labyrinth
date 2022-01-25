@@ -225,6 +225,18 @@ def test_get_state_valid_after_error(client):
     _wait_for(client, "SHIFT")
 
 
+def test_get_state_returns_remaining_time(client):
+    """ Tests GET for /api/games/0/state
+
+    expects the remaining time for the current action to be returned
+    """
+    _post_player(client)
+    time.sleep(3)
+
+    state = _get_state(client).get_json()
+    assert abs(state["nextAction"]["remainingSeconds"] - 27) <= 1
+
+
 def test_change_maze_size(client):
     """ Tests PUT for /api/games/0
 

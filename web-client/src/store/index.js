@@ -8,7 +8,7 @@ import countdown from "./modules/countdown.js";
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
+let store = new Vuex.Store({
     modules: {
         game: game,
         board: board,
@@ -17,3 +17,12 @@ export default new Vuex.Store({
     },
     strict: process.env.NODE_ENV !== "production"
 });
+
+store.watch(
+    state => state.game.nextAction,
+    nextAction => {
+        store.dispatch("countdown/nextActionUpdated", nextAction);
+    }
+);
+
+export default store;

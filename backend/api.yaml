@@ -220,7 +220,7 @@ components:
                                 $ref: "#/components/schemas/mazeCard"
                 nextAction:
                     type: "object"
-                    description: "The player whose turn it is, and the action he has to take. `null` if there are no players in the game."
+                    description: "The player to take an action, the type of the action and the remaining time."
                     properties:
                         action:
                             type: "string"
@@ -231,6 +231,9 @@ components:
                                 - "MOVE"
                         playerId:
                             type: "integer"
+                        remainingSeconds:
+                            type: "integer"
+                            description: remaining full seconds
                 objectiveMazeCardId:
                     type: "integer"
                     description: "One of the identifiers of the elements of `mazeCards`, specifying the current location of the objective."
@@ -569,6 +572,7 @@ components:
                 nextAction:
                     action: SHIFT
                     playerId: 1
+                    remainingSeconds: 17
                 objectiveMazeCardId: 48
                 players:
                     - id: 1

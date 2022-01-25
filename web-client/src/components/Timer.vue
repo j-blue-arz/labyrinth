@@ -5,76 +5,19 @@
 </template>
 
 <script>
-import { NO_ACTION } from "@/model/player.js";
-
 export default {
     name: "timer",
-    watch: {
-        nextUserAction: function(newValue) {
-            if (this.timerShouldRun()) {
-                this.$store.dispatch("countdown/restartCountdown");
-            } else {
-                this.$store.dispatch("countdown/stopCountdown");
-            }
-        },
-        gameSize: function() {
-            // this is a heuristic to detect a game restart
-            // For the case where a game is restarted with a different size,
-            // but the user turn does not change
-            if (this.timerShouldRun()) {
-                this.$store.dispatch("countdown/restartCountdown");
-            }
-        },
-        objectiveId: function() {
-            // this is a heuristic to detect a game restart
-            // For the case where a game is restarted with the same size,
-            // but the user turn does not change
-            // This heuristic might fail!
-            if (this.timerShouldRun()) {
-                this.$store.dispatch("countdown/restartCountdown");
-            }
-        },
-        remainingSeconds: function(newValue) {
-            if (newValue <= 0 && this.timerShouldRun()) {
-                this.removeCurrentPlayer();
-            }
-        }
-    },
     computed: {
-        gameSize: function() {
-            return this.$store.state.board.mazeSize;
-        },
-        objectiveId: function() {
-            return this.$store.state.game.objectiveId;
-        },
         remainingSeconds: function() {
             return this.$store.state.countdown.remainingSeconds;
         },
-        nextUserAction: function() {
-            const userPlayer = this.$store.getters["players/userPlayer"];
-            if (userPlayer) {
-                return userPlayer.nextAction;
-            } else {
-                return NO_ACTION;
-            }
-        },
         visible: function() {
-            return this.timerShouldRun();
-        },
-        numPlayers: function() {
-            return this.$store.state.players.allIds.length;
+            return this.$store.getters["countdown/timerShouldRun"];
         }
     },
     methods: {
         formatTime: function(seconds) {
             return ("0" + seconds).slice(-2);
-        },
-        removeCurrentPlayer: function() {
-            const currentPlayerId = this.$store.state.game.nextAction.playerId;
-            this.$store.dispatch("players/removeClientPlayer", currentPlayerId);
-        },
-        timerShouldRun: function() {
-            return this.nextUserAction !== NO_ACTION && this.$store.getters["game/isOnline"];
         }
     }
 };

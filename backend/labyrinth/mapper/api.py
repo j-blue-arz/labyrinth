@@ -4,6 +4,7 @@ There are no specific classes for these DTOs,
 instead they are data structures built of dictionaries and lists,
 which in turn are automatically translatable to structured text (JSON or XML)
 """
+from datetime import timedelta
 from labyrinth.model.game import Game, Turns, Player
 import labyrinth.model.bots
 from labyrinth.mapper.shared import _objective_to_dto, _dto_to_board_location, _board_location_to_dto, _board_to_dto
@@ -12,7 +13,7 @@ from labyrinth.mapper.constants import (ID, OBJECTIVE, PLAYERS, MAZE, NEXT_ACTIO
                                         MAZE_SIZE, SCORE, PIECE_INDEX, IS_BOT, COMPUTATION_METHOD, PLAYER_NAME)
 
 
-def game_state_to_dto(game: Game):
+def game_state_to_dto(game: Game, remaining: timedelta):
     """Maps the game state, as served by the GET state request, to a DTO.
     Player ID is no longer a parameter, because with the change that all players have the same objective,
     every player has full information about the game.
@@ -20,12 +21,15 @@ def game_state_to_dto(game: Game):
     :param game: an instance of model.Game
     :return: a structure whose JSON representation is valid for the API
     """
+    player_action_dto = _turns_to_next_player_action_dto(game.turns)
+    if player_action_dto:
+        player_action_dto["remainingSeconds"] = int(remaining.total_seconds())
     return {
         ID: game.identifier,
         OBJECTIVE: _objective_to_dto(game.board.objective_maze_card),
         PLAYERS: [player_to_dto(player) for player in game.players],
         MAZE: _board_to_dto(game.board),
-        NEXT_ACTION: _turns_to_next_player_action_dto(game.turns),
+        NEXT_ACTION: player_action_dto,
         ENABLED_SHIFT_LOCATIONS: _enabled_shift_locations_to_dto(game)
     }
 

@@ -2,6 +2,8 @@
 More specifically, it tests the method game_state_to_dto(),
 which maps a Game instance to an object used to transfer the state """
 import json
+from datetime import timedelta
+
 import labyrinth.mapper.api as mapper
 import labyrinth.mapper.constants as keys
 from labyrinth.model.game import BoardLocation, Player
@@ -22,7 +24,7 @@ def _create_test_game():
 def test_mapping_players():
     """ Tests correct mapping of players """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     assert keys.PLAYERS in game_dto
     assert len(game_dto[keys.PLAYERS]) == len(game.board.pieces)
     assert len(game_dto[keys.PLAYERS]) == len(game.players)
@@ -43,7 +45,7 @@ def test_mapping_players_sort_order():
     game.remove_player(1)
     game.add_player(Player(identifier=2))
     game.add_player(Player(identifier=1))
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
 
     assert game_dto[keys.PLAYERS][0][keys.PIECE_INDEX] < game_dto[keys.PLAYERS][1][keys.PIECE_INDEX]
     assert game_dto[keys.PLAYERS][1][keys.PIECE_INDEX] < game_dto[keys.PLAYERS][2][keys.PIECE_INDEX]
@@ -52,7 +54,7 @@ def test_mapping_players_sort_order():
 def test_mapping_leftover():
     """ Tests correct mapping of leftover maze card """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     maze_cards = game_dto[keys.MAZE][keys.MAZE_CARDS]
     leftover_dtos = [maze_card for maze_card in maze_cards
                      if not maze_card[keys.LOCATION]]
@@ -65,7 +67,7 @@ def test_mapping_leftover():
 def test_mapping_board():
     """ Tests correct mapping of current board state """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     maze_cards = game_dto[keys.MAZE][keys.MAZE_CARDS]
     maze_card_dtos = [maze_card_dto for maze_card_dto in maze_cards
                       if maze_card_dto[keys.LOCATION]]
@@ -85,7 +87,7 @@ def test_mapping_board():
 def test_mapping_objectives():
     """ Tests correct mapping of players' objective """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     assert keys.OBJECTIVE in game_dto
     assert game_dto[keys.OBJECTIVE] == game.board.objective_maze_card.identifier
 
@@ -93,7 +95,7 @@ def test_mapping_objectives():
 def test_mapping_enabled_shift_loctions():
     """ Tests correct mapping of enabled shift loctions """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     assert keys.ENABLED_SHIFT_LOCATIONS in game_dto
     assert len(game_dto[keys.ENABLED_SHIFT_LOCATIONS]) == 11
     for enabled_shift_location in game_dto[keys.ENABLED_SHIFT_LOCATIONS]:
@@ -104,7 +106,7 @@ def test_mapping_enabled_shift_loctions():
 def test_mapping_identifier():
     """ Tests correct mapping of game's identifier """
     game = _create_test_game()
-    game_dto = mapper.game_state_to_dto(game)
+    game_dto = mapper.game_state_to_dto(game, timedelta(0))
     assert game_dto[keys.ID] == game.identifier
 
 

@@ -62,18 +62,21 @@ class DatabaseGateway:
         )
         self._notify_listeners(game)
 
-    def load_game(self, game_id, for_update=False, with_last_observed=False):
+    def load_game(self, game_id, for_update=False, with_timestamps=False):
         """ Loads a game from the database """
         game_row = (
             self._db(exclusive=for_update)
-            .execute("SELECT game_state, last_observed_timestamp FROM games WHERE id=?", (game_id,))
+            .execute(
+                "SELECT game_state, last_observed_timestamp, player_action_timestamp FROM games WHERE id=?",
+                (game_id,),
+            )
             .fetchone()
         )
         if game_row is None:
             return None
         game = self._game_row_to_game(game_row)
-        if with_last_observed:
-            return game, game_row["last_observed_timestamp"]
+        if with_timestamps:
+            return game, game_row["last_observed_timestamp"], game_row["player_action_timestamp"]
         else:
             return game
 
