@@ -520,10 +520,6 @@ class PlayerAction:
     def is_prepare(self):
         return self.action in [self.PREPARE_SHIFT, self.PREPARE_MOVE]
 
-    def copy_with_prepare(self):
-        action = self.action if self.is_prepare() else f"PREPARE_{self.action}"
-        return PlayerAction(self._player, action)
-
     def __eq__(self, other):
         return isinstance(self, type(other)) and \
             self.player.identifier == other.player.identifier and \
@@ -647,10 +643,6 @@ class Turns:
         else:
             self._notify_turn_changed_listeners()
 
-    def restart_player_action(self):
-        player_prepare_action = self.next_player_action().copy_with_prepare()
-        self.set_next(player_action=player_prepare_action)
-
     def _delay_next_state(self, next_player_action):
         time.sleep(self._prepare_delay.total_seconds())
         # check that state was not changed, e.g. due to removed player
@@ -741,8 +733,6 @@ class Game:
         self._players.sort(key=lambda player: player.piece.piece_index)
         if len(self.players) == 1:
             self._turns.start()
-        if len(self.players) == 2:
-            self._turns.restart_player_action()
 
     def get_player(self, player_id):
         """ Finds a player by ID

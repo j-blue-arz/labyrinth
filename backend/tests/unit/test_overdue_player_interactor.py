@@ -30,18 +30,6 @@ def test_remove_overdue_players__with_one_blocking_player__removes_current_playe
     logger.remove_player.assert_called_once()
 
 
-def test_remove_overdue_players__with_only_one_blocking_player__does_not_remove_current_player():
-    game = setup_test(players=[Player(3)])
-    game.remove_player = Mock()
-    game_repository = when_game_repository_find_all_before_action_timestamp_then_return([game])
-
-    interactor = interactors.OverduePlayerInteractor(game_repository, logger)
-    interactor.remove_overdue_players()
-
-    game.remove_player.assert_not_called()
-    logger.remove_player.assert_not_called()
-
-
 def test_remove_overdue_players__with_player_just_removed__does_not_raise_exception():
     """ When the last remaining player was removed or has left the game,
     the update timestamp will stay at its last value. Then, the interactor must not try to remove a player.

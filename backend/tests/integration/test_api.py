@@ -463,7 +463,7 @@ def test_get_computation_methods_contains_library(library_path, client):
     assert expected_name in computation_methods
 
 
-def test_remove_overdue_players__with_two_overdue_player__should_remove_player(client, cli_runner):
+def test_remove_overdue_players__with_two_overdue_players__should_remove_player(client, cli_runner):
     """ Tests the cli to remove overdue players.
 
     Sets the overdue time to 1s and waits 2s before executing cli."""
@@ -480,7 +480,7 @@ def test_remove_overdue_players__with_two_overdue_player__should_remove_player(c
     assert state["players"][0]["id"] == player_id_2
 
 
-def test_remove_overdue_players__with_one_overdue_player__should_not_remove_player(client, cli_runner):
+def test_remove_overdue_players__with_one_overdue_player__should_remove_player(client, cli_runner):
     """ Tests the cli to remove overdue players.
 
     A single player is not removed. When a second player joins, the countdown starts for the first player.
@@ -491,18 +491,7 @@ def test_remove_overdue_players__with_one_overdue_player__should_not_remove_play
     time.sleep(2)
     _cli_remove_overdue_players(cli_runner, 1)
     state = _get_state(client).get_json()
-    assert len(state["players"]) == 1
-
-    player_id_2 = _assert_ok_retrieve_id(_post_player(client))
-    _cli_remove_overdue_players(cli_runner, 1)
-    state = _get_state(client).get_json()
-    assert len(state["players"]) == 2
-
-    time.sleep(2)
-    _cli_remove_overdue_players(cli_runner, 1)
-    state = _get_state(client).get_json()
-    assert len(state["players"]) == 1
-    assert state["players"][0]["id"] == player_id_2
+    assert len(state["players"]) == 0
 
 
 def test_remove_unobserved_games__with_one_unobserved_game__should_remove_game(client, cli_runner):

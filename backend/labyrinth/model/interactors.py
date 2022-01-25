@@ -76,7 +76,7 @@ class OverduePlayerInteractor:
         threshold = datetime.now() - overdue_timedelta
         games = self._game_repository.find_all_before_action_timestamp(threshold)
         for game in games:
-            if len(game.players) > 1:
+            if game.players:
                 player_id_to_remove = game.next_player().identifier
                 game.remove_player(player_id_to_remove)
                 self._game_repository.update(game)
