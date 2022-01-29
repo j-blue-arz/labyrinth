@@ -6,6 +6,7 @@ import labyrinth.event_logging as logging
 
 API = Blueprint("analytics", __name__, url_prefix='/analytics')
 
+
 @API.route("/launch", methods=["POST"])
 def app_launch():
     user_agent = request.user_agent.string.encode('utf-8')
