@@ -61,6 +61,9 @@ def create_app(test_config=None):
     from . import api
     app.register_blueprint(api.API)
 
+    from . import analytics
+    app.register_blueprint(analytics.API)
+
     from . import game_management
     app.register_blueprint(game_management.GAME_MANAGEMENT)
 

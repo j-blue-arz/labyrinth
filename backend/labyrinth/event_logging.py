@@ -38,10 +38,14 @@ class EventLogger():
     def remove_player(self, *args, **kwargs):
         pass
 
+    def app_launch(self, *args, **kwargs):
+        pass
+
 
 class InfluxLogger(EventLogger):
     _GAME_COUNTER = "games"
     _PLAYER_COUNTER = "players"
+    _APP_LAUNCHES = "launches"
 
     def __init__(self, url, token):
         self.org = "labyrinth"
@@ -88,4 +92,11 @@ class InfluxLogger(EventLogger):
             .field("value", -1) \
             .field("count_game_players", num_players) \
             .time(datetime.utcnow(), WritePrecision.NS)
+        self.write_api.write(self.bucket, self.org, point)
+
+    def app_launch(self, user_agent_hash):
+        point = Point(self._APP_LAUNCHES) \
+            .tag("user_agent_hash", str(user_agent_hash)) \
+            .field("value", 1) \
+            .time(datetime.utcnow(), WritePrecision.S)
         self.write_api.write(self.bucket, self.org, point)

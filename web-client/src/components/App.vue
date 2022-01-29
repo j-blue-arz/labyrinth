@@ -11,6 +11,7 @@
 import VMenuBar from "@/components/VMenuBar.vue";
 import VGame from "@/components/VGame.vue";
 import WasmPlayer from "@/model/wasmPlayer.js";
+import logAppLaunch from "@/services/analytics-api.js";
 
 export default {
     name: "app",
@@ -26,7 +27,7 @@ export default {
     created: function() {
         this.wasmPlayer = new WasmPlayer(this.$store);
         window.addEventListener("beforeunload", () => this.leave());
-
+        logAppLaunch();
         this.$store.dispatch("game/playOffline");
     },
     methods: {
