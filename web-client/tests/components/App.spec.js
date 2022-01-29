@@ -2,6 +2,7 @@ import { shallowMount } from "@vue/test-utils";
 import App from "@/components/App.vue";
 
 let dispatch = jest.fn();
+global.fetch = jest.fn();
 
 const factory = function() {
     return shallowMount(App, {
