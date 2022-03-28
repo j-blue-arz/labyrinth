@@ -83,7 +83,19 @@ describe("board Vuex module", () => {
                 expect(playerIds.length).toBe(2);
             });
 
-            it("leaves empty maze card player-ids empty", () => {
+            it("removes player ids from maze card", () => {
+                givenApiStateWithSize3();
+                givenStoreFromApi();
+                givenApiPlayerWithId(42).isOnMazeCard(3);
+                givenApiPlayerWithId(17).isOnMazeCard(3);
+
+                whenSetBoardFromApi();
+
+                const playerIds = store.getters.mazeCardById(2).playerIds;
+                expect(playerIds.length).toBe(0);
+            });
+
+            it("leaves empty maze card player ids empty", () => {
                 givenApiStateWithSize3();
 
                 whenSetBoardFromApi();
@@ -249,6 +261,15 @@ const givenApiStateWithoutDisabledShiftLocations = function() {
 const givenStoreFromApi = function() {
     givenApiStateWithSize3();
     store.dispatch("update", apiState);
+};
+
+const givenApiPlayerWithId = function(playerId) {
+    return {
+        isOnMazeCard(cardId) {
+            const player = apiState.players.find(player => player.id === playerId);
+            player.mazeCardId = cardId;
+        }
+    };
 };
 
 const whenSetBoardFromApi = function() {

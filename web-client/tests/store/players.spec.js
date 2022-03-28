@@ -6,6 +6,7 @@ import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
 import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
+import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("players Vuex module", () => {
     beforeEach(() => {
@@ -109,34 +110,16 @@ describe("players Vuex module", () => {
                 expect(store.getters["players/find"](42).isUser).toBe(true);
                 expect(store.getters["players/hasUserPlayer"]).toBe(true);
             });
-        });
 
-        describe("leaveGame", () => {
-            it("does not call API if no user is not playing", () => {
-                givenNoPlayersInState();
-
+            it("adds player to maze card", () => {
+                givenPlayingOffline();
                 whenLeaveGame();
 
-                expect(API.removePlayer).not.toHaveBeenCalled();
-            });
+                whenEnterGame();
 
-            it("calls API", () => {
-                const userPlayerId = 2;
-                givenPlayerInState({ id: userPlayerId, isUser: true });
-
-                whenLeaveGame();
-
-                expect(API.removePlayer).toHaveBeenCalledTimes(1);
-                expect(API.removePlayer).toHaveBeenCalledWith(userPlayerId);
-            });
-
-            it("removes user from players", () => {
-                givenPlayerInState({ id: 2, isUser: true });
-                expect(store.getters["players/hasUserPlayer"]).toBe(true);
-
-                whenLeaveGame();
-
-                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                const userPlayer = store.getters["players/userPlayer"];
+                const playerMazeCard = store.getters["board/mazeCardById"](userPlayer.mazeCardId);
+                expect(playerMazeCard.playerIds).toEqual([userPlayer.id]);
             });
         });
 
@@ -233,9 +216,9 @@ describe("players Vuex module", () => {
         describe("removeAllClientPlayers", () => {
             it("removes only client players from state", () => {
                 givenPlayersInState([
-                    { id: 2, isWasm: true },
-                    { id: 5, isUser: true },
-                    { id: 7, isWasm: false, isUser: false }
+                    { id: 2, isWasm: true, mazeCardId: 2 },
+                    { id: 5, isUser: true, mazeCardId: 4 },
+                    { id: 7, isWasm: false, isUser: false, mazeCardId: 3 }
                 ]);
 
                 whenRemoveAllClientPlayers();
@@ -249,9 +232,9 @@ describe("players Vuex module", () => {
 
             it("removes calls API with players to remove", () => {
                 givenPlayersInState([
-                    { id: 2, isWasm: true },
-                    { id: 5, isUser: true },
-                    { id: 7, isWasm: false, isUser: false }
+                    { id: 2, isWasm: true, mazeCardId: 2 },
+                    { id: 5, isUser: true, mazeCardId: 4 },
+                    { id: 7, isWasm: false, isUser: false, mazeCardId: 3 }
                 ]);
 
                 whenRemoveAllClientPlayers();
@@ -264,7 +247,7 @@ describe("players Vuex module", () => {
 
         describe("removeClientPlayer", () => {
             it("does not remove player if not managed by client", () => {
-                givenPlayerInState({ id: 7, isWasm: false, isUser: false });
+                givenPlayerInState({ id: 7, isWasm: false, isUser: false, mazeCardId: 2 });
 
                 whenRemoveClientPlayer(7);
 
@@ -274,9 +257,9 @@ describe("players Vuex module", () => {
 
             it("removes player if managed by client", () => {
                 givenPlayersInState([
-                    { id: 2, isWasm: true },
-                    { id: 5, isUser: true },
-                    { id: 7, isWasm: false, isUser: false }
+                    { id: 2, isWasm: true, mazeCardId: 2 },
+                    { id: 5, isUser: true, mazeCardId: 4 },
+                    { id: 7, isWasm: false, isUser: false, mazeCardId: 3 }
                 ]);
 
                 whenRemoveClientPlayer(5);
@@ -284,6 +267,20 @@ describe("players Vuex module", () => {
                 expect(findPlayer(5)).toBeFalsy();
                 expect(API.removePlayer).toHaveBeenCalledTimes(1);
                 expect(API.removePlayer).toHaveBeenCalledWith(5);
+            });
+
+            it("removes player from maze card", () => {
+                givenPlayingOffline();
+
+                whenLeaveGame();
+
+                const mazeCards = store.getters["board/allIds"].map(id =>
+                    store.getters["board/mazeCardById"](id)
+                );
+
+                mazeCards.forEach(mazeCard => {
+                    expect(mazeCard.playerIds.length).toEqual(0);
+                });
             });
         });
 
@@ -427,7 +424,26 @@ let store;
 let apiPlayers = [];
 
 const givenPlayingOnline = function() {
+    let apiState = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
+    apiState.players = [];
+    apiState.nextAction = {};
     store.commit("game/online");
+    store.dispatch("game/updateFromApi", apiState);
+};
+
+const givenPlayingOffline = function() {
+    function mockState() {
+        let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
+        return state.maze;
+    }
+
+    jest.mock("@/model/board-factory.js", () => ({
+        default: size => {
+            return mockState();
+        }
+    }));
+
+    store.dispatch("game/playOffline");
 };
 
 const givenNoPlayersInState = function() {

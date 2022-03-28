@@ -85,6 +85,7 @@ const actions = {
                 player.mazeCardId = playerMazeCard.id;
                 commit("addPlayer", player);
                 dispatch("game/playerWasAdded", null, { root: true });
+                dispatch("board/updatePlayers", getters["all"], { root: true });
             }
         }
     },
@@ -110,6 +111,7 @@ const actions = {
                 player.mazeCardId = playerMazeCard.id;
                 commit("addPlayer", player);
                 dispatch("game/playerWasAdded", null, { root: true });
+                dispatch("board/updatePlayers", getters["all"], { root: true });
             }
         }
     },
@@ -129,6 +131,7 @@ const actions = {
             }
             commit("removePlayer", playerId);
             dispatch("game/playerWasRemoved", playerId, { root: true });
+            dispatch("board/updatePlayers", getters["all"], { root: true });
         }
     },
     changeUserPlayerName({ getters, commit, rootGetters }, newName) {

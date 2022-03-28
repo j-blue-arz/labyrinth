@@ -98,7 +98,7 @@ export const mutations = {
                 Vue.set(
                     newState.cardsById,
                     newState.leftoverId,
-                    createCardWithPlayers(mazeCardArray[0])
+                    createCardWithoutPlayers(mazeCardArray[0])
                 );
             }
 
@@ -109,7 +109,7 @@ export const mutations = {
                     Vue.set(
                         newState.cardsById,
                         mazeCardArray[index].id,
-                        createCardWithPlayers(mazeCardArray[index])
+                        createCardWithoutPlayers(mazeCardArray[index])
                     );
                     newState.boardLayout[row].push(mazeCardArray[index].id);
                     index++;
@@ -123,6 +123,9 @@ export const mutations = {
         state.disabledShiftLocation = shiftLocation;
     },
     setPlayersOnCards(state, players) {
+        [].concat
+            .apply([], state.boardLayout)
+            .forEach(id => state.cardsById[id].playerIds.splice(0));
         for (const player of players) {
             state.cardsById[player.mazeCardId].playerIds.push(player.id);
         }
@@ -200,7 +203,7 @@ export function isInside(location, mazeSize) {
     );
 }
 
-function createCardWithPlayers(mazeCard) {
+function createCardWithoutPlayers(mazeCard) {
     return { ...mazeCard, playerIds: [] };
 }
 
