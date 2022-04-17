@@ -39,7 +39,7 @@ export default {
 
     &__separator {
         font-size: 0.7em;
-        font-weight: bold;
+        font-weight: 700;
         vertical-align: middle;
     }
 }

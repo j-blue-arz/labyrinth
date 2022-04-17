@@ -68,7 +68,7 @@ export default {
 
     &__text {
         pointer-events: none;
-        font-weight: bold;
+        font-weight: 700;
         font-family: sans-serif;
         opacity: 0.8;
 
