@@ -3,7 +3,7 @@
         <div class="game__board">
             <interactive-board v-if="hasBoard" ref="interactive-board" />
         </div>
-        <timer class="game__timer" />
+        <countdown-timer class="game__timer" />
         <div class="game__score">
             <score-board />
         </div>
@@ -21,7 +21,7 @@
 <script>
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import ScoreBoard from "@/components/ScoreBoard.vue";
-import Timer from "@/components/Timer.vue";
+import CountdownTimer from "@/components/CountdownTimer.vue";
 import VMessageArea from "@/components/VMessageArea.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 
@@ -30,7 +30,7 @@ export default {
     components: {
         InteractiveBoard,
         ScoreBoard,
-        Timer,
+        CountdownTimer,
         VMessageArea,
         LeftoverMazeCard,
     },

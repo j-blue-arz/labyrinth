@@ -35,7 +35,7 @@ export default {
             this.$store.dispatch("game/leaveOnlineGame");
         },
     },
-    beforeDestroy() {
+    beforeUnmount() {
         this.leave();
     },
 };

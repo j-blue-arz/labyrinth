@@ -1,4 +1,5 @@
 import Vue from "vue";
+import { ValueError } from "@/util/exceptions.js";
 
 export const state = () => ({
     mazeSize: 0,

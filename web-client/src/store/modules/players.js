@@ -159,7 +159,6 @@ export const mutations = {
         state.allIds.push(player.id);
     },
     removePlayer(state, id) {
-        const player = state.byId[id];
         Vue.delete(state.byId, id);
         const index = state.allIds.indexOf(id);
         state.allIds.splice(index, 1);

@@ -7,8 +7,8 @@ let pollingTimer = 0;
 
 export default {
     _fetchSource: axios.CancelToken.source(),
-    stateObserver: (state) => {},
-    errorHandler: (error) => {},
+    stateObserver: () => {},
+    errorHandler: () => {},
     _isPolling: false,
 
     // this will not start polling until the next request has finished.
@@ -50,8 +50,8 @@ export default {
     },
 
     resetHandlers() {
-        this.stateObserver = (state) => {};
-        this.errorHandler = (error) => {};
+        this.stateObserver = () => {};
+        this.errorHandler = () => {};
     },
 
     doMove(playerId, toLocation) {

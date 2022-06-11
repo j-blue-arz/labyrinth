@@ -6,7 +6,7 @@
 
 <script>
 export default {
-    name: "timer",
+    name: "countdown-timer",
     computed: {
         remainingSeconds: function () {
             return this.$store.state.countdown.remainingSeconds;
