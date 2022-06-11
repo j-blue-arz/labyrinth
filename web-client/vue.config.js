@@ -1,11 +1,12 @@
 const webpack = require("webpack");
+const { defineConfig } = require("@vue/cli-service");
 
 const path = require("path");
 const compressionPlugin = require("compression-webpack-plugin");
 
 const version = require("./package.json").version;
 
-module.exports = {
+module.exports = defineConfig({
     assetsDir: "assets",
     configureWebpack: {
         devtool: "source-map",
@@ -29,4 +30,4 @@ module.exports = {
     chainWebpack: config => {
         config.plugin("CompressionPlugin").use(compressionPlugin);
     }
-};
+});
