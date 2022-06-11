@@ -22,24 +22,24 @@ export default {
     name: "v-score-board-row",
     components: {
         VPlayerPiece,
-        PlayerNamePanel
+        PlayerNamePanel,
     },
     props: {
         player: {
-            required: true
-        }
+            required: true,
+        },
     },
     computed: {
-        pieceIndexClass: function() {
+        pieceIndexClass: function () {
             return "score-row--player-" + this.player.pieceIndex;
         },
-        playerName: function() {
+        playerName: function () {
             return getLabel(this.player);
         },
-        isTurn: function() {
+        isTurn: function () {
             return this.player.nextAction !== NO_ACTION;
-        }
-    }
+        },
+    },
 };
 </script>
 

@@ -19,14 +19,14 @@ export default class WasmGateway {
         if (!this.libexhsearch && !this.isLoading) {
             this.isLoading = true;
             this._loadRuntime()
-                .then(loadWasm => {
-                    loadWasm().then(libexhsearch => {
+                .then((loadWasm) => {
+                    loadWasm().then((libexhsearch) => {
                         this.libexhsearch = libexhsearch;
                         this.isLoading = false;
                         callback();
                     });
                 })
-                .catch(reason => {
+                .catch((reason) => {
                     console.error("failed to load runtime: " + reason);
                     this.isLoading = false;
                 })
@@ -57,9 +57,9 @@ export default class WasmGateway {
         const computedActions = {
             shiftAction: {
                 location: this._loc(action.shift.location.row, action.shift.location.column),
-                leftoverRotation: action.shift.rotation
+                leftoverRotation: action.shift.rotation,
             },
-            moveLocation: this._loc(action.move_location.row, action.move_location.column)
+            moveLocation: this._loc(action.move_location.row, action.move_location.column),
         };
 
         mazeGraph.delete();

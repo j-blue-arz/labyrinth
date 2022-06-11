@@ -27,33 +27,33 @@ export default {
         DraggableGameBoard,
         InsertPanels,
         VMazeCard,
-        VSvgDefs
+        VSvgDefs,
     },
     data() {
         return {
             leftoverX: 0,
             leftoverY: 0,
-            isLandscape: true
+            isLandscape: true,
         };
     },
     computed: {
-        userPlayerId: function() {
+        userPlayerId: function () {
             return this.$store.getters["players/userPlayerId"];
         },
-        reachableMazeCards: function() {
+        reachableMazeCards: function () {
             const playerId = this.$store.getters["game/currentPlayer"]?.id;
             if (playerId !== undefined) {
                 return this.computeReachableMazeCards(playerId);
             }
             return new Set();
         },
-        currentPlayerColor: function() {
+        currentPlayerColor: function () {
             return this.$store.getters["game/currentPlayer"]?.pieceIndex;
         },
-        userAction: function() {
+        userAction: function () {
             return this.$store.getters["players/userPlayer"]?.nextAction ?? action.NO_ACTION;
         },
-        isTouchDevice: function() {
+        isTouchDevice: function () {
             // https://stackoverflow.com/a/4819886/359287
             return (
                 "ontouchstart" in window ||
@@ -61,53 +61,54 @@ export default {
                 navigator.msMaxTouchPoints > 0
             );
         },
-        viewBox: function() {
+        viewBox: function () {
             const offset = this.isTouchDevice ? -16 : -100;
             const interactionSize =
                 this.$ui.cardSize * this.$store.state.board.mazeSize + 2 * -offset;
             return `${offset} ${offset} ${interactionSize} ${interactionSize}`;
-        }
+        },
     },
     methods: {
-        computeReachableMazeCards: function(playerId) {
+        computeReachableMazeCards: function (playerId) {
             const playerCard = this.$store.getters["players/mazeCard"](playerId);
             if (playerCard?.location) {
                 let pieceLocation = playerCard.location;
                 let graph = new Graph(this.$store.state.board);
                 let locations = graph.reachableLocations(pieceLocation);
                 return new Set(
-                    locations.map(location => this.$store.getters["board/mazeCard"](location))
+                    locations.map((location) => this.$store.getters["board/mazeCard"](location))
                 );
             } else {
                 return new Set();
             }
         },
-        onPlayerShift: function(shiftLocation) {
+        onPlayerShift: function (shiftLocation) {
             let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
-                leftoverRotation: this.$store.getters["board/leftoverMazeCard"].rotation
+                leftoverRotation: this.$store.getters["board/leftoverMazeCard"].rotation,
             };
             this.$store.dispatch("game/shift", shiftAction);
         },
-        onPlayerMove: function(mazeCard) {
+        onPlayerMove: function (mazeCard) {
             if (this.isMoveValid(mazeCard.location)) {
                 let moveAction = {
                     playerId: this.userPlayerId,
-                    targetLocation: mazeCard.location
+                    targetLocation: mazeCard.location,
                 };
                 this.$store.dispatch("game/move", moveAction);
             }
         },
-        isMoveValid: function(targetLocation) {
-            const sourceLocation = this.$store.getters["players/mazeCard"](this.userPlayerId)
-                .location;
+        isMoveValid: function (targetLocation) {
+            const sourceLocation = this.$store.getters["players/mazeCard"](
+                this.userPlayerId
+            ).location;
             return (
                 this.userAction === action.MOVE_ACTION &&
                 new Graph(this.$store.state.board).isReachable(sourceLocation, targetLocation)
             );
-        }
-    }
+        },
+    },
 };
 </script>
 

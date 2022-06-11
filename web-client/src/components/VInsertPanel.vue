@@ -41,34 +41,34 @@ export default {
     props: {
         insertPanel: {
             type: InsertPanel,
-            required: true
+            required: true,
         },
         size: {
             type: Number,
-            required: true
+            required: true,
         },
         xPos: {
             type: Number,
-            required: true
+            required: true,
         },
         yPos: {
             type: Number,
-            required: true
+            required: true,
         },
         interaction: {
             type: Boolean,
             required: false,
-            default: true
-        }
+            default: true,
+        },
     },
     computed: {
-        isEnabled: function() {
+        isEnabled: function () {
             return this.insertPanel.enabled;
         },
-        isDisabled: function() {
+        isDisabled: function () {
             return !this.insertPanel.enabled;
         },
-        insertPanelClass: function() {
+        insertPanelClass: function () {
             if (this.insertPanel.enabled) {
                 if (this.interaction) {
                     return ["insert-panel--enabled", "insert-panel--interaction"];
@@ -81,35 +81,35 @@ export default {
                 return "insert-panel--disabled";
             }
         },
-        pathCross: function() {
+        pathCross: function () {
             let paths = [
                 [
                     [25, 25],
-                    [75, 75]
+                    [75, 75],
                 ],
                 [
                     [75, 25],
-                    [25, 75]
-                ]
+                    [25, 75],
+                ],
             ];
             return "M" + paths.join("M");
         },
-        pathArrow: function() {
+        pathArrow: function () {
             let paths = [
                 [
                     [25, 45],
                     [50, 25],
-                    [75, 45]
+                    [75, 45],
                 ],
                 [
                     [25, 70],
                     [50, 50],
-                    [75, 70]
-                ]
+                    [75, 70],
+                ],
             ];
             this.rotateAndTranslatePaths(paths);
             return "M" + paths.join("M");
-        }
+        },
     },
     methods: {
         rotateAndTranslatePaths(paths) {
@@ -129,17 +129,17 @@ export default {
                 }
             }
         },
-        angle: function() {
+        angle: function () {
             if (this.isDisabled) {
                 return 0;
             }
             let degree = ["N", "E", "S", "W"].indexOf(this.insertPanel.direction) * 90;
             return 2 * Math.PI * (degree / 360.0);
         },
-        onClick: function() {
+        onClick: function () {
             this.$emit("panel-click");
-        }
-    }
+        },
+    },
 };
 </script>
 

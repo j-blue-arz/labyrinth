@@ -13,14 +13,14 @@ let store = new Vuex.Store({
         game: game,
         board: board,
         players: players,
-        countdown: countdown
+        countdown: countdown,
     },
-    strict: process.env.NODE_ENV !== "production"
+    strict: process.env.NODE_ENV !== "production",
 });
 
 store.watch(
-    state => state.game.nextAction,
-    nextAction => {
+    (state) => state.game.nextAction,
+    (nextAction) => {
         store.dispatch("countdown/nextActionUpdated", nextAction);
     }
 );

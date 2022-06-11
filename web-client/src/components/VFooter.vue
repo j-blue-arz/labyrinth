@@ -13,9 +13,9 @@ export default {
     name: "v-footer",
     data() {
         return {
-            version: process.env.VERSION
+            version: process.env.VERSION,
         };
-    }
+    },
 };
 </script>
 

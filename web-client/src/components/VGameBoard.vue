@@ -4,10 +4,9 @@
         :y="-borderWidth"
         :width="boardSize + 2 * borderWidth"
         :height="boardSize + 2 * borderWidth"
-        :viewBox="
-            `${-borderWidth} ${-borderWidth} ${boardSize + 2 * borderWidth} ${boardSize +
-                2 * borderWidth}`
-        "
+        :viewBox="`${-borderWidth} ${-borderWidth} ${boardSize + 2 * borderWidth} ${
+            boardSize + 2 * borderWidth
+        }`"
     >
         <g>
             <rect
@@ -49,48 +48,48 @@ export default {
     name: "v-game-board",
     components: {
         VMazeCard,
-        VMoveAnimation
+        VMoveAnimation,
     },
     props: {
         interactiveMazeCards: {
             required: false,
-            default: () => new Set()
+            default: () => new Set(),
         },
         requiredAction: {
             required: false,
-            default: NO_ACTION
+            default: NO_ACTION,
         },
         reachableCards: {
             required: false,
-            default: () => new Set()
+            default: () => new Set(),
         },
         currentPlayerColor: {
             required: false,
-            default: null
+            default: null,
         },
         drag: {
             required: false,
-            default: function() {
+            default: function () {
                 return { row: false, column: false, offset: 0 };
-            }
-        }
+            },
+        },
     },
     computed: {
-        mazeSize: function() {
+        mazeSize: function () {
             return this.$store.state.board.mazeSize;
         },
-        mazeCards: function() {
+        mazeCards: function () {
             return this.$store.getters["board/mazeCardsRowMajorOrder"];
         },
-        boardSize: function() {
+        boardSize: function () {
             return this.$ui.cardSize * this.mazeSize;
         },
-        borderWidth: function() {
+        borderWidth: function () {
             return Math.floor(this.$ui.cardSize / 6);
         },
-        players: function() {
+        players: function () {
             return this.$store.getters["players/all"];
-        }
+        },
     },
     methods: {
         isMoveInteractive(mazeCard) {
@@ -125,10 +124,10 @@ export default {
             }
             return yPos;
         },
-        onMazeCardClick: function($event, mazeCard) {
+        onMazeCardClick: function ($event, mazeCard) {
             this.$emit("player-move", mazeCard);
-        }
-    }
+        },
+    },
 };
 </script>
 

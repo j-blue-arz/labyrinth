@@ -22,26 +22,26 @@ export default {
     name: "leftover-maze-card",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VMazeCard
+        VMazeCard,
     },
     computed: {
-        rotation: function() {
+        rotation: function () {
             return this.mazeCard.rotation;
         },
-        mazeCard: function() {
+        mazeCard: function () {
             return this.$store.getters["board/leftoverMazeCard"];
         },
-        shiftInteraction: function() {
+        shiftInteraction: function () {
             return this.$store.getters["players/userPlayer"]?.nextAction === action.SHIFT_ACTION;
         },
-        arrowPath: function() {
+        arrowPath: function () {
             let radius = 40;
             let start = 0.7 * radius;
             let pathStart = [50 - start, 50 + start];
             let arc = [radius, radius, 0, 1, 1, 50 + start, 50 + start];
             return "M" + pathStart + "A" + arc;
         },
-        arrowHead: function() {
+        arrowHead: function () {
             let radius = 40;
             let start = 0.7 * radius;
             let arrowLength = 20;
@@ -49,15 +49,15 @@ export default {
             let point2 = [point1[0], point1[1] - arrowLength];
             let point3 = [point1[0] + arrowLength, point1[1]];
             return [point1, point2, point3];
-        }
+        },
     },
     methods: {
-        onLeftoverClick: function() {
+        onLeftoverClick: function () {
             if (this.shiftInteraction) {
                 this.$store.dispatch("board/rotateLeftoverClockwise");
             }
-        }
-    }
+        },
+    },
 };
 </script>
 

@@ -3,11 +3,11 @@ import { NO_ACTION } from "@/model/player.js";
 export const state = () => ({
     timer: 0,
     remainingSeconds: 0,
-    visible: false
+    visible: false,
 });
 
 const getters = {
-    isRunning: state => {
+    isRunning: (state) => {
         return state.timer !== 0;
     },
     timerShouldRun: (_, __, ___, rootGetters) => {
@@ -17,7 +17,7 @@ const getters = {
         } else {
             return false;
         }
-    }
+    },
 };
 const actions = {
     restartCountdown({ state, commit, dispatch, getters, rootState }, newValue) {
@@ -49,7 +49,7 @@ const actions = {
                 dispatch("restartCountdown", remainingSecondsApi + 1);
             }
         }
-    }
+    },
 };
 const mutations = {
     saveTimer(state, timer) {
@@ -66,7 +66,7 @@ const mutations = {
     },
     countDown(state) {
         state.remainingSeconds--;
-    }
+    },
 };
 
 export default {
@@ -74,5 +74,5 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };

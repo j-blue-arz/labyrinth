@@ -17,16 +17,16 @@ export default {
     name: "v-menu",
     props: {
         menuItems: {
-            required: true
-        }
+            required: true,
+        },
     },
     data() {
         return {
-            activeMenuKey: null
+            activeMenuKey: null,
         };
     },
     computed: {
-        visibleMenuItems: function() {
+        visibleMenuItems: function () {
             if (this.activeMenuKey === null) {
                 return this.menuItems;
             } else {
@@ -42,7 +42,7 @@ export default {
                     return this.menuItems;
                 }
             }
-        }
+        },
     },
     methods: {
         findMenuitem(searchKey, menuItems) {
@@ -69,8 +69,8 @@ export default {
         },
         reset() {
             this.activeMenuKey = null;
-        }
-    }
+        },
+    },
 };
 </script>
 

@@ -4,63 +4,63 @@ import * as action from "@/model/player.js";
 
 export const state = () => ({
     byId: {},
-    allIds: []
+    allIds: [],
 });
 
 const getters = {
-    find: (state, _, rootState) => id => {
+    find: (state, _, rootState) => (id) => {
         const player = state.byId[id];
         if (player) {
             const nextAction = rootState.game.nextAction;
             return {
                 ...player,
-                nextAction: nextAction?.playerId === id ? nextAction.action : action.NO_ACTION
+                nextAction: nextAction?.playerId === id ? nextAction.action : action.NO_ACTION,
             };
         } else {
             return undefined;
         }
     },
     all: (state, getters) => {
-        return state.allIds.map(id => getters.find(id));
+        return state.allIds.map((id) => getters.find(id));
     },
-    findByMazeCard: (_, getters) => cardId => {
-        return getters.all.filter(player => player.mazeCardId === cardId);
+    findByMazeCard: (_, getters) => (cardId) => {
+        return getters.all.filter((player) => player.mazeCardId === cardId);
     },
-    mazeCard: (state, _, __, rootGetters) => id => {
+    mazeCard: (state, _, __, rootGetters) => (id) => {
         const player = state.byId[id];
         return rootGetters["board/mazeCardById"](player.mazeCardId);
     },
-    hasUserPlayer: state => {
-        return state.allIds.some(id => state.byId[id].isUser);
+    hasUserPlayer: (state) => {
+        return state.allIds.some((id) => state.byId[id].isUser);
     },
-    userPlayerId: state => {
-        return state.allIds.find(id => state.byId[id].isUser);
+    userPlayerId: (state) => {
+        return state.allIds.find((id) => state.byId[id].isUser);
     },
     userPlayer: (_, getters) => {
         return getters.find(getters.userPlayerId);
     },
-    hasWasmPlayer: state => {
-        return state.allIds.some(id => state.byId[id].isWasm);
+    hasWasmPlayer: (state) => {
+        return state.allIds.some((id) => state.byId[id].isWasm);
     },
-    wasmPlayerId: state => {
-        return state.allIds.find(id => state.byId[id].isWasm);
+    wasmPlayerId: (state) => {
+        return state.allIds.find((id) => state.byId[id].isWasm);
     },
     wasmPlayer: (_, getters) => {
         return getters.find(getters.wasmPlayerId);
     },
     bots: (_, getters) => {
-        return getters.all.filter(player => player.isBot);
-    }
+        return getters.all.filter((player) => player.isBot);
+    },
 };
 
 const actions = {
     update({ commit, state }, apiPlayers) {
-        const apiIds = apiPlayers.map(apiPlayer => apiPlayer.id);
-        const removedPlayerIds = state.allIds.filter(id => !apiIds.includes(id));
-        removedPlayerIds.forEach(playerId => {
+        const apiIds = apiPlayers.map((apiPlayer) => apiPlayer.id);
+        const removedPlayerIds = state.allIds.filter((id) => !apiIds.includes(id));
+        removedPlayerIds.forEach((playerId) => {
             commit("removePlayer", playerId);
         });
-        apiPlayers.forEach(apiPlayer => {
+        apiPlayers.forEach((apiPlayer) => {
             if (state.allIds.includes(apiPlayer.id)) {
                 commit("updatePlayer", apiPlayer);
             } else {
@@ -74,7 +74,7 @@ const actions = {
     enterGame({ commit, getters, rootGetters, dispatch }) {
         if (!getters.hasUserPlayer) {
             if (rootGetters["game/isOnline"]) {
-                API.doAddPlayer(apiPlayer => {
+                API.doAddPlayer((apiPlayer) => {
                     apiPlayer.isUser = true;
                     commit("addPlayer", apiPlayer);
                 });
@@ -97,14 +97,14 @@ const actions = {
     addWasmPlayer({ commit, getters, rootGetters, rootState, dispatch }) {
         if (!getters.hasWasmPlayer) {
             if (rootGetters["game/isOnline"]) {
-                API.doAddPlayer(apiPlayer => {
+                API.doAddPlayer((apiPlayer) => {
                     apiPlayer.isWasm = true;
                     commit("addPlayer", apiPlayer);
                 });
             } else {
                 const playerMazeCard = rootGetters["board/mazeCard"]({
                     row: 0,
-                    column: rootState.board.mazeSize - 1
+                    column: rootState.board.mazeSize - 1,
                 });
                 const player = createPlayer(1);
                 player.isWasm = true;
@@ -145,7 +145,7 @@ const actions = {
     },
     objectiveReached({ commit }, playerId) {
         commit("increaseScore", playerId);
-    }
+    },
 };
 
 export const mutations = {
@@ -174,7 +174,7 @@ export const mutations = {
     },
     increaseScore(state, playerId) {
         state.byId[playerId].score += 1;
-    }
+    },
 };
 
 export default {
@@ -182,7 +182,7 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };
 
 function fillPlayer(playerToFill, apiPlayer) {
@@ -197,7 +197,7 @@ function newPlayer(id) {
 function createPlayer(playerId) {
     let player = {
         id: playerId,
-        pieceIndex: playerId
+        pieceIndex: playerId,
     };
     return player;
 }

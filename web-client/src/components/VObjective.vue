@@ -18,18 +18,18 @@ export default {
         return {
             mastSize: 50,
             flagLength: 26,
-            flagX: -4
+            flagX: -4,
         };
     },
     computed: {
-        svgFlagLine: function() {
+        svgFlagLine: function () {
             return this.flagTop();
         },
-        svgFlagPolygon: function() {
+        svgFlagPolygon: function () {
             return [this.flagTop(), this.flagPoint(), this.flagBase()]
                 .map(this.toString)
                 .join(", ");
-        }
+        },
     },
     methods: {
         toString(point) {
@@ -49,8 +49,8 @@ export default {
         },
         mastFoot() {
             return { x: this.flagX, y: this.mastSize / 2 };
-        }
-    }
+        },
+    },
 };
 </script>
 

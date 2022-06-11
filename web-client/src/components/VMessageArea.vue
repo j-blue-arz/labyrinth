@@ -10,7 +10,7 @@ import * as action from "@/model/player.js";
 export default {
     name: "v-message-area",
     computed: {
-        text: function() {
+        text: function () {
             if (this.shouldShowMessage) {
                 if (this.userPlayer.nextAction === action.SHIFT_ACTION) {
                     return "Drag the maze tiles to modify the maze layout.";
@@ -20,16 +20,16 @@ export default {
             }
             return "";
         },
-        visible: function() {
+        visible: function () {
             return this.text !== "";
         },
         shouldShowMessage() {
             return this.userPlayer?.score === 0;
         },
-        userPlayer: function() {
+        userPlayer: function () {
             return this.$store.getters["players/userPlayer"];
-        }
-    }
+        },
+    },
 };
 </script>
 

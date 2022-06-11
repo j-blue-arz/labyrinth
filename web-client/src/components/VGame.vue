@@ -32,20 +32,20 @@ export default {
         ScoreBoard,
         Timer,
         VMessageArea,
-        LeftoverMazeCard
+        LeftoverMazeCard,
     },
     computed: {
-        hasBoard: function() {
+        hasBoard: function () {
             return this.$store.getters["board/notEmpty"];
         },
-        userPlayer: function() {
+        userPlayer: function () {
             return this.$store.getters["players/userPlayer"];
         },
-        leftoverSize: function() {
+        leftoverSize: function () {
             const mazeSize = this.$store.state.board.mazeSize;
             return Math.round(100 / (mazeSize + 2)) + "vmin";
-        }
-    }
+        },
+    },
 };
 </script>
 

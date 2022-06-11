@@ -22,40 +22,40 @@ export default {
     data() {
         return {
             editing: false,
-            editText: ""
+            editText: "",
         };
     },
     props: {
         placeholder: {
             type: String,
-            default: ""
+            default: "",
         },
         value: {
             type: String,
-            required: true
-        }
+            required: true,
+        },
     },
     computed: {
-        content: function() {
+        content: function () {
             if (this.value === "") {
                 return this.placeholder;
             } else {
                 return this.value;
             }
-        }
+        },
     },
     methods: {
-        startEditing: function() {
+        startEditing: function () {
             this.editing = true;
             Vue.nextTick(() => {
                 this.$refs.input.focus();
             });
         },
-        stopEditing: function() {
+        stopEditing: function () {
             this.editing = false;
             this.$emit("input", this.editText);
-        }
-    }
+        },
+    },
 };
 </script>
 

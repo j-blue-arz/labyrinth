@@ -9,7 +9,7 @@
         class="maze-card"
         :class="[
             { 'maze-card--interactive': interaction, 'maze-card--shiftable': shiftInteraction },
-            reachablePlayerColorIndexClass
+            reachablePlayerColorIndexClass,
         ]"
     >
         <g class="maze-card__group" :class="rotationClass">
@@ -80,37 +80,37 @@ export default {
     components: {
         /* eslint-disable vue/no-unused-components */
         PlayerPieceGroup,
-        VObjective
+        VObjective,
     },
     props: {
         mazeCard: {
             type: Object,
-            required: true
+            required: true,
         },
         xPos: {
             type: Number,
             required: false,
-            default: 0
+            default: 0,
         },
         yPos: {
             type: Number,
             required: false,
-            default: 0
+            default: 0,
         },
         interaction: {
             type: Boolean,
             required: false,
-            default: false
+            default: false,
         },
         shiftInteraction: {
             type: Boolean,
             required: false,
-            default: false
+            default: false,
         },
         reachableByPlayer: {
             required: false,
-            default: null
-        }
+            default: null,
+        },
     },
     data() {
         return {
@@ -120,79 +120,79 @@ export default {
             yPosAnimated: 0,
             pathWidth: 37,
             piecesSize: 33,
-            positionAnimationThreshold: 40
+            positionAnimationThreshold: 40,
         };
     },
     watch: {
-        rotation: function(newValue) {
+        rotation: function (newValue) {
             clearTimeout(this.timer);
             this.animatedRotationClass = "rotateTo" + newValue;
             this.timer = setTimeout(() => {
                 this.animatedRotationClass = "rotate" + newValue;
             }, 500);
         },
-        xPos: function(newValue, oldValue) {
+        xPos: function (newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
                 TweenLite.to(this.$data, 0.9, { xPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.xPosAnimated = newValue;
             }
         },
-        yPos: function(newValue, oldValue) {
+        yPos: function (newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
                 TweenLite.to(this.$data, 0.9, { yPosAnimated: newValue, ease: Power3.easeInOut });
             } else {
                 this.yPosAnimated = newValue;
             }
-        }
+        },
     },
     computed: {
-        rotation: function() {
+        rotation: function () {
             return this.mazeCard.rotation;
         },
-        rotationClass: function() {
+        rotationClass: function () {
             if (this.animatedRotationClass === "") {
                 return "rotate" + this.mazeCard.rotation;
             }
             return this.animatedRotationClass;
         },
-        reachablePlayerColorIndexClass: function() {
+        reachablePlayerColorIndexClass: function () {
             if (this.reachableByPlayer !== null) {
                 return "maze-card--reachable-player-" + this.reachableByPlayer;
             }
             return "";
         },
-        players: function() {
+        players: function () {
             return this.$store.getters["players/findByMazeCard"](this.mazeCard.id);
         },
-        remainingSpace: function() {
+        remainingSpace: function () {
             return Math.floor((this.$ui.cardSize - this.pathWidth) / 2);
         },
-        hasNorth: function() {
+        hasNorth: function () {
             return this.hasOutPath(this.mazeCard, "N");
         },
-        hasEast: function() {
+        hasEast: function () {
             return this.hasOutPath(this.mazeCard, "E");
         },
-        hasSouth: function() {
+        hasSouth: function () {
             return this.hasOutPath(this.mazeCard, "S");
         },
-        hasWest: function() {
+        hasWest: function () {
             return this.hasOutPath(this.mazeCard, "W");
         },
-        hasObjective: function() {
+        hasObjective: function () {
             return this.$store.state.game.objectiveId === this.mazeCard.id;
-        }
+        },
     },
     methods: {
         hasOutPath(mazeCard, outPath) {
             return mazeCard.outPaths.indexOf(outPath) != -1;
-        }
+        },
     },
-    created: function() {
+    created: function () {
         this.xPosAnimated = this.xPos;
         this.yPosAnimated = this.yPos;
-    }
+    },
 };
 </script>
 

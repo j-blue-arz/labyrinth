@@ -22,7 +22,7 @@ export default class Graph {
             if (locationsEqual(currentLocation, targetLocation)) {
                 return this._reachedToPath(currentLocation);
             }
-            this._neighborLocations(currentLocation).forEach(neighbor => {
+            this._neighborLocations(currentLocation).forEach((neighbor) => {
                 if (!this._getReached(neighbor)) {
                     this._setReached(neighbor, { parent: currentLocation });
                     nextElements.push(neighbor);
@@ -47,7 +47,7 @@ export default class Graph {
         let nextElements = [sourceLocation];
         let currentLocation;
         while ((currentLocation = nextElements.shift()) !== undefined) {
-            this._neighborLocations(currentLocation).forEach(neighbor => {
+            this._neighborLocations(currentLocation).forEach((neighbor) => {
                 if (!this._getReached(neighbor)) {
                     this._setReached(neighbor, true);
                     nextElements.push(neighbor);
@@ -64,7 +64,7 @@ export default class Graph {
         for (var outPath of outPaths) {
             let locationToTest = {
                 row: location.row + outPath[0],
-                column: location.column + outPath[1]
+                column: location.column + outPath[1],
             };
             if (isInside(locationToTest, this.board.mazeSize)) {
                 let cardToTest = mazeCardAtLocation(this.board, locationToTest);
@@ -126,7 +126,7 @@ export default class Graph {
                 if (this._reachedLocations[row][col]) {
                     reached.push({
                         row: row,
-                        column: col
+                        column: col,
                     });
                 }
             }

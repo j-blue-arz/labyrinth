@@ -115,7 +115,7 @@ function generateFixedMazeCard(outPaths, rotation) {
         id: 0,
         outPaths: outPaths,
         rotation: rotation,
-        location: null
+        location: null,
     };
 }
 
@@ -124,7 +124,7 @@ function generateFreeMazeCard(outPaths) {
         id: 0,
         outPaths: outPaths,
         rotation: Math.floor(Math.random() * 4) * 90,
-        location: null
+        location: null,
     };
 }
 
@@ -133,7 +133,7 @@ function generateFreeCards(remaining) {
         [CORNER]: Math.floor((remaining * 15) / 34),
         [TJUNCT]: Math.floor((remaining * 6) / 34),
         [STRAIGHT]: Math.floor((remaining * 13) / 34),
-        [CROSS]: 0
+        [CROSS]: 0,
     };
 
     remaining = remaining - Object.values(nums).reduce((acc, val) => acc + val, 0);
@@ -142,7 +142,7 @@ function generateFreeCards(remaining) {
     if (remaining > 1) nums[STRAIGHT] += 1;
 
     let cards = [];
-    Object.keys(nums).forEach(outPath => {
+    Object.keys(nums).forEach((outPath) => {
         for (let i = 0; i < nums[outPath]; i++) {
             cards.push(generateFreeMazeCard(outPath));
         }

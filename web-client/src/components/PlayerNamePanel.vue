@@ -10,23 +10,23 @@ import { getLabel } from "@/model/player.js";
 export default {
     name: "player-name-panel",
     components: {
-        VEditableField
+        VEditableField,
     },
     data() {
         return {
-            editablePlaceholder: "You (edit here)"
+            editablePlaceholder: "You (edit here)",
         };
     },
     props: {
         player: {
-            required: true
-        }
+            required: true,
+        },
     },
     computed: {
-        isEditable: function() {
+        isEditable: function () {
             return this.player.isUser;
         },
-        playerLabel: function() {
+        playerLabel: function () {
             return getLabel(this.player);
         },
         playerName: {
@@ -35,9 +35,9 @@ export default {
             },
             set(value) {
                 this.$store.dispatch("players/changeUserPlayerName", value);
-            }
-        }
-    }
+            },
+        },
+    },
 };
 </script>
 

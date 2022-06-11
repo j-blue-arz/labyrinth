@@ -24,21 +24,21 @@ export default {
     name: "draggable-game-board",
     components: {
         /* eslint-disable vue/no-unused-components */
-        VGameBoard
+        VGameBoard,
     },
     props: {
         userAction: {
             required: false,
-            default: NO_ACTION
+            default: NO_ACTION,
         },
         reachableCards: {
             required: false,
-            default: () => new Set()
+            default: () => new Set(),
         },
         currentPlayerColor: {
             required: false,
-            default: null
-        }
+            default: null,
+        },
     },
     data() {
         return {
@@ -46,27 +46,27 @@ export default {
             dragLocation: null,
             dragOffset: 0,
             dragRow: null,
-            dragColumn: null
+            dragColumn: null,
         };
     },
     computed: {
-        mazeSize: function() {
+        mazeSize: function () {
             return this.$store.state.board.mazeSize;
         },
-        shiftLocations: function() {
+        shiftLocations: function () {
             const n = this.mazeSize;
-            return getShiftLocations(n).map(location => new ShiftLocation(location, n));
+            return getShiftLocations(n).map((location) => new ShiftLocation(location, n));
         },
-        dragInteractiveLocations: function() {
+        dragInteractiveLocations: function () {
             let result = new Set();
             for (let shiftLocation of this.shiftLocations) {
                 shiftLocation
                     .affectedLocations(this.mazeSize)
-                    .forEach(location => result.add(location));
+                    .forEach((location) => result.add(location));
             }
             return result;
         },
-        interactiveMazeCards: function() {
+        interactiveMazeCards: function () {
             if (this.userAction === MOVE_ACTION) {
                 return this.reachableCards;
             } else if (this.userAction === SHIFT_ACTION) {
@@ -79,7 +79,7 @@ export default {
                 return new Set();
             }
         },
-        possibleDragDirections: function() {
+        possibleDragDirections: function () {
             let result = [];
             if (this.dragLocation) {
                 const disabledShiftLocation = this.$store.state.board.disabledShiftLocation;
@@ -92,10 +92,10 @@ export default {
                 }
             }
             return result;
-        }
+        },
     },
     methods: {
-        startDrag: function(svgPosition) {
+        startDrag: function (svgPosition) {
             this.resetDrag();
             if (this.userAction === SHIFT_ACTION) {
                 let location = this.getLocation(svgPosition);
@@ -108,7 +108,7 @@ export default {
                 }
             }
         },
-        drag: function(svgPosition) {
+        drag: function (svgPosition) {
             let offset = this.dragStart.to(svgPosition);
             for (let direction of ["N", "S", "E", "W"]) {
                 if (!this.possibleDragDirections.includes(direction)) {
@@ -121,41 +121,41 @@ export default {
                 this.dragVertically(offset);
             }
         },
-        dragHorizontally: function(offset) {
+        dragHorizontally: function (offset) {
             this.dragOffset = this.bound(offset.x);
             this.dragRow = this.dragLocation.row;
             this.dragColumn = null;
         },
-        dragVertically: function(offset) {
+        dragVertically: function (offset) {
             this.dragOffset = this.bound(offset.y);
             this.dragRow = null;
             this.dragColumn = this.dragLocation.column;
         },
-        bound: function(value) {
+        bound: function (value) {
             return bound(value, -this.DRAG_BOUND, this.DRAG_BOUND);
         },
-        endDrag: function() {
+        endDrag: function () {
             if (Math.abs(this.dragOffset) > this.SHIFT_DRAG_THRESHOLD) {
                 this.emitShiftEvent();
             }
             this.resetDrag();
         },
-        resetDrag: function() {
+        resetDrag: function () {
             this.dragRow = null;
             this.dragColumn = null;
             this.dragStart = null;
             this.dragLocation = null;
             this.dragOffset = 0;
         },
-        pointerDown: function($event) {
+        pointerDown: function ($event) {
             this.startDrag(this.getPointerPosition($event));
         },
-        pointerMove: function($event) {
+        pointerMove: function ($event) {
             if (this.dragLocation !== null) {
                 this.drag(this.getPointerPosition($event));
             }
         },
-        isDraggable: function(location) {
+        isDraggable: function (location) {
             for (let shiftLocation of this.shiftLocations) {
                 if (shiftLocation.affects(location)) {
                     return true;
@@ -163,7 +163,7 @@ export default {
             }
             return false;
         },
-        emitShiftEvent: function() {
+        emitShiftEvent: function () {
             let shiftLocation = null;
             if (this.dragRow) {
                 if (this.dragOffset > 0) {
@@ -182,28 +182,28 @@ export default {
                 this.$emit("player-shift", shiftLocation);
             }
         },
-        getPointerPosition: function(evt) {
+        getPointerPosition: function (evt) {
             const svg = evt.currentTarget;
             return this.getSVGPosition(evt.clientX, evt.clientY, svg);
         },
-        getSVGPosition: function(clientX, clientY, svg) {
+        getSVGPosition: function (clientX, clientY, svg) {
             const CTM = svg.getScreenCTM();
             return new Vector((clientX - CTM.e) / CTM.a, (clientY - CTM.f) / CTM.d);
         },
-        getLocation: function(svgPosition) {
+        getLocation: function (svgPosition) {
             let locationVector = svgPosition.dividedBy(this.$ui.cardSize);
             let column = Math.floor(locationVector.x);
             let row = Math.floor(locationVector.y);
             return loc(row, column);
         },
-        onMazeCardClicked: function(mazeCard) {
+        onMazeCardClicked: function (mazeCard) {
             this.$emit("player-move", mazeCard);
-        }
+        },
     },
     created() {
         this.DRAG_BOUND = 100;
         this.SHIFT_DRAG_THRESHOLD = this.$ui.cardSize / 2;
-    }
+    },
 };
 </script>
 

@@ -8,18 +8,18 @@
 export default {
     name: "timer",
     computed: {
-        remainingSeconds: function() {
+        remainingSeconds: function () {
             return this.$store.state.countdown.remainingSeconds;
         },
-        visible: function() {
+        visible: function () {
             return this.$store.getters["countdown/timerShouldRun"];
-        }
+        },
     },
     methods: {
-        formatTime: function(seconds) {
+        formatTime: function (seconds) {
             return ("0" + seconds).slice(-2);
-        }
-    }
+        },
+    },
 };
 </script>
 

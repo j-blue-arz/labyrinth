@@ -25,20 +25,20 @@ export default {
     name: "v-menu-bar",
     data() {
         return {
-            menuToggled: false
+            menuToggled: false,
         };
     },
     components: {
         GameMenu,
-        VFooter
+        VFooter,
     },
     methods: {
         resetToggle() {
             if (this.menuToggled) {
                 this.menuToggled = false;
             }
-        }
-    }
+        },
+    },
 };
 </script>
 

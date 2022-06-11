@@ -35,25 +35,25 @@ export default {
     name: "v-player-piece",
     props: {
         player: {
-            required: true
+            required: true,
         },
         interaction: {
             type: Boolean,
             required: false,
-            default: false
-        }
+            default: false,
+        },
     },
     computed: {
-        pieceIndexClass: function() {
+        pieceIndexClass: function () {
             return "player-piece__player-" + this.player.pieceIndex;
         },
-        isUser: function() {
+        isUser: function () {
             return this.player.isUser;
         },
-        pieceIndex: function() {
+        pieceIndex: function () {
             return this.player.pieceIndex;
-        }
-    }
+        },
+    },
 };
 </script>
 

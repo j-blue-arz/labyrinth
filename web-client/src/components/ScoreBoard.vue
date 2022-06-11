@@ -14,13 +14,13 @@ import VScoreBoardRow from "@/components/VScoreBoardRow.vue";
 export default {
     name: "score-board",
     components: {
-        VScoreBoardRow
+        VScoreBoardRow,
     },
     computed: {
-        players: function() {
+        players: function () {
             return this.$store.getters["players/all"];
-        }
-    }
+        },
+    },
 };
 </script>
 

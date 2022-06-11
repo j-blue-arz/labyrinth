@@ -7,8 +7,8 @@ let pollingTimer = 0;
 
 export default {
     _fetchSource: axios.CancelToken.source(),
-    stateObserver: state => {},
-    errorHandler: error => {},
+    stateObserver: (state) => {},
+    errorHandler: (error) => {},
     _isPolling: false,
 
     // this will not start polling until the next request has finished.
@@ -50,8 +50,8 @@ export default {
     },
 
     resetHandlers() {
-        this.stateObserver = state => {};
-        this.errorHandler = error => {};
+        this.stateObserver = (state) => {};
+        this.errorHandler = (error) => {};
     },
 
     doMove(playerId, toLocation) {
@@ -59,9 +59,9 @@ export default {
         this._suspendPolling();
         axios
             .post(postMovePath, {
-                location: toLocation
+                location: toLocation,
             })
-            .catch(error => this._handleError(error))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -71,10 +71,10 @@ export default {
         axios
             .post(postShiftPath, {
                 location: shiftLocation,
-                leftoverRotation: leftoverRotation
+                leftoverRotation: leftoverRotation,
             })
-            .then(apiResponse => callback(apiResponse.data))
-            .catch(error => this._handleError(error))
+            .then((apiResponse) => callback(apiResponse.data))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -83,8 +83,8 @@ export default {
         this._suspendPolling();
         axios
             .post(addPlayerPath)
-            .then(apiResponse => callback(apiResponse.data))
-            .catch(error => this._handleError(error))
+            .then((apiResponse) => callback(apiResponse.data))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -94,9 +94,9 @@ export default {
         axios
             .post(addPlayerPath, {
                 isBot: true,
-                computationMethod: computeMethod
+                computationMethod: computeMethod,
             })
-            .catch(error => this._handleError(error))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -105,7 +105,7 @@ export default {
         this._suspendPolling();
         axios
             .delete(deletePlayerPath)
-            .catch(error => this._handleError(error))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -114,9 +114,9 @@ export default {
         this._suspendPolling();
         axios
             .put(changePlayerNamePath, {
-                name: name
+                name: name,
             })
-            .catch(error => this._handleError(error))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -125,9 +125,9 @@ export default {
         this._suspendPolling();
         axios
             .put(putGamePath, {
-                mazeSize: size
+                mazeSize: size,
             })
-            .catch(error => this._handleError(error))
+            .catch((error) => this._handleError(error))
             .then(() => this.resumePolling());
     },
 
@@ -135,18 +135,18 @@ export default {
         var getStatePath = API_PATH + "/games/0/state";
         axios
             .get(getStatePath, {
-                cancelToken: this._fetchSource.token
+                cancelToken: this._fetchSource.token,
             })
-            .then(response => this.stateObserver(response.data))
-            .catch(error => this._handleError(error));
+            .then((response) => this.stateObserver(response.data))
+            .catch((error) => this._handleError(error));
     },
 
     fetchComputationMethods(callback) {
         let getComputationMethodsPath = API_PATH + "/computation-methods";
         axios
             .get(getComputationMethodsPath)
-            .then(apiResponse => callback(apiResponse.data))
-            .catch(error => this._handleError(error));
+            .then((apiResponse) => callback(apiResponse.data))
+            .catch((error) => this._handleError(error));
     },
 
     CANCEL_MESSAGE: "fetchState cancelled by user.",
@@ -158,5 +158,5 @@ export default {
 
     _errorWasThrownByCancel(error) {
         return error.toString().includes(this.CANCEL_MESSAGE);
-    }
+    },
 };

@@ -5,34 +5,34 @@ export const state = () => ({
     cardsById: {},
     boardLayout: [],
     leftoverId: null,
-    disabledShiftLocation: null
+    disabledShiftLocation: null,
 });
 
 export const getters = {
-    notEmpty: state => {
+    notEmpty: (state) => {
         return state.leftoverId !== null && state.mazeSize > 0;
     },
-    mazeCardById: state => id => {
+    mazeCardById: (state) => (id) => {
         return state.cardsById[id];
     },
-    leftoverMazeCard: state => {
+    leftoverMazeCard: (state) => {
         return leftoverMazeCard(state);
     },
-    mazeCard: state => location => {
+    mazeCard: (state) => (location) => {
         return mazeCardAtLocation(state, location);
     },
-    isInside: state => location => {
+    isInside: (state) => (location) => {
         return isInside(location, state.mazeSize);
     },
-    oppositeLocation: state => location => {
+    oppositeLocation: (state) => (location) => {
         return getOppositeLocation(location, state.mazeSize);
     },
     mazeCardsRowMajorOrder: (state, getters) => {
         return [].concat.apply([], state.boardLayout).map(getters.mazeCardById);
     },
-    allIds: state => {
+    allIds: (state) => {
         return [].concat.apply([state.leftoverId], state.boardLayout);
-    }
+    },
 };
 
 const actions = {
@@ -67,7 +67,7 @@ const actions = {
             commit("setDisabledShiftLocation", getOppositeLocation(location, n));
             commit("transferPlayers", {
                 source: getters.leftoverMazeCard.id,
-                target: getters.mazeCard(location).id
+                target: getters.mazeCard(location).id,
             });
         } else {
             throw new ValueError();
@@ -76,7 +76,7 @@ const actions = {
     rotateLeftoverClockwise({ commit, state }) {
         const oldRotation = state.cardsById[state.leftoverId].rotation;
         commit("setLeftoverRotation", (oldRotation + 90) % 360);
-    }
+    },
 };
 
 export const mutations = {
@@ -85,7 +85,7 @@ export const mutations = {
             mazeSize: 0,
             leftoverId: state.leftoverId,
             cardsById: { ...state.cardsById },
-            boardLayout: []
+            boardLayout: [],
         };
 
         const n = maze.mazeSize;
@@ -125,7 +125,7 @@ export const mutations = {
     setPlayersOnCards(state, players) {
         [].concat
             .apply([], state.boardLayout)
-            .forEach(id => state.cardsById[id].playerIds.splice(0));
+            .forEach((id) => state.cardsById[id].playerIds.splice(0));
         for (const player of players) {
             state.cardsById[player.mazeCardId].playerIds.push(player.id);
         }
@@ -162,7 +162,7 @@ export const mutations = {
     },
     setLeftoverRotation(state, rotation) {
         state.cardsById[state.leftoverId].rotation = rotation;
-    }
+    },
 };
 
 export default {
@@ -170,7 +170,7 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };
 
 export function mazeCardAtLocation(state, location) {
@@ -226,7 +226,7 @@ function generateShiftLocations(location, n) {
 function findDisabledShiftLocation(n, apiShiftLocations) {
     let allShiftLocations = getShiftLocations(n);
     for (let location of allShiftLocations) {
-        if (!apiShiftLocations.find(apiLocation => locationsEqual(apiLocation, location))) {
+        if (!apiShiftLocations.find((apiLocation) => locationsEqual(apiLocation, location))) {
             return location;
         }
     }

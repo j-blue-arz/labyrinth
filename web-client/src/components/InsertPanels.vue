@@ -22,10 +22,10 @@ import { SHIFT_ACTION } from "@/model/player.js";
 export default {
     name: "insert-panels",
     components: {
-        VInsertPanel
+        VInsertPanel,
     },
     computed: {
-        insertPanels: function() {
+        insertPanels: function () {
             let result = [];
             let id = 0;
             const mazeSize = this.$store.state.board.mazeSize;
@@ -39,9 +39,9 @@ export default {
             }
             return result;
         },
-        interaction: function() {
+        interaction: function () {
             return this.$store.getters["players/userPlayer"]?.nextAction === SHIFT_ACTION;
-        }
+        },
     },
     methods: {
         xPos(insertPanel) {
@@ -50,11 +50,11 @@ export default {
         yPos(insertPanel) {
             return this.$ui.cardSize * insertPanel.displayLocation.row;
         },
-        onClick: function(event, insertPanel) {
+        onClick: function (event, insertPanel) {
             if (this.interaction && insertPanel.enabled) {
                 this.$emit("player-shift", insertPanel.shiftLocation);
             }
-        }
-    }
+        },
+    },
 };
 </script>

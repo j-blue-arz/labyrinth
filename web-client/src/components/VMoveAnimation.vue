@@ -17,17 +17,17 @@ export default {
     name: "v-move-animation",
     props: {
         player: {
-            required: true
-        }
+            required: true,
+        },
     },
     data() {
         return {
             isAnimating: false,
-            path: []
+            path: [],
         };
     },
     watch: {
-        mazeCardId: function(newMazeCardId, oldMazeCardId) {
+        mazeCardId: function (newMazeCardId, oldMazeCardId) {
             const newMazeCard = this.$store.getters["board/mazeCardById"](newMazeCardId);
             const oldMazeCard = this.$store.getters["board/mazeCardById"](oldMazeCardId);
             if (newMazeCard && oldMazeCard) {
@@ -36,29 +36,29 @@ export default {
                     let targetLocation = newMazeCard.location;
                     let graph = new Graph(this.$store.state.board);
                     let locations = graph.path(sourceLocation, targetLocation);
-                    this.path = locations.map(location => this.locationToPosition(location));
+                    this.path = locations.map((location) => this.locationToPosition(location));
                     this.correctLastSegment();
                     this.animatePath();
                 }
             }
-        }
+        },
     },
     computed: {
-        mazeCardId: function() {
+        mazeCardId: function () {
             return this.player.mazeCardId;
         },
-        colorIndexClass: function() {
+        colorIndexClass: function () {
             return "move-animation__path--player-" + this.player.pieceIndex;
-        }
+        },
     },
     methods: {
-        animatePath: function() {
+        animatePath: function () {
             this.isAnimating = true;
             setTimeout(() => {
                 this.isAnimating = false;
             }, 1400);
         },
-        correctLastSegment: function() {
+        correctLastSegment: function () {
             if (this.path.length > 1) {
                 let lastSegment = this.path[this.path.length - 1];
                 let secondLastSegment = this.path[this.path.length - 2];
@@ -66,16 +66,16 @@ export default {
                 lastSegment[1] = (3 * lastSegment[1] + secondLastSegment[1]) / 4;
             }
         },
-        locationToPosition: function(location) {
+        locationToPosition: function (location) {
             let offset = this.$ui.cardSize / 2;
             let x = location.column * this.$ui.cardSize + offset;
             let y = location.row * this.$ui.cardSize + offset;
             return [x, y];
         },
-        isLeftover: function(mazeCard) {
+        isLeftover: function (mazeCard) {
             return mazeCard.id === this.$store.state.board.leftoverId || !mazeCard.location;
-        }
-    }
+        },
+    },
 };
 </script>
 

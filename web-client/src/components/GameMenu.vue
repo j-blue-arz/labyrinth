@@ -15,10 +15,10 @@ const RESTART_PREFIX = "restart-";
 export default {
     name: "game-menu",
     components: {
-        VMenu
+        VMenu,
     },
     computed: {
-        menuItems: function() {
+        menuItems: function () {
             let menu = [];
             if (this.$store.getters["players/hasUserPlayer"]) {
                 menu.push(new MenuItem("leave", "Leave game"));
@@ -39,7 +39,7 @@ export default {
                 new MenuItem("restart", "Restart with..", [
                     new MenuItem(RESTART_PREFIX + "7", "original size (7)"),
                     new MenuItem(RESTART_PREFIX + "9", "large size (9)"),
-                    new MenuItem(RESTART_PREFIX + "13", "huge size (13)")
+                    new MenuItem(RESTART_PREFIX + "13", "huge size (13)"),
                 ])
             );
             if (this.$store.getters["game/isOffline"]) {
@@ -49,15 +49,15 @@ export default {
             }
             return menu;
         },
-        bots: function() {
+        bots: function () {
             return this.$store.getters["players/bots"];
         },
-        gameIsNotFull: function() {
+        gameIsNotFull: function () {
             return this.$store.state.players.allIds.length < 4;
-        }
+        },
     },
     methods: {
-        onItemClick: function($event) {
+        onItemClick: function ($event) {
             if ($event === "leave") {
                 this.$store.dispatch("players/leaveGame");
             } else if ($event === "enter") {
@@ -86,11 +86,11 @@ export default {
             }
             this.$emit("item-click");
         },
-        createAddBotSubmenu: function() {
+        createAddBotSubmenu: function () {
             let submenu = [];
             const computationMethods = this.$store.getters["game/computationMethods"];
             if (computationMethods) {
-                computationMethods.forEach(method => {
+                computationMethods.forEach((method) => {
                     let key = ADD_PREFIX + method;
                     let text = computationMethodLabel(method);
                     submenu.push(new MenuItem(key, text));
@@ -98,7 +98,7 @@ export default {
             }
             return submenu;
         },
-        removeBotSubmenu: function() {
+        removeBotSubmenu: function () {
             let submenu = [];
             for (let player of this.bots) {
                 let key = REMOVE_PREFIX + player.id;
@@ -116,8 +116,8 @@ export default {
                 }
             }
             return submenu;
-        }
-    }
+        },
+    },
 };
 </script>
 

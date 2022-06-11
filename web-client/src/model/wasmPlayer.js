@@ -12,7 +12,7 @@ export default class WasmPlayer {
             () => {
                 return this.store.getters["players/wasmPlayer"]?.nextAction ?? NO_ACTION;
             },
-            newAction => {
+            (newAction) => {
                 if (newAction === SHIFT_ACTION) {
                     this.onHasToShift();
                 } else if (newAction === MOVE_ACTION) {
@@ -45,25 +45,24 @@ export default class WasmPlayer {
         const objectiveId = this.store.state.game.objectiveId;
         const leftoverCard = this.store.getters["board/leftoverMazeCard"];
         const mazeCardList = this.store.getters["board/mazeCardsRowMajorOrder"].concat([
-            leftoverCard
+            leftoverCard,
         ]);
         const shiftLocations = getShiftLocations(this.store.state.board.mazeSize);
         const disabledShiftLocation = this.store.state.board.disabledShiftLocation;
-        const previousShiftLocation = this.store.getters["board/oppositeLocation"](
-            disabledShiftLocation
-        );
+        const previousShiftLocation =
+            this.store.getters["board/oppositeLocation"](disabledShiftLocation);
         const instance = {
             playerLocation: playerLocation,
             objectiveId: objectiveId,
             mazeCardList: mazeCardList,
             shiftLocations: shiftLocations,
-            previousShiftLocation: previousShiftLocation
+            previousShiftLocation: previousShiftLocation,
         };
         this.computedAction = this.wasmGateway.computeActions(instance);
         let shiftAction = {
             playerId: wasmPlayerId,
             location: this.computedAction.shiftAction.location,
-            leftoverRotation: this.computedAction.shiftAction.leftoverRotation
+            leftoverRotation: this.computedAction.shiftAction.leftoverRotation,
         };
         this.store.dispatch("game/shift", shiftAction);
     }
@@ -71,7 +70,7 @@ export default class WasmPlayer {
     performMove() {
         let shiftAction = {
             playerId: this.store.getters["players/wasmPlayerId"],
-            targetLocation: this.computedAction.moveLocation
+            targetLocation: this.computedAction.moveLocation,
         };
         this.computedAction = undefined;
         this.store.dispatch("game/move", shiftAction);

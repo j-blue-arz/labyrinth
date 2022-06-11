@@ -11,7 +11,7 @@ export const state = () => ({
     objectiveId: -1,
     mode: OFFLINE,
     computationMethods: [],
-    turnProgressionTimeout: 0
+    turnProgressionTimeout: 0,
 });
 
 const stateInitializer = state;
@@ -24,10 +24,10 @@ const getters = {
             return null;
         }
     },
-    isOffline: state => {
+    isOffline: (state) => {
         return state.mode === OFFLINE;
     },
-    isOnline: state => {
+    isOnline: (state) => {
         return state.mode === ONLINE;
     },
     computationMethods: (state, _, __, rootGetters) => {
@@ -40,7 +40,7 @@ const getters = {
                 return ["wasm"];
             }
         }
-    }
+    },
 };
 
 const actions = {
@@ -53,13 +53,13 @@ const actions = {
         }
     },
     playOnline({ commit, dispatch, state }) {
-        API.errorHandler = error => handleError(error);
-        API.stateObserver = apiState => dispatch("game/updateFromApi", apiState, { root: true });
+        API.errorHandler = (error) => handleError(error);
+        API.stateObserver = (apiState) => dispatch("game/updateFromApi", apiState, { root: true });
         API.activatePolling();
         commit("online");
         dispatch("players/update", [], { root: true });
         if (state.computationMethods.length === 0) {
-            API.fetchComputationMethods(responseList => {
+            API.fetchComputationMethods((responseList) => {
                 commit("setComputationMethods", responseList);
             });
         }
@@ -74,7 +74,7 @@ const actions = {
         const boardState = {
             maze: board,
             enabledShiftLocations: getShiftLocations(size),
-            players: []
+            players: [],
         };
         dispatch("board/update", boardState, { root: true });
         dispatch("players/enterGame", null, { root: true });
@@ -90,7 +90,7 @@ const actions = {
         const boardState = {
             maze: newState.maze,
             enabledShiftLocations: newState.enabledShiftLocations,
-            players: newState.players
+            players: newState.players,
         };
         dispatch("board/update", boardState, { root: true });
     },
@@ -101,7 +101,7 @@ const actions = {
         const boardMove = {
             sourceCardId: sourceCard.id,
             targetCardId: targetCard.id,
-            playerId: moveAction.playerId
+            playerId: moveAction.playerId,
         };
         dispatch("board/movePlayer", boardMove, { root: true });
 
@@ -117,11 +117,11 @@ const actions = {
             }
             const allPlayers = rootGetters["players/all"];
             const currentPlayerId = state.nextAction.playerId;
-            const currentIndex = allPlayers.findIndex(player => player.id === currentPlayerId);
+            const currentIndex = allPlayers.findIndex((player) => player.id === currentPlayerId);
             const nextPlayerId = allPlayers[(currentIndex + 1) % allPlayers.length].id;
             dispatch("continueTurnProgression", {
                 playerId: nextPlayerId,
-                action: action.SHIFT_ACTION
+                action: action.SHIFT_ACTION,
             });
         }
     },
@@ -149,7 +149,7 @@ const actions = {
         if (getters.isOffline) {
             dispatch("continueTurnProgression", {
                 playerId: state.nextAction.playerId,
-                action: action.MOVE_ACTION
+                action: action.MOVE_ACTION,
             });
         }
     },
@@ -162,7 +162,7 @@ const actions = {
                        it is ok to pick player with index 0 here */
                     dispatch("continueTurnProgression", {
                         playerId: allPlayers[0].id,
-                        action: action.SHIFT_ACTION
+                        action: action.SHIFT_ACTION,
                     });
                 } else {
                     dispatch("abortTurnProgression");
@@ -176,7 +176,7 @@ const actions = {
             if (allPlayers.length == 1) {
                 dispatch("continueTurnProgression", {
                     playerId: allPlayers[0].id,
-                    action: action.SHIFT_ACTION
+                    action: action.SHIFT_ACTION,
                 });
             }
         }
@@ -188,7 +188,7 @@ const actions = {
         }
         const prepareAction = {
             playerId: nextPlayerAction.playerId,
-            action: action.PREPARE_PREFIX + nextPlayerAction.action
+            action: action.PREPARE_PREFIX + nextPlayerAction.action,
         };
         commit("updateNextAction", prepareAction);
         const timeout = setTimeout(() => commit("updateNextAction", nextPlayerAction), 800);
@@ -200,7 +200,7 @@ const actions = {
             commit("turnProgressionTimeout", 0);
         }
         commit("updateNextAction", null);
-    }
+    },
 };
 
 export const mutations = {
@@ -224,7 +224,7 @@ export const mutations = {
     },
     turnProgressionTimeout(identifier) {
         state.turnProgressionTimeout = identifier;
-    }
+    },
 };
 
 export default {
@@ -232,7 +232,7 @@ export default {
     state,
     getters,
     actions,
-    mutations
+    mutations,
 };
 
 function handleError(error) {
@@ -253,7 +253,7 @@ function handleError(error) {
 
 function chooseRandomObjective(rootGetters) {
     const mazeCardIds = rootGetters["board/allIds"];
-    const playerCardIds = rootGetters["players/all"].map(player => player.mazeCardId);
+    const playerCardIds = rootGetters["players/all"].map((player) => player.mazeCardId);
     let objectiveMazeCardId;
     do {
         objectiveMazeCardId = randomChoice(mazeCardIds);

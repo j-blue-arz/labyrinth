@@ -17,14 +17,14 @@ export default {
     name: "app",
     components: {
         VMenuBar,
-        VGame
+        VGame,
     },
     data() {
         return {
-            wasmPlayer: null
+            wasmPlayer: null,
         };
     },
-    created: function() {
+    created: function () {
         this.wasmPlayer = new WasmPlayer(this.$store);
         window.addEventListener("beforeunload", () => this.leave());
         logAppLaunch();
@@ -33,11 +33,11 @@ export default {
     methods: {
         leave() {
             this.$store.dispatch("game/leaveOnlineGame");
-        }
+        },
     },
     beforeDestroy() {
         this.leave();
-    }
+    },
 };
 </script>
 
