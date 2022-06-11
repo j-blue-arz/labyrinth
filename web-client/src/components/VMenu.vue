@@ -20,6 +20,7 @@ export default {
             required: true,
         },
     },
+    emits: ["item-click"],
     data() {
         return {
             activeMenuKey: null,

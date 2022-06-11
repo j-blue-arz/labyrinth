@@ -24,6 +24,7 @@ export default {
     components: {
         VInsertPanel,
     },
+    emits: ["player-shift"],
     computed: {
         insertPanels: function () {
             let result = [];

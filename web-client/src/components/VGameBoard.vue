@@ -19,7 +19,7 @@
             <transition-group name="game-board__maze-card-" tag="g">
                 <v-maze-card
                     v-for="mazeCard in mazeCards"
-                    @click.native="onMazeCardClick($event, mazeCard)"
+                    @click="onMazeCardClick($event, mazeCard)"
                     :maze-card="mazeCard"
                     :key="'mazeCard-' + mazeCard.id"
                     :xPos="xPos(mazeCard)"
@@ -74,6 +74,7 @@ export default {
             },
         },
     },
+    emits: ["player-move"],
     computed: {
         mazeSize: function () {
             return this.$store.state.board.mazeSize;

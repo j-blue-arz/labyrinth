@@ -1,9 +1,9 @@
 <template>
     <v-game-board
-        @pointerdown.native="pointerDown($event)"
-        @pointermove.native="pointerMove($event)"
-        @pointerup.native="endDrag()"
-        @pointercancel.native="pointercancel($event)"
+        @pointerdown="pointerDown($event)"
+        @pointermove="pointerMove($event)"
+        @pointerup="endDrag()"
+        @pointercancel="pointercancel($event)"
         :interactive-maze-cards="interactiveMazeCards"
         :current-player-color="currentPlayerColor"
         :reachable-cards="reachableCards"
@@ -40,6 +40,7 @@ export default {
             default: null,
         },
     },
+    emits: ["player-shift", "player-move"],
     data() {
         return {
             dragStart: null,

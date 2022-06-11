@@ -61,6 +61,7 @@ export default {
             default: true,
         },
     },
+    emits: ["panel-click"],
     computed: {
         isEnabled: function () {
             return this.insertPanel.enabled;

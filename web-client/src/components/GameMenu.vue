@@ -17,6 +17,7 @@ export default {
     components: {
         VMenu,
     },
+    emits: ["item-click"],
     computed: {
         menuItems: function () {
             let menu = [];

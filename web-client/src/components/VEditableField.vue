@@ -35,6 +35,7 @@ export default {
             required: true,
         },
     },
+    emits: ["input"],
     computed: {
         content: function () {
             if (this.value === "") {

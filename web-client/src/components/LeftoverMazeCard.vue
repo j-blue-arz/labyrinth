@@ -1,7 +1,7 @@
 <template>
     <svg viewBox="0 0 100 100" class="leftover">
         <v-maze-card
-            @click.native="onLeftoverClick"
+            @click="onLeftoverClick"
             :maze-card="mazeCard"
             x="0"
             y="0"
