@@ -1,7 +1,6 @@
 const webpack = require("webpack");
 const { defineConfig } = require("@vue/cli-service");
 
-const path = require("path");
 const compressionPlugin = require("compression-webpack-plugin");
 
 const version = require("./package.json").version;
@@ -12,22 +11,20 @@ module.exports = defineConfig({
         devtool: "source-map",
         plugins: [
             new webpack.DefinePlugin({
-                "process.env": {
-                    VERSION: '"' + version + '"'
-                }
-            })
-        ]
+                "process.env.VERSION": '"' + version + '"',
+            }),
+        ],
     },
     lintOnSave: true,
     css: {
         loaderOptions: {
             sass: {
-                additionalData: `@import "@/scss/main.scss";`
-            }
-        }
+                additionalData: `@import "@/scss/main.scss";`,
+            },
+        },
     },
     productionSourceMap: false,
-    chainWebpack: config => {
+    chainWebpack: (config) => {
         config.plugin("CompressionPlugin").use(compressionPlugin);
-    }
+    },
 });

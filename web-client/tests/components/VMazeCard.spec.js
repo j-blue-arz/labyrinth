@@ -74,12 +74,12 @@ function createMockStore() {
     return {
         state: {
             game: {
-                objectiveId: -1
-            }
+                objectiveId: -1,
+            },
         },
         getters: {
-            "players/findByMazeCard": id => []
-        }
+            "players/findByMazeCard": (id) => [],
+        },
     };
 }
 
@@ -91,8 +91,8 @@ function givenVMazeCard() {
     vMazeCard = mount(VMazeCard, {
         propsData: { mazeCard: mazeCard },
         mocks: {
-            $store: mockStore
-        }
+            $store: mockStore,
+        },
     });
 }
 
@@ -105,7 +105,7 @@ function givenObjective() {
 }
 
 function givenPlayers(players) {
-    mockStore.getters["players/findByMazeCard"] = id => {
+    mockStore.getters["players/findByMazeCard"] = (id) => {
         if (id === mazeCardId) {
             return players;
         } else {

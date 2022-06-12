@@ -23,8 +23,8 @@ describe("game Vuex module", () => {
                 modules: {
                     game: cloneDeep(gameConfig),
                     board: cloneDeep(boardConfig),
-                    players: cloneDeep(playersConfig)
-                }
+                    players: cloneDeep(playersConfig),
+                },
             });
         });
 
@@ -69,8 +69,8 @@ describe("game Vuex module", () => {
                 modules: {
                     game: cloneDeep(gameConfig),
                     board: cloneDeep(boardConfig),
-                    players: cloneDeep(playersConfig)
-                }
+                    players: cloneDeep(playersConfig),
+                },
             });
         });
 
@@ -135,7 +135,7 @@ describe("game Vuex module", () => {
                 thenSinglePlayer({
                     id: 0,
                     isUser: true,
-                    pieceIndex: 0
+                    pieceIndex: 0,
                 });
                 expect(playersOnCard(loc(0, 0))).toContain(0);
             });
@@ -280,98 +280,98 @@ let store;
 let game;
 let apiState;
 
-const givenInitialGameState = function() {
+const givenInitialGameState = function () {
     game = state();
 };
 
-const givenApiStateWithSize3 = function() {
+const givenApiStateWithSize3 = function () {
     apiState = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
 };
 
-const givenApiStateWithoutPlayers = function() {
+const givenApiStateWithoutPlayers = function () {
     givenApiStateWithSize3();
     apiState.players = [];
     apiState.nextAction = null;
 };
 
-const givenStoreFromApi = function() {
+const givenStoreFromApi = function () {
     givenApiStateWithSize3();
     givenPlayingOnline();
     updateGame();
 };
 
-const givenStoreFromApiWithUserPlayer = function(playerId) {
+const givenStoreFromApiWithUserPlayer = function (playerId) {
     givenPlayingOnline();
     store.commit("players/addPlayer", { id: playerId, isUser: true });
     givenApiStateWithSize3();
     updateGame();
 };
 
-const givenPlayingOnline = function() {
+const givenPlayingOnline = function () {
     store.dispatch("game/playOnline");
 };
 
-const givenPlayingOffline = function() {
+const givenPlayingOffline = function () {
     function mockState() {
         let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
         return state.maze;
     }
 
     jest.mock("@/model/board-factory.js", () => ({
-        default: size => {
+        default: (size) => {
             return mockState();
-        }
+        },
     }));
 
     store.dispatch("game/playOffline");
 };
 
-const givenNextActionIs = function(playerId, nextAction) {
+const givenNextActionIs = function (playerId, nextAction) {
     store.commit("game/updateNextAction", { playerId: playerId, action: nextAction });
 };
 
-const givenObjectiveOnMazeCard = function(location) {
+const givenObjectiveOnMazeCard = function (location) {
     const objectiveId = store.getters["board/mazeCard"](location).id;
     store.commit("game/updateObjective", objectiveId);
 };
 
-const whenUpdateObjective = function() {
+const whenUpdateObjective = function () {
     updateObjective(game, apiState.objectiveMazeCardId);
 };
 
-const whenUpdateNextAction = function() {
+const whenUpdateNextAction = function () {
     updateNextAction(game, apiState.nextAction);
 };
 
-const whenDispatchMove = function(targetLocation, playerId) {
+const whenDispatchMove = function (targetLocation, playerId) {
     store.dispatch("game/move", {
         targetLocation: targetLocation,
-        playerId: playerId
+        playerId: playerId,
     });
 };
 
-const whenDispatchShift = function(playerId, shiftLocation, leftoverRotation) {
+const whenDispatchShift = function (playerId, shiftLocation, leftoverRotation) {
     const shiftAction = {
         playerId: playerId,
         location: shiftLocation,
-        leftoverRotation: leftoverRotation
+        leftoverRotation: leftoverRotation,
     };
     store.dispatch("game/shift", shiftAction);
 };
 
-const whenGameUpdate = function() {
+const whenGameUpdate = function () {
     updateGame();
 };
 
-const whenPlayOffline = function() {
+const whenPlayOffline = function () {
     store.dispatch("game/playOffline");
 };
 
-const updateGame = function() {
+const updateGame = function () {
     store.dispatch("game/updateFromApi", apiState);
 };
 
-const thenCardLocationsAreConsistent = function() {
+const thenCardLocationsAreConsistent = function () {
     const n = store.state.board.mazeSize;
     for (let row = 0; row < n; row++) {
         for (let col = 0; col < n; col++) {
@@ -381,51 +381,51 @@ const thenCardLocationsAreConsistent = function() {
     expect(leftoverMazeCard().location).toBeNull();
 };
 
-const thenScoreIs = function(player, expectedScore) {
+const thenScoreIs = function (player, expectedScore) {
     expect(player.score).toEqual(expectedScore);
 };
 
-const thenBoardIsGeneratedWithSize = function(size) {
+const thenBoardIsGeneratedWithSize = function (size) {
     const n = store.state.board.mazeSize;
     expect(n).toEqual(size);
 };
 
-const thenObjectiveIsAMazeCardOnTheBoard = function() {
+const thenObjectiveIsAMazeCardOnTheBoard = function () {
     const objectiveId = store.state.game.objectiveId;
     expect(objectiveId).toBeGreaterThanOrEqual(0);
     const objectiveCard = store.getters["board/mazeCardById"](store.state.game.objectiveId);
     expect(objectiveCard).toBeDefined();
 };
 
-const thenObjectiveIsNotAt = function(location) {
+const thenObjectiveIsNotAt = function (location) {
     const prohibited = store.getters["board/mazeCard"](location).id;
     const actual = store.state.game.objectiveId;
     expect(actual).not.toEqual(prohibited);
 };
 
-const thenPlayerIsRemovedByApi = function(playerId) {
+const thenPlayerIsRemovedByApi = function (playerId) {
     expect(API.removePlayer).toHaveBeenCalledWith(playerId);
 };
 
-const thenSinglePlayer = function(expectedPlayer) {
+const thenSinglePlayer = function (expectedPlayer) {
     expect(store.getters["players/all"].length === 1);
     const actualPlayer = store.getters["players/all"][0];
     expect(actualPlayer).toEqual(expect.objectContaining(expectedPlayer));
 };
 
-const playersOnCard = function(location) {
+const playersOnCard = function (location) {
     return store.getters["board/mazeCard"](location).playerIds;
 };
 
-const cardOnLocation = function(location) {
+const cardOnLocation = function (location) {
     return store.getters["board/mazeCard"](location);
 };
 
-const leftoverMazeCard = function() {
+const leftoverMazeCard = function () {
     return store.getters["board/leftoverMazeCard"];
 };
 
-const player = function(id) {
+const player = function (id) {
     return store.getters["players/find"](id);
 };
 

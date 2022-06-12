@@ -48,62 +48,62 @@ let mockStore;
 
 const mazeCard = { id: 0, location: null, outPaths: "NS", rotation: 0 };
 
-const createMockStore = function() {
+const createMockStore = function () {
     return {
-        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": id => [] },
+        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": (id) => [] },
         dispatch: jest.fn(),
         state: {
             game: {
-                objectiveId: 1
-            }
-        }
+                objectiveId: 1,
+            },
+        },
     };
 };
 
-const factory = function() {
+const factory = function () {
     let leftoverMazeCard = mount(LeftoverMazeCard, {
         mocks: {
-            $store: mockStore
-        }
+            $store: mockStore,
+        },
     });
     return leftoverMazeCard;
 };
 
-const givenLeftoverMazeCard = function() {
+const givenLeftoverMazeCard = function () {
     leftoverMazeCard = factory();
 };
 
-const givenRotation = function(rotation) {
+const givenRotation = function (rotation) {
     mazeCard.rotation = rotation;
 };
 
-const givenShiftRequired = function() {
+const givenShiftRequired = function () {
     mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.SHIFT_ACTION };
 };
 
-const givenNoActionRequired = function() {
+const givenNoActionRequired = function () {
     mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.NO_ACTION };
 };
 
-const whenMazeCardIsClicked = function() {
+const whenMazeCardIsClicked = function () {
     leftoverMazeCard.find(VMazeCard).trigger("click");
 };
 
-const thenMazeCardWasRotated = function() {
+const thenMazeCardWasRotated = function () {
     expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
     expect(mockStore.dispatch).toHaveBeenCalledWith("board/rotateLeftoverClockwise");
 };
 
-const thenMazeCardWasNotRotated = function() {
+const thenMazeCardWasNotRotated = function () {
     expect(mockStore.dispatch).toHaveBeenCalledTimes(0);
 };
 
-const thenMazeCardIsInteractive = function() {
+const thenMazeCardIsInteractive = function () {
     let leftoverVMazeCard = leftoverMazeCard.find(VMazeCard);
     expect(leftoverVMazeCard.classes()).toContain("maze-card--interactive");
 };
 
-const thenMazeCardIsNotInteractive = function() {
+const thenMazeCardIsNotInteractive = function () {
     let leftoverVMazeCard = leftoverMazeCard.find(VMazeCard);
     expect(leftoverVMazeCard.classes()).not.toContain("maze-card--interactive");
 };

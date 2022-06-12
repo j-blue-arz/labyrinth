@@ -4,14 +4,14 @@ import App from "@/components/App.vue";
 let dispatch = jest.fn();
 global.fetch = jest.fn();
 
-const factory = function() {
+const factory = function () {
     return shallowMount(App, {
         mocks: {
             $store: {
                 dispatch: dispatch,
-                watch: jest.fn()
-            }
-        }
+                watch: jest.fn(),
+            },
+        },
     });
 };
 

@@ -19,12 +19,12 @@ describe("generateBoard(7)", () => {
     it("returns 50 maze cards", () => {
         expect(board.mazeCards.length).toEqual(50);
 
-        board.mazeCards.forEach(mazeCard =>
+        board.mazeCards.forEach((mazeCard) =>
             expect(mazeCard).toEqual(
                 expect.objectContaining({
                     id: expect.any(Number),
                     outPaths: expect.stringMatching("^[NESW]{2,4}$"),
-                    rotation: expect.anything()
+                    rotation: expect.anything(),
                     // location omitted, because null is difficult to match
                 })
             )
@@ -32,12 +32,12 @@ describe("generateBoard(7)", () => {
     });
 
     it("returns unique maze card ids", () => {
-        var ids = new Set(board.mazeCards.map(mazeCard => mazeCard.id));
+        var ids = new Set(board.mazeCards.map((mazeCard) => mazeCard.id));
         expect(ids.size).toEqual(50);
     });
 
     it("generates valid outPaths", () => {
-        board.mazeCards.forEach(mazeCard => {
+        board.mazeCards.forEach((mazeCard) => {
             expect(mazeCard.outPaths).toEqual(expect.stringMatching("^[NESW]{2,4}$"));
             expect(count("N", mazeCard.outPaths)).toBeLessThanOrEqual(1);
             expect(count("E", mazeCard.outPaths)).toBeLessThanOrEqual(1);
@@ -47,7 +47,7 @@ describe("generateBoard(7)", () => {
     });
 
     it("generates valid rotations", () => {
-        board.mazeCards.forEach(mazeCard => {
+        board.mazeCards.forEach((mazeCard) => {
             expect([0, 90, 180, 270]).toContain(mazeCard.rotation);
         });
     });
@@ -111,7 +111,7 @@ describe("generateBoard(7)", () => {
     });
 
     it("does not place a cross anywhere", () => {
-        board.mazeCards.forEach(mazeCard => expect(mazeCard.outPaths).not.toEqual("NESW"));
+        board.mazeCards.forEach((mazeCard) => expect(mazeCard.outPaths).not.toEqual("NESW"));
     });
 });
 

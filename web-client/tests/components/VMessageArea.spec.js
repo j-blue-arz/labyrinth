@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import VMessageArea from "@/components/VMessageArea.vue";
-import Vue from "vue";
 import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
 
 beforeEach(() => {
@@ -44,55 +43,55 @@ let mockStore = null;
 
 const initialPlayer = { id: 0, nextAction: NO_ACTION, score: 0 };
 
-const createMockStore = function() {
+const createMockStore = function () {
     let mockStore = {
         state: {
             countdown: {
                 remainingSeconds: 30,
-                startSeconds: 30
-            }
+                startSeconds: 30,
+            },
         },
         getters: {
             "countdown/isRunning": true,
-            "players/userPlayer": { ...initialPlayer }
-        }
+            "players/userPlayer": { ...initialPlayer },
+        },
     };
     return mockStore;
 };
 
-const factory = function() {
+const factory = function () {
     let wrapper = mount(VMessageArea, {
         mocks: {
-            $store: mockStore
-        }
+            $store: mockStore,
+        },
     });
     return wrapper;
 };
 
-const givenNotPlayersTurn = function() {
+const givenNotPlayersTurn = function () {
     mockStore.getters["players/userPlayer"].nextAction = NO_ACTION;
 };
 
-const givenPlayerShift = function() {
+const givenPlayerShift = function () {
     mockStore.getters["players/userPlayer"].nextAction = SHIFT_ACTION;
 };
 
-const givenPlayerMove = function() {
+const givenPlayerMove = function () {
     mockStore.getters["players/userPlayer"].nextAction = MOVE_ACTION;
 };
 
-const givenPlayerScore = function(score) {
+const givenPlayerScore = function (score) {
     mockStore.getters["players/userPlayer"].score = score;
 };
 
-const thenMessageBoardIsInvisible = function() {
+const thenMessageBoardIsInvisible = function () {
     expect(wrapper.find("div").isVisible()).toBe(false);
 };
 
-const thenMessageBoardIsVisible = function() {
+const thenMessageBoardIsVisible = function () {
     expect(wrapper.find("div").isVisible()).toBe(true);
 };
 
-const thenMessageBoardShowsMessageContaining = function(text) {
+const thenMessageBoardShowsMessageContaining = function (text) {
     expect(wrapper.text()).toEqual(expect.stringContaining(text));
 };

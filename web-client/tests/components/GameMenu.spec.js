@@ -8,7 +8,7 @@ import API from "@/services/game-api.js";
 beforeEach(() => {
     mockStore = createMockStore();
     givenNoBots();
-    API.fetchComputationMethods.mockImplementation(cb => cb([]));
+    API.fetchComputationMethods.mockImplementation((cb) => cb([]));
     API.doAddBot.mockClear();
     API.removePlayer.mockClear();
     API.changeGame.mockClear();
@@ -219,13 +219,13 @@ describe("GameMenu", () => {
 
 const { state } = playersConfig;
 
-const createMockStore = function() {
+const createMockStore = function () {
     return {
         dispatch: jest.fn(),
         state: {
-            players: state()
+            players: state(),
         },
-        getters: {}
+        getters: {},
     };
 };
 
@@ -238,115 +238,112 @@ API.removePlayer = jest.fn();
 API.changeGame = jest.fn();
 API.fetchComputationMethods = jest.fn();
 
-const factory = function() {
+const factory = function () {
     return mount(GameMenu, {
         mocks: {
-            $store: mockStore
-        }
+            $store: mockStore,
+        },
     });
 };
 
-const givenGameMenu = function() {
+const givenGameMenu = function () {
     gameMenu = factory();
 };
 
-const whenGameMenuIsCreated = function() {
+const whenGameMenuIsCreated = function () {
     gameMenu = factory();
 };
 
-const givenPlayingOnline = function() {
+const givenPlayingOnline = function () {
     mockStore.getters["game/isOnline"] = true;
     mockStore.getters["game/isOffline"] = false;
 };
 
-const givenPlayingOffline = function() {
+const givenPlayingOffline = function () {
     mockStore.getters["game/isOnline"] = false;
     mockStore.getters["game/isOffline"] = true;
 };
 
-const givenComputationMethods = function(computationMethods) {
+const givenComputationMethods = function (computationMethods) {
     mockStore.getters["game/computationMethods"] = computationMethods;
 };
 
-const givenUserIsParticipating = function() {
+const givenUserIsParticipating = function () {
     mockStore.getters["players/hasUserPlayer"] = true;
 };
 
-const givenUserIsNotParticipating = function() {
+const givenUserIsNotParticipating = function () {
     mockStore.getters["players/hasUserPlayer"] = false;
 };
 
-const givenGameIsFull = function() {
+const givenGameIsFull = function () {
     mockStore.state.players.byId = {
         0: { id: 0 },
         1: { id: 1 },
         2: { id: 2 },
-        3: { id: 3 }
+        3: { id: 3 },
     };
     mockStore.state.players.allIds = [0, 1, 2, 3];
 };
 
-const givenWasmIsParticipating = function() {
+const givenWasmIsParticipating = function () {
     const id = 3;
     const wasmPlayer = {
         id: id,
         isWasm: true,
-        name: ""
+        name: "",
     };
     mockStore.getters["players/hasWasmPlayer"] = true;
     mockStore.getters["players/wasmPlayerId"] = id;
-    mockStore.getters["players/find"] = playerId => (playerId === id ? wasmPlayer : null);
+    mockStore.getters["players/find"] = (playerId) => (playerId === id ? wasmPlayer : null);
 };
 
-const givenWasmIsNotParticipating = function() {
+const givenWasmIsNotParticipating = function () {
     mockStore.getters["players/hasWasmPlayer"] = false;
 };
 
-const givenBots = function(players) {
+const givenBots = function (players) {
     mockStore.getters["players/bots"] = players;
 };
 
-const givenNoBots = function() {
+const givenNoBots = function () {
     mockStore.getters["players/bots"] = [];
 };
 
-const createBot = function(id, computationMethod) {
+const createBot = function (id, computationMethod) {
     return {
         isBot: true,
         computationMethod: computationMethod,
         id: id,
-        pieceIndex: id
+        pieceIndex: id,
     };
 };
 
-const thenOneLabelContains = function(expectedText) {
+const thenOneLabelContains = function (expectedText) {
     let menu = gameMenu.find(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
-    expect(entries.find(entry => entry.text().includes(expectedText))).not.toBeUndefined();
+    expect(entries.find((entry) => entry.text().includes(expectedText))).not.toBeUndefined();
 };
 
-const expectNoLabelContains = function(expectedText) {
+const expectNoLabelContains = function (expectedText) {
     let menu = gameMenu.find(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
-    expect(entries.find(entry => entry.text().includes(expectedText))).toBeUndefined();
+    expect(entries.find((entry) => entry.text().includes(expectedText))).toBeUndefined();
 };
 
-const whenClickInMenu = function(...refs) {
-    refs.forEach(ref => {
+const whenClickInMenu = function (...refs) {
+    refs.forEach((ref) => {
         clickInMenu(ref);
     });
 };
 
-const clickInMenu = function(ref) {
-    gameMenu
-        .find(VMenu)
-        .find({ ref: ref })
-        .trigger("click");
+const clickInMenu = function (ref) {
+    gameMenu.find(VMenu).find({ ref: ref }).trigger("click");
 };
 
-const thenDispatchWas = function(expected, arg) {
+const thenDispatchWas = function (expected, arg) {
     if (arg) {
         expect(mockStore.dispatch).toHaveBeenCalledWith(expected, arg);
     } else {
@@ -354,24 +351,24 @@ const thenDispatchWas = function(expected, arg) {
     }
 };
 
-const thenEntryExists = function(ref) {
+const thenEntryExists = function (ref) {
     let entry = gameMenu.find(VMenu).find({ ref: ref });
     expect(entry.exists()).toBe(true);
 };
 
-const thenEntryDoesNotExist = function(ref) {
+const thenEntryDoesNotExist = function (ref) {
     let entry = gameMenu.find(VMenu).find({ ref: ref });
     expect(entry.exists()).toBe(false);
 };
 function thenReadableLabelsAreDisplayed() {
     let menu = gameMenu.find(VMenu);
     let entries = menu.findAll("li");
-    let labels = entries.wrappers.map(wrapper => wrapper.text());
+    let labels = entries.wrappers.map((wrapper) => wrapper.text());
     expect(labels).toEqual(
         expect.arrayContaining([
             computationMethodLabel("libminimax-distance"),
             computationMethodLabel("libexhsearch"),
-            "WASM: Exhaustive Search\u00A0(1P)"
+            "WASM: Exhaustive Search\u00A0(1P)",
         ])
     );
 }

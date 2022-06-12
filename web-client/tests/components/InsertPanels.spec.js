@@ -36,35 +36,35 @@ let store;
 
 const playerId = 1;
 
-const factory = function() {
+const factory = function () {
     const localVue = createLocalVue();
     localVue.use(Vuex);
     store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
     store.commit("players/addPlayer", { id: playerId, isUser: true });
     let wrapper = mount(InsertPanels, {
         store,
-        localVue
+        localVue,
     });
     return wrapper;
 };
 
-const givenInsertPanels = function() {
+const givenInsertPanels = function () {
     insertPanels = factory();
 };
 
-const givenDisabledShiftLocation = function(location) {
+const givenDisabledShiftLocation = function (location) {
     store.commit("board/setDisabledShiftLocation", location);
 };
 
-const givenNoDisabledShiftLocation = function() {
+const givenNoDisabledShiftLocation = function () {
     store.commit("board/setDisabledShiftLocation", null);
 };
 
-const givenShiftRequired = function() {
+const givenShiftRequired = function () {
     store.commit("game/updateNextAction", { playerId: playerId, action: SHIFT_ACTION });
 };
 
-const givenMoveRequired = function() {
+const givenMoveRequired = function () {
     store.commit("game/updateNextAction", { playerId: playerId, action: MOVE_ACTION });
 };
 
@@ -83,7 +83,7 @@ function thenOnePanelIsDisabled() {
 
 function thenNoPanelHasInteractionClass() {
     let insertPanelsHtml = insertPanels.findAll(".insert-panel");
-    let insertPanelsWithInteraction = insertPanelsHtml.filter(panel =>
+    let insertPanelsWithInteraction = insertPanelsHtml.filter((panel) =>
         panel.classes(".insert-panel--interaction")
     );
     expect(insertPanelsWithInteraction.length).toBe(0);

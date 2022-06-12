@@ -1,12 +1,12 @@
 import { shallowMount } from "@vue/test-utils";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
 
-const wrapperFactory = function(player) {
+const wrapperFactory = function (player) {
     return shallowMount(VPlayerPiece, {
         propsData: {
             player: player,
-            interaction: false
-        }
+            interaction: false,
+        },
     });
 };
 
@@ -33,7 +33,7 @@ describe("VPlayerPiece", () => {
         let player = { id: 0, isUser: false };
         let playerPiece = wrapperFactory(player);
         let svgElement = playerPiece.find({ ref: "playerPiece" });
-        svgElement.classes().forEach(elementClass => {
+        svgElement.classes().forEach((elementClass) => {
             expect(elementClass).toEqual(expect.not.stringContaining("player-piece--is-user"));
         });
     });

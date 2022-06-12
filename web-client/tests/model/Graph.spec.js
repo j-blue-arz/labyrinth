@@ -33,7 +33,7 @@ describe("Graph", () => {
                     loc(5, 3),
                     loc(5, 4),
                     loc(6, 3),
-                    loc(6, 4)
+                    loc(6, 4),
                 ])
             );
         });
@@ -65,7 +65,7 @@ describe("Graph", () => {
                     loc(5, 1),
                     loc(6, 1),
                     loc(5, 2),
-                    loc(6, 2)
+                    loc(6, 2),
                 ])
             );
         });

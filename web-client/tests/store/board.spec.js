@@ -41,9 +41,9 @@ describe("board Vuex module", () => {
                         id: 3,
                         location: {
                             column: 0,
-                            row: 1
+                            row: 1,
                         },
-                        rotation: 180
+                        rotation: 180,
                     })
                 );
             });
@@ -170,7 +170,7 @@ describe("board Vuex module", () => {
 
                 expect(card).toEqual(
                     expect.objectContaining({
-                        location: { column: 1, row: 1 }
+                        location: { column: 1, row: 1 },
                     })
                 );
             });
@@ -226,7 +226,7 @@ let store;
 let board;
 let apiState;
 
-const givenExistingBoardStateWithSize5 = function() {
+const givenExistingBoardStateWithSize5 = function () {
     board = state();
     board.mazeSize = 5;
     let id = 8;
@@ -237,7 +237,7 @@ const givenExistingBoardStateWithSize5 = function() {
                 id: id,
                 location: { row: row, column: col },
                 rotation: 0,
-                outPaths: "NES"
+                outPaths: "NES",
             };
             board.boardLayout[row].push(card.id);
             board.cardsById[card.id] = card;
@@ -249,54 +249,54 @@ const givenExistingBoardStateWithSize5 = function() {
     store.replaceState(cloneDeep(board));
 };
 
-const givenApiStateWithSize3 = function() {
+const givenApiStateWithSize3 = function () {
     apiState = JSON.parse(GET_STATE_RESULT_FOR_N_3);
 };
 
-const givenApiStateWithoutDisabledShiftLocations = function() {
+const givenApiStateWithoutDisabledShiftLocations = function () {
     givenApiStateWithSize3();
     apiState.enabledShiftLocations.push(loc(2, 1));
 };
 
-const givenStoreFromApi = function() {
+const givenStoreFromApi = function () {
     givenApiStateWithSize3();
     store.dispatch("update", apiState);
 };
 
-const givenApiPlayerWithId = function(playerId) {
+const givenApiPlayerWithId = function (playerId) {
     return {
         isOnMazeCard(cardId) {
-            const player = apiState.players.find(player => player.id === playerId);
+            const player = apiState.players.find((player) => player.id === playerId);
             player.mazeCardId = cardId;
-        }
+        },
     };
 };
 
-const whenSetBoardFromApi = function() {
+const whenSetBoardFromApi = function () {
     store.dispatch("update", apiState);
 };
 
-const whenMove = function(moveObject) {
+const whenMove = function (moveObject) {
     store.dispatch("movePlayer", moveObject);
 };
 
-const whenShift = function(location, rotation) {
+const whenShift = function (location, rotation) {
     store.dispatch("shift", { location: location, leftoverRotation: rotation });
 };
 
-const whenGetMazeCard = function(location) {
+const whenGetMazeCard = function (location) {
     return getMazeCard(location);
 };
 
-const whenRotateLeftover = function() {
+const whenRotateLeftover = function () {
     store.dispatch("rotateLeftoverClockwise");
 };
 
-const whenGetMazeCardsRowMajorOrder = function() {
+const whenGetMazeCardsRowMajorOrder = function () {
     return store.getters.mazeCardsRowMajorOrder;
 };
 
-const thenBoardSizeIs = function(size) {
+const thenBoardSizeIs = function (size) {
     expect(store.state.mazeSize).toEqual(size);
     expect(store.state.boardLayout.length).toEqual(size);
     for (let row = 0; row < size; row++) {
@@ -304,11 +304,11 @@ const thenBoardSizeIs = function(size) {
     }
 };
 
-const getMazeCard = function(location) {
+const getMazeCard = function (location) {
     return store.getters.mazeCard(location);
 };
 
-const playersOnCard = function(id) {
+const playersOnCard = function (id) {
     return store.getters.mazeCardById(id).playerIds;
 };
 

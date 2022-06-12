@@ -10,10 +10,7 @@ export function assertConsistentLocation(game, location) {
 }
 
 export function extractIdMatrix(app) {
-    var vMazeCards = app
-        .find({ ref: "interactive-board" })
-        .find(VGameBoard)
-        .findAll(VMazeCard);
+    var vMazeCards = app.find({ ref: "interactive-board" }).find(VGameBoard).findAll(VMazeCard);
     var htmlCards = [];
     for (let i = 0; i < vMazeCards.length; i++) {
         var card = vMazeCards.at(i);
@@ -24,11 +21,11 @@ export function extractIdMatrix(app) {
             htmlCards.push({
                 x: x,
                 y: y,
-                id: id
+                id: id,
             });
         }
     }
-    htmlCards.sort(function(a, b) {
+    htmlCards.sort(function (a, b) {
         if (a.y > b.y) {
             return 1;
         }
@@ -52,10 +49,6 @@ export function extractIdMatrix(app) {
         }
     }
     return ids;
-}
-
-export function copyObjectStructure(obj) {
-    return JSON.parse(JSON.stringify(obj));
 }
 
 export function buildRandomMaze(game) {

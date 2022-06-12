@@ -43,60 +43,60 @@ let wrapper = null;
 
 let placeholder = "some placeholder";
 
-const factory = function() {
+const factory = function () {
     let wrapper = mount(VEditableField, {
         propsData: {
             placeholder: placeholder,
-            value: ""
-        }
+            value: "",
+        },
     });
     return wrapper;
 };
 
-const givenTextSet = function(text) {
+const givenTextSet = function (text) {
     wrapper
         .findAll("span")
-        .filter(w => w.isVisible())
+        .filter((w) => w.isVisible())
         .at(0)
         .trigger("click");
     wrapper.find("input").setValue(text);
 };
 
-const whenFocusIsLost = function() {
+const whenFocusIsLost = function () {
     wrapper.find("input").trigger("blur");
 };
 
-const whenEnteringText = function() {
+const whenEnteringText = function () {
     wrapper
         .findAll("span")
-        .filter(w => w.isVisible())
+        .filter((w) => w.isVisible())
         .at(0)
         .trigger("click");
 };
 
-const thenContentIs = function(expectedText) {
+const thenContentIs = function (expectedText) {
     let actualText = wrapper
         .findAll("span")
-        .filter(w => w.isVisible())
+        .filter((w) => w.isVisible())
         .at(0)
         .text();
     expect(actualText).toEqual(expectedText);
 };
 
-const thenInputEventContentIs = function(expectedText) {
+const thenInputEventContentIs = function (expectedText) {
     expect(wrapper.emitted().input).toBeTruthy();
     expect(wrapper.emitted().input[0]).toEqual([expectedText]);
 };
 
-const thenShowsOnlyOneSpan = function() {
-    let visibleSpans = wrapper.findAll("span").filter(w => w.isVisible()).length;
+const thenShowsOnlyOneSpan = function () {
+    let visibleSpans = wrapper.findAll("span").filter((w) => w.isVisible()).length;
     expect(visibleSpans).toEqual(1);
 };
 
-const thenInputIsInvisible = function() {
+const thenInputIsInvisible = function () {
     expect(wrapper.find("input").isVisible()).toBeFalsy;
 };
 
-const thenInputIsVisible = function() {
+const thenInputIsVisible = function () {
     expect(wrapper.find("input").isVisible()).toBeTruthy;
 };

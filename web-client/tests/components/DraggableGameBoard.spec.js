@@ -147,83 +147,83 @@ let wrapper;
 let store;
 let mousePosition;
 
-const factory = function() {
+const factory = function () {
     const localVue = createLocalVue();
     localVue.use(Vuex);
     store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
     givenDisabledShiftLocation(null);
     let wrapper = mount(DraggableGameBoard, {
         propsData: {
-            userAction: SHIFT_ACTION
+            userAction: SHIFT_ACTION,
         },
         store,
-        localVue
+        localVue,
     });
-    wrapper.element.getScreenCTM = function() {
+    wrapper.element.getScreenCTM = function () {
         return { e: 0, f: 0, a: 1, d: 1 };
     };
     return wrapper;
 };
 
-const givenShiftIsNotRequired = function() {
+const givenShiftIsNotRequired = function () {
     wrapper.setProps({ userAction: NO_ACTION });
 };
 
-const givenDisabledShiftLocation = function(location) {
+const givenDisabledShiftLocation = function (location) {
     store.commit("board/setDisabledShiftLocation", location);
 };
 
-const givenMouseDownAt = function(location) {
+const givenMouseDownAt = function (location) {
     const clientX = location.column * 100 + 50;
     const clientY = location.row * 100 + 50;
     mousePosition = { clientX: clientX, clientY: clientY };
     wrapper.trigger("pointerdown", mousePosition);
 };
 
-const givenMouseIsMoved = function(offset) {
+const givenMouseIsMoved = function (offset) {
     whenMouseIsMoved(offset);
 };
 
-const whenMouseIsMoved = function(offset) {
+const whenMouseIsMoved = function (offset) {
     const clientX = mousePosition.clientX + offset.x;
     const clientY = mousePosition.clientY + offset.y;
     mousePosition = { clientX: clientX, clientY: clientY };
     wrapper.trigger("pointermove", mousePosition);
 };
 
-const whenMouseIsReleased = function() {
+const whenMouseIsReleased = function () {
     wrapper.trigger("pointerup");
 };
 
-const thenRowIsDragged = function(expectedRow) {
+const thenRowIsDragged = function (expectedRow) {
     const drag = wrapper.find(VGameBoard).props("drag");
     expect(drag.row).toBe(expectedRow);
     expect([0, 1, 2]).not.toContain(drag.column);
 };
 
-const thenColumnIsDragged = function(expectedColumn) {
+const thenColumnIsDragged = function (expectedColumn) {
     const drag = wrapper.find(VGameBoard).props("drag");
     expect([0, 1, 2]).not.toContain(drag.row);
     expect(drag.column).toBe(expectedColumn);
 };
 
-const thenDragOffsetIs = function(expectedOffset) {
+const thenDragOffsetIs = function (expectedOffset) {
     const drag = wrapper.find(VGameBoard).props("drag");
     expect(drag.offset).toBe(expectedOffset);
 };
 
-const thenNoDraggingOccurs = function() {
+const thenNoDraggingOccurs = function () {
     const drag = wrapper.find(VGameBoard).props("drag");
     expect(drag.offset).toBe(0);
 };
 
-const thenShiftEventIsEmitted = function(expectedShiftLocation) {
+const thenShiftEventIsEmitted = function (expectedShiftLocation) {
     expect(wrapper.emitted("player-shift")).toBeTruthy();
     expect(wrapper.emitted("player-shift").length).toBe(1);
     expect(wrapper.emitted("player-shift")[0][0].row).toBe(expectedShiftLocation.row);
     expect(wrapper.emitted("player-shift")[0][0].column).toBe(expectedShiftLocation.column);
 };
 
-const thenNoShiftEventIsEmitted = function() {
+const thenNoShiftEventIsEmitted = function () {
     expect(wrapper.emitted("player-shift")).toBeFalsy();
 };
