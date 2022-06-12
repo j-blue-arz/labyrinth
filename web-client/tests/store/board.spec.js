@@ -1,5 +1,4 @@
 import boardConfig from "@/store/modules/board.js";
-import { loc } from "../testutils.js";
 import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
@@ -311,6 +310,10 @@ const getMazeCard = function (location) {
 const playersOnCard = function (id) {
     return store.getters.mazeCardById(id).playerIds;
 };
+
+function loc(row, column) {
+    return { row: row, column: column };
+}
 
 const GET_STATE_RESULT_FOR_N_3 = `{
     "maze": {

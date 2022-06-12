@@ -6,7 +6,6 @@ import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
-import generateBoard from "@/model/board-factory.js";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("game Vuex module", () => {
@@ -318,7 +317,7 @@ const givenPlayingOffline = function () {
     }
 
     jest.mock("@/model/board-factory.js", () => ({
-        default: (size) => {
+        default: () => {
             return mockState();
         },
     }));

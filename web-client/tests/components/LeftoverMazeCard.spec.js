@@ -50,7 +50,7 @@ const mazeCard = { id: 0, location: null, outPaths: "NS", rotation: 0 };
 
 const createMockStore = function () {
     return {
-        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": (id) => [] },
+        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": () => [] },
         dispatch: jest.fn(),
         state: {
             game: {

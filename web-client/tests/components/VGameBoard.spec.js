@@ -4,17 +4,6 @@ import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 
-const mazeCardListFactory = function (n) {
-    var mazeCards = [];
-    var i = 0;
-    for (var row = 0; row < n; row++) {
-        for (var col = 0; col < n; col++) {
-            mazeCards.push(new MazeCard(i++, row, col, "NS", 0));
-        }
-    }
-    return mazeCards;
-};
-
 const findLowestPositionOfMazeCard = function (vGameBoard, dimension) {
     var vMazeCards = vGameBoard.findAll(VMazeCard);
     var min = Number.MAX_VALUE;

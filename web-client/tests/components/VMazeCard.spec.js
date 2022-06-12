@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import VMazeCard from "@/components/VMazeCard.vue";
-import Player from "@/model/player.js";
 
 beforeEach(() => {
     mockStore = createMockStore();
@@ -78,7 +77,7 @@ function createMockStore() {
             },
         },
         getters: {
-            "players/findByMazeCard": (id) => [],
+            "players/findByMazeCard": () => [],
         },
     };
 }

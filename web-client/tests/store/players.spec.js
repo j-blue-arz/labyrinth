@@ -438,7 +438,7 @@ const givenPlayingOffline = function () {
     }
 
     jest.mock("@/model/board-factory.js", () => ({
-        default: (size) => {
+        default: () => {
             return mockState();
         },
     }));
@@ -479,7 +479,6 @@ const givenPlayersInState = function (players) {
 };
 
 const givenNextAction = function (nextAction) {
-    const players = store.state.players;
     store.commit("game/updateNextAction", nextAction);
 };
 
