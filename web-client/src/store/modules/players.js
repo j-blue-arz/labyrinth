@@ -1,4 +1,3 @@
-import Vue from "vue";
 import API from "@/services/game-api.js";
 import * as action from "@/model/player.js";
 
@@ -155,18 +154,18 @@ export const mutations = {
     addPlayer(state, playerToAdd) {
         let defaultPlayer = newPlayer(playerToAdd.id);
         let player = fillPlayer(defaultPlayer, playerToAdd);
-        Vue.set(state.byId, player.id, player);
+        state.byId[player.id] = player;
         state.allIds.push(player.id);
     },
     removePlayer(state, id) {
-        Vue.delete(state.byId, id);
+        delete state.byId[id];
         const index = state.allIds.indexOf(id);
         state.allIds.splice(index, 1);
     },
     updatePlayer(state, player) {
         let existingPlayer = state.byId[player.id];
         let updatedPlayer = fillPlayer(existingPlayer, player);
-        Vue.set(state.byId, updatedPlayer.id, updatedPlayer);
+        state.byId[updatedPlayer.id] = updatedPlayer;
     },
     changeName(state, nameChange) {
         state.byId[nameChange.id].name = nameChange.name;

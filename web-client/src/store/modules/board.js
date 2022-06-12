@@ -1,5 +1,4 @@
-import Vue from "vue";
-import { ValueError } from "@/util/exceptions.js";
+import ValueError from "@/util/exceptions.js";
 
 export const state = () => ({
     mazeSize: 0,
@@ -96,10 +95,8 @@ export const mutations = {
         if (mazeCardArray) {
             if (newState.leftoverId !== mazeCardArray[0].id) {
                 newState.leftoverId = mazeCardArray[0].id;
-                Vue.set(
-                    newState.cardsById,
-                    newState.leftoverId,
-                    createCardWithoutPlayers(mazeCardArray[0])
+                newState.cardsById[newState.leftoverId] = createCardWithoutPlayers(
+                    mazeCardArray[0]
                 );
             }
 
@@ -107,10 +104,8 @@ export const mutations = {
             for (let row = 0; row < n; row++) {
                 newState.boardLayout.push([]);
                 for (let col = 0; col < n; col++) {
-                    Vue.set(
-                        newState.cardsById,
-                        mazeCardArray[index].id,
-                        createCardWithoutPlayers(mazeCardArray[index])
+                    newState.cardsById[mazeCardArray[index].id] = createCardWithoutPlayers(
+                        mazeCardArray[index]
                     );
                     newState.boardLayout[row].push(mazeCardArray[index].id);
                     index++;

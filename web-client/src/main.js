@@ -1,31 +1,25 @@
-import Vue from "vue";
+import { createApp } from "vue";
 import App from "@/components/App.vue";
 import store from "@/store";
 
-Vue.config.productionTip = false;
+// https://stackoverflow.com/questions/36170425/detect-click-outside-element
+const clickOutside = {
+    beforeMount: (el, binding) => {
+        el.clickOutsideEvent = (event) => {
+            if (!(el == event.target || el.contains(event.target))) {
+                binding.value();
+            }
+        };
+        document.addEventListener("click", el.clickOutsideEvent);
+    },
+    unmounted: (el) => {
+        document.removeEventListener("click", el.clickOutsideEvent);
+    },
+};
 
-Vue.prototype.$ui = Object.freeze({
+const app = createApp(App);
+app.config.globalProperties.$ui = Object.freeze({
     cardSize: 100,
 });
 
-// https://stackoverflow.com/questions/36170425/detect-click-outside-element
-Vue.directive("click-outside", {
-    bind: function (el, binding, vnode) {
-        el.clickOutsideEvent = function (event) {
-            if (!(el == event.target || el.contains(event.target))) {
-                vnode.context[binding.expression](event);
-            }
-        };
-        document.body.addEventListener("click", el.clickOutsideEvent);
-    },
-    unbind: function (el) {
-        document.body.removeEventListener("click", el.clickOutsideEvent);
-    },
-});
-
-new Vue({
-    render: function (h) {
-        return h(App);
-    },
-    store: store,
-}).$mount("#app");
+app.use(store).directive("click-outside", clickOutside).mount("#app");

@@ -1,14 +1,11 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import { createStore } from "vuex";
 
 import game from "./modules/game.js";
 import board from "./modules/board.js";
 import players from "./modules/players.js";
 import countdown from "./modules/countdown.js";
 
-Vue.use(Vuex);
-
-let store = new Vuex.Store({
+let store = createStore({
     modules: {
         game: game,
         board: board,

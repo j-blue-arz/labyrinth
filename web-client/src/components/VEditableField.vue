@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import Vue from "vue";
+import { nextTick } from "vue";
 
 export default {
     name: "v-editable-field",
@@ -48,7 +48,7 @@ export default {
     methods: {
         startEditing: function () {
             this.editing = true;
-            Vue.nextTick(() => {
+            nextTick(() => {
                 this.$refs.input.focus();
             });
         },
