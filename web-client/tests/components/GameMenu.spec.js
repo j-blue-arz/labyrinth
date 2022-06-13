@@ -240,8 +240,10 @@ API.fetchComputationMethods = jest.fn();
 
 const factory = function () {
     return mount(GameMenu, {
-        mocks: {
-            $store: mockStore,
+        global: {
+            mocks: {
+                $store: mockStore,
+            },
         },
     });
 };

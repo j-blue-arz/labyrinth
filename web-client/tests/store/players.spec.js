@@ -1,7 +1,6 @@
 import playersConfig from "@/store/modules/players.js";
 import gameConfig from "@/store/modules/game.js";
 import boardConfig from "@/store/modules/board.js";
-import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
@@ -10,8 +9,6 @@ import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("players Vuex module", () => {
     beforeEach(() => {
-        const localVue = createLocalVue();
-        localVue.use(Vuex);
         store = new Vuex.Store({
             modules: {
                 game: cloneDeep(gameConfig),

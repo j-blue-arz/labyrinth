@@ -1,5 +1,4 @@
 import boardConfig from "@/store/modules/board.js";
-import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 
@@ -7,8 +6,6 @@ describe("board Vuex module", () => {
     describe("actions", () => {
         // actions run against real store
         beforeEach(() => {
-            const localVue = createLocalVue();
-            localVue.use(Vuex);
             store = new Vuex.Store(cloneDeep(boardConfig));
         });
 
@@ -156,8 +153,6 @@ describe("board Vuex module", () => {
 
     describe("getters", () => {
         beforeEach(() => {
-            const localVue = createLocalVue();
-            localVue.use(Vuex);
             store = new Vuex.Store(cloneDeep(boardConfig));
         });
 

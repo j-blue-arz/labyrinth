@@ -2,7 +2,6 @@ import gameConfig from "@/store/modules/game.js";
 import boardConfig from "@/store/modules/board.js";
 import playersConfig from "@/store/modules/players.js";
 import { SHIFT_ACTION, MOVE_ACTION, PREPARE_MOVE, PREPARE_SHIFT } from "@/model/player.js";
-import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
@@ -16,8 +15,6 @@ describe("game Vuex module", () => {
 
     describe("getters", () => {
         beforeEach(() => {
-            const localVue = createLocalVue();
-            localVue.use(Vuex);
             store = new Vuex.Store({
                 modules: {
                     game: cloneDeep(gameConfig),
@@ -62,8 +59,6 @@ describe("game Vuex module", () => {
     describe("actions", () => {
         // actions run against real store, because they call other modules mutations and getters.
         beforeEach(() => {
-            const localVue = createLocalVue();
-            localVue.use(Vuex);
             store = new Vuex.Store({
                 modules: {
                     game: cloneDeep(gameConfig),

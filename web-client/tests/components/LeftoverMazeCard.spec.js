@@ -62,8 +62,10 @@ const createMockStore = function () {
 
 const factory = function () {
     let leftoverMazeCard = mount(LeftoverMazeCard, {
-        mocks: {
-            $store: mockStore,
+        global: {
+            mocks: {
+                $store: mockStore,
+            },
         },
     });
     return leftoverMazeCard;

@@ -61,8 +61,10 @@ const createMockStore = function () {
 
 const factory = function () {
     let wrapper = mount(VMessageArea, {
-        mocks: {
-            $store: mockStore,
+        global: {
+            mocks: {
+                $store: mockStore,
+            },
         },
     });
     return wrapper;

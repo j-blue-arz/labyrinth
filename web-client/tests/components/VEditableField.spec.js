@@ -45,7 +45,7 @@ let placeholder = "some placeholder";
 
 const factory = function () {
     let wrapper = mount(VEditableField, {
-        propsData: {
+        props: {
             placeholder: placeholder,
             value: "",
         },

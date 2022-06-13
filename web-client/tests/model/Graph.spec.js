@@ -1,13 +1,10 @@
 import Graph from "@/model/Graph";
 import boardConfig, { loc } from "@/store/modules/board.js";
-import { createLocalVue } from "@vue/test-utils";
 import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 
 describe("Graph", () => {
     beforeEach(() => {
-        const localVue = createLocalVue();
-        localVue.use(Vuex);
         let store = new Vuex.Store(cloneDeep(boardConfig));
         const apiState = JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER);
         store.dispatch("update", apiState);

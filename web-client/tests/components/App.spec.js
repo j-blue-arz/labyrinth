@@ -6,10 +6,12 @@ global.fetch = jest.fn();
 
 const factory = function () {
     return shallowMount(App, {
-        mocks: {
-            $store: {
-                dispatch: dispatch,
-                watch: jest.fn(),
+        global: {
+            mocks: {
+                $store: {
+                    dispatch: dispatch,
+                    watch: jest.fn(),
+                },
             },
         },
     });

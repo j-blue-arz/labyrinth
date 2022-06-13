@@ -1,6 +1,5 @@
-import Vuex from "vuex";
-import { mount, createLocalVue } from "@vue/test-utils";
-import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { mount } from "@vue/test-utils";
+import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import InsertPanels from "@/components/InsertPanels.vue";
 import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
 
@@ -37,13 +36,12 @@ let store;
 const playerId = 1;
 
 const factory = function () {
-    const localVue = createLocalVue();
-    localVue.use(Vuex);
-    store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
+    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
     store.commit("players/addPlayer", { id: playerId, isUser: true });
     let wrapper = mount(InsertPanels, {
-        store,
-        localVue,
+        global: {
+            plugins: [store],
+        },
     });
     return wrapper;
 };
@@ -70,8 +68,8 @@ const givenMoveRequired = function () {
 
 function thenDisabledPanelIsTopOfFirstColumn() {
     let insertPanelsHtml = insertPanels.findAll(".insert-panel--disabled");
-    let xPos = Number.parseInt(insertPanelsHtml.at(0).attributes("x"));
-    let yPos = Number.parseInt(insertPanelsHtml.at(0).attributes("y"));
+    let xPos = Number.parseInt(insertPanelsHtml[0].attributes("x"));
+    let yPos = Number.parseInt(insertPanelsHtml[0].attributes("y"));
     expect(xPos).toBe(100);
     expect(yPos).toBe(-100);
 }

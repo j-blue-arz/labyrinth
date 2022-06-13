@@ -1,12 +1,12 @@
-import Vuex from "vuex";
+import { createStore } from "vuex";
 import { cloneDeep } from "lodash";
 
 import gameConfig from "@/store/modules/game.js";
 import boardConfig from "@/store/modules/board.js";
 import playersConfig from "@/store/modules/players.js";
 
-export const createStore = function (apiState) {
-    let store = new Vuex.Store({
+export const createTestStore = function (apiState) {
+    let store = createStore({
         modules: {
             game: cloneDeep(gameConfig),
             board: cloneDeep(boardConfig),

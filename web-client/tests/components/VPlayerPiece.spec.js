@@ -3,7 +3,7 @@ import VPlayerPiece from "@/components/VPlayerPiece.vue";
 
 const wrapperFactory = function (player) {
     return shallowMount(VPlayerPiece, {
-        propsData: {
+        props: {
             player: player,
             interaction: false,
         },

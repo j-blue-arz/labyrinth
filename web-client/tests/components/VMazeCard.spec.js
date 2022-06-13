@@ -88,9 +88,11 @@ function givenCardWithOutPaths(outPaths) {
 
 function givenVMazeCard() {
     vMazeCard = mount(VMazeCard, {
-        propsData: { mazeCard: mazeCard },
-        mocks: {
-            $store: mockStore,
+        props: { mazeCard: mazeCard },
+        global: {
+            mocks: {
+                $store: mockStore,
+            },
         },
     });
 }

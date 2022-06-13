@@ -1,6 +1,5 @@
-import Vuex from "vuex";
-import { mount, createLocalVue } from "@vue/test-utils";
-import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { mount } from "@vue/test-utils";
+import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 
@@ -39,11 +38,10 @@ let vGameBoard;
 let store;
 
 function givenVGameBoard() {
-    const localVue = createLocalVue();
-    localVue.use(Vuex);
-    store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
+    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
     vGameBoard = mount(VGameBoard, {
-        store,
-        localVue,
+        global: {
+            plugins: [store],
+        },
     });
 }

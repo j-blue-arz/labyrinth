@@ -1,9 +1,8 @@
-import Vuex from "vuex";
-import { mount, createLocalVue } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import VGameBoard from "@/components/VGameBoard.vue";
-import { createStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import { loc } from "@/store/modules/board.js";
 
 beforeEach(() => {
@@ -148,16 +147,15 @@ let store;
 let mousePosition;
 
 const factory = function () {
-    const localVue = createLocalVue();
-    localVue.use(Vuex);
-    store = createStore(GET_GAME_STATE_RESULT_FOR_N_3);
+    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
     givenDisabledShiftLocation(null);
     let wrapper = mount(DraggableGameBoard, {
-        propsData: {
+        props: {
             userAction: SHIFT_ACTION,
         },
-        store,
-        localVue,
+        global: {
+            plugins: [store],
+        },
     });
     wrapper.element.getScreenCTM = function () {
         return { e: 0, f: 0, a: 1, d: 1 };

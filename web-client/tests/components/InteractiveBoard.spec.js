@@ -1,6 +1,5 @@
-import Vuex from "vuex";
-import { createStore } from "../testfixtures.js";
-import { mount, createLocalVue } from "@vue/test-utils";
+import { createTestStore } from "../testfixtures.js";
+import { mount } from "@vue/test-utils";
 import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
@@ -62,12 +61,11 @@ function givenUserPlayer() {
 }
 
 function givenInteractiveBoard() {
-    const localVue = createLocalVue();
-    localVue.use(Vuex);
-    store = createStore();
+    store = createTestStore();
     interactiveBoard = mount(InteractiveBoard, {
-        store,
-        localVue,
+        global: {
+            plugins: [store],
+        },
     });
 }
 
@@ -107,7 +105,7 @@ function fetchInteractiveCardIds() {
     let mazeCards = interactiveBoard.findAll(".maze-card");
     let interactiveCardIds = [];
     for (var i = 0; i < mazeCards.length; i++) {
-        let card = mazeCards.at(i);
+        let card = mazeCards[i];
         if (card.classes("maze-card--interactive")) {
             interactiveCardIds.push(parseInt(card.attributes("id")));
         }
