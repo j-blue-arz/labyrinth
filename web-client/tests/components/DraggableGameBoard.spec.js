@@ -11,55 +11,55 @@ beforeEach(() => {
 
 describe("DraggableGameBoard", () => {
     describe("when dragging", () => {
-        it("offsets entire row when dragging right", () => {
+        it("offsets entire row when dragging right", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: 40, y: 0 });
+            await whenMouseIsMoved({ x: 40, y: 0 });
 
             thenRowIsDragged(1);
             thenDragOffsetIs(40);
         });
 
-        it("offset entire column when dragging upwards", () => {
+        it("offset entire column when dragging upwards", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: 0, y: -30 });
+            await whenMouseIsMoved({ x: 0, y: -30 });
 
             thenColumnIsDragged(1);
             thenDragOffsetIs(-30);
         });
 
-        it("drags column when dragging more down than right", () => {
+        it("drags column when dragging more down than right", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: 20, y: 40 });
+            await whenMouseIsMoved({ x: 20, y: 40 });
 
             thenColumnIsDragged(1);
             thenDragOffsetIs(40);
         });
 
-        it("drags row when dragging more left than downwards", () => {
+        it("drags row when dragging more left than downwards", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: -40, y: -20 });
+            await whenMouseIsMoved({ x: -40, y: -20 });
 
             thenRowIsDragged(1);
             thenDragOffsetIs(-40);
         });
 
-        it("drags row when dragging equally horizontally and vertically", () => {
+        it("drags row when dragging equally horizontally and vertically", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: 30, y: 30 });
+            await whenMouseIsMoved({ x: 30, y: 30 });
 
             thenRowIsDragged(1);
             thenDragOffsetIs(30);
         });
 
-        it("does not offset by more than 100", () => {
+        it("does not offset by more than 100", async () => {
             givenMouseDownAt(loc(1, 1));
 
-            whenMouseIsMoved({ x: 120, y: 0 });
+            await whenMouseIsMoved({ x: 120, y: 0 });
 
             thenRowIsDragged(1);
             thenDragOffsetIs(100);
@@ -182,11 +182,11 @@ const givenMouseIsMoved = function (offset) {
     whenMouseIsMoved(offset);
 };
 
-const whenMouseIsMoved = function (offset) {
+const whenMouseIsMoved = async function (offset) {
     const clientX = mousePosition.clientX + offset.x;
     const clientY = mousePosition.clientY + offset.y;
     mousePosition = { clientX: clientX, clientY: clientY };
-    wrapper.trigger("pointermove", mousePosition);
+    await wrapper.trigger("pointermove", mousePosition);
 };
 
 const whenMouseIsReleased = function () {
@@ -194,24 +194,24 @@ const whenMouseIsReleased = function () {
 };
 
 const thenRowIsDragged = function (expectedRow) {
-    const drag = wrapper.find(VGameBoard).props("drag");
+    const drag = wrapper.findComponent(VGameBoard).props("drag");
     expect(drag.row).toBe(expectedRow);
     expect([0, 1, 2]).not.toContain(drag.column);
 };
 
 const thenColumnIsDragged = function (expectedColumn) {
-    const drag = wrapper.find(VGameBoard).props("drag");
+    const drag = wrapper.findComponent(VGameBoard).props("drag");
     expect([0, 1, 2]).not.toContain(drag.row);
     expect(drag.column).toBe(expectedColumn);
 };
 
 const thenDragOffsetIs = function (expectedOffset) {
-    const drag = wrapper.find(VGameBoard).props("drag");
+    const drag = wrapper.findComponent(VGameBoard).props("drag");
     expect(drag.offset).toBe(expectedOffset);
 };
 
 const thenNoDraggingOccurs = function () {
-    const drag = wrapper.find(VGameBoard).props("drag");
+    const drag = wrapper.findComponent(VGameBoard).props("drag");
     expect(drag.offset).toBe(0);
 };
 

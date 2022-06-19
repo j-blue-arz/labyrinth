@@ -14,13 +14,13 @@ describe("InteractiveBoard", () => {
     });
 
     it("sets interaction class on reachable maze cards", async () => {
-        whenMoveRequired();
-        await nextTick();
+        await whenMoveRequired();
+
         thenCardsAreInteractive([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)]);
     });
 
-    it("does not set interaction class if shift is required", () => {
-        whenShiftRequired();
+    it("does not set interaction class if shift is required", async () => {
+        await whenShiftRequired();
 
         thenCardsAreInteractive([]);
     });
@@ -73,21 +73,25 @@ function givenShiftRequired() {
     whenShiftRequired();
 }
 
-const whenShiftRequired = function () {
+const whenShiftRequired = async function () {
     store.commit("game/updateNextAction", { playerId: userPlayerId, action: SHIFT_ACTION });
+    await nextTick();
 };
 
 function givenMoveRequired() {
     whenMoveRequired();
 }
 
-const whenMoveRequired = function () {
+const whenMoveRequired = async function () {
     store.commit("game/updateNextAction", { playerId: userPlayerId, action: MOVE_ACTION });
+    await nextTick();
 };
 
-function whenMazeCardIsClickedAtLocation(location) {
+async function whenMazeCardIsClickedAtLocation(location) {
     const clickedMazeCard = store.getters["board/mazeCard"](location);
-    interactiveBoard.find(DraggableGameBoard).vm.$emit("player-move", clickedMazeCard);
+    await interactiveBoard
+        .findComponent(DraggableGameBoard)
+        .vm.$emit("player-move", clickedMazeCard);
 }
 
 function thenMoveIsDispatched(toLocation) {

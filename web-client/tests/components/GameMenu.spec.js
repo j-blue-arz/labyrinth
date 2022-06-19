@@ -188,29 +188,29 @@ describe("GameMenu", () => {
             thenEntryDoesNotExist("disconnect");
         });
 
-        it("dispatches 'playOnline' when 'connect' was clicked", () => {
+        it("dispatches 'playOnline' when 'connect' was clicked", async () => {
             givenPlayingOffline();
             givenGameMenu();
 
-            whenClickInMenu("connect");
+            await whenClickInMenu("connect");
 
             thenDispatchWas("game/playOnline");
         });
 
-        it("displays 'disconnect' in online mode", () => {
+        it("displays 'disconnect' in online mode", async () => {
             givenPlayingOnline();
 
-            whenGameMenuIsCreated();
+            await whenGameMenuIsCreated();
 
             thenEntryExists("disconnect");
             thenEntryDoesNotExist("connect");
         });
 
-        it("dispatches 'playOffline' when 'disconnect' was clicked", () => {
+        it("dispatches 'playOffline' when 'disconnect' was clicked", async () => {
             givenPlayingOnline();
             givenGameMenu();
 
-            whenClickInMenu("disconnect");
+            await whenClickInMenu("disconnect");
 
             thenDispatchWas("game/playOffline");
         });
@@ -322,27 +322,27 @@ const createBot = function (id, computationMethod) {
 };
 
 const thenOneLabelContains = function (expectedText) {
-    let menu = gameMenu.find(VMenu);
+    let menu = gameMenu.findComponent(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
     expect(entries.find((entry) => entry.text().includes(expectedText))).not.toBeUndefined();
 };
 
 const expectNoLabelContains = function (expectedText) {
-    let menu = gameMenu.find(VMenu);
+    let menu = gameMenu.findComponent(VMenu);
     expect(gameMenu.find(".menu").isVisible()).toBe(true);
     let entries = menu.findAll("li").wrappers;
     expect(entries.find((entry) => entry.text().includes(expectedText))).toBeUndefined();
 };
 
-const whenClickInMenu = function (...refs) {
-    refs.forEach((ref) => {
+const whenClickInMenu = async function (...refs) {
+    await refs.forEach((ref) => {
         clickInMenu(ref);
     });
 };
 
-const clickInMenu = function (ref) {
-    gameMenu.find(VMenu).find({ ref: ref }).trigger("click");
+const clickInMenu = async function (ref) {
+    await gameMenu.findComponent(VMenu).find({ ref: ref }).trigger("click");
 };
 
 const thenDispatchWas = function (expected, arg) {
@@ -354,16 +354,16 @@ const thenDispatchWas = function (expected, arg) {
 };
 
 const thenEntryExists = function (ref) {
-    let entry = gameMenu.find(VMenu).find({ ref: ref });
+    let entry = gameMenu.findComponent(VMenu).find({ ref: ref });
     expect(entry.exists()).toBe(true);
 };
 
 const thenEntryDoesNotExist = function (ref) {
-    let entry = gameMenu.find(VMenu).find({ ref: ref });
+    let entry = gameMenu.findComponent(VMenu).find({ ref: ref });
     expect(entry.exists()).toBe(false);
 };
 function thenReadableLabelsAreDisplayed() {
-    let menu = gameMenu.find(VMenu);
+    let menu = gameMenu.findComponent(VMenu);
     let entries = menu.findAll("li");
     let labels = entries.wrappers.map((wrapper) => wrapper.text());
     expect(labels).toEqual(
