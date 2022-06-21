@@ -10,10 +10,10 @@ describe("VEditableField", () => {
         thenContentIs(placeholder);
     });
 
-    it("has placeholder as content if no text was set.", () => {
+    it("has placeholder as content if no text was set.", async () => {
         givenTextSet("");
 
-        whenFocusIsLost();
+        await whenFocusIsLost();
 
         thenContentIs(placeholder);
     });
@@ -23,17 +23,17 @@ describe("VEditableField", () => {
         thenInputIsInvisible();
     });
 
-    it("only shows one span when editing.", () => {
-        whenEnteringText();
+    it("only shows one span when editing.", async () => {
+        await whenEnteringText();
 
         thenShowsOnlyOneSpan();
         thenInputIsVisible();
     });
 
-    it("emits set text as event", () => {
+    it("emits set text as event", async () => {
         givenTextSet("some text");
 
-        whenFocusIsLost();
+        await whenFocusIsLost();
 
         thenInputEventContentIs("some text");
     });
@@ -62,12 +62,12 @@ const givenTextSet = function (text) {
     wrapper.find("input").setValue(text);
 };
 
-const whenFocusIsLost = function () {
-    wrapper.find("input").trigger("blur");
+const whenFocusIsLost = async function () {
+    await wrapper.find("input").trigger("blur");
 };
 
-const whenEnteringText = function () {
-    wrapper
+const whenEnteringText = async function () {
+    await wrapper
         .findAll("span")
         .filter((w) => w.isVisible())
         .at(0)

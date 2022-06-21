@@ -12,7 +12,7 @@ describe("VMazeCard", () => {
     it("contains an svg-element", () => {
         givenVMazeCard();
 
-        expect(vMazeCard.contains("svg")).toBe(true);
+        expect(vMazeCard.find("svg").exists()).toBe(true);
     });
 
     it("has width of 100 if cardSize is 100", () => {

@@ -1,15 +1,17 @@
 import { mount } from "@vue/test-utils";
 import VMessageArea from "@/components/VMessageArea.vue";
 import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { nextTick } from "vue";
 
 beforeEach(() => {
     mockStore = createMockStore();
-    wrapper = factory();
 });
 
 describe("VMessageArea", () => {
-    it("is invisible if not player's turn", async () => {
+    it("is invisible if not player's turn", () => {
         givenNotPlayersTurn();
+
+        whenMessageAreaIsCreated();
 
         thenMessageBoardIsInvisible();
     });
@@ -18,20 +20,26 @@ describe("VMessageArea", () => {
         givenPlayerShift();
         givenPlayerScore(1);
 
+        whenMessageAreaIsCreated();
+
         thenMessageBoardIsInvisible();
     });
 
-    it("shows message if score is 0 and shift is required", () => {
+    it("shows message if score is 0 and shift is required", async () => {
         givenPlayerShift();
         givenPlayerScore(0);
+
+        whenMessageAreaIsCreated();
 
         thenMessageBoardIsVisible();
         thenMessageBoardShowsMessageContaining("layout");
     });
 
-    it("shows message if score is 0 and move is required", () => {
+    it("shows message if score is 0 and move is required", async () => {
         givenPlayerMove();
         givenPlayerScore(0);
+
+        whenMessageAreaIsCreated();
 
         thenMessageBoardIsVisible();
         thenMessageBoardShowsMessageContaining("move");
@@ -84,6 +92,10 @@ const givenPlayerMove = function () {
 
 const givenPlayerScore = function (score) {
     mockStore.getters["players/userPlayer"].score = score;
+};
+
+const whenMessageAreaIsCreated = function () {
+    wrapper = factory();
 };
 
 const thenMessageBoardIsInvisible = function () {

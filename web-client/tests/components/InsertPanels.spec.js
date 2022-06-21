@@ -4,26 +4,26 @@ import InsertPanels from "@/components/InsertPanels.vue";
 import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
 
 describe("InsertPanels", () => {
-    it("sets interaction class on insert panels if shift is required", () => {
+    it("sets interaction class on insert panels if shift is required", async () => {
         givenInsertPanels();
-        givenNoDisabledShiftLocation();
-        givenShiftRequired();
+        await givenNoDisabledShiftLocation();
+        await givenShiftRequired();
 
         thenPanelsHaveInteractionClass();
     });
 
-    it("does not set interaction class on insert panels if move is required", () => {
+    it("does not set interaction class on insert panels if move is required", async () => {
         givenInsertPanels();
-        givenNoDisabledShiftLocation();
-        givenMoveRequired();
+        await givenNoDisabledShiftLocation();
+        await givenMoveRequired();
 
         thenNoPanelHasInteractionClass();
     });
 
-    it("enables all insert panels but the one which is disabled in game", () => {
+    it("enables all insert panels but the one which is disabled in game", async () => {
         givenInsertPanels();
-        givenDisabledShiftLocation({ row: 0, column: 1 });
-        givenShiftRequired();
+        await givenDisabledShiftLocation({ row: 0, column: 1 });
+        await givenShiftRequired();
 
         thenOnePanelIsDisabled();
         thenDisabledPanelIsTopOfFirstColumn();
@@ -67,27 +67,28 @@ const givenMoveRequired = function () {
 };
 
 function thenDisabledPanelIsTopOfFirstColumn() {
-    let insertPanelsHtml = insertPanels.findAll(".insert-panel--disabled");
-    let xPos = Number.parseInt(insertPanelsHtml[0].attributes("x"));
-    let yPos = Number.parseInt(insertPanelsHtml[0].attributes("y"));
+    const insertPanelSVGs = insertPanels.findAll(".insert-panel--disabled");
+    let xPos = Number.parseInt(insertPanelSVGs[0].attributes("x"));
+    let yPos = Number.parseInt(insertPanelSVGs[0].attributes("y"));
     expect(xPos).toBe(100);
     expect(yPos).toBe(-100);
 }
 
 function thenOnePanelIsDisabled() {
-    let insertPanelsHtml = insertPanels.findAll(".insert-panel--disabled");
-    expect(insertPanelsHtml.length).toBe(1);
+    const insertPanelSVGs = insertPanels.findAll(".insert-panel--disabled");
+    expect(insertPanelSVGs.length).toBe(1);
 }
 
 function thenNoPanelHasInteractionClass() {
-    let insertPanelsHtml = insertPanels.findAll(".insert-panel");
-    let insertPanelsWithInteraction = insertPanelsHtml.filter((panel) =>
-        panel.classes(".insert-panel--interaction")
-    );
-    expect(insertPanelsWithInteraction.length).toBe(0);
+    const insertPanelSVGs = insertPanels.findAll(".insert-panel");
+    insertPanelSVGs.forEach((panel) => {
+        expect(panel.classes("insert-panel--interaction")).toBe(false);
+    });
 }
 
 function thenPanelsHaveInteractionClass() {
-    let insertPanelsHtml = insertPanels.findAll(".insert-panel");
-    expect(insertPanelsHtml.is(".insert-panel--interaction")).toBe(true);
+    const insertPanelSVGs = insertPanels.findAll(".insert-panel");
+    insertPanelSVGs.forEach((panel) => {
+        expect(panel.classes("insert-panel--interaction")).toBe(true);
+    });
 }

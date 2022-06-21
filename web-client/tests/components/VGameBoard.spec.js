@@ -4,7 +4,7 @@ import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 
 const findLowestPositionOfMazeCard = function (vGameBoard, dimension) {
-    var vMazeCards = vGameBoard.findAll(VMazeCard);
+    var vMazeCards = vGameBoard.findAllComponents(VMazeCard);
     var min = Number.MAX_VALUE;
     for (var i = 0; i < vMazeCards.length; i++) {
         var value = parseInt(vMazeCards.at(i).element.getAttribute(dimension));
@@ -17,7 +17,7 @@ describe("VGameBoard", () => {
     it("renders all VMazeCard components", () => {
         givenVGameBoard();
 
-        expect(vGameBoard.findAll(VMazeCard).length).toBe(3 * 3);
+        expect(vGameBoard.findAllComponents(VMazeCard).length).toBe(3 * 3);
     });
 
     it("renders leftmost v-maze-card exactly at 0", () => {

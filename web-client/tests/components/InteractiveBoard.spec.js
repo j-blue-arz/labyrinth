@@ -25,26 +25,26 @@ describe("InteractiveBoard", () => {
         thenCardsAreInteractive([]);
     });
 
-    it("calls performMove() on controller when maze card is clicked", () => {
+    it("calls performMove() on controller when maze card is clicked", async () => {
         givenMoveRequired();
 
-        whenMazeCardIsClickedAtLocation(loc(0, 2));
+        await whenMazeCardIsClickedAtLocation(loc(0, 2));
 
         thenMoveIsDispatched(loc(0, 2));
     });
 
-    it("does not call performMove() if shift is required", () => {
+    it("does not call performMove() if shift is required", async () => {
         givenShiftRequired();
 
-        whenMazeCardIsClickedAtLocation(loc(0, 2));
+        await whenMazeCardIsClickedAtLocation(loc(0, 2));
 
         thenMoveIsNotDispatched();
     });
 
-    it("does not call performMove() if clicked maze card is not reachable", () => {
+    it("does not call performMove() if clicked maze card is not reachable", async () => {
         givenMoveRequired();
 
-        whenMazeCardIsClickedAtLocation(loc(0, 0));
+        await whenMazeCardIsClickedAtLocation(loc(0, 0));
 
         thenMoveIsNotDispatched();
     });

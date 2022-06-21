@@ -8,22 +8,22 @@ describe("InteractiveBoard", () => {
         mockStore = createMockStore();
     });
 
-    it("rotates leftover maze card when clicked", () => {
+    it("rotates leftover maze card when clicked", async () => {
         givenRotation(0);
         givenShiftRequired();
         givenLeftoverMazeCard();
 
-        whenMazeCardIsClicked();
+        await whenMazeCardIsClicked();
 
         thenMazeCardWasRotated();
     });
 
-    it("does not rotate leftover maze card given no interaction required", () => {
+    it("does not rotate leftover maze card given no interaction required", async () => {
         givenRotation(0);
         givenNoActionRequired();
         givenLeftoverMazeCard();
 
-        whenMazeCardIsClicked();
+        await whenMazeCardIsClicked();
 
         thenMazeCardWasNotRotated();
     });
@@ -87,8 +87,8 @@ const givenNoActionRequired = function () {
     mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.NO_ACTION };
 };
 
-const whenMazeCardIsClicked = function () {
-    leftoverMazeCard.find(VMazeCard).trigger("click");
+const whenMazeCardIsClicked = async function () {
+    await leftoverMazeCard.findComponent(VMazeCard).trigger("click");
 };
 
 const thenMazeCardWasRotated = function () {
@@ -101,11 +101,11 @@ const thenMazeCardWasNotRotated = function () {
 };
 
 const thenMazeCardIsInteractive = function () {
-    let leftoverVMazeCard = leftoverMazeCard.find(VMazeCard);
+    let leftoverVMazeCard = leftoverMazeCard.findComponent(VMazeCard);
     expect(leftoverVMazeCard.classes()).toContain("maze-card--interactive");
 };
 
 const thenMazeCardIsNotInteractive = function () {
-    let leftoverVMazeCard = leftoverMazeCard.find(VMazeCard);
+    let leftoverVMazeCard = leftoverMazeCard.findComponent(VMazeCard);
     expect(leftoverVMazeCard.classes()).not.toContain("maze-card--interactive");
 };
