@@ -3,7 +3,6 @@
         <li
             v-for="item in visibleMenuItems"
             :key="item.key"
-            :ref="item.key"
             class="menu__item"
             @click.stop="onItemClick(item)"
         >

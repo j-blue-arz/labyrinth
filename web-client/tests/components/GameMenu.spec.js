@@ -22,7 +22,7 @@ describe("GameMenu", () => {
 
             whenGameMenuIsCreated();
 
-            thenEntryExists("leave");
+            thenEntryExists("Leave game");
         });
 
         it("is invisible if user is not participating", () => {
@@ -30,14 +30,14 @@ describe("GameMenu", () => {
 
             whenGameMenuIsCreated();
 
-            thenEntryDoesNotExist("leave");
+            thenEntryDoesNotExist("Leave game");
         });
 
         it("dispatches leaveGame", () => {
             givenUserIsParticipating();
             givenGameMenu();
 
-            whenClickInMenu("leave");
+            whenClickInMenu("Leave game");
 
             thenDispatchWas("players/leaveGame");
         });
@@ -48,56 +48,48 @@ describe("GameMenu", () => {
             givenUserIsNotParticipating();
             givenGameMenu();
 
-            whenClickInMenu("enter");
+            whenClickInMenu("Enter game");
 
             thenDispatchWas("players/enterGame");
         });
 
         it("is not visible if user participating", () => {
+            givenUserIsParticipating();
+
             whenGameMenuIsCreated();
 
-            thenEntryDoesNotExist("enter-game");
+            thenEntryDoesNotExist("Enter game");
         });
     });
 
     describe("Add bot submenu", () => {
-        it("has entries corresponding to store computation methods", () => {
+        it("has entries corresponding to store computation methods", async () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
             givenGameMenu();
 
-            whenClickInMenu("add");
+            await whenClickInMenu("Add bot..");
 
-            thenEntryDoesNotExist("add-alpha-beta");
-            thenEntryExists("add-libexhsearch");
-            thenEntryExists("add-libminimax-distance");
+            thenEntryDoesNotExist("Minimax (2P)");
+            thenEntryExists("Exhaustive Search (1P)");
+            thenEntryExists("Minimax (2P) - Distance Heuristic");
         });
 
-        it("calls addBot() on API with computation method", () => {
-            givenComputationMethods(["exhaustive-search"]);
+        it("calls addBot() on API with computation method", async () => {
+            givenComputationMethods(["libexhsearch"]);
             givenGameMenu();
 
-            whenClickInMenu("add", "add-exhaustive-search");
+            await whenClickInMenu("Add bot..", "Exhaustive Search (1P)");
 
-            expect(API.doAddBot).toHaveBeenCalledWith("exhaustive-search");
+            expect(API.doAddBot).toHaveBeenCalledWith("libexhsearch");
         });
 
-        it("has no WASM entry when there is already a WASM player participating", () => {
-            givenComputationMethods(["exhaustive-search"]);
+        it("has WASM entry", async () => {
+            givenComputationMethods(["wasm"]);
             givenGameMenu();
 
-            whenClickInMenu("add");
+            await whenClickInMenu("Add bot..");
 
-            thenEntryDoesNotExist("add-wasm");
-        });
-
-        it("displays readable labels", () => {
-            givenComputationMethods(["libminimax-distance", "libexhsearch", "wasm"]);
-            givenWasmIsNotParticipating();
-            givenGameMenu();
-
-            whenClickInMenu("add");
-
-            thenReadableLabelsAreDisplayed();
+            thenEntryExists("WASM: Exhaustive Search\u00A0(1P)");
         });
 
         it("is invisible if game is full", () => {
@@ -110,43 +102,44 @@ describe("GameMenu", () => {
     });
 
     describe("Remove bot submenu", () => {
-        it("offers all bots for removal", () => {
+        it("offers all bots for removal", async () => {
             let exhaustiveSearch = createBot(10, "libexhsearch");
             let alphaBeta = createBot(11, "libminimax");
             givenBots([exhaustiveSearch, alphaBeta]);
             givenGameMenu();
 
-            whenClickInMenu("remove");
+            await whenClickInMenu("Remove bot..");
 
             thenOneLabelContains("Minimax");
             thenOneLabelContains("Exhaustive Search");
             expectNoLabelContains("WASM: Exhaustive Search");
         });
 
-        it("calls removePlayer() on API with correct player ID for backend players", () => {
-            givenBots([createBot(11, "alpha-beta")]);
+        it("calls removePlayer() on API with correct player ID for backend players", async () => {
+            givenBots([createBot(11, "libexhsearch")]);
             givenGameMenu();
 
-            whenClickInMenu("remove", "remove-11");
+            await whenClickInMenu("Remove bot..", "11 - Exhaustive Search (1P)");
 
             expect(API.removePlayer).toHaveBeenCalledWith(11);
         });
 
-        it("dispatches removeWasmPlayer for WASM player", () => {
+        it("dispatches removeWasmPlayer for WASM player", async () => {
             givenWasmIsParticipating();
             givenGameMenu();
 
-            whenClickInMenu("remove", "remove-wasm");
+            await whenClickInMenu("Remove bot..", "3 - WASM: Exhaustive Search");
 
             thenDispatchWas("players/removeWasmPlayer");
         });
 
         it("is invisible if no bot exists", () => {
+            givenWasmIsNotParticipating();
             givenBots([]);
 
             whenGameMenuIsCreated();
 
-            thenEntryDoesNotExist("remove");
+            thenEntryDoesNotExist("Remove bot..");
         });
 
         it("is visible if WASM player exists", () => {
@@ -154,25 +147,25 @@ describe("GameMenu", () => {
 
             whenGameMenuIsCreated();
 
-            thenEntryExists("remove");
+            thenEntryExists("Remove bot..");
         });
     });
 
     describe("change game size", () => {
-        it("calls changeGame() on API with correct size in online mode", () => {
+        it("calls changeGame() on API with correct size in online mode", async () => {
             givenPlayingOnline();
             givenGameMenu();
 
-            whenClickInMenu("restart", "restart-9");
+            await whenClickInMenu("Restart with..", "large size (9)");
 
             expect(API.changeGame).toHaveBeenCalledWith(9);
         });
 
-        it("dispatches change of size on store with correct size in offline mode", () => {
+        it("dispatches change of size on store with correct size in offline mode", async () => {
             givenPlayingOffline();
             givenGameMenu();
 
-            whenClickInMenu("restart", "restart-9");
+            await whenClickInMenu("Restart with..", "large size (9)");
 
             thenDispatchWas("game/playOffline", 9);
         });
@@ -184,15 +177,15 @@ describe("GameMenu", () => {
 
             whenGameMenuIsCreated();
 
-            thenEntryExists("connect");
-            thenEntryDoesNotExist("disconnect");
+            thenEntryExists("Connect to server");
+            thenEntryDoesNotExist("Disconnect");
         });
 
         it("dispatches 'playOnline' when 'connect' was clicked", async () => {
             givenPlayingOffline();
             givenGameMenu();
 
-            await whenClickInMenu("connect");
+            await whenClickInMenu("Connect to server");
 
             thenDispatchWas("game/playOnline");
         });
@@ -202,15 +195,15 @@ describe("GameMenu", () => {
 
             await whenGameMenuIsCreated();
 
-            thenEntryExists("disconnect");
-            thenEntryDoesNotExist("connect");
+            thenEntryExists("Disconnect");
+            thenEntryDoesNotExist("Connect to server");
         });
 
         it("dispatches 'playOffline' when 'disconnect' was clicked", async () => {
             givenPlayingOnline();
             givenGameMenu();
 
-            await whenClickInMenu("disconnect");
+            await whenClickInMenu("Disconnect");
 
             thenDispatchWas("game/playOffline");
         });
@@ -243,6 +236,9 @@ const factory = function () {
         global: {
             mocks: {
                 $store: mockStore,
+            },
+            directives: {
+                "click-outside": {},
             },
         },
     });
@@ -294,6 +290,7 @@ const givenWasmIsParticipating = function () {
         id: id,
         isWasm: true,
         name: "",
+        pieceIndex: 3,
     };
     mockStore.getters["players/hasWasmPlayer"] = true;
     mockStore.getters["players/wasmPlayerId"] = id;
@@ -322,27 +319,27 @@ const createBot = function (id, computationMethod) {
 };
 
 const thenOneLabelContains = function (expectedText) {
-    let menu = gameMenu.findComponent(VMenu);
-    expect(gameMenu.find(".menu").isVisible()).toBe(true);
-    let entries = menu.findAll("li").wrappers;
-    expect(entries.find((entry) => entry.text().includes(expectedText))).not.toBeUndefined();
+    const menu = gameMenu.findComponent(VMenu);
+    const entries = menu.findAll("li");
+    const filtered = entries.filter((entry) => entry.text().includes(expectedText));
+    expect(filtered).toHaveLength(1);
 };
 
 const expectNoLabelContains = function (expectedText) {
-    let menu = gameMenu.findComponent(VMenu);
-    expect(gameMenu.find(".menu").isVisible()).toBe(true);
-    let entries = menu.findAll("li").wrappers;
-    expect(entries.find((entry) => entry.text().includes(expectedText))).toBeUndefined();
+    const menu = gameMenu.findComponent(VMenu);
+    const entries = menu.findAll("li");
+    const filtered = entries.filter((entry) => entry.text().includes(expectedText));
+    expect(filtered).toEqual([]);
 };
 
-const whenClickInMenu = async function (...refs) {
-    await refs.forEach((ref) => {
-        clickInMenu(ref);
-    });
+const whenClickInMenu = async function (...labels) {
+    for (let label of labels) {
+        await clickInMenu(label);
+    }
 };
 
-const clickInMenu = async function (ref) {
-    await gameMenu.findComponent(VMenu).find({ ref: ref }).trigger("click");
+const clickInMenu = async function (label) {
+    await findEntryByText(label).trigger("click");
 };
 
 const thenDispatchWas = function (expected, arg) {
@@ -353,24 +350,46 @@ const thenDispatchWas = function (expected, arg) {
     }
 };
 
-const thenEntryExists = function (ref) {
-    let entry = gameMenu.findComponent(VMenu).find({ ref: ref });
-    expect(entry.exists()).toBe(true);
+expect.extend({
+    toExistAsEntry(label) {
+        const entries = findEntriesByText(label);
+        if (entries.length === 0) {
+            return {
+                message: () => `expected ${label} to exist as entry`,
+                pass: false,
+            };
+        } else if (entries.length > 1) {
+            return {
+                message: () => `expected ${label} to to be a unique entry`,
+                pass: false,
+            };
+        } else {
+            return {
+                message: () => `expected ${label} not to exist as entry`,
+                pass: true,
+            };
+        }
+    },
+});
+
+const thenEntryExists = function (label) {
+    expect(label).toExistAsEntry();
 };
 
-const thenEntryDoesNotExist = function (ref) {
-    let entry = gameMenu.findComponent(VMenu).find({ ref: ref });
-    expect(entry.exists()).toBe(false);
+const thenEntryDoesNotExist = function (label) {
+    expect(findEntriesByText(label)).toEqual([]);
 };
-function thenReadableLabelsAreDisplayed() {
-    let menu = gameMenu.findComponent(VMenu);
-    let entries = menu.findAll("li");
-    let labels = entries.wrappers.map((wrapper) => wrapper.text());
-    expect(labels).toEqual(
-        expect.arrayContaining([
-            computationMethodLabel("libminimax-distance"),
-            computationMethodLabel("libexhsearch"),
-            "WASM: Exhaustive Search\u00A0(1P)",
-        ])
-    );
+
+function findEntryByText(label) {
+    const entries = findEntriesByText(label);
+    if (entries.length === 0) {
+        throw new Error(`Entry does not exist: "${label}".`);
+    }
+    return entries.at(0);
+}
+
+function findEntriesByText(label) {
+    const menu = gameMenu.findComponent(VMenu);
+    const entries = menu.findAll("li");
+    return entries.filter((entry) => entry.text() === label);
 }
