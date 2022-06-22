@@ -2,7 +2,6 @@ import { mount } from "@vue/test-utils";
 import playersConfig from "@/store/modules/players.js";
 import GameMenu from "@/components/GameMenu.vue";
 import VMenu from "@/components/VMenu.vue";
-import { computationMethodLabel } from "@/model/player.js";
 import API from "@/services/game-api.js";
 
 beforeEach(() => {
