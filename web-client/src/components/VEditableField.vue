@@ -30,18 +30,18 @@ export default {
             type: String,
             default: "",
         },
-        value: {
+        modelValue: {
             type: String,
             required: true,
         },
     },
-    emits: ["input"],
+    emits: ["update:modelValue"],
     computed: {
         content: function () {
-            if (this.value === "") {
+            if (this.modelValue === "") {
                 return this.placeholder;
             } else {
-                return this.value;
+                return this.modelValue;
             }
         },
     },
@@ -54,7 +54,7 @@ export default {
         },
         stopEditing: function () {
             this.editing = false;
-            this.$emit("input", this.editText);
+            this.$emit("update:modelValue", this.editText);
         },
     },
 };

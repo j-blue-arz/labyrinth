@@ -47,7 +47,7 @@ const factory = function () {
     let wrapper = mount(VEditableField, {
         props: {
             placeholder: placeholder,
-            value: "",
+            modelValue: "",
         },
     });
     return wrapper;
@@ -84,8 +84,8 @@ const thenContentIs = function (expectedText) {
 };
 
 const thenInputEventContentIs = function (expectedText) {
-    expect(wrapper.emitted().input).toBeTruthy();
-    expect(wrapper.emitted().input[0]).toEqual([expectedText]);
+    expect(wrapper.emitted("update:modelValue")).toBeTruthy();
+    expect(wrapper.emitted("update:modelValue")[0]).toEqual([expectedText]);
 };
 
 const thenShowsOnlyOneSpan = function () {
