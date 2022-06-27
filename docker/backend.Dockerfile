@@ -50,15 +50,15 @@ FROM base as dev
 COPY backend/dev-requirements.txt .
 RUN pip install --no-cache-dir -r dev-requirements.txt
 
-FROM dev as lint
-
 # lint
+FROM dev as lint
 RUN flake8 . --count --max-line-length=120 --max-complexity=10 --show-source --statistics --exclude __pycache__,venv
 
-FROM dev as test
-
 # test
-RUN pytest . --junitxml=../test-results/backend-results.xml --cov=backend --cov-report=xml:../test-results/backend-coverage.xml
+FROM dev as test 
+COPY backend/pytest.ini backend/conftest.py ./
+COPY backend/tests ./tests
+RUN pytest .
 
 FROM base as release
 
