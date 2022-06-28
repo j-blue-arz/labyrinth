@@ -3,14 +3,19 @@ FROM node:16 as base
 WORKDIR /usr/src/web-client
 
 # copy everything but .dockerignore
-COPY . ./
+COPY package.json package-lock.json ./
 
 RUN npm ci
 
+COPY . ./
+
 FROM base as test
 
-RUN npm run lint
 RUN npm run test:unit
+
+FROM base as lint
+
+RUN npm run lint
 
 FROM base as build
 
