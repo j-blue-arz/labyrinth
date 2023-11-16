@@ -12,7 +12,7 @@ let store = createStore({
         players: players,
         countdown: countdown,
     },
-    strict: process.env.NODE_ENV !== "production",
+    strict: import.meta.env.NODE_ENV !== "production",
 });
 
 store.watch(

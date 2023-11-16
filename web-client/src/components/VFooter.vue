@@ -13,7 +13,7 @@ export default {
     name: "v-footer",
     data() {
         return {
-            version: process.env.VERSION,
+            version: import.meta.env.VERSION,
         };
     },
 };

@@ -7,7 +7,7 @@ export default class WasmGateway {
         }
         this.libexhsearch = null;
         this.isLoading = false;
-        this.publicPath = process.env.BASE_URL;
+        this.publicPath = import.meta.env.BASE_URL;
         return instance;
     }
 
