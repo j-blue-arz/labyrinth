@@ -26,4 +26,10 @@ export default defineConfig({
             plugins: [autoprefixer],
         },
     },
+    server: {
+        proxy: {
+            "/api": "http://localhost:5000",
+            "/analytics": "http://localhost:5000"
+        },
+    }
 });

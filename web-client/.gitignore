@@ -1,0 +1,7 @@
+node_modules/
+
+# Editor directories and files
+.vscode
+
+# vue build output
+dist
