@@ -3,11 +3,13 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
+import { compression } from "vite-plugin-compression2";
+
 import packageJson from "./package.json";
 import autoprefixer from "autoprefixer";
 
 export default defineConfig({
-    plugins: [vue()],
+    plugins: [vue(), compression()],
     define: {
         "import.meta.env.VERSION": JSON.stringify(packageJson.version),
     },
@@ -29,7 +31,7 @@ export default defineConfig({
     server: {
         proxy: {
             "/api": "http://localhost:5000",
-            "/analytics": "http://localhost:5000"
+            "/analytics": "http://localhost:5000",
         },
-    }
+    },
 });
