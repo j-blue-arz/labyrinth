@@ -1,8 +1,8 @@
 import { shallowMount } from "@vue/test-utils";
 import App from "@/components/App.vue";
 
-let dispatch = jest.fn();
-global.fetch = jest.fn();
+let dispatch = vi.fn();
+global.fetch = vi.fn();
 
 const factory = function () {
     return shallowMount(App, {
@@ -10,7 +10,7 @@ const factory = function () {
             mocks: {
                 $store: {
                     dispatch: dispatch,
-                    watch: jest.fn(),
+                    watch: vi.fn(),
                 },
             },
         },

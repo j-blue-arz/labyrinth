@@ -11,6 +11,7 @@ describe("game Vuex module", () => {
     beforeEach(() => {
         API.doMove.mockClear();
         API.doShift.mockClear();
+        vi.resetModules();
     });
 
     describe("getters", () => {
@@ -306,14 +307,10 @@ const givenPlayingOnline = function () {
 };
 
 const givenPlayingOffline = function () {
-    function mockState() {
-        let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
-        return state.maze;
-    }
-
-    jest.mock("@/model/board-factory.js", () => ({
+    vi.doMock("@/model/board-factory.js", () => ({
         default: () => {
-            return mockState();
+            let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
+            return state.maze;
         },
     }));
 
@@ -437,6 +434,8 @@ function loc(row, column) {
     return { row: row, column: column };
 }
 
-API.doMove = jest.fn();
-API.doShift = jest.fn();
-API.removePlayer = jest.fn();
+API.doMove = vi.fn();
+API.doShift = vi.fn();
+API.removePlayer = vi.fn();
+API.fetchComputationMethods = vi.fn();
+API.doAddPlayer = vi.fn();

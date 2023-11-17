@@ -51,7 +51,7 @@ const mazeCard = { id: 0, location: null, outPaths: "NS", rotation: 0 };
 const createMockStore = function () {
     return {
         getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": () => [] },
-        dispatch: jest.fn(),
+        dispatch: vi.fn(),
         state: {
             game: {
                 objectiveId: 1,

@@ -10,7 +10,7 @@ describe("InteractiveBoard", () => {
     beforeEach(() => {
         givenInteractiveBoard();
         givenUserPlayer();
-        store.dispatch = jest.fn();
+        store.dispatch = vi.fn();
     });
 
     it("sets interaction class on reachable maze cards", async () => {

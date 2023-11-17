@@ -213,7 +213,7 @@ const { state } = playersConfig;
 
 const createMockStore = function () {
     return {
-        dispatch: jest.fn(),
+        dispatch: vi.fn(),
         state: {
             players: state(),
         },
@@ -225,10 +225,10 @@ let mockStore = createMockStore();
 
 let gameMenu;
 
-API.doAddBot = jest.fn();
-API.removePlayer = jest.fn();
-API.changeGame = jest.fn();
-API.fetchComputationMethods = jest.fn();
+API.doAddBot = vi.fn();
+API.removePlayer = vi.fn();
+API.changeGame = vi.fn();
+API.fetchComputationMethods = vi.fn();
 
 const factory = function () {
     return mount(GameMenu, {

@@ -1,34 +1,35 @@
 {
-  "name": "labyrinth",
-  "version": "0.3.3",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview",
-    "test:unit": "vue-cli-service test:unit --maxWorkers=4",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --no-fix src",
-    "debug-build": "vue-cli-service build --mode development"
-  },
-  "dependencies": {
-    "axios": "^0.21.4",
-    "core-js": "^3.8.3",
-    "gsap": "^3.6.0",
-    "vue": "^3.2.37",
-    "vuex": "^4.0.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.1",
-    "@vue/eslint-config-prettier": "^8.0.0",
-    "@vue/test-utils": "^2.4.2",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.53.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-vue": "^9.18.1",
-    "lodash": "^4.17.21",
-    "prettier": "^3.1.0",
-    "sass": "^1.32.7",
-    "vite": "^4.5.0",
-    "vitest": "^0.34.6"
-  }
+    "name": "labyrinth",
+    "version": "0.3.3",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "debug-build": "vite build --mode development",
+        "serve": "vite preview",
+        "test": "vitest",
+        "lint": "eslint --ext .js,.vue --ignore-path .gitignore --no-fix src"
+    },
+    "dependencies": {
+        "axios": "^0.21.4",
+        "core-js": "^3.8.3",
+        "gsap": "^3.6.0",
+        "vue": "^3.2.37",
+        "vuex": "^4.0.0"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^4.4.1",
+        "@vue/eslint-config-prettier": "^8.0.0",
+        "@vue/test-utils": "^2.4.2",
+        "autoprefixer": "^10.4.16",
+        "eslint": "^8.53.0",
+        "eslint-plugin-prettier": "^4.0.0",
+        "eslint-plugin-vue": "^9.18.1",
+        "jsdom": "^22.1.0",
+        "lodash": "^4.17.21",
+        "prettier": "^3.1.0",
+        "sass": "^1.32.7",
+        "vite": "^4.5.0",
+        "vitest": "^0.34.6"
+    }
 }

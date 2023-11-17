@@ -413,9 +413,9 @@ describe("players Vuex module", () => {
 
 const { state } = playersConfig;
 
-API.doAddPlayer = jest.fn();
-API.removePlayer = jest.fn();
-API.changePlayerName = jest.fn();
+API.doAddPlayer = vi.fn();
+API.removePlayer = vi.fn();
+API.changePlayerName = vi.fn();
 
 let store;
 let apiPlayers = [];
@@ -429,14 +429,9 @@ const givenPlayingOnline = function () {
 };
 
 const givenPlayingOffline = function () {
-    function mockState() {
-        let state = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
-        return state.maze;
-    }
-
-    jest.mock("@/model/board-factory.js", () => ({
+    vi.doMock("@/model/board-factory.js", () => ({
         default: () => {
-            return mockState();
+            return cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3).state;
         },
     }));
 
