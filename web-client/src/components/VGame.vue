@@ -113,20 +113,11 @@ export default {
     &__leftover {
         grid-area: leftover;
 
-        @media (hover: hover) and (orientation: landscape) {
-            transform: translate(calc(-100% - var(--gap) / 2), 50%);
-        }
-
-        @media (hover: hover) and (orientation: portrait) {
-            place-self: end;
-            transform: translateY(100%);
-        }
-
-        @media (hover: none) and (orientation: landscape) {
+        @media (orientation: landscape) {
             transform: translate(0px, 50%);
         }
 
-        @media (hover: none) and (orientation: portrait) {
+        @media (orientation: portrait) {
             place-self: center;
             transform: translateY(15%);
         }
