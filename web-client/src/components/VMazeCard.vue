@@ -73,7 +73,7 @@
 <script>
 import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
-import { TweenLite, Power3 } from "gsap";
+import { gsap, Power3 } from "gsap";
 
 import { mapState } from "pinia";
 import { usePlayersStore } from "@/stores/players.js";
@@ -125,6 +125,8 @@ export default {
             pathWidth: 37,
             piecesSize: 33,
             positionAnimationThreshold: 40,
+            xAnimation: null,
+            yAnimation: null,
         };
     },
     watch: {
@@ -137,16 +139,32 @@ export default {
         },
         xPos: function (newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
-                TweenLite.to(this.$data, 0.9, { xPosAnimated: newValue, ease: Power3.easeInOut });
+                this.xAnimation = gsap.to(this.$data, {
+                    xPosAnimated: newValue,
+                    duration: 0.9,
+                    ease: Power3.easeInOut,
+                });
             } else {
+                if (this.xAnimation) {
+                    this.xAnimation.progress(1);
+                }
                 this.xPosAnimated = newValue;
+                this.xAnimation = null;
             }
         },
         yPos: function (newValue, oldValue) {
             if (Math.abs(newValue - oldValue) > this.positionAnimationThreshold) {
-                TweenLite.to(this.$data, 0.9, { yPosAnimated: newValue, ease: Power3.easeInOut });
+                this.yAnimation = gsap.to(this.$data, {
+                    yPosAnimated: newValue,
+                    duration: 0.9,
+                    ease: Power3.easeInOut,
+                });
             } else {
+                if (this.yAnimation) {
+                    this.yAnimation.progress(1);
+                }
                 this.yPosAnimated = newValue;
+                this.yAnimation = null;
             }
         },
     },
