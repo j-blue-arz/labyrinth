@@ -1,16 +1,16 @@
-import { createTestStore } from "../testfixtures.js";
-import { mount } from "@vue/test-utils";
-import InteractiveBoard from "@/components/InteractiveBoard.vue";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
-import { loc } from "@/store/modules/board.js";
+import InteractiveBoard from "@/components/InteractiveBoard.vue";
+import { MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { loc } from "@/stores/board.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
+import { createTestStores } from "../testfixtures.js";
 
 describe("InteractiveBoard", () => {
     beforeEach(() => {
         givenInteractiveBoard();
         givenUserPlayer();
-        store.dispatch = vi.fn();
     });
 
     it("sets interaction class on reachable maze cards", async () => {
@@ -26,11 +26,11 @@ describe("InteractiveBoard", () => {
     });
 
     it("calls performMove() on controller when maze card is clicked", async () => {
-        givenMoveRequired();
+        await givenMoveRequired();
 
         await whenMazeCardIsClickedAtLocation(loc(0, 2));
 
-        thenMoveIsDispatched(loc(0, 2));
+        thenMoveIsCalled(loc(0, 2));
     });
 
     it("does not call performMove() if shift is required", async () => {
@@ -38,7 +38,7 @@ describe("InteractiveBoard", () => {
 
         await whenMazeCardIsClickedAtLocation(loc(0, 2));
 
-        thenMoveIsNotDispatched();
+        thenMoveIsNotCalled();
     });
 
     it("does not call performMove() if clicked maze card is not reachable", async () => {
@@ -46,27 +46,27 @@ describe("InteractiveBoard", () => {
 
         await whenMazeCardIsClickedAtLocation(loc(0, 0));
 
-        thenMoveIsNotDispatched();
+        thenMoveIsNotCalled();
     });
 });
 
 let interactiveBoard;
-let store;
+let stores;
 
 const userPlayerId = 5;
 
 function givenUserPlayer() {
-    store.commit("players/addPlayer", { id: userPlayerId, isUser: true });
-    store.dispatch("game/updateFromApi", API_STATE);
+    stores.playersStore.addPlayer({ id: userPlayerId, isUser: true });
+    stores.gameStore.updateFromApi(API_STATE);
 }
 
 function givenInteractiveBoard() {
-    store = createTestStore();
     interactiveBoard = mount(InteractiveBoard, {
         global: {
-            plugins: [store],
+            plugins: [createTestingPinia({ stubActions: false })],
         },
     });
+    stores = createTestStores();
 }
 
 function givenShiftRequired() {
@@ -74,35 +74,35 @@ function givenShiftRequired() {
 }
 
 const whenShiftRequired = async function () {
-    store.commit("game/updateNextAction", { playerId: userPlayerId, action: SHIFT_ACTION });
+    stores.gameStore.updateNextAction({ playerId: userPlayerId, action: SHIFT_ACTION });
     await nextTick();
 };
 
-function givenMoveRequired() {
-    whenMoveRequired();
+async function givenMoveRequired() {
+    await whenMoveRequired();
 }
 
 const whenMoveRequired = async function () {
-    store.commit("game/updateNextAction", { playerId: userPlayerId, action: MOVE_ACTION });
+    stores.gameStore.updateNextAction({ playerId: userPlayerId, action: MOVE_ACTION });
     await nextTick();
 };
 
 async function whenMazeCardIsClickedAtLocation(location) {
-    const clickedMazeCard = store.getters["board/mazeCard"](location);
+    const clickedMazeCard = stores.boardStore.mazeCard(location);
     await interactiveBoard
         .findComponent(DraggableGameBoard)
         .vm.$emit("player-move", clickedMazeCard);
 }
 
-function thenMoveIsDispatched(toLocation) {
-    expect(store.dispatch).toHaveBeenCalledWith("game/move", {
+function thenMoveIsCalled(toLocation) {
+    expect(stores.gameStore.move).toHaveBeenCalledWith({
         playerId: userPlayerId,
         targetLocation: toLocation,
     });
 }
 
-function thenMoveIsNotDispatched() {
-    expect(store.dispatch).not.toHaveBeenCalled();
+function thenMoveIsNotCalled() {
+    expect(stores.gameStore.move).not.toHaveBeenCalled();
 }
 
 function fetchInteractiveCardIds() {
@@ -119,7 +119,7 @@ function fetchInteractiveCardIds() {
 
 function thenCardsAreInteractive(reachableCardLocations) {
     let reachableCardIds = reachableCardLocations.map(
-        (location) => store.getters["board/mazeCard"](location).id
+        (location) => stores.boardStore.mazeCard(location).id,
     );
 
     let interactiveCardIds = fetchInteractiveCardIds();

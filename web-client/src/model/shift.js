@@ -1,4 +1,4 @@
-import { loc } from "@/store/modules/board.js";
+import { loc } from "@/stores/board.js";
 
 function shiftLocationDirection(shiftLocation, limit) {
     if (shiftLocation.row === 0) {

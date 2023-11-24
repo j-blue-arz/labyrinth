@@ -7,6 +7,9 @@
 <script>
 import * as action from "@/model/player.js";
 
+import { mapState } from "pinia";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "v-message-area",
     computed: {
@@ -26,9 +29,7 @@ export default {
         shouldShowMessage() {
             return this.userPlayer?.score === 0;
         },
-        userPlayer: function () {
-            return this.$store.getters["players/userPlayer"];
-        },
+        ...mapState(usePlayersStore, ["userPlayer"]),
     },
 };
 </script>

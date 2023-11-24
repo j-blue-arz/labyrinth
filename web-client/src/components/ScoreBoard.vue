@@ -11,15 +11,18 @@
 <script>
 import VScoreBoardRow from "@/components/VScoreBoardRow.vue";
 
+import { mapState } from "pinia";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "score-board",
     components: {
         VScoreBoardRow,
     },
     computed: {
-        players: function () {
-            return this.$store.getters["players/all"];
-        },
+        ...mapState(usePlayersStore, {
+            players: (store) => store.all,
+        }),
     },
 };
 </script>

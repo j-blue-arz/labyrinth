@@ -5,15 +5,17 @@
 </template>
 
 <script>
+import { mapState } from 'pinia';
+import { useCountdownStore } from '@/stores/countdown.js';
+
+
 export default {
     name: "countdown-timer",
     computed: {
-        remainingSeconds: function () {
-            return this.$store.state.countdown.remainingSeconds;
-        },
         visible: function () {
-            return this.$store.getters["countdown/timerShouldRun"];
+            return this.timerShouldRun;
         },
+        ...mapState(useCountdownStore, ["timerShouldRun", "remainingSeconds"])
     },
     methods: {
         formatTime: function (seconds) {

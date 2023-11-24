@@ -1,11 +1,18 @@
 import { mount } from "@vue/test-utils";
-import playersConfig from "@/store/modules/players.js";
+import { createTestingPinia } from "@pinia/testing";
+import { usePlayersStore } from "@/stores/players.js";
+import { useGameStore } from "@/stores/game.js";
 import GameMenu from "@/components/GameMenu.vue";
 import VMenu from "@/components/VMenu.vue";
 import API from "@/services/game-api.js";
+import { expect } from "vitest";
+
+import { nextTick } from 'vue'
 
 beforeEach(() => {
-    mockStore = createMockStore();
+    gameMenu = factory();
+    playersStore = usePlayersStore();
+    gameStore = useGameStore();
     givenNoBots();
     API.fetchComputationMethods.mockImplementation((cb) => cb([]));
     API.doAddBot.mockClear();
@@ -16,46 +23,45 @@ beforeEach(() => {
 
 describe("GameMenu", () => {
     describe("entry leave game", () => {
-        it("is visible if user is participating", () => {
+        it("is visible if user is participating", async () => {
             givenUserIsParticipating();
 
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryExists("Leave game");
         });
 
-        it("is invisible if user is not participating", () => {
+        it("is invisible if user is not participating", async () => {
             givenUserIsNotParticipating();
 
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryDoesNotExist("Leave game");
         });
 
-        it("dispatches leaveGame", () => {
+        it("calls playersStore to leave game", async () => {
             givenUserIsParticipating();
-            givenGameMenu();
+            await nextTick();
 
             whenClickInMenu("Leave game");
 
-            thenDispatchWas("players/leaveGame");
+            thenLeaveGameIsCalledOnPlayersStore();
         });
     });
 
     describe("entry enter game", () => {
-        it("calls method on controller", () => {
+        it("calls method on controller", async () => {
             givenUserIsNotParticipating();
-            givenGameMenu();
+            await nextTick();
 
             whenClickInMenu("Enter game");
 
-            thenDispatchWas("players/enterGame");
+            thenEnterGameIsCalledOnPlayersStore();
         });
 
-        it("is not visible if user participating", () => {
+        it("is not visible if user participating", async () => {
             givenUserIsParticipating();
-
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryDoesNotExist("Enter game");
         });
@@ -64,7 +70,6 @@ describe("GameMenu", () => {
     describe("Add bot submenu", () => {
         it("has entries corresponding to store computation methods", async () => {
             givenComputationMethods(["libminimax-distance", "libexhsearch"]);
-            givenGameMenu();
 
             await whenClickInMenu("Add bot..");
 
@@ -75,7 +80,6 @@ describe("GameMenu", () => {
 
         it("calls addBot() on API with computation method", async () => {
             givenComputationMethods(["libexhsearch"]);
-            givenGameMenu();
 
             await whenClickInMenu("Add bot..", "Exhaustive Search (1P)");
 
@@ -84,19 +88,25 @@ describe("GameMenu", () => {
 
         it("has WASM entry", async () => {
             givenComputationMethods(["wasm"]);
-            givenGameMenu();
 
             await whenClickInMenu("Add bot..");
 
             thenEntryExists("WASM: Exhaustive Search\u00A0(1P)");
         });
 
-        it("is invisible if game is full", () => {
+        it("is invisible if game is full", async () => {
             givenGameIsFull();
+            await nextTick();
 
-            whenGameMenuIsCreated();
+            thenEntryDoesNotExist("Add bot..");
+        });
 
-            thenEntryDoesNotExist("add");
+        it("is visible in online mode", async () => {
+            givenPlayingOnline();
+            givenComputationMethods(["libminimax-distance", "libexhsearch"]);
+            await nextTick();
+
+            thenEntryExists("Add bot..");
         });
     });
 
@@ -105,7 +115,7 @@ describe("GameMenu", () => {
             let exhaustiveSearch = createBot(10, "libexhsearch");
             let alphaBeta = createBot(11, "libminimax");
             givenBots([exhaustiveSearch, alphaBeta]);
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Remove bot..");
 
@@ -116,35 +126,33 @@ describe("GameMenu", () => {
 
         it("calls removePlayer() on API with correct player ID for backend players", async () => {
             givenBots([createBot(11, "libexhsearch")]);
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Remove bot..", "11 - Exhaustive Search (1P)");
 
             expect(API.removePlayer).toHaveBeenCalledWith(11);
         });
 
-        it("dispatches removeWasmPlayer for WASM player", async () => {
+        it("calls removeWasmPlayer for WASM player", async () => {
             givenWasmIsParticipating();
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Remove bot..", "3 - WASM: Exhaustive Search");
 
-            thenDispatchWas("players/removeWasmPlayer");
+            thenRemoveWasmPlayerIsCalledOnPlayersStore();
         });
 
-        it("is invisible if no bot exists", () => {
+        it("is invisible if no bot exists", async () => {
             givenWasmIsNotParticipating();
             givenBots([]);
-
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryDoesNotExist("Remove bot..");
         });
 
-        it("is visible if WASM player exists", () => {
+        it("is visible if WASM player exists", async () => {
             givenWasmIsParticipating();
-
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryExists("Remove bot..");
         });
@@ -153,75 +161,62 @@ describe("GameMenu", () => {
     describe("change game size", () => {
         it("calls changeGame() on API with correct size in online mode", async () => {
             givenPlayingOnline();
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Restart with..", "large size (9)");
 
             expect(API.changeGame).toHaveBeenCalledWith(9);
         });
 
-        it("dispatches change of size on store with correct size in offline mode", async () => {
+        it("calls playOffline on store with correct size", async () => {
             givenPlayingOffline();
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Restart with..", "large size (9)");
 
-            thenDispatchWas("game/playOffline", 9);
+            thenPlayOfflineIsCalledOnGameStore(9);
         });
     });
 
     describe("server connection", () => {
-        it("displays 'connect' in offline mode", () => {
+        it("displays 'connect' in offline mode", async () => {
             givenPlayingOffline();
-
-            whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryExists("Connect to server");
             thenEntryDoesNotExist("Disconnect");
         });
 
-        it("dispatches 'playOnline' when 'connect' was clicked", async () => {
+        it("calls 'playOnline' when 'connect' was clicked", async () => {
             givenPlayingOffline();
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Connect to server");
 
-            thenDispatchWas("game/playOnline");
+            thenPlayOnlineIsCalledOnGameStore();
         });
 
-        it("displays 'disconnect' in online mode", async () => {
+        it("calls 'disconnect' in online mode", async () => {
             givenPlayingOnline();
-
-            await whenGameMenuIsCreated();
+            await nextTick();
 
             thenEntryExists("Disconnect");
             thenEntryDoesNotExist("Connect to server");
         });
 
-        it("dispatches 'playOffline' when 'disconnect' was clicked", async () => {
+        it("calls 'playOffline' when 'disconnect' was clicked", async () => {
             givenPlayingOnline();
-            givenGameMenu();
+            await nextTick();
 
             await whenClickInMenu("Disconnect");
 
-            thenDispatchWas("game/playOffline");
+            thenPlayOfflineIsCalledOnGameStore();
         });
     });
 });
 
-const { state } = playersConfig;
-
-const createMockStore = function () {
-    return {
-        dispatch: vi.fn(),
-        state: {
-            players: state(),
-        },
-        getters: {},
-    };
-};
-
-let mockStore = createMockStore();
+let playersStore;
+let gameStore;
 
 let gameMenu;
 
@@ -233,9 +228,7 @@ API.fetchComputationMethods = vi.fn();
 const factory = function () {
     return mount(GameMenu, {
         global: {
-            mocks: {
-                $store: mockStore,
-            },
+            plugins: [createTestingPinia()],
             directives: {
                 "click-outside": {},
             },
@@ -243,44 +236,36 @@ const factory = function () {
     });
 };
 
-const givenGameMenu = function () {
-    gameMenu = factory();
-};
-
-const whenGameMenuIsCreated = function () {
-    gameMenu = factory();
-};
-
 const givenPlayingOnline = function () {
-    mockStore.getters["game/isOnline"] = true;
-    mockStore.getters["game/isOffline"] = false;
+    gameStore.isOnline = true;
+    gameStore.isOffline = false;
 };
 
 const givenPlayingOffline = function () {
-    mockStore.getters["game/isOnline"] = false;
-    mockStore.getters["game/isOffline"] = true;
+    gameStore.isOnline = false;
+    gameStore.isOffline = true;
 };
 
 const givenComputationMethods = function (computationMethods) {
-    mockStore.getters["game/computationMethods"] = computationMethods;
+    gameStore.computationMethods = computationMethods;
 };
 
 const givenUserIsParticipating = function () {
-    mockStore.getters["players/hasUserPlayer"] = true;
+    playersStore.hasUserPlayer = true;
 };
 
 const givenUserIsNotParticipating = function () {
-    mockStore.getters["players/hasUserPlayer"] = false;
+    playersStore.hasUserPlayer = false;
 };
 
 const givenGameIsFull = function () {
-    mockStore.state.players.byId = {
+    playersStore.byId = {
         0: { id: 0 },
         1: { id: 1 },
         2: { id: 2 },
         3: { id: 3 },
     };
-    mockStore.state.players.allIds = [0, 1, 2, 3];
+    playersStore.allIds = [0, 1, 2, 3];
 };
 
 const givenWasmIsParticipating = function () {
@@ -291,21 +276,21 @@ const givenWasmIsParticipating = function () {
         name: "",
         pieceIndex: 3,
     };
-    mockStore.getters["players/hasWasmPlayer"] = true;
-    mockStore.getters["players/wasmPlayerId"] = id;
-    mockStore.getters["players/find"] = (playerId) => (playerId === id ? wasmPlayer : null);
+    playersStore.hasWasmPlayer = true;
+    playersStore.wasmPlayerId = id;
+    playersStore.find = (playerId) => (playerId === id ? wasmPlayer : null);
 };
 
 const givenWasmIsNotParticipating = function () {
-    mockStore.getters["players/hasWasmPlayer"] = false;
+    playersStore.hasWasmPlayer = false;
 };
 
 const givenBots = function (players) {
-    mockStore.getters["players/bots"] = players;
+    playersStore.bots = players;
 };
 
 const givenNoBots = function () {
-    mockStore.getters["players/bots"] = [];
+    playersStore.bots = [];
 };
 
 const createBot = function (id, computationMethod) {
@@ -341,14 +326,30 @@ const clickInMenu = async function (label) {
     await findEntryByText(label).trigger("click");
 };
 
-const thenDispatchWas = function (expected, arg) {
-    if (arg) {
-        expect(mockStore.dispatch).toHaveBeenCalledWith(expected, arg);
-    } else {
-        expect(mockStore.dispatch).toHaveBeenCalledWith(expected);
-    }
+const thenLeaveGameIsCalledOnPlayersStore = function () {
+    expect(playersStore.leaveGame).toHaveBeenCalledTimes(1);
 };
 
+const thenEnterGameIsCalledOnPlayersStore = function() {
+    expect(playersStore.enterGame).toHaveBeenCalledTimes(1);
+}
+
+const thenRemoveWasmPlayerIsCalledOnPlayersStore = function() {
+    expect(playersStore.removeWasmPlayer).toHaveBeenCalledTimes(1);
+}
+
+const thenPlayOfflineIsCalledOnGameStore = function(size) {
+    if(size) {
+        expect(gameStore.playOffline).toHaveBeenCalledWith(size);
+    } else {
+        expect(gameStore.playOffline).toHaveBeenCalledWith();
+    }
+    
+}
+
+const thenPlayOnlineIsCalledOnGameStore = function() {
+    expect(gameStore.playOnline).toHaveBeenCalledTimes(1);
+}
 expect.extend({
     toExistAsEntry(label) {
         const entries = findEntriesByText(label);

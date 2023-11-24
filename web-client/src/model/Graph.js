@@ -1,4 +1,4 @@
-import { locationsEqual, mazeCardAtLocation, isInside } from "@/store/modules/board.js";
+import { locationsEqual, mazeCardAtLocation, isInside } from "@/stores/board.js";
 
 const outPathsRotation = ["N", "E", "S", "W"];
 

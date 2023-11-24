@@ -1,6 +1,6 @@
 import { createApp } from "vue";
+import { createPinia } from 'pinia'
 import App from "@/components/App.vue";
-import store from "@/store";
 
 // https://stackoverflow.com/questions/36170425/detect-click-outside-element
 const clickOutside = {
@@ -17,9 +17,10 @@ const clickOutside = {
     },
 };
 
+const pinia = createPinia();
 const app = createApp(App);
 app.config.globalProperties.$ui = Object.freeze({
     cardSize: 100,
 });
 
-app.use(store).directive("click-outside", clickOutside).mount("#app");
+app.use(pinia).directive("click-outside", clickOutside).mount("#app");

@@ -18,6 +18,10 @@
 import VMazeCard from "@/components/VMazeCard.vue";
 import * as action from "@/model/player.js";
 
+import { mapState, mapActions } from "pinia";
+import { useBoardStore } from "@/stores/board.js";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "leftover-maze-card",
     components: {
@@ -27,12 +31,6 @@ export default {
     computed: {
         rotation: function () {
             return this.mazeCard.rotation;
-        },
-        mazeCard: function () {
-            return this.$store.getters["board/leftoverMazeCard"];
-        },
-        shiftInteraction: function () {
-            return this.$store.getters["players/userPlayer"]?.nextAction === action.SHIFT_ACTION;
         },
         arrowPath: function () {
             let radius = 40;
@@ -50,13 +48,20 @@ export default {
             let point3 = [point1[0] + arrowLength, point1[1]];
             return [point1, point2, point3];
         },
+        ...mapState(useBoardStore, {
+            mazeCard: (store) => store.leftoverMazeCard,
+        }),
+        ...mapState(usePlayersStore, {
+            shiftInteraction: (store) => store.userPlayer?.nextAction === action.SHIFT_ACTION,
+        }),
     },
     methods: {
         onLeftoverClick: function () {
             if (this.shiftInteraction) {
-                this.$store.dispatch("board/rotateLeftoverClockwise");
+                this.rotateLeftoverClockwise();
             }
         },
+        ...mapActions(useBoardStore, ["rotateLeftoverClockwise"]),
     },
 };
 </script>

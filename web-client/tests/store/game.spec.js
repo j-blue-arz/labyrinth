@@ -1,30 +1,27 @@
-import gameConfig from "@/store/modules/game.js";
-import boardConfig from "@/store/modules/board.js";
-import playersConfig from "@/store/modules/players.js";
-import { SHIFT_ACTION, MOVE_ACTION, PREPARE_MOVE, PREPARE_SHIFT } from "@/model/player.js";
-import Vuex from "vuex";
-import { cloneDeep } from "lodash";
+import { MOVE_ACTION, PREPARE_MOVE, PREPARE_SHIFT, SHIFT_ACTION } from "@/model/player.js";
 import API from "@/services/game-api.js";
+import { useBoardStore } from "@/stores/board.js";
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { cloneDeep } from "lodash";
+import { createPinia, setActivePinia } from "pinia";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
-describe("game Vuex module", () => {
+describe("Game Store", () => {
     beforeEach(() => {
+        setActivePinia(createPinia());
+        stores = {
+            game: useGameStore(),
+            board: useBoardStore(),
+            players: usePlayersStore(),
+        };
+        gameStore = stores.game;
         API.doMove.mockClear();
         API.doShift.mockClear();
         vi.resetModules();
     });
 
     describe("getters", () => {
-        beforeEach(() => {
-            store = new Vuex.Store({
-                modules: {
-                    game: cloneDeep(gameConfig),
-                    board: cloneDeep(boardConfig),
-                    players: cloneDeep(playersConfig),
-                },
-            });
-        });
-
         describe("currentPlayer", () => {
             it("returns player for next action", () => {
                 givenStoreFromApi();
@@ -35,40 +32,25 @@ describe("game Vuex module", () => {
         });
     });
 
-    describe("mutations", () => {
-        describe("updates", () => {
-            it("sets objective flag for maze card id 8", () => {
-                givenInitialGameState();
-                givenApiStateWithSize3();
+    describe("updates", () => {
+        it("sets objective flag for maze card id 8", () => {
+            givenApiStateWithSize3();
 
-                whenUpdateObjective();
+            whenUpdateObjective();
 
-                expect(game.objectiveId).toBe(8);
-            });
+            expect(gameStore.objectiveId).toBe(8);
+        });
 
-            it("sets next action from api", () => {
-                givenInitialGameState();
-                givenApiStateWithSize3();
+        it("sets next action from api", () => {
+            givenApiStateWithSize3();
 
-                whenUpdateNextAction();
+            whenUpdateNextAction();
 
-                expect(game.nextAction).toBe(apiState.nextAction);
-            });
+            expect(gameStore.nextAction).toEqual(apiState.nextAction);
         });
     });
 
     describe("actions", () => {
-        // actions run against real store, because they call other modules mutations and getters.
-        beforeEach(() => {
-            store = new Vuex.Store({
-                modules: {
-                    game: cloneDeep(gameConfig),
-                    board: cloneDeep(boardConfig),
-                    players: cloneDeep(playersConfig),
-                },
-            });
-        });
-
         describe("update", () => {
             it("places players on card ids", () => {
                 givenApiStateWithSize3();
@@ -92,7 +74,7 @@ describe("game Vuex module", () => {
 
                 whenGameUpdate();
 
-                expect(store.state.game.nextAction).toBeFalsy();
+                expect(gameStore.nextAction).toBeFalsy();
             });
         });
 
@@ -106,8 +88,6 @@ describe("game Vuex module", () => {
             });
 
             it("builds a board generated from the api", () => {
-                givenInitialGameState();
-
                 whenPlayOffline();
 
                 thenCardLocationsAreConsistent();
@@ -115,16 +95,12 @@ describe("game Vuex module", () => {
             });
 
             it("chooses an objective", () => {
-                givenInitialGameState();
-
                 whenPlayOffline();
 
                 thenObjectiveIsAMazeCardOnTheBoard();
             });
 
             it("adds user player and sets piece on board", () => {
-                givenInitialGameState();
-
                 whenPlayOffline();
 
                 thenSinglePlayer({
@@ -136,8 +112,6 @@ describe("game Vuex module", () => {
             });
 
             it("starts offline mode with player to shift", () => {
-                givenInitialGameState();
-
                 whenPlayOffline();
 
                 thenNextActionIs(PREPARE_SHIFT);
@@ -151,20 +125,20 @@ describe("game Vuex module", () => {
                 });
 
                 it("updates players on maze cards", () => {
-                    whenDispatchMove(loc(0, 2), 42);
+                    whenMoveIsCalled(loc(0, 2), 42);
 
                     expect(playersOnCard(loc(1, 2))).not.toContain(42);
                     expect(playersOnCard(loc(0, 2))).toContain(42);
                 });
 
                 it("updates card of players", () => {
-                    whenDispatchMove(loc(0, 2), 42);
+                    whenMoveIsCalled(loc(0, 2), 42);
 
                     expect(player(42).mazeCardId).toEqual(2);
                 });
 
                 it("calls API", () => {
-                    whenDispatchMove(loc(0, 2), 42);
+                    whenMoveIsCalled(loc(0, 2), 42);
 
                     expect(API.doMove).toHaveBeenCalledTimes(1);
                     expect(API.doMove).toHaveBeenCalledWith(42, loc(0, 2));
@@ -178,13 +152,13 @@ describe("game Vuex module", () => {
                 });
 
                 it("does not call API", () => {
-                    whenDispatchMove(loc(2, 0), 0);
+                    whenMoveIsCalled(loc(2, 0), 0);
 
                     expect(API.doMove).not.toHaveBeenCalled();
                 });
 
                 it("changes player's action to 'shift'", () => {
-                    whenDispatchMove(loc(2, 0), 0);
+                    whenMoveIsCalled(loc(2, 0), 0);
 
                     thenNextActionIs(PREPARE_SHIFT);
                     thenNextPlayerIs(0);
@@ -193,7 +167,7 @@ describe("game Vuex module", () => {
                 it("increases player's score when objective is reached", () => {
                     givenObjectiveOnMazeCard(loc(1, 0));
 
-                    whenDispatchMove(loc(1, 0), 0);
+                    whenMoveIsCalled(loc(1, 0), 0);
 
                     thenScoreIs(player(0), 1);
                 });
@@ -201,7 +175,7 @@ describe("game Vuex module", () => {
                 it("generates new objective when objective is reached", () => {
                     givenObjectiveOnMazeCard(loc(1, 0));
 
-                    whenDispatchMove(loc(1, 0), 0);
+                    whenMoveIsCalled(loc(1, 0), 0);
 
                     thenObjectiveIsNotAt(loc(1, 0));
                 });
@@ -212,7 +186,7 @@ describe("game Vuex module", () => {
             it("places maze cards correctly", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(17, loc(0, 1), 90);
+                whenShiftIsCalled(17, loc(0, 1), 90);
 
                 thenCardLocationsAreConsistent();
                 expect(cardOnLocation(loc(0, 1))).toHaveProperty("id", 9);
@@ -223,7 +197,7 @@ describe("game Vuex module", () => {
             it("transfers players to pushed-in card", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(17, loc(1, 0), 90);
+                whenShiftIsCalled(17, loc(1, 0), 90);
 
                 expect(leftoverMazeCard().playerIds).toHaveLength(0);
                 expect(playersOnCard(loc(1, 0))).toContain(42);
@@ -233,7 +207,7 @@ describe("game Vuex module", () => {
             it("updates player's maze card correctly", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(17, loc(1, 0), 90);
+                whenShiftIsCalled(17, loc(1, 0), 90);
 
                 expect(player(42).mazeCardId).toEqual(9);
                 expect(player(17).mazeCardId).toEqual(9);
@@ -242,7 +216,7 @@ describe("game Vuex module", () => {
             it("calls API", () => {
                 givenStoreFromApi();
 
-                whenDispatchShift(17, loc(1, 0), 90);
+                whenShiftIsCalled(17, loc(1, 0), 90);
 
                 expect(API.doShift).toHaveBeenCalledTimes(1);
                 expect(API.doShift).toHaveBeenCalledWith(17, loc(1, 0), 90, expect.anything());
@@ -251,7 +225,7 @@ describe("game Vuex module", () => {
             it("does not call API when playing offline", () => {
                 givenPlayingOffline();
 
-                whenDispatchShift(0, loc(1, 0), 90);
+                whenShiftIsCalled(0, loc(1, 0), 90);
 
                 expect(API.doShift).not.toHaveBeenCalled();
             });
@@ -259,7 +233,7 @@ describe("game Vuex module", () => {
             it("changes player's next action to 'move' when playing offline", () => {
                 givenPlayingOffline();
 
-                whenDispatchShift(0, loc(1, 0), 90);
+                whenShiftIsCalled(0, loc(1, 0), 90);
 
                 thenNextActionIs(PREPARE_MOVE);
                 thenNextPlayerIs(0);
@@ -268,16 +242,9 @@ describe("game Vuex module", () => {
     });
 });
 
-const { state, mutations } = gameConfig;
-const { updateNextAction, updateObjective } = mutations;
-
-let store;
-let game;
+let stores;
+let gameStore;
 let apiState;
-
-const givenInitialGameState = function () {
-    game = state();
-};
 
 const givenApiStateWithSize3 = function () {
     apiState = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
@@ -297,13 +264,13 @@ const givenStoreFromApi = function () {
 
 const givenStoreFromApiWithUserPlayer = function (playerId) {
     givenPlayingOnline();
-    store.commit("players/addPlayer", { id: playerId, isUser: true });
+    stores.players.addPlayer({ id: playerId, isUser: true });
     givenApiStateWithSize3();
     updateGame();
 };
 
 const givenPlayingOnline = function () {
-    store.dispatch("game/playOnline");
+    gameStore.playOnline();
 };
 
 const givenPlayingOffline = function () {
@@ -314,40 +281,40 @@ const givenPlayingOffline = function () {
         },
     }));
 
-    store.dispatch("game/playOffline");
+    gameStore.playOffline();
 };
 
 const givenNextActionIs = function (playerId, nextAction) {
-    store.commit("game/updateNextAction", { playerId: playerId, action: nextAction });
+    gameStore.updateNextAction({ playerId: playerId, action: nextAction });
 };
 
 const givenObjectiveOnMazeCard = function (location) {
-    const objectiveId = store.getters["board/mazeCard"](location).id;
-    store.commit("game/updateObjective", objectiveId);
+    const objectiveId = stores.board.mazeCard(location).id;
+    gameStore.updateObjective(objectiveId);
 };
 
 const whenUpdateObjective = function () {
-    updateObjective(game, apiState.objectiveMazeCardId);
+    gameStore.updateObjective(apiState.objectiveMazeCardId);
 };
 
 const whenUpdateNextAction = function () {
-    updateNextAction(game, apiState.nextAction);
+    gameStore.updateNextAction(apiState.nextAction);
 };
 
-const whenDispatchMove = function (targetLocation, playerId) {
-    store.dispatch("game/move", {
+const whenMoveIsCalled = function (targetLocation, playerId) {
+    gameStore.move({
         targetLocation: targetLocation,
         playerId: playerId,
     });
 };
 
-const whenDispatchShift = function (playerId, shiftLocation, leftoverRotation) {
+const whenShiftIsCalled = function (playerId, shiftLocation, leftoverRotation) {
     const shiftAction = {
         playerId: playerId,
         location: shiftLocation,
         leftoverRotation: leftoverRotation,
     };
-    store.dispatch("game/shift", shiftAction);
+    gameStore.shift(shiftAction);
 };
 
 const whenGameUpdate = function () {
@@ -355,15 +322,15 @@ const whenGameUpdate = function () {
 };
 
 const whenPlayOffline = function () {
-    store.dispatch("game/playOffline");
+    gameStore.playOffline();
 };
 
 const updateGame = function () {
-    store.dispatch("game/updateFromApi", apiState);
+    gameStore.updateFromApi(apiState);
 };
 
 const thenCardLocationsAreConsistent = function () {
-    const n = store.state.board.mazeSize;
+    const n = stores.board.mazeSize;
     for (let row = 0; row < n; row++) {
         for (let col = 0; col < n; col++) {
             expect(cardOnLocation(loc(row, col)).location).toEqual(loc(row, col));
@@ -377,20 +344,20 @@ const thenScoreIs = function (player, expectedScore) {
 };
 
 const thenBoardIsGeneratedWithSize = function (size) {
-    const n = store.state.board.mazeSize;
+    const n = stores.board.mazeSize;
     expect(n).toEqual(size);
 };
 
 const thenObjectiveIsAMazeCardOnTheBoard = function () {
-    const objectiveId = store.state.game.objectiveId;
+    const objectiveId = gameStore.objectiveId;
     expect(objectiveId).toBeGreaterThanOrEqual(0);
-    const objectiveCard = store.getters["board/mazeCardById"](store.state.game.objectiveId);
+    const objectiveCard = stores.board.mazeCardById(gameStore.objectiveId);
     expect(objectiveCard).toBeDefined();
 };
 
 const thenObjectiveIsNotAt = function (location) {
-    const prohibited = store.getters["board/mazeCard"](location).id;
-    const actual = store.state.game.objectiveId;
+    const prohibited = stores.board.mazeCard(location).id;
+    const actual = gameStore.objectiveId;
     expect(actual).not.toEqual(prohibited);
 };
 
@@ -399,34 +366,34 @@ const thenPlayerIsRemovedByApi = function (playerId) {
 };
 
 const thenSinglePlayer = function (expectedPlayer) {
-    expect(store.getters["players/all"].length === 1);
-    const actualPlayer = store.getters["players/all"][0];
+    expect(stores.players.all.length === 1);
+    const actualPlayer = stores.players.all[0];
     expect(actualPlayer).toEqual(expect.objectContaining(expectedPlayer));
 };
 
 const playersOnCard = function (location) {
-    return store.getters["board/mazeCard"](location).playerIds;
+    return stores.board.mazeCard(location).playerIds;
 };
 
 const cardOnLocation = function (location) {
-    return store.getters["board/mazeCard"](location);
+    return stores.board.mazeCard(location);
 };
 
 const leftoverMazeCard = function () {
-    return store.getters["board/leftoverMazeCard"];
+    return stores.board.leftoverMazeCard;
 };
 
 const player = function (id) {
-    return store.getters["players/find"](id);
+    return stores.players.find(id);
 };
 
 function thenNextActionIs(expectedAction) {
-    const player = store.getters["game/currentPlayer"];
+    const player = gameStore.currentPlayer;
     expect(player.nextAction).toEqual(expectedAction);
 }
 
 function thenNextPlayerIs(expectedPlayerId) {
-    const player = store.getters["game/currentPlayer"];
+    const player = gameStore.currentPlayer;
     expect(player.id).toEqual(expectedPlayerId);
 }
 

@@ -1,9 +1,10 @@
-import { mount } from "@vue/test-utils";
 import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
-import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import VGameBoard from "@/components/VGameBoard.vue";
-import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
-import { loc } from "@/store/modules/board.js";
+import { NO_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { loc } from "@/stores/board.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { GET_GAME_STATE_RESULT_FOR_N_3, createTestStores } from "../testfixtures.js";
 
 beforeEach(() => {
     wrapper = factory();
@@ -143,20 +144,20 @@ describe("DraggableGameBoard", () => {
 });
 
 let wrapper;
-let store;
+let stores;
 let mousePosition;
 
 const factory = function () {
-    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
-    givenDisabledShiftLocation(null);
     let wrapper = mount(DraggableGameBoard, {
         props: {
             userAction: SHIFT_ACTION,
         },
         global: {
-            plugins: [store],
+            plugins: [createTestingPinia({ stubActions: false })],
         },
     });
+    stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);
+    givenDisabledShiftLocation(null);
     wrapper.element.getScreenCTM = function () {
         return { e: 0, f: 0, a: 1, d: 1 };
     };
@@ -168,7 +169,7 @@ const givenShiftIsNotRequired = function () {
 };
 
 const givenDisabledShiftLocation = function (location) {
-    store.commit("board/setDisabledShiftLocation", location);
+    stores.boardStore.setDisabledShiftLocation(location);
 };
 
 const givenMouseDownAt = function (location) {

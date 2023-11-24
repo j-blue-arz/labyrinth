@@ -17,8 +17,13 @@ import DraggableGameBoard from "@/components/DraggableGameBoard.vue";
 import InsertPanels from "@/components/InsertPanels.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import VSvgDefs from "@/components/VSvgDefs.vue";
-import * as action from "@/model/player.js";
 import Graph from "@/model/Graph.js";
+import * as action from "@/model/player.js";
+
+import { useBoardStore } from "@/stores/board.js";
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { mapState, mapStores } from "pinia";
 
 export default {
     name: "interactive-board",
@@ -37,21 +42,15 @@ export default {
         };
     },
     computed: {
-        userPlayerId: function () {
-            return this.$store.getters["players/userPlayerId"];
-        },
         reachableMazeCards: function () {
-            const playerId = this.$store.getters["game/currentPlayer"]?.id;
+            const playerId = this.gameStore.currentPlayer?.id;
             if (playerId !== undefined) {
                 return this.computeReachableMazeCards(playerId);
             }
             return new Set();
         },
         currentPlayerColor: function () {
-            return this.$store.getters["game/currentPlayer"]?.pieceIndex;
-        },
-        userAction: function () {
-            return this.$store.getters["players/userPlayer"]?.nextAction ?? action.NO_ACTION;
+            return this.gameStore.currentPlayer?.pieceIndex;
         },
         isTouchDevice: function () {
             // https://stackoverflow.com/a/4819886/359287
@@ -63,21 +62,30 @@ export default {
         },
         viewBox: function () {
             const offset = this.isTouchDevice ? -16 : -100;
-            const interactionSize =
-                this.$ui.cardSize * this.$store.state.board.mazeSize + 2 * -offset;
+            const interactionSize = this.$ui.cardSize * this.boardState.mazeSize + 2 * -offset;
             return `${offset} ${offset} ${interactionSize} ${interactionSize}`;
         },
+        ...mapState(useBoardStore, {
+            boardMazeCardAt: "mazeCard",
+            leftoverMazeCardRotation: (store) => store.leftoverMazeCard.rotation,
+            boardState: (store) => store,
+            mazeSize: "mazeSize",
+        }),
+        ...mapState(usePlayersStore, {
+            userPlayerId: "userPlayerId",
+            userAction: (store) => store.userPlayer?.nextAction ?? action.NO_ACTION,
+            mazeCardOfPlayer: "mazeCard",
+        }),
+        ...mapStores(useGameStore),
     },
     methods: {
         computeReachableMazeCards: function (playerId) {
-            const playerCard = this.$store.getters["players/mazeCard"](playerId);
+            const playerCard = this.mazeCardOfPlayer(playerId);
             if (playerCard?.location) {
                 let pieceLocation = playerCard.location;
-                let graph = new Graph(this.$store.state.board);
+                let graph = new Graph(this.boardState);
                 let locations = graph.reachableLocations(pieceLocation);
-                return new Set(
-                    locations.map((location) => this.$store.getters["board/mazeCard"](location))
-                );
+                return new Set(locations.map((location) => this.boardMazeCardAt(location)));
             } else {
                 return new Set();
             }
@@ -86,9 +94,9 @@ export default {
             let shiftAction = {
                 playerId: this.userPlayerId,
                 location: shiftLocation,
-                leftoverRotation: this.$store.getters["board/leftoverMazeCard"].rotation,
+                leftoverRotation: this.leftoverMazeCardRotation,
             };
-            this.$store.dispatch("game/shift", shiftAction);
+            this.gameStore.shift(shiftAction);
         },
         onPlayerMove: function (mazeCard) {
             if (this.isMoveValid(mazeCard.location)) {
@@ -96,17 +104,15 @@ export default {
                     playerId: this.userPlayerId,
                     targetLocation: mazeCard.location,
                 };
-                this.$store.dispatch("game/move", moveAction);
+                this.gameStore.move(moveAction);
             }
         },
         isMoveValid: function (targetLocation) {
-            const sourceLocation = this.$store.getters["players/mazeCard"](
-                this.userPlayerId
-            ).location;
-            return (
-                this.userAction === action.MOVE_ACTION &&
-                new Graph(this.$store.state.board).isReachable(sourceLocation, targetLocation)
-            );
+            if (this.userAction === action.MOVE_ACTION) {
+                const sourceLocation = this.mazeCardOfPlayer(this.userPlayerId).location;
+                return new Graph(this.boardState).isReachable(sourceLocation, targetLocation);
+            }
+            return false;
         },
     },
 };

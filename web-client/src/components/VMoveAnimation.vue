@@ -13,6 +13,9 @@
 <script>
 import Graph from "@/model/Graph.js";
 
+import { mapState } from "pinia";
+import { useBoardStore } from "@/stores/board.js";
+
 export default {
     name: "v-move-animation",
     props: {
@@ -28,13 +31,13 @@ export default {
     },
     watch: {
         mazeCardId: function (newMazeCardId, oldMazeCardId) {
-            const newMazeCard = this.$store.getters["board/mazeCardById"](newMazeCardId);
-            const oldMazeCard = this.$store.getters["board/mazeCardById"](oldMazeCardId);
+            const newMazeCard = this.mazeCardById(newMazeCardId);
+            const oldMazeCard = this.mazeCardById(oldMazeCardId);
             if (newMazeCard && oldMazeCard) {
                 if (!this.isLeftover(newMazeCard) && !this.isLeftover(oldMazeCard)) {
                     let sourceLocation = oldMazeCard.location;
                     let targetLocation = newMazeCard.location;
-                    let graph = new Graph(this.$store.state.board);
+                    let graph = new Graph(this.boardState);
                     let locations = graph.path(sourceLocation, targetLocation);
                     this.path = locations.map((location) => this.locationToPosition(location));
                     this.correctLastSegment();
@@ -50,6 +53,11 @@ export default {
         colorIndexClass: function () {
             return "move-animation__path--player-" + this.player.pieceIndex;
         },
+        ...mapState(useBoardStore, {
+            mazeCardById: "mazeCardById",
+            leftoverId: "leftoverId",
+            boardState: (state) => state
+        })
     },
     methods: {
         animatePath: function () {
@@ -73,7 +81,7 @@ export default {
             return [x, y];
         },
         isLeftover: function (mazeCard) {
-            return mazeCard.id === this.$store.state.board.leftoverId || !mazeCard.location;
+            return mazeCard.id === this.leftoverId || !mazeCard.location;
         },
     },
 };

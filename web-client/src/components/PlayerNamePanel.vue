@@ -7,6 +7,9 @@
 import VEditableField from "@/components/VEditableField.vue";
 import { getLabel } from "@/model/player.js";
 
+import { mapActions } from "pinia";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "player-name-panel",
     components: {
@@ -34,9 +37,12 @@ export default {
                 return this.player.name;
             },
             set(value) {
-                this.$store.dispatch("players/changeUserPlayerName", value);
+                this.changeUserPlayerName(value);
             },
         },
+    },
+    methods: {
+        ...mapActions(usePlayersStore, ["changeUserPlayerName"]),
     },
 };
 </script>

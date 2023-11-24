@@ -1,22 +1,23 @@
-import { createStore } from "vuex";
+import { createTestingPinia } from "@pinia/testing";
 import { cloneDeep } from "lodash";
 
-import gameConfig from "@/store/modules/game.js";
-import boardConfig from "@/store/modules/board.js";
-import playersConfig from "@/store/modules/players.js";
+import { useGameStore } from "@/stores/game.js";
+import { useBoardStore } from "@/stores/board.js";
+import { usePlayersStore } from "@/stores/players.js";
 
-export const createTestStore = function (apiState) {
-    let store = createStore({
-        modules: {
-            game: cloneDeep(gameConfig),
-            board: cloneDeep(boardConfig),
-            players: cloneDeep(playersConfig),
-        },
-    });
+export const createTestStores = function (apiState) {
+    const gameStore = useGameStore();
+    const boardStore = useBoardStore();
+    const playersStore = usePlayersStore();
+
     if (apiState) {
-        store.dispatch("game/updateFromApi", cloneDeep(apiState));
+        gameStore.updateFromApi(cloneDeep(apiState));
     }
-    return store;
+    return {
+        gameStore: gameStore,
+        boardStore: boardStore,
+        playersStore: playersStore,
+    };
 };
 
 export const GET_GAME_STATE_RESULT_FOR_N_3 = {

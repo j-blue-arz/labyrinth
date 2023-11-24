@@ -44,6 +44,10 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import VMoveAnimation from "@/components/VMoveAnimation.vue";
 import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 
+import { mapState } from "pinia";
+import { useBoardStore } from "@/stores/board.js";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "v-game-board",
     components: {
@@ -76,21 +80,19 @@ export default {
     },
     emits: ["player-move"],
     computed: {
-        mazeSize: function () {
-            return this.$store.state.board.mazeSize;
-        },
-        mazeCards: function () {
-            return this.$store.getters["board/mazeCardsRowMajorOrder"];
-        },
         boardSize: function () {
             return this.$ui.cardSize * this.mazeSize;
         },
         borderWidth: function () {
             return Math.floor(this.$ui.cardSize / 6);
         },
-        players: function () {
-            return this.$store.getters["players/all"];
-        },
+        ...mapState(useBoardStore, {
+            mazeSize: "mazeSize",
+            mazeCards: "mazeCardsRowMajorOrder",
+        }),
+        ...mapState(usePlayersStore, {
+            players: (store) => store.all,
+        }),
     },
     methods: {
         isMoveInteractive(mazeCard) {

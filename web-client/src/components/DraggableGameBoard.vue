@@ -15,7 +15,9 @@
 
 <script>
 import VGameBoard from "@/components/VGameBoard.vue";
-import { locationsEqual, getShiftLocations, loc } from "@/store/modules/board.js";
+import { mapState } from "pinia";
+import { useBoardStore, locationsEqual, getShiftLocations, loc } from "@/stores/board.js";
+
 import { MOVE_ACTION, SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import { Vector, bound } from "@/model/2d.js";
 import { ShiftLocation } from "@/model/shift.js";
@@ -51,9 +53,6 @@ export default {
         };
     },
     computed: {
-        mazeSize: function () {
-            return this.$store.state.board.mazeSize;
-        },
         shiftLocations: function () {
             const n = this.mazeSize;
             return getShiftLocations(n).map((location) => new ShiftLocation(location, n));
@@ -73,7 +72,7 @@ export default {
             } else if (this.userAction === SHIFT_ACTION) {
                 let result = new Set();
                 for (let location of this.dragInteractiveLocations) {
-                    result.add(this.$store.getters["board/mazeCard"](location));
+                    result.add(this.boardMazeCardAt(location));
                 }
                 return result;
             } else {
@@ -83,9 +82,8 @@ export default {
         possibleDragDirections: function () {
             let result = [];
             if (this.dragLocation) {
-                const disabledShiftLocation = this.$store.state.board.disabledShiftLocation;
                 for (let shiftLocation of this.shiftLocations) {
-                    if (!locationsEqual(disabledShiftLocation, shiftLocation)) {
+                    if (!locationsEqual(this.disabledShiftLocation, shiftLocation)) {
                         if (shiftLocation.affects(this.dragLocation)) {
                             result.push(shiftLocation.direction);
                         }
@@ -94,13 +92,18 @@ export default {
             }
             return result;
         },
+        ...mapState(useBoardStore, {
+            boardMazeCardAt: "mazeCard",
+            mazeSize: "mazeSize",
+            disabledShiftLocation: "disabledShiftLocation",
+        }),
     },
     methods: {
         startDrag: function (svgPosition) {
             this.resetDrag();
             if (this.userAction === SHIFT_ACTION) {
                 let location = this.getLocation(svgPosition);
-                let mazeCard = this.$store.getters["board/mazeCard"](location);
+                let mazeCard = this.boardMazeCardAt(location);
                 if (mazeCard) {
                     if (this.isDraggable(location)) {
                         this.dragLocation = location;

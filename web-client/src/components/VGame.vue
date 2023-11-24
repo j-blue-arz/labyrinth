@@ -25,6 +25,10 @@ import CountdownTimer from "@/components/CountdownTimer.vue";
 import VMessageArea from "@/components/VMessageArea.vue";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 
+import { mapState } from "pinia";
+import { useBoardStore } from "@/stores/board.js";
+import { usePlayersStore } from "@/stores/players.js";
+
 export default {
     name: "v-game",
     components: {
@@ -35,16 +39,13 @@ export default {
         LeftoverMazeCard,
     },
     computed: {
-        hasBoard: function () {
-            return this.$store.getters["board/notEmpty"];
-        },
-        userPlayer: function () {
-            return this.$store.getters["players/userPlayer"];
-        },
-        leftoverSize: function () {
-            const mazeSize = this.$store.state.board.mazeSize;
-            return Math.round(100 / (mazeSize + 2)) + "vmin";
-        },
+        ...mapState(usePlayersStore, ["userPlayer"]),
+        ...mapState(useBoardStore, {
+            hasBoard: (store) => store.notEmpty,
+            leftoverSize: (store) => {
+                return Math.round(100 / (store.mazeSize + 2)) + "vmin";
+            },
+        }),
     },
 };
 </script>

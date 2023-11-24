@@ -1,63 +1,81 @@
-import { mount } from "@vue/test-utils";
 import VMazeCard from "@/components/VMazeCard.vue";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
 
 beforeEach(() => {
-    mockStore = createMockStore();
+    const testingPinia = createTestingPinia({
+        game: {
+            objectiveId: -1,
+        },
+    });
+    gameStore = useGameStore();
+    playersStore = usePlayersStore();
+    playersStore.findByMazeCard = () => [];
     mazeCard = { ...initialMazeCard };
-    vMazeCard = undefined;
     givenNoObjective();
 });
 
 describe("VMazeCard", () => {
     it("contains an svg-element", () => {
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.find("svg").exists()).toBe(true);
     });
 
     it("has width of 100 if cardSize is 100", () => {
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.element.getAttribute("width")).toBe("100");
     });
 
     it("includes north outPath if MazeCard has a north outPath", () => {
         givenCardWithOutPaths("NW");
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.find({ ref: "north" }).exists()).toBeTruthy();
     });
 
     it("does not include north outPath if MazeCard object does not have a north outPath", () => {
         givenCardWithOutPaths("EW");
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.find({ ref: "north" }).exists()).toBeFalsy();
     });
 
     it("does not render players if the MazeCard object does not contain pieces", () => {
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.findAll("player-piece").length).toBe(0);
     });
 
     it("renders a single player", () => {
         givenPlayers([{ id: 0 }]);
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.findAll(".player-piece").length).toBe(1);
     });
 
     it("renders an objective if MazeCard has one", () => {
         givenObjective();
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.findAll(".objective").length).toBe(1);
     });
 
     it("does not render an objective if MazeCard has none", () => {
         givenNoObjective();
-        givenVMazeCard();
+
+        whenCreateVMazeCard();
 
         expect(vMazeCard.findAll(".objective").length).toBe(0);
     });
@@ -67,46 +85,34 @@ const mazeCardId = 1;
 const initialMazeCard = { id: mazeCardId, outPaths: "NESW" };
 let mazeCard = { ...initialMazeCard };
 let vMazeCard;
-let mockStore = createMockStore();
 
-function createMockStore() {
-    return {
-        state: {
-            game: {
-                objectiveId: -1,
-            },
-        },
-        getters: {
-            "players/findByMazeCard": () => [],
-        },
-    };
-}
+let testingPinia;
+let gameStore;
+let playersStore;
 
 function givenCardWithOutPaths(outPaths) {
     mazeCard = { ...mazeCard, outPaths: outPaths };
 }
 
-function givenVMazeCard() {
+const whenCreateVMazeCard = function () {
     vMazeCard = mount(VMazeCard, {
         props: { mazeCard: mazeCard },
         global: {
-            mocks: {
-                $store: mockStore,
-            },
+            plugins: [testingPinia],
         },
     });
-}
+};
 
 function givenNoObjective() {
-    mockStore.state.game.objectiveId = -1;
+    gameStore.objectiveId = -1;
 }
 
 function givenObjective() {
-    mockStore.state.game.objectiveId = mazeCardId;
+    gameStore.objectiveId = mazeCardId;
 }
 
 function givenPlayers(players) {
-    mockStore.getters["players/findByMazeCard"] = (id) => {
+    playersStore.findByMazeCard = (id) => {
         if (id === mazeCardId) {
             return players;
         } else {

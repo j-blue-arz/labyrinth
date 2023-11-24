@@ -13,6 +13,9 @@ import VGame from "@/components/VGame.vue";
 import WasmPlayer from "@/model/wasmPlayer.js";
 import logAppLaunch from "@/services/analytics-api.js";
 
+import { mapActions } from 'pinia';
+import { useGameStore } from '@/stores/game.js';
+
 export default {
     name: "app",
     components: {
@@ -25,15 +28,16 @@ export default {
         };
     },
     created: function () {
-        this.wasmPlayer = new WasmPlayer(this.$store);
+        this.wasmPlayer = new WasmPlayer();
         window.addEventListener("beforeunload", () => this.leave());
         logAppLaunch();
-        this.$store.dispatch("game/playOffline");
+        this.playOffline();
     },
     methods: {
         leave() {
-            this.$store.dispatch("game/leaveOnlineGame");
+            this.leaveOnlineGame();
         },
+        ...mapActions(useGameStore, ["playOffline", "leaveOnlineGame"])
     },
     beforeUnmount() {
         this.leave();

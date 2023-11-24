@@ -1,7 +1,9 @@
-import { mount } from "@vue/test-utils";
-import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { nextTick } from "vue";
 
 const findLowestPositionOfMazeCard = function (vGameBoard, dimension) {
     var vMazeCards = vGameBoard.findAllComponents(VMazeCard);
@@ -14,34 +16,41 @@ const findLowestPositionOfMazeCard = function (vGameBoard, dimension) {
 };
 
 describe("VGameBoard", () => {
-    it("renders all VMazeCard components", () => {
+    it("renders all VMazeCard components", async () => {
         givenVGameBoard();
+
+        await nextTick();
 
         expect(vGameBoard.findAllComponents(VMazeCard).length).toBe(3 * 3);
     });
 
-    it("renders leftmost v-maze-card exactly at 0", () => {
+    it("renders leftmost v-maze-card exactly at 0", async () => {
         givenVGameBoard();
+
+        await nextTick();
 
         var xPos = findLowestPositionOfMazeCard(vGameBoard, "x");
         expect(xPos).toBe(0);
     });
 
-    it("renders topmost v-maze-card exactly at 0", () => {
+    it("renders topmost v-maze-card exactly at 0", async () => {
         givenVGameBoard();
+
+        await nextTick();
+
         var yPos = findLowestPositionOfMazeCard(vGameBoard, "y");
         expect(yPos).toBe(0);
     });
 });
 
 let vGameBoard;
-let store;
+let stores;
 
 function givenVGameBoard() {
-    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
     vGameBoard = mount(VGameBoard, {
         global: {
-            plugins: [store],
+            plugins: [createTestingPinia({ stubActions: false })],
         },
     });
+    stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);
 }

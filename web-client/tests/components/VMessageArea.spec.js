@@ -1,9 +1,13 @@
 import { mount } from "@vue/test-utils";
 import VMessageArea from "@/components/VMessageArea.vue";
 import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { createTestingPinia } from "@pinia/testing";
+import { usePlayersStore } from "@/stores/players.js";
 
 beforeEach(() => {
-    mockStore = createMockStore();
+    testingPinia = createTestingPinia();
+    playersStore = usePlayersStore();
+    playersStore.userPlayer = { ...initialPlayer };
 });
 
 describe("VMessageArea", () => {
@@ -46,55 +50,33 @@ describe("VMessageArea", () => {
 });
 
 let wrapper = null;
-let mockStore = null;
+let playersStore = null;
+let testingPinia;
 
 const initialPlayer = { id: 0, nextAction: NO_ACTION, score: 0 };
 
-const createMockStore = function () {
-    let mockStore = {
-        state: {
-            countdown: {
-                remainingSeconds: 30,
-                startSeconds: 30,
-            },
-        },
-        getters: {
-            "countdown/isRunning": true,
-            "players/userPlayer": { ...initialPlayer },
-        },
-    };
-    return mockStore;
-};
-
-const factory = function () {
-    let wrapper = mount(VMessageArea, {
-        global: {
-            mocks: {
-                $store: mockStore,
-            },
-        },
-    });
-    return wrapper;
-};
-
 const givenNotPlayersTurn = function () {
-    mockStore.getters["players/userPlayer"].nextAction = NO_ACTION;
+    playersStore.userPlayer.nextAction = NO_ACTION;
 };
 
 const givenPlayerShift = function () {
-    mockStore.getters["players/userPlayer"].nextAction = SHIFT_ACTION;
+    playersStore.userPlayer.nextAction = SHIFT_ACTION;
 };
 
 const givenPlayerMove = function () {
-    mockStore.getters["players/userPlayer"].nextAction = MOVE_ACTION;
+    playersStore.userPlayer.nextAction = MOVE_ACTION;
 };
 
 const givenPlayerScore = function (score) {
-    mockStore.getters["players/userPlayer"].score = score;
+    playersStore.userPlayer.score = score;
 };
 
 const whenMessageAreaIsCreated = function () {
-    wrapper = factory();
+    wrapper = mount(VMessageArea, {
+        global: {
+            plugins: [testingPinia],
+        },
+    });
 };
 
 const thenMessageBoardIsInvisible = function () {

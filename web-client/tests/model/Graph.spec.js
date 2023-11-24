@@ -1,14 +1,16 @@
 import Graph from "@/model/Graph";
-import boardConfig, { loc } from "@/store/modules/board.js";
-import Vuex from "vuex";
+import { loc } from "@/stores/board.js";
 import { cloneDeep } from "lodash";
+import { createTestingPinia } from "@pinia/testing";
+import { useBoardStore } from "@/stores/board.js";
 
 describe("Graph", () => {
     beforeEach(() => {
-        let store = new Vuex.Store(cloneDeep(boardConfig));
+        const testingPinia = createTestingPinia({ stubActions: false });
+        const boardStore = useBoardStore();
         const apiState = JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER);
-        store.dispatch("update", apiState);
-        graph = new Graph(store.state);
+        boardStore.update(apiState);
+        graph = new Graph(boardStore.$state);
     });
 
     describe("reachableLocations", () => {

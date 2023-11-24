@@ -75,6 +75,10 @@ import PlayerPieceGroup from "@/components/PlayerPieceGroup.vue";
 import VObjective from "@/components/VObjective.vue";
 import { TweenLite, Power3 } from "gsap";
 
+import { mapState } from "pinia";
+import { usePlayersStore } from "@/stores/players.js";
+import { useGameStore } from "@/stores/game.js";
+
 export default {
     name: "v-maze-card",
     components: {
@@ -162,9 +166,6 @@ export default {
             }
             return "";
         },
-        players: function () {
-            return this.$store.getters["players/findByMazeCard"](this.mazeCard.id);
-        },
         remainingSpace: function () {
             return Math.floor((this.$ui.cardSize - this.pathWidth) / 2);
         },
@@ -180,9 +181,16 @@ export default {
         hasWest: function () {
             return this.hasOutPath(this.mazeCard, "W");
         },
-        hasObjective: function () {
-            return this.$store.state.game.objectiveId === this.mazeCard.id;
-        },
+        ...mapState(usePlayersStore, {
+            players(store) {
+                return store.findByMazeCard(this.mazeCard.id);
+            },
+        }),
+        ...mapState(useGameStore, {
+            hasObjective(store) {
+                return store.objectiveId === this.mazeCard.id;
+            },
+        }),
     },
     methods: {
         hasOutPath(mazeCard, outPath) {

@@ -1,17 +1,19 @@
 import WasmGateway from "@/services/wasmGateway.js";
 import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player";
-import { getShiftLocations } from "@/store/modules/board.js";
+import { useBoardStore, getShiftLocations } from "@/stores/board.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { useGameStore } from "@/stores/game.js";
+
+import { watch } from 'vue'
 
 export default class WasmPlayer {
-    constructor(store) {
-        this.store = store;
+    constructor() {
         this.wasmGateway = new WasmGateway();
         this.computedAction = undefined;
+        const playersStore = usePlayersStore()
 
-        this.store.watch(
-            () => {
-                return this.store.getters["players/wasmPlayer"]?.nextAction ?? NO_ACTION;
-            },
+        watch(
+            () => playersStore.wasmPlayer?.nextAction ?? NO_ACTION,
             (newAction) => {
                 if (newAction === SHIFT_ACTION) {
                     this.onHasToShift();
@@ -39,18 +41,21 @@ export default class WasmPlayer {
     }
 
     performShift() {
-        const wasmPlayerId = this.store.getters["players/wasmPlayerId"];
-        const playerCard = this.store.getters["players/mazeCard"](wasmPlayerId);
+        const boardStore = useBoardStore();
+        const playersStore = usePlayersStore();
+        const gameStore = useGameStore();
+        const wasmPlayerId = playersStore.wasmPlayerId;
+        const playerCard = playersStore.mazeCard(wasmPlayerId);
         const playerLocation = playerCard.location;
-        const objectiveId = this.store.state.game.objectiveId;
-        const leftoverCard = this.store.getters["board/leftoverMazeCard"];
-        const mazeCardList = this.store.getters["board/mazeCardsRowMajorOrder"].concat([
+        const objectiveId = gameStore.objectiveId;
+        const leftoverCard = boardStore.leftoverMazeCard;
+        const mazeCardList = boardStore.mazeCardsRowMajorOrder.concat([
             leftoverCard,
         ]);
-        const shiftLocations = getShiftLocations(this.store.state.board.mazeSize);
-        const disabledShiftLocation = this.store.state.board.disabledShiftLocation;
+        const shiftLocations = getShiftLocations(boardStore.mazeSize);
+        const disabledShiftLocation = boardStore.disabledShiftLocation;
         const previousShiftLocation =
-            this.store.getters["board/oppositeLocation"](disabledShiftLocation);
+            boardStore.oppositeLocation(disabledShiftLocation);
         const instance = {
             playerLocation: playerLocation,
             objectiveId: objectiveId,
@@ -64,15 +69,17 @@ export default class WasmPlayer {
             location: this.computedAction.shiftAction.location,
             leftoverRotation: this.computedAction.shiftAction.leftoverRotation,
         };
-        this.store.dispatch("game/shift", shiftAction);
+        gameStore.shift(shiftAction);
     }
 
     performMove() {
-        let shiftAction = {
-            playerId: this.store.getters["players/wasmPlayerId"],
+        const gameStore = useGameStore();
+        const playersStore = usePlayersStore();
+        let moveAction = {
+            playerId: playersStore.wasmPlayerId,
             targetLocation: this.computedAction.moveLocation,
         };
         this.computedAction = undefined;
-        this.store.dispatch("game/move", shiftAction);
+        gameStore.move(moveAction);
     }
 }

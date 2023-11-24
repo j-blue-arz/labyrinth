@@ -1,17 +1,23 @@
-import { mount } from "@vue/test-utils";
 import LeftoverMazeCard from "@/components/LeftoverMazeCard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import * as action from "@/model/player.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+
+import { useBoardStore } from "@/stores/board.js";
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { expect } from "vitest";
+import { nextTick } from "vue";
 
 describe("InteractiveBoard", () => {
     beforeEach(() => {
-        mockStore = createMockStore();
+        givenLeftoverMazeCard();
     });
 
     it("rotates leftover maze card when clicked", async () => {
         givenRotation(0);
         givenShiftRequired();
-        givenLeftoverMazeCard();
 
         await whenMazeCardIsClicked();
 
@@ -21,51 +27,48 @@ describe("InteractiveBoard", () => {
     it("does not rotate leftover maze card given no interaction required", async () => {
         givenRotation(0);
         givenNoActionRequired();
-        givenLeftoverMazeCard();
 
         await whenMazeCardIsClicked();
 
         thenMazeCardWasNotRotated();
     });
 
-    it("assigns class 'interaction' on leftover maze card when interaction is required", () => {
+    it("assigns class 'interaction' on leftover maze card when interaction is required", async () => {
         givenShiftRequired();
-        givenLeftoverMazeCard();
+        await nextTick();
 
         thenMazeCardIsInteractive();
     });
 
-    it("removes class 'interaction' on leftover maze card when no interaction required", () => {
+    it("removes class 'interaction' on leftover maze card when no interaction required", async () => {
         givenNoActionRequired();
-        givenLeftoverMazeCard();
+        await nextTick();
 
         thenMazeCardIsNotInteractive();
     });
 });
 
 let leftoverMazeCard;
-let mockStore;
+let gameStore;
+let playersStore;
+let boardStore;
 
 const mazeCard = { id: 0, location: null, outPaths: "NS", rotation: 0 };
 
-const createMockStore = function () {
-    return {
-        getters: { "board/leftoverMazeCard": mazeCard, "players/findByMazeCard": () => [] },
-        dispatch: vi.fn(),
-        state: {
-            game: {
-                objectiveId: 1,
-            },
-        },
-    };
-};
-
 const factory = function () {
+    const testingPinia = createTestingPinia({
+        game: {
+            objectiveId: 1,
+        },
+    });
+    gameStore = useGameStore();
+    playersStore = usePlayersStore();
+    playersStore.findByMazeCard = () => [];
+    boardStore = useBoardStore();
+    boardStore.leftoverMazeCard = mazeCard;
     let leftoverMazeCard = mount(LeftoverMazeCard, {
         global: {
-            mocks: {
-                $store: mockStore,
-            },
+            plugins: [testingPinia],
         },
     });
     return leftoverMazeCard;
@@ -80,11 +83,11 @@ const givenRotation = function (rotation) {
 };
 
 const givenShiftRequired = function () {
-    mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.SHIFT_ACTION };
+    playersStore.userPlayer = { id: 0, nextAction: action.SHIFT_ACTION };
 };
 
 const givenNoActionRequired = function () {
-    mockStore.getters["players/userPlayer"] = { id: 0, nextAction: action.NO_ACTION };
+    playersStore.userPlayer = { id: 0, nextAction: action.NO_ACTION };
 };
 
 const whenMazeCardIsClicked = async function () {
@@ -92,12 +95,11 @@ const whenMazeCardIsClicked = async function () {
 };
 
 const thenMazeCardWasRotated = function () {
-    expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
-    expect(mockStore.dispatch).toHaveBeenCalledWith("board/rotateLeftoverClockwise");
+    expect(boardStore.rotateLeftoverClockwise).toHaveBeenCalledTimes(1);
 };
 
 const thenMazeCardWasNotRotated = function () {
-    expect(mockStore.dispatch).toHaveBeenCalledTimes(0);
+    expect(boardStore.rotateLeftoverClockwise).toHaveBeenCalledTimes(0);
 };
 
 const thenMazeCardIsInteractive = function () {

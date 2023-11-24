@@ -1,29 +1,38 @@
 import { mount } from "@vue/test-utils";
-import { createTestStore, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { createTestingPinia } from "@pinia/testing";
+import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import InsertPanels from "@/components/InsertPanels.vue";
 import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
+import { nextTick } from "vue";
+
+beforeEach(() => {
+    insertPanels = factory();
+});
 
 describe("InsertPanels", () => {
     it("sets interaction class on insert panels if shift is required", async () => {
-        givenInsertPanels();
-        await givenNoDisabledShiftLocation();
-        await givenShiftRequired();
+        givenNoDisabledShiftLocation();
+        givenShiftRequired();
+        
+        await nextTick();
 
         thenPanelsHaveInteractionClass();
     });
 
     it("does not set interaction class on insert panels if move is required", async () => {
-        givenInsertPanels();
-        await givenNoDisabledShiftLocation();
-        await givenMoveRequired();
+        givenNoDisabledShiftLocation();
+        givenMoveRequired();
+
+        await nextTick();
 
         thenNoPanelHasInteractionClass();
     });
 
     it("enables all insert panels but the one which is disabled in game", async () => {
-        givenInsertPanels();
-        await givenDisabledShiftLocation({ row: 0, column: 1 });
-        await givenShiftRequired();
+        givenDisabledShiftLocation({ row: 0, column: 1 });
+        givenShiftRequired();
+
+        await nextTick();
 
         thenOnePanelIsDisabled();
         thenDisabledPanelIsTopOfFirstColumn();
@@ -31,39 +40,35 @@ describe("InsertPanels", () => {
 });
 
 let insertPanels;
-let store;
+let stores;
 
 const playerId = 1;
 
 const factory = function () {
-    store = createTestStore(GET_GAME_STATE_RESULT_FOR_N_3);
-    store.commit("players/addPlayer", { id: playerId, isUser: true });
     let wrapper = mount(InsertPanels, {
         global: {
-            plugins: [store],
+            plugins: [createTestingPinia({ stubActions: false })],
         },
     });
+    stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);
+    stores.playersStore.addPlayer({ id: playerId, isUser: true });
     return wrapper;
 };
 
-const givenInsertPanels = function () {
-    insertPanels = factory();
-};
-
 const givenDisabledShiftLocation = function (location) {
-    store.commit("board/setDisabledShiftLocation", location);
+    stores.boardStore.setDisabledShiftLocation(location);
 };
 
 const givenNoDisabledShiftLocation = function () {
-    store.commit("board/setDisabledShiftLocation", null);
+    stores.boardStore.setDisabledShiftLocation(null);
 };
 
 const givenShiftRequired = function () {
-    store.commit("game/updateNextAction", { playerId: playerId, action: SHIFT_ACTION });
+    stores.gameStore.updateNextAction({ playerId: playerId, action: SHIFT_ACTION });
 };
 
 const givenMoveRequired = function () {
-    store.commit("game/updateNextAction", { playerId: playerId, action: MOVE_ACTION });
+    stores.gameStore.updateNextAction({ playerId: playerId, action: MOVE_ACTION });
 };
 
 function thenDisabledPanelIsTopOfFirstColumn() {

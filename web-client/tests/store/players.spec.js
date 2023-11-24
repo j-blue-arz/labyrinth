@@ -1,21 +1,21 @@
-import playersConfig from "@/store/modules/players.js";
-import gameConfig from "@/store/modules/game.js";
-import boardConfig from "@/store/modules/board.js";
-import Vuex from "vuex";
 import { cloneDeep } from "lodash";
 import API from "@/services/game-api.js";
+import { useBoardStore } from "@/stores/board.js";
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { createPinia, setActivePinia } from "pinia";
 import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
-describe("players Vuex module", () => {
+describe("Players Store", () => {
     beforeEach(() => {
-        store = new Vuex.Store({
-            modules: {
-                game: cloneDeep(gameConfig),
-                board: cloneDeep(boardConfig),
-                players: cloneDeep(playersConfig),
-            },
-        });
+        setActivePinia(createPinia());
+        stores = {
+            game: useGameStore(),
+            board: useBoardStore(),
+            players: usePlayersStore(),
+        };
+        playersStore = stores.players;
         API.doAddPlayer.mockClear();
         API.removePlayer.mockClear();
         API.changePlayerName.mockClear();
@@ -51,7 +51,7 @@ describe("players Vuex module", () => {
                     { id: 4, isBot: true, pieceIndex: 3 },
                 ]);
 
-                const bots = store.getters["players/bots"];
+                const bots = playersStore.bots;
 
                 expect(bots).toEqual(
                     expect.arrayContaining([
@@ -69,7 +69,7 @@ describe("players Vuex module", () => {
                     { id: 4, isBot: true, pieceIndex: 3 },
                 ]);
 
-                const userPlayer = store.getters.userPlayer;
+                const userPlayer = playersStore.userPlayer;
 
                 expect(userPlayer).toBeUndefined();
             });
@@ -104,8 +104,8 @@ describe("players Vuex module", () => {
 
                 whenEnterGame();
 
-                expect(store.getters["players/find"](42).isUser).toBe(true);
-                expect(store.getters["players/hasUserPlayer"]).toBe(true);
+                expect(playersStore.find(42).isUser).toBe(true);
+                expect(playersStore.hasUserPlayer).toBe(true);
             });
 
             it("adds player to maze card", () => {
@@ -114,8 +114,8 @@ describe("players Vuex module", () => {
 
                 whenEnterGame();
 
-                const userPlayer = store.getters["players/userPlayer"];
-                const playerMazeCard = store.getters["board/mazeCardById"](userPlayer.mazeCardId);
+                const userPlayer = playersStore.userPlayer;
+                const playerMazeCard = stores.board.mazeCardById(userPlayer.mazeCardId);
                 expect(playerMazeCard.playerIds).toEqual([userPlayer.id]);
             });
         });
@@ -144,7 +144,7 @@ describe("players Vuex module", () => {
 
                 whenLeaveGame();
 
-                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                expect(playersStore.hasUserPlayer).toBe(false);
             });
         });
 
@@ -176,9 +176,9 @@ describe("players Vuex module", () => {
                 whenAddWasmPlayer();
 
                 expect(findPlayer(42).isUser).toBeFalsy;
-                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                expect(playersStore.hasUserPlayer).toBe(false);
                 expect(findPlayer(42).isWasm).toBe(true);
-                expect(store.getters["players/hasWasmPlayer"]).toBe(true);
+                expect(playersStore.hasWasmPlayer).toBe(true);
             });
         });
 
@@ -206,7 +206,7 @@ describe("players Vuex module", () => {
 
                 whenRemoveWasmPlayer();
 
-                expect(store.getters["players/hasWasmPlayer"]).toBe(false);
+                expect(playersStore.hasWasmPlayer).toBe(false);
             });
         });
 
@@ -220,8 +220,8 @@ describe("players Vuex module", () => {
 
                 whenRemoveAllClientPlayers();
 
-                expect(store.getters["players/hasWasmPlayer"]).toBe(false);
-                expect(store.getters["players/hasUserPlayer"]).toBe(false);
+                expect(playersStore.hasWasmPlayer).toBe(false);
+                expect(playersStore.hasUserPlayer).toBe(false);
                 expect(findPlayer(2)).toBeFalsy();
                 expect(findPlayer(5)).toBeFalsy();
                 expect(findPlayer(7)).toBeTruthy();
@@ -271,8 +271,8 @@ describe("players Vuex module", () => {
 
                 whenLeaveGame();
 
-                const mazeCards = store.getters["board/allIds"].map((id) =>
-                    store.getters["board/mazeCardById"](id)
+                const mazeCards = stores.board.allIds.map((id) =>
+                    stores.board.mazeCardById(id)
                 );
 
                 mazeCards.forEach((mazeCard) => {
@@ -288,7 +288,7 @@ describe("players Vuex module", () => {
                 whenChangeUserPlayerName("gina");
 
                 expect(API.changePlayerName).not.toHaveBeenCalled();
-                expect(store.state.players.byId[7].name).toBe("felix");
+                expect(playersStore.byId[7].name).toBe("felix");
             });
 
             it("changes name if user is playing", () => {
@@ -296,7 +296,7 @@ describe("players Vuex module", () => {
 
                 whenChangeUserPlayerName("gina");
 
-                expect(store.state.players.byId[7].name).toBe("gina");
+                expect(playersStore.byId[7].name).toBe("gina");
             });
 
             it("calls API if user is playing", () => {
@@ -411,21 +411,20 @@ describe("players Vuex module", () => {
     });
 });
 
-const { state } = playersConfig;
-
 API.doAddPlayer = vi.fn();
 API.removePlayer = vi.fn();
 API.changePlayerName = vi.fn();
 
-let store;
+let stores;
+let playersStore;
 let apiPlayers = [];
 
 const givenPlayingOnline = function () {
     let apiState = cloneDeep(GET_GAME_STATE_RESULT_FOR_N_3);
     apiState.players = [];
     apiState.nextAction = {};
-    store.commit("game/online");
-    store.dispatch("game/updateFromApi", apiState);
+    stores.game.online();
+    stores.game.updateFromApi(apiState);
 };
 
 const givenPlayingOffline = function () {
@@ -435,26 +434,16 @@ const givenPlayingOffline = function () {
         },
     }));
 
-    store.dispatch("game/playOffline");
+    stores.game.playOffline();
 };
 
 const givenNoPlayersInState = function () {
-    let players = state();
-    store.replaceState({
-        game: store.state.game,
-        players: players,
-        board: store.state.board,
-    });
+    playersStore.$reset();
 };
 
 const givenPlayerInState = function (player) {
     const playerId = player.id;
-    let players = { byId: { [playerId]: player }, allIds: [playerId] };
-    store.replaceState({
-        game: store.state.game,
-        players: players,
-        board: store.state.board,
-    });
+    playersStore.$patch({ byId: { [playerId]: player }, allIds: [playerId] });
 };
 
 const givenPlayersInState = function (players) {
@@ -462,16 +451,11 @@ const givenPlayersInState = function (players) {
         result[player.id] = player;
         return result;
     }, {});
-    let storePlayers = { byId: byId, allIds: players.map((player) => player.id) };
-    store.replaceState({
-        game: store.state.game,
-        players: storePlayers,
-        board: store.state.board,
-    });
+    playersStore.$patch({ byId: byId, allIds: players.map((player) => player.id) });
 };
 
 const givenNextAction = function (nextAction) {
-    store.commit("game/updateNextAction", nextAction);
+    stores.game.updateNextAction(nextAction);
 };
 
 const givenApiPlayer = function (apiPlayer) {
@@ -483,49 +467,49 @@ const givenApiAddPlayerReturns = function (apiPlayer) {
 };
 
 const whenSetPlayersFromApi = function () {
-    store.dispatch("players/update", apiPlayers);
+    playersStore.update(apiPlayers);
 };
 
 const whenEnterGame = function () {
-    store.dispatch("players/enterGame");
+    playersStore.enterGame();
 };
 
 const whenLeaveGame = function () {
-    store.dispatch("players/leaveGame");
+    playersStore.leaveGame();
 };
 
 const whenAddWasmPlayer = function () {
-    store.dispatch("players/addWasmPlayer");
+    playersStore.addWasmPlayer();
 };
 
 const whenRemoveWasmPlayer = function () {
-    store.dispatch("players/removeWasmPlayer");
+    playersStore.removeWasmPlayer();
 };
 
 const whenRemoveAllClientPlayers = function () {
-    store.dispatch("players/removeAllClientPlayers");
+    playersStore.removeAllClientPlayers();
 };
 
 const whenRemoveClientPlayer = function (id) {
-    store.dispatch("players/removeClientPlayer", id);
+    playersStore.removeClientPlayer(id);
 };
 
 const whenChangeUserPlayerName = function (newName) {
-    store.dispatch("players/changeUserPlayerName", newName);
+    playersStore.changeUserPlayerName(newName);
 };
 
 const thenPlayerExists = function (id) {
-    const players = store.state.players;
-    expect(players.byId).toHaveProperty("" + id);
-    expect(players.allIds).toContain(id);
+    const state = playersStore.$state;
+    expect(state.byId).toHaveProperty("" + id);
+    expect(state.allIds).toContain(id);
 };
 
 const thenPlayerDoesNotExist = function (id) {
-    const players = store.state.players;
-    expect(players.byId).not.toHaveProperty("" + id);
-    expect(players.allIds).not.toContain(id);
+    const state = playersStore.$state;
+    expect(state.byId).not.toHaveProperty("" + id);
+    expect(state.allIds).not.toContain(id);
 };
 
 const findPlayer = function (id) {
-    return store.getters["players/find"](id);
+    return playersStore.find(id);
 };
