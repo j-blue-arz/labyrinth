@@ -6,7 +6,7 @@ import { useGameStore } from "@/stores/game.js";
 import { usePlayersStore } from "@/stores/players.js";
 
 beforeEach(() => {
-    const testingPinia = createTestingPinia({
+    testingPinia = createTestingPinia({
         game: {
             objectiveId: -1,
         },
