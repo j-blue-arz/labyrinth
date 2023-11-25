@@ -1,6 +1,4 @@
-import { createTestingPinia } from "@pinia/testing";
 import { cloneDeep } from "lodash";
-
 import { useGameStore } from "@/stores/game.js";
 import { useBoardStore } from "@/stores/board.js";
 import { usePlayersStore } from "@/stores/players.js";

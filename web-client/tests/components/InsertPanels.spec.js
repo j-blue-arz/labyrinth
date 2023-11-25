@@ -1,9 +1,10 @@
-import { mount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
-import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 import InsertPanels from "@/components/InsertPanels.vue";
-import { SHIFT_ACTION, MOVE_ACTION } from "@/model/player.js";
+import { MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
+import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 beforeEach(() => {
     insertPanels = factory();
@@ -13,7 +14,7 @@ describe("InsertPanels", () => {
     it("sets interaction class on insert panels if shift is required", async () => {
         givenNoDisabledShiftLocation();
         givenShiftRequired();
-        
+
         await nextTick();
 
         thenPanelsHaveInteractionClass();
@@ -47,7 +48,7 @@ const playerId = 1;
 const factory = function () {
     let wrapper = mount(InsertPanels, {
         global: {
-            plugins: [createTestingPinia({ stubActions: false })],
+            plugins: [createTestingPinia({ stubActions: false, createSpy: vi.fn })],
         },
     });
     stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);

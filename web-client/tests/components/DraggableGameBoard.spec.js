@@ -4,7 +4,8 @@ import { NO_ACTION, SHIFT_ACTION } from "@/model/player.js";
 import { loc } from "@/stores/board.js";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
-import { GET_GAME_STATE_RESULT_FOR_N_3, createTestStores } from "../testfixtures.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 beforeEach(() => {
     wrapper = factory();
@@ -153,7 +154,7 @@ const factory = function () {
             userAction: SHIFT_ACTION,
         },
         global: {
-            plugins: [createTestingPinia({ stubActions: false })],
+            plugins: [createTestingPinia({ stubActions: false, createSpy: vi.fn })],
         },
     });
     stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);

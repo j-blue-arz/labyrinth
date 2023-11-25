@@ -3,11 +3,10 @@ import VMazeCard from "@/components/VMazeCard.vue";
 import * as action from "@/model/player.js";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useBoardStore } from "@/stores/board.js";
-import { useGameStore } from "@/stores/game.js";
 import { usePlayersStore } from "@/stores/players.js";
-import { expect } from "vitest";
 import { nextTick } from "vue";
 
 describe("InteractiveBoard", () => {
@@ -49,7 +48,6 @@ describe("InteractiveBoard", () => {
 });
 
 let leftoverMazeCard;
-let gameStore;
 let playersStore;
 let boardStore;
 
@@ -60,18 +58,17 @@ const factory = function () {
         game: {
             objectiveId: 1,
         },
+        createSpy: vi.fn,
     });
-    gameStore = useGameStore();
     playersStore = usePlayersStore();
     playersStore.findByMazeCard = () => [];
     boardStore = useBoardStore();
     boardStore.leftoverMazeCard = mazeCard;
-    let leftoverMazeCard = mount(LeftoverMazeCard, {
+    return mount(LeftoverMazeCard, {
         global: {
             plugins: [testingPinia],
         },
     });
-    return leftoverMazeCard;
 };
 
 const givenLeftoverMazeCard = function () {

@@ -1,22 +1,25 @@
-import { shallowMount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
-import { useGameStore } from "@/stores/game.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import App from "@/components/App.vue";
-import { beforeEach } from "vitest";
+import { useGameStore } from "@/stores/game.js";
+import { createTestingPinia } from "@pinia/testing";
+import { shallowMount } from "@vue/test-utils";
 
 global.fetch = vi.fn();
 
-
-
 describe("App", () => {
     beforeEach(() => {
-        wrapper = shallowMount(App, {
+        shallowMount(App, {
             global: {
-                plugins: [createTestingPinia()],
+                plugins: [
+                    createTestingPinia({
+                        createSpy: vi.fn,
+                    }),
+                ],
             },
         });
         gameStore = useGameStore();
-    })
+    });
 
     it("starts offline game on startup", () => {
         expect(gameStore.playOffline).toHaveBeenCalledTimes(1);
@@ -24,4 +27,3 @@ describe("App", () => {
 });
 
 let gameStore;
-let wrapper;

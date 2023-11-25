@@ -1,15 +1,16 @@
 import VMazeCard from "@/components/VMazeCard.vue";
-import { createTestingPinia } from "@pinia/testing";
-import { mount } from "@vue/test-utils";
-
 import { useGameStore } from "@/stores/game.js";
 import { usePlayersStore } from "@/stores/players.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => {
     testingPinia = createTestingPinia({
         game: {
             objectiveId: -1,
         },
+        createSpy: vi.fn,
     });
     gameStore = useGameStore();
     playersStore = usePlayersStore();
@@ -20,14 +21,12 @@ beforeEach(() => {
 
 describe("VMazeCard", () => {
     it("contains an svg-element", () => {
-
         whenCreateVMazeCard();
 
         expect(vMazeCard.find("svg").exists()).toBe(true);
     });
 
     it("has width of 100 if cardSize is 100", () => {
-
         whenCreateVMazeCard();
 
         expect(vMazeCard.element.getAttribute("width")).toBe("100");
@@ -50,7 +49,6 @@ describe("VMazeCard", () => {
     });
 
     it("does not render players if the MazeCard object does not contain pieces", () => {
-
         whenCreateVMazeCard();
 
         expect(vMazeCard.findAll("player-piece").length).toBe(0);

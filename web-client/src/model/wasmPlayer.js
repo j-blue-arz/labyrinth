@@ -3,14 +3,13 @@ import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player";
 import { useBoardStore, getShiftLocations } from "@/stores/board.js";
 import { usePlayersStore } from "@/stores/players.js";
 import { useGameStore } from "@/stores/game.js";
-
-import { watch } from 'vue'
+import { watch } from "vue";
 
 export default class WasmPlayer {
     constructor() {
         this.wasmGateway = new WasmGateway();
         this.computedAction = undefined;
-        const playersStore = usePlayersStore()
+        const playersStore = usePlayersStore();
 
         watch(
             () => playersStore.wasmPlayer?.nextAction ?? NO_ACTION,
@@ -22,7 +21,7 @@ export default class WasmPlayer {
                 } else if (newAction === NO_ACTION) {
                     this.computedAction = null;
                 }
-            }
+            },
         );
     }
 
@@ -49,13 +48,10 @@ export default class WasmPlayer {
         const playerLocation = playerCard.location;
         const objectiveId = gameStore.objectiveId;
         const leftoverCard = boardStore.leftoverMazeCard;
-        const mazeCardList = boardStore.mazeCardsRowMajorOrder.concat([
-            leftoverCard,
-        ]);
+        const mazeCardList = boardStore.mazeCardsRowMajorOrder.concat([leftoverCard]);
         const shiftLocations = getShiftLocations(boardStore.mazeSize);
         const disabledShiftLocation = boardStore.disabledShiftLocation;
-        const previousShiftLocation =
-            boardStore.oppositeLocation(disabledShiftLocation);
+        const previousShiftLocation = boardStore.oppositeLocation(disabledShiftLocation);
         const instance = {
             playerLocation: playerLocation,
             objectiveId: objectiveId,

@@ -1,6 +1,7 @@
 import { stateFactory, useBoardStore } from "@/stores/board.js";
 import { cloneDeep } from "lodash";
 import { createPinia, setActivePinia } from "pinia";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("Board Store", () => {
     describe("actions", () => {

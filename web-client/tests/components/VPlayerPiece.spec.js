@@ -1,5 +1,6 @@
-import { shallowMount } from "@vue/test-utils";
 import VPlayerPiece from "@/components/VPlayerPiece.vue";
+import { shallowMount } from "@vue/test-utils";
+import { describe, expect, it } from "vitest";
 
 const wrapperFactory = function (player) {
     return shallowMount(VPlayerPiece, {

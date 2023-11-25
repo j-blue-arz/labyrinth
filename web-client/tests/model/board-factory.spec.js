@@ -1,4 +1,5 @@
 import generateBoard from "@/model/board-factory.js";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("generateBoard(7)", () => {
     beforeEach(() => {
@@ -8,7 +9,7 @@ describe("generateBoard(7)", () => {
 
     it("returns object with fields mazeSize and mazeCards", () => {
         expect(board).toEqual(
-            expect.objectContaining({ mazeSize: expect.any(Number), mazeCards: expect.any(Array) })
+            expect.objectContaining({ mazeSize: expect.any(Number), mazeCards: expect.any(Array) }),
         );
     });
 
@@ -26,8 +27,8 @@ describe("generateBoard(7)", () => {
                     outPaths: expect.stringMatching("^[NESW]{2,4}$"),
                     rotation: expect.anything(),
                     // location omitted, because null is difficult to match
-                })
-            )
+                }),
+            ),
         );
     });
 
@@ -61,7 +62,7 @@ describe("generateBoard(7)", () => {
         for (let row = 0; row < 7; row++) {
             for (let column = 0; column < 7; column++) {
                 expect(board.mazeCards[index].location).toEqual(
-                    expect.objectContaining({ row: row, column: column })
+                    expect.objectContaining({ row: row, column: column }),
                 );
                 index++;
             }

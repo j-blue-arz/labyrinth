@@ -1,10 +1,11 @@
-import { cloneDeep } from "lodash";
+import { NO_ACTION, SHIFT_ACTION } from "@/model/player.js";
 import API from "@/services/game-api.js";
 import { useBoardStore } from "@/stores/board.js";
 import { useGameStore } from "@/stores/game.js";
 import { usePlayersStore } from "@/stores/players.js";
+import { cloneDeep } from "lodash";
 import { createPinia, setActivePinia } from "pinia";
-import { SHIFT_ACTION, NO_ACTION } from "@/model/player.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("Players Store", () => {
@@ -57,7 +58,7 @@ describe("Players Store", () => {
                     expect.arrayContaining([
                         expect.objectContaining({ id: 3, isBot: true, pieceIndex: 2 }),
                         expect.objectContaining({ id: 4, isBot: true, pieceIndex: 3 }),
-                    ])
+                    ]),
                 );
             });
         });
@@ -271,9 +272,7 @@ describe("Players Store", () => {
 
                 whenLeaveGame();
 
-                const mazeCards = stores.board.allIds.map((id) =>
-                    stores.board.mazeCardById(id)
-                );
+                const mazeCards = stores.board.allIds.map((id) => stores.board.mazeCardById(id));
 
                 mazeCards.forEach((mazeCard) => {
                     expect(mazeCard.playerIds.length).toEqual(0);

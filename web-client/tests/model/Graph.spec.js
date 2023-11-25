@@ -1,12 +1,11 @@
 import Graph from "@/model/Graph";
-import { loc } from "@/stores/board.js";
-import { cloneDeep } from "lodash";
+import { loc, useBoardStore } from "@/stores/board.js";
 import { createTestingPinia } from "@pinia/testing";
-import { useBoardStore } from "@/stores/board.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("Graph", () => {
     beforeEach(() => {
-        const testingPinia = createTestingPinia({ stubActions: false });
+        createTestingPinia({ stubActions: false, createSpy: vi.fn });
         const boardStore = useBoardStore();
         const apiState = JSON.parse(GAME_STATE_GENERATED_WITH_LINE_LEFTOVER);
         boardStore.update(apiState);
@@ -33,7 +32,7 @@ describe("Graph", () => {
                     loc(5, 4),
                     loc(6, 3),
                     loc(6, 4),
-                ])
+                ]),
             );
         });
 
@@ -42,7 +41,7 @@ describe("Graph", () => {
 
             expect(reachable.length).toBe(5);
             expect(reachable).toEqual(
-                expect.arrayContaining([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)])
+                expect.arrayContaining([loc(0, 2), loc(0, 3), loc(1, 2), loc(2, 2), loc(3, 2)]),
             );
         });
 
@@ -65,7 +64,7 @@ describe("Graph", () => {
                     loc(6, 1),
                     loc(5, 2),
                     loc(6, 2),
-                ])
+                ]),
             );
         });
     });

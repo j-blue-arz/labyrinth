@@ -1,5 +1,6 @@
-import { mount } from "@vue/test-utils";
 import VEditableField from "@/components/VEditableField.vue";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it } from "vitest";
 
 beforeEach(() => {
     wrapper = factory();
@@ -44,13 +45,12 @@ let wrapper = null;
 let placeholder = "some placeholder";
 
 const factory = function () {
-    let wrapper = mount(VEditableField, {
+    return mount(VEditableField, {
         props: {
             placeholder: placeholder,
             modelValue: "",
         },
     });
-    return wrapper;
 };
 
 const givenTextSet = function (text) {

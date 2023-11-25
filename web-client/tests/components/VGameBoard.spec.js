@@ -2,15 +2,18 @@ import VGameBoard from "@/components/VGameBoard.vue";
 import VMazeCard from "@/components/VMazeCard.vue";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
-import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
+import { describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
+import { createTestStores, GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 const findLowestPositionOfMazeCard = function (vGameBoard, dimension) {
-    var vMazeCards = vGameBoard.findAllComponents(VMazeCard);
-    var min = Number.MAX_VALUE;
-    for (var i = 0; i < vMazeCards.length; i++) {
-        var value = parseInt(vMazeCards.at(i).element.getAttribute(dimension));
-        if (value < min) min = value;
+    const vMazeCards = vGameBoard.findAllComponents(VMazeCard);
+    let min = Number.MAX_VALUE;
+    for (let i = 0; i < vMazeCards.length; i++) {
+        const value = parseInt(vMazeCards.at(i).element.getAttribute(dimension));
+        if (value < min) {
+            min = value;
+        }
     }
     return min;
 };
@@ -29,7 +32,7 @@ describe("VGameBoard", () => {
 
         await nextTick();
 
-        var xPos = findLowestPositionOfMazeCard(vGameBoard, "x");
+        const xPos = findLowestPositionOfMazeCard(vGameBoard, "x");
         expect(xPos).toBe(0);
     });
 
@@ -38,19 +41,18 @@ describe("VGameBoard", () => {
 
         await nextTick();
 
-        var yPos = findLowestPositionOfMazeCard(vGameBoard, "y");
+        const yPos = findLowestPositionOfMazeCard(vGameBoard, "y");
         expect(yPos).toBe(0);
     });
 });
 
 let vGameBoard;
-let stores;
 
 function givenVGameBoard() {
     vGameBoard = mount(VGameBoard, {
         global: {
-            plugins: [createTestingPinia({ stubActions: false })],
+            plugins: [createTestingPinia({ stubActions: false, createSpy: vi.fn })],
         },
     });
-    stores = createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);
+    createTestStores(GET_GAME_STATE_RESULT_FOR_N_3);
 }

@@ -1,4 +1,5 @@
 import { getLabel } from "@/model/player.js";
+import { describe, expect, it } from "vitest";
 
 describe("getLabel", () => {
     it("returns player name for non-bot players", () => {

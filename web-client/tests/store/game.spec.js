@@ -5,6 +5,7 @@ import { useGameStore } from "@/stores/game.js";
 import { usePlayersStore } from "@/stores/players.js";
 import { cloneDeep } from "lodash";
 import { createPinia, setActivePinia } from "pinia";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET_GAME_STATE_RESULT_FOR_N_3 } from "../testfixtures.js";
 
 describe("Game Store", () => {

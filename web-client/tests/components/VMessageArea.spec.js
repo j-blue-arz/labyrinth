@@ -1,11 +1,14 @@
-import { mount } from "@vue/test-utils";
 import VMessageArea from "@/components/VMessageArea.vue";
-import { NO_ACTION, MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
-import { createTestingPinia } from "@pinia/testing";
+import { MOVE_ACTION, NO_ACTION, SHIFT_ACTION } from "@/model/player.js";
 import { usePlayersStore } from "@/stores/players.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 beforeEach(() => {
-    testingPinia = createTestingPinia();
+    testingPinia = createTestingPinia({
+        createSpy: vi.fn,
+    });
     playersStore = usePlayersStore();
     playersStore.userPlayer = { ...initialPlayer };
 });

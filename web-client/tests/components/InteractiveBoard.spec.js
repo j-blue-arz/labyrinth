@@ -4,6 +4,7 @@ import { MOVE_ACTION, SHIFT_ACTION } from "@/model/player.js";
 import { loc } from "@/stores/board.js";
 import { createTestingPinia } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { createTestStores } from "../testfixtures.js";
 
@@ -63,7 +64,7 @@ function givenUserPlayer() {
 function givenInteractiveBoard() {
     interactiveBoard = mount(InteractiveBoard, {
         global: {
-            plugins: [createTestingPinia({ stubActions: false })],
+            plugins: [createTestingPinia({ stubActions: false, createSpy: vi.fn })],
         },
     });
     stores = createTestStores();

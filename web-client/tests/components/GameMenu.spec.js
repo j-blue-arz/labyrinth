@@ -1,13 +1,13 @@
-import { mount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
-import { usePlayersStore } from "@/stores/players.js";
-import { useGameStore } from "@/stores/game.js";
 import GameMenu from "@/components/GameMenu.vue";
 import VMenu from "@/components/VMenu.vue";
 import API from "@/services/game-api.js";
-import { expect } from "vitest";
+import { useGameStore } from "@/stores/game.js";
+import { usePlayersStore } from "@/stores/players.js";
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { nextTick } from 'vue'
+import { nextTick } from "vue";
 
 beforeEach(() => {
     gameMenu = factory();
@@ -228,7 +228,11 @@ API.fetchComputationMethods = vi.fn();
 const factory = function () {
     return mount(GameMenu, {
         global: {
-            plugins: [createTestingPinia()],
+            plugins: [
+                createTestingPinia({
+                    createSpy: vi.fn,
+                }),
+            ],
             directives: {
                 "click-outside": {},
             },
@@ -330,26 +334,25 @@ const thenLeaveGameIsCalledOnPlayersStore = function () {
     expect(playersStore.leaveGame).toHaveBeenCalledTimes(1);
 };
 
-const thenEnterGameIsCalledOnPlayersStore = function() {
+const thenEnterGameIsCalledOnPlayersStore = function () {
     expect(playersStore.enterGame).toHaveBeenCalledTimes(1);
-}
+};
 
-const thenRemoveWasmPlayerIsCalledOnPlayersStore = function() {
+const thenRemoveWasmPlayerIsCalledOnPlayersStore = function () {
     expect(playersStore.removeWasmPlayer).toHaveBeenCalledTimes(1);
-}
+};
 
-const thenPlayOfflineIsCalledOnGameStore = function(size) {
-    if(size) {
+const thenPlayOfflineIsCalledOnGameStore = function (size) {
+    if (size) {
         expect(gameStore.playOffline).toHaveBeenCalledWith(size);
     } else {
         expect(gameStore.playOffline).toHaveBeenCalledWith();
     }
-    
-}
+};
 
-const thenPlayOnlineIsCalledOnGameStore = function() {
+const thenPlayOnlineIsCalledOnGameStore = function () {
     expect(gameStore.playOnline).toHaveBeenCalledTimes(1);
-}
+};
 expect.extend({
     toExistAsEntry(label) {
         const entries = findEntriesByText(label);
