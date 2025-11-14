@@ -1,7 +1,7 @@
 ##########################################################
 # first build and test algolibs for the solver libraries #
 ##########################################################
-FROM gcc:9.4 as algolibs-base
+FROM gcc:15 AS algolibs-base
 
 WORKDIR /usr/src/algolibs
 
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 COPY algolibs/solvers ./solvers
 COPY algolibs/CMakeLists.txt .
 
-FROM algolibs-base as algolibs-test
+FROM algolibs-base AS algolibs-test
 
 COPY algolibs/test ./test
 COPY algolibs/graphbuilder ./graphbuilder
@@ -25,7 +25,7 @@ WORKDIR /usr/src/algolibs/build/test/
 RUN ctest -V
 WORKDIR /usr/src/algolibs
 
-FROM algolibs-base as algolibs-release
+FROM algolibs-base AS algolibs-release
 
 RUN mkdir build
 RUN cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF
@@ -35,7 +35,7 @@ RUN cmake --build build
 # then package the backend python application,                   #  
 # using the shared libraries (.so files) from the previous stage #
 ##################################################################
-FROM python:3.9.5-buster as base
+FROM python:3.12 AS base
 
 WORKDIR /app
 
@@ -45,22 +45,22 @@ COPY backend/instance ./instance
 RUN rm -rf instance/lib && mkdir instance/lib
 COPY --from=algolibs-release /usr/src/algolibs/build/solvers/*.so instance/lib/
 
-FROM base as dev
+FROM base AS dev
 
 COPY backend/dev-requirements.txt .
 RUN pip install --no-cache-dir -r dev-requirements.txt
 
 # lint
-FROM dev as lint
+FROM dev AS lint
 RUN flake8 . --count --max-line-length=120 --max-complexity=10 --show-source --statistics --exclude __pycache__,venv
-
+  
 # test
-FROM dev as test 
+FROM dev AS test
 COPY backend/pytest.ini backend/conftest.py ./
 COPY backend/tests ./tests
 RUN pytest .
 
-FROM base as release
+FROM base AS release
 
 # install runtime dependencies
 RUN pip install --no-cache-dir uwsgi

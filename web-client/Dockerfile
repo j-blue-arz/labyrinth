@@ -1,4 +1,4 @@
-FROM node:18 as base
+FROM node:18 AS base
 
 WORKDIR /usr/src/web-client
 
@@ -9,19 +9,19 @@ RUN npm ci
 
 COPY . ./
 
-FROM base as test
+FROM base AS test
 
 RUN npm run test
 
-FROM base as lint
+FROM base AS lint
 
 RUN npm run lint
 
-FROM base as build
+FROM base AS build
 
 RUN npm run build
 
-FROM nginx:1.25.3 as release
+FROM nginx:1.25.3 AS release
 
 RUN rm /etc/nginx/conf.d/default.conf
 

@@ -2,6 +2,7 @@
 
 #include "solvers.h"
 
+#include <array>
 #include <future>
 
 namespace labyrinth {

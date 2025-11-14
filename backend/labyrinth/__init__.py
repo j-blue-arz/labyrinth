@@ -1,15 +1,16 @@
-""" This package is the backend of the labyrinth game.
+"""This package is the backend of the labyrinth game.
 It serves the Vue application
-and defines a set of API methods to play the game """
+and defines a set of API methods to play the game"""
+
 from collections import namedtuple
 
 Version = namedtuple("Version", ["milestone", "major", "minor"])
 version_info = Version(0, 3, 3)
-__version__ = '.'.join(map(str, version_info))
+__version__ = ".".join(map(str, version_info))
 
 
 def create_app(test_config=None):
-    """ basic Flask app setup. Creates the instance folder if not existing """
+    """basic Flask app setup. Creates the instance folder if not existing"""
 
     # Imports inside here so the package can be imported without the dependency to Flask #
     import mimetypes
@@ -20,22 +21,24 @@ def create_app(test_config=None):
 
     import labyrinth.event_logging as logging
 
-    app = Flask(__name__,
-                instance_relative_config=True,
-                static_folder="../../web-client/dist",
-                static_url_path="")
+    app = Flask(
+        __name__,
+        instance_relative_config=True,
+        static_folder="../../web-client/dist",
+        static_url_path="",
+    )
 
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY="dev",
         PROFILE=False,
         ENABLE_INFLUXDB_LOGGING=False,
         JSON_SORT_KEYS=False,
-        DATABASE=os.path.join(app.instance_path, 'labyrinth.sqlite'),
-        LIBRARY_PATH=os.path.join(app.instance_path, 'lib')
+        DATABASE=os.path.join(app.instance_path, "labyrinth.sqlite"),
+        LIBRARY_PATH=os.path.join(app.instance_path, "lib"),
     )
 
     if test_config is None:
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile("config.py", silent=True)
     else:
         app.config.from_mapping(test_config)
 
@@ -43,11 +46,15 @@ def create_app(test_config=None):
         app.before_request(lambda: logging.create_logger(app.config["INFLUXDB_URL"], app.config["INFLUXDB_TOKEN"]))
 
     if app.config["PROFILE"]:
-        app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir=os.path.join(app.instance_path),
-                                          stream=None)
+        app.wsgi_app = ProfilerMiddleware(app.wsgi_app, profile_dir=os.path.join(app.instance_path), stream=None)
 
     if test_config is None:
-        from labyrinth.scheduler import scheduler, schedule_remove_overdue_players, schedule_remove_unobserved_games
+        from labyrinth.scheduler import (
+            schedule_remove_overdue_players,
+            schedule_remove_unobserved_games,
+            scheduler,
+        )
+
         scheduler.init_app(app)
         schedule_remove_overdue_players()
         schedule_remove_unobserved_games()
@@ -59,28 +66,35 @@ def create_app(test_config=None):
         pass
 
     from . import api
+
     app.register_blueprint(api.API)
 
     from . import analytics
+
     app.register_blueprint(analytics.API)
 
     from . import game_management
+
     app.register_blueprint(game_management.GAME_MANAGEMENT)
 
     from labyrinth.database import DatabaseGateway
-    app.before_first_request(lambda: DatabaseGateway.init_database())
+
+    # Initialize database immediately during app creation (Flask 3.0+ removed before_first_request)
+    with app.app_context():
+        DatabaseGateway.init_database()
+
     app.teardown_request(lambda exc: DatabaseGateway.close_database())
 
-    mimetypes.add_type('application/wasm', '.wasm')
+    mimetypes.add_type("application/wasm", ".wasm")
 
-    @app.route('/')
+    @app.route("/")
     def index():
-        """ Serves the 'static' part, i.e. the Vue application """
+        """Serves the 'static' part, i.e. the Vue application"""
         return app.send_static_file("index.html")
 
-    @app.route('/version')
+    @app.route("/version")
     def version():
-        """ Returns version as 3-tuple """
+        """Returns version as 3-tuple"""
         return version_info._asdict()
 
     return app

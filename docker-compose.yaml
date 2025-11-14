@@ -1,4 +1,3 @@
-version: '3'
 services:
     backend:
         build:
@@ -8,12 +7,12 @@ services:
         image: labyrinth:latest
         container_name: labyrinth
         expose:
-        - 9112
+            - 9112
     nginx:
-        build: 
+        build:
             context: ./web-client
             target: release
         image: labyrinth-nginx:latest
         container_name: labyrinth-nginx
         ports:
-        - "80:80"
+            - "80:80"
